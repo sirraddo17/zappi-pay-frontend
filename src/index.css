@@ -1,0 +1,262 @@
+:root {
+  --orange: #f97316;
+  --orange-dark: #ea580c;
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-400: #94a3b8;
+  --slate-100: #f1f5f9;
+  --red-500: #ef4444;
+  --green-500: #22c55e;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--slate-900);
+  color: var(--slate-100);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile-first: content scrolls above a fixed bottom nav, matching how
+   an installed PWA is actually held and used — one thumb, one hand —
+   rather than a desktop sidebar bolted onto a phone screen. */
+.app-shell {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-bottom: 76px;
+  position: relative;
+}
+
+.page-header {
+  padding: 20px 16px 8px;
+}
+
+.page-header h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--slate-400);
+  font-size: 14px;
+}
+
+.card {
+  background: var(--slate-800);
+  border: 1px solid var(--slate-700);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 0 16px 16px;
+}
+
+.stat-card .label {
+  font-size: 13px;
+  color: var(--slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-card .value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 0 16px 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.field label {
+  font-size: 13px;
+  color: var(--slate-400);
+}
+
+input, select {
+  background: var(--slate-900);
+  border: 1px solid var(--slate-700);
+  border-radius: 8px;
+  color: var(--slate-100);
+  padding: 10px 12px;
+  font-size: 15px;
+  width: 100%;
+}
+
+.btn {
+  background: var(--orange);
+  color: var(--slate-900);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  width: 100%;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--orange);
+  border: 1px solid var(--orange);
+}
+
+.error-text {
+  color: var(--red-500);
+  font-size: 14px;
+  margin: 0 16px 12px;
+}
+
+.empty-state {
+  color: var(--slate-400);
+  font-size: 14px;
+  text-align: center;
+  padding: 24px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--slate-700);
+}
+
+th {
+  color: var(--slate-400);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 0 16px 16px;
+}
+
+.service-tile {
+  background: var(--slate-800);
+  border: 1px solid var(--slate-700);
+  border-radius: var(--radius);
+  padding: 16px 8px;
+  text-align: center;
+  color: var(--slate-100);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  background: var(--slate-800);
+  border-top: 1px solid var(--slate-700);
+}
+
+.bottom-nav a {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  color: var(--slate-400);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.bottom-nav a.active {
+  color: var(--orange);
+}
+
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--slate-400);
+}
+
+/* Admin uses a plain desktop layout — the sidebar pattern from every
+   other admin panel in this ecosystem — since admins work at a
+   laptop, not one-handed on a phone. */
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--slate-800);
+  border-right: 1px solid var(--slate-700);
+  padding: 20px 0;
+}
+
+.admin-sidebar a {
+  display: block;
+  padding: 10px 20px;
+  color: var(--slate-100);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.admin-sidebar a.active {
+  background: var(--slate-900);
+  color: var(--orange);
+  border-right: 2px solid var(--orange);
+}
+
+.admin-main {
+  flex: 1;
+  padding: 24px;
+  max-width: 900px;
+}
+
+.admin-table-wrap .card {
+  margin: 0 0 16px;
+}
+
+@media (max-width: 768px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    padding: 8px 0;
+  }
+}
