@@ -61,6 +61,7 @@ export const updateSettings = (data) => adminRequest('/api/admin/settings', { me
 
 // --- Admin: customers ---
 export const getCustomers = () => adminRequest('/api/admin/customers');
+export const getCustomerDetail = (id) => adminRequest(`/api/admin/customers/${id}`);
 export const setCustomerActive = (id, active) =>
   adminRequest(`/api/admin/customers/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) });
 
