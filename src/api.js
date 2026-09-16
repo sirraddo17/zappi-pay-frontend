@@ -72,3 +72,11 @@ export const rejectFunding = (id) => adminRequest(`/api/admin/wallet/${id}/rejec
 // --- Admin: orders & audit log ---
 export const getAdminOrders = () => adminRequest('/api/admin/orders');
 export const getAuditLog = () => adminRequest('/api/admin/audit-log');
+
+// --- Admin: manual wallet adjustments ---
+export const adjustWallet = (customerId, data) =>
+  adminRequest(`/api/admin/customers/${customerId}/adjust-wallet`, { method: 'POST', body: JSON.stringify(data) });
+
+// --- Admin: staff management ---
+export const getAdmins = () => adminRequest('/api/admin/admins');
+export const createAdmin = (data) => adminRequest('/api/admin/admins', { method: 'POST', body: JSON.stringify(data) });
