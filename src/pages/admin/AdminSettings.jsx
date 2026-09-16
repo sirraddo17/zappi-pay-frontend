@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getSettings, updateSettings } from '../../api';
 
+const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION'];
+
 export default function AdminSettings() {
   const [vtpassMode, setVtpassMode] = useState('sandbox');
   const [vtpassApiKey, setVtpassApiKey] = useState('');
   const [vtpassSecretKey, setVtpassSecretKey] = useState('');
   const [vtpassPublicKey, setVtpassPublicKey] = useState('');
-  const [markupPercent, setMarkupPercent] = useState('0');
+  const [markupByService, setMarkupByService] = useState(
+    Object.fromEntries(SERVICES.map((s) => [s, '0']))
+  );
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -21,11 +25,16 @@ export default function AdminSettings() {
         setVtpassApiKey(s.vtpassApiKey || '');
         setVtpassSecretKey(s.vtpassSecretKey || '');
         setVtpassPublicKey(s.vtpassPublicKey || '');
-        setMarkupPercent(String(s.markupPercent ?? 0));
+        const stored = s.markupPercentByService || {};
+        setMarkupByService(Object.fromEntries(SERVICES.map((svc) => [svc, String(stored[svc] ?? 0)])));
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  function setMarkupFor(service, value) {
+    setMarkupByService((prev) => ({ ...prev, [service]: value }));
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -38,7 +47,9 @@ export default function AdminSettings() {
         vtpassApiKey,
         vtpassSecretKey,
         vtpassPublicKey,
-        markupPercent: Number(markupPercent),
+        markupPercentByService: Object.fromEntries(
+          SERVICES.map((svc) => [svc, Number(markupByService[svc] || 0)])
+        ),
       });
       setSuccessMessage('Settings saved.');
     } catch (err) {
@@ -86,10 +97,25 @@ export default function AdminSettings() {
           <label htmlFor="publicKey">Public key</label>
           <input id="publicKey" type="password" value={vtpassPublicKey} onChange={(e) => setVtpassPublicKey(e.target.value)} />
         </div>
-        <div className="field">
-          <label htmlFor="markup">Markup (%)</label>
-          <input id="markup" type="number" step="0.1" min="0" value={markupPercent} onChange={(e) => setMarkupPercent(e.target.value)} />
-        </div>
+
+        <h2 style={{ fontSize: 15, marginBottom: 4 }}>Markup per service (%)</h2>
+        <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 0, marginBottom: 12 }}>
+          Added on top of VTpass's own price for that service.
+        </p>
+        {SERVICES.map((service) => (
+          <div className="field" key={service}>
+            <label htmlFor={`markup-${service}`}>{service.charAt(0) + service.slice(1).toLowerCase()}</label>
+            <input
+              id={`markup-${service}`}
+              type="number"
+              step="0.1"
+              min="0"
+              value={markupByService[service]}
+              onChange={(e) => setMarkupFor(service, e.target.value)}
+            />
+          </div>
+        ))}
+
         <button className="btn" type="submit" disabled={saving}>
           {saving ? 'Saving…' : 'Save Settings'}
         </button>
