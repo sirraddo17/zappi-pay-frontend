@@ -29,4 +29,5 @@ export default defineConfig({
   server: {
     port: 5173,
   },
+  // Force-rebuild marker: 1789535037196
 });
