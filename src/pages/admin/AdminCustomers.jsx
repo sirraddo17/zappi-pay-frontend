@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getCustomers, setCustomerActive, adjustWallet } from '../../api';
 
@@ -124,7 +125,7 @@ export default function AdminCustomers() {
             <tbody>
               {customers.map((c) => (
                 <tr key={c.id}>
-                  <td>{c.name}</td>
+                  <td><Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--orange)' }}>{c.name}</Link></td>
                   <td>{c.phone}</td>
                   <td>{fmtMoney(c.walletBalance)}</td>
                   <td>{c.active ? 'Active' : 'Deactivated'}</td>
