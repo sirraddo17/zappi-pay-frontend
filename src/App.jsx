@@ -16,6 +16,7 @@ import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminPendingFunding from './pages/admin/AdminPendingFunding';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminAuditLog from './pages/admin/AdminAuditLog';
+import AdminStaff from './pages/admin/AdminStaff';
 
 function RequireCustomer({ children }) {
   const { customer, loading } = useAuth();
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="/admin/pending-funding" element={<RequireAdmin><AdminPendingFunding /></RequireAdmin>} />
           <Route path="/admin/orders" element={<RequireAdmin><AdminOrders /></RequireAdmin>} />
           <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
+          <Route path="/admin/staff" element={<RequireAdmin><AdminStaff /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
