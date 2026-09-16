@@ -5,6 +5,7 @@ const TABS = [
   { to: '/admin', label: 'Overview', end: true },
   { to: '/admin/pending-funding', label: 'Pending Funding' },
   { to: '/admin/customers', label: 'Customers' },
+  { to: '/admin/staff', label: 'Staff' },
   { to: '/admin/orders', label: 'Orders' },
   { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit-log', label: 'Audit Log' },
