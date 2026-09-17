@@ -12,6 +12,9 @@ export default function BottomNav() {
       <NavLink to="/orders" className={({ isActive }) => (isActive ? 'active' : '')}>
         Orders
       </NavLink>
+      <NavLink to="/profile" className={({ isActive }) => (isActive ? 'active' : '')}>
+        Profile
+      </NavLink>
     </nav>
   );
 }
