@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PasswordField from '../../components/PasswordField';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 
@@ -41,7 +42,7 @@ export default function AdminLogin() {
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>
-          <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <PasswordField id="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
         </div>
         <button className="btn" type="submit" disabled={submitting}>
           {submitting ? 'Logging in…' : 'Log In'}
