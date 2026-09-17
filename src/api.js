@@ -37,6 +37,7 @@ export function adminRequest(path, options = {}) {
 export const signup = (data) => request('/api/auth/signup', { method: 'POST', body: JSON.stringify(data) });
 export const login = (data) => request('/api/auth/login', { method: 'POST', body: JSON.stringify(data) });
 export const getMe = () => request('/api/auth/me');
+export const updateMe = (data) => request('/api/auth/me', { method: 'PATCH', body: JSON.stringify(data) });
 export const changePassword = (data) => request('/api/auth/password', { method: 'PATCH', body: JSON.stringify(data) });
 
 // --- Wallet ---
