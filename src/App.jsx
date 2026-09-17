@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Buy from './pages/Buy';
 import Wallet from './pages/Wallet';
 import Orders from './pages/Orders';
+import Profile from './pages/Profile';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/buy/:service" element={<RequireCustomer><Buy /></RequireCustomer>} />
           <Route path="/wallet" element={<RequireCustomer><Wallet /></RequireCustomer>} />
           <Route path="/orders" element={<RequireCustomer><Orders /></RequireCustomer>} />
+          <Route path="/profile" element={<RequireCustomer><Profile /></RequireCustomer>} />
 
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
