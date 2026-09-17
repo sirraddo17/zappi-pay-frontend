@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
 import { getSettings, updateSettings } from '../../api';
 
@@ -87,15 +88,15 @@ export default function AdminSettings() {
         </div>
         <div className="field">
           <label htmlFor="apiKey">API key</label>
-          <input id="apiKey" type="password" value={vtpassApiKey} onChange={(e) => setVtpassApiKey(e.target.value)} />
+          <PasswordField id="apiKey" value={vtpassApiKey} onChange={(e) => setVtpassApiKey(e.target.value)} />
         </div>
         <div className="field">
           <label htmlFor="secretKey">Secret key</label>
-          <input id="secretKey" type="password" value={vtpassSecretKey} onChange={(e) => setVtpassSecretKey(e.target.value)} />
+          <PasswordField id="secretKey" value={vtpassSecretKey} onChange={(e) => setVtpassSecretKey(e.target.value)} />
         </div>
         <div className="field">
           <label htmlFor="publicKey">Public key</label>
-          <input id="publicKey" type="password" value={vtpassPublicKey} onChange={(e) => setVtpassPublicKey(e.target.value)} />
+          <PasswordField id="publicKey" value={vtpassPublicKey} onChange={(e) => setVtpassPublicKey(e.target.value)} />
         </div>
 
         <h2 style={{ fontSize: 15, marginBottom: 4 }}>Markup per service (%)</h2>
