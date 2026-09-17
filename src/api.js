@@ -83,3 +83,5 @@ export const adjustWallet = (customerId, data) =>
 // --- Admin: staff management ---
 export const getAdmins = () => adminRequest('/api/admin/admins');
 export const createAdmin = (data) => adminRequest('/api/admin/admins', { method: 'POST', body: JSON.stringify(data) });
+export const setAdminActive = (id, active) => adminRequest(`/api/admin/admins/${id}/active`, { method: 'PATCH', body: JSON.stringify({ active }) });
+export const resetAdminPassword = (id, newPassword) => adminRequest(`/api/admin/admins/${id}/reset-password`, { method: 'POST', body: JSON.stringify({ newPassword }) });
