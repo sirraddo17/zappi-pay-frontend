@@ -37,6 +37,7 @@ export function adminRequest(path, options = {}) {
 export const signup = (data) => request('/api/auth/signup', { method: 'POST', body: JSON.stringify(data) });
 export const login = (data) => request('/api/auth/login', { method: 'POST', body: JSON.stringify(data) });
 export const getMe = () => request('/api/auth/me');
+export const changePassword = (data) => request('/api/auth/password', { method: 'PATCH', body: JSON.stringify(data) });
 
 // --- Wallet ---
 export const getWalletBalance = () => request('/api/wallet/balance');
@@ -54,6 +55,7 @@ export const getOrders = () => request('/api/orders');
 
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
+export const changeAdminPassword = (data) => adminRequest('/api/admin/password', { method: 'PATCH', body: JSON.stringify(data) });
 
 // --- Admin: settings ---
 export const getSettings = () => adminRequest('/api/admin/settings');
