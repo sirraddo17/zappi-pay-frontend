@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { updateMe } from '../api';
+import { updateMe, changePassword } from '../api';
+import PasswordField from '../components/PasswordField';
 
 const MAX_AVATAR_BYTES = 1_500_000;
 
@@ -18,6 +19,12 @@ export default function Profile() {
 
   const [avatarError, setAvatarError] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const initial = (customer?.name || '?').charAt(0).toUpperCase();
 
@@ -70,6 +77,23 @@ export default function Profile() {
     };
     reader.onerror = () => setAvatarError('Could not read that file.');
     reader.readAsDataURL(file);
+  }
+
+  async function handlePasswordChange(e) {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+    setChangingPassword(true);
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setCurrentPassword('');
+      setNewPassword('');
+      setPasswordSuccess('Password changed.');
+    } catch (err) {
+      setPasswordError(err.message || 'Could not change password.');
+    } finally {
+      setChangingPassword(false);
+    }
   }
 
   function handleLogout() {
@@ -138,6 +162,23 @@ export default function Profile() {
         </div>
         <button className="btn" type="submit" disabled={saving}>
           {saving ? 'Saving…' : 'Save Changes'}
+        </button>
+      </form>
+
+      <form className="card" style={{ margin: '0 0 16px' }} onSubmit={handlePasswordChange}>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>Change Password</h2>
+        {passwordError && <p className="error-text" style={{ margin: '0 0 12px' }}>{passwordError}</p>}
+        {passwordSuccess && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 0 12px' }}>{passwordSuccess}</p>}
+        <div className="field">
+          <label htmlFor="currentPassword">Current password</label>
+          <PasswordField id="currentPassword" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoComplete="current-password" />
+        </div>
+        <div className="field">
+          <label htmlFor="newPassword">New password</label>
+          <PasswordField id="newPassword" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
+        </div>
+        <button className="btn" type="submit" disabled={changingPassword}>
+          {changingPassword ? 'Saving…' : 'Change Password'}
         </button>
       </form>
 
