@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PasswordField from '../components/PasswordField';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -51,7 +52,7 @@ export default function Signup() {
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>
-          <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+          <PasswordField id="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
         </div>
         <button className="btn" type="submit" disabled={submitting}>
           {submitting ? 'Creating account…' : 'Sign Up'}
