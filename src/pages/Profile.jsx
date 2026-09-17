@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { updateMe } from '../api';
 
+const MAX_AVATAR_BYTES = 1_500_000;
+
 export default function Profile() {
   const { customer, logout, refreshCustomer } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [name, setName] = useState(customer?.name || '');
   const [email, setEmail] = useState(customer?.email || '');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const [avatarError, setAvatarError] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const initial = (customer?.name || '?').charAt(0).toUpperCase();
 
@@ -31,6 +37,41 @@ export default function Profile() {
     }
   }
 
+  function handleAvatarClick() {
+    fileInputRef.current?.click();
+  }
+
+  function handleAvatarChange(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setAvatarError('');
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('Please choose an image file.');
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      setAvatarError('Image is too large. Please choose a photo under 1.5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      setUploadingAvatar(true);
+      try {
+        await updateMe({ avatarUrl: reader.result });
+        await refreshCustomer();
+      } catch (err) {
+        setAvatarError(err.message || 'Could not upload photo.');
+      } finally {
+        setUploadingAvatar(false);
+      }
+    };
+    reader.onerror = () => setAvatarError('Could not read that file.');
+    reader.readAsDataURL(file);
+  }
+
   function handleLogout() {
     logout();
     navigate('/login');
@@ -39,23 +80,46 @@ export default function Profile() {
   return (
     <div style={{ maxWidth: 420, margin: '0 auto', padding: '24px 16px 90px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
-        <div
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarChange}
+          style={{ display: 'none' }}
+        />
+        <button
+          type="button"
+          onClick={handleAvatarClick}
+          disabled={uploadingAvatar}
           style={{
             width: 80,
             height: 80,
             borderRadius: '50%',
-            background: 'var(--orange)',
+            background: customer?.avatarUrl ? 'transparent' : 'var(--orange)',
+            border: 'none',
+            padding: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 32,
             fontWeight: 700,
             color: '#0f172a',
-            marginBottom: 12,
+            marginBottom: 8,
+            cursor: 'pointer',
+            overflow: 'hidden',
+            opacity: uploadingAvatar ? 0.6 : 1,
           }}
         >
-          {initial}
-        </div>
+          {customer?.avatarUrl ? (
+            <img src={customer.avatarUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            initial
+          )}
+        </button>
+        <span style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 8 }}>
+          {uploadingAvatar ? 'Uploading…' : 'Tap to change photo'}
+        </span>
+        {avatarError && <p className="error-text" style={{ margin: '0 0 8px', fontSize: 13 }}>{avatarError}</p>}
         <h1 style={{ margin: 0, fontSize: 20 }}>{customer?.name}</h1>
         <p style={{ margin: '4px 0 0', color: 'var(--slate-400)', fontSize: 14 }}>{customer?.phone}</p>
       </div>
