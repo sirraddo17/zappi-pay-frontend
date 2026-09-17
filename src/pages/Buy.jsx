@@ -126,8 +126,13 @@ export default function Buy() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    const phoneToSend = isPhoneService ? recipient : phone;
-    if (!providerId || !recipient || (!isPhoneService && !phone) || !amount) {
+    // Phone is never a separate field the person fills in anymore —
+    // for airtime/data the recipient they typed IS the phone; for
+    // everything else (meter, smartcard, profile) VTpass's phone
+    // parameter is just a contact/notification number, and using
+    // the account's own number for that is correct, not a guess.
+    const phoneToSend = isPhoneService ? recipient : (customer?.phone || phone);
+    if (!providerId || !recipient || !phoneToSend || !amount) {
       setError('Please fill in every field.');
       return;
     }
@@ -236,13 +241,7 @@ export default function Buy() {
           </div>
         )}
 
-        {!isPhoneService && (
-          <div className="field">
-            <label htmlFor="phone">Your phone number</label>
-            <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-          </div>
-        )}
-
+        
         {amount > 0 && (
           <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 12px' }}>Total: ₦{amount.toLocaleString()}</p>
         )}
