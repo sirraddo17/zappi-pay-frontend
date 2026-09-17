@@ -66,6 +66,14 @@ export default function Buy() {
   const navigate = useNavigate();
   const { customer, refreshCustomer } = useAuth();
   const config = SERVICE_CONFIG[slug];
+  // Airtime and data top up a phone number directly — the recipient
+  // IS the phone, so asking for it twice (once as "recipient", once
+  // as a separate "your phone number" field defaulted from the
+  // account's own number) is confusing and, worse, silently sends
+  // the wrong number to VTpass if they don't match. Services with a
+  // separate account identifier (meter number, smartcard, profile)
+  // still need both.
+  const isPhoneService = config?.recipientLabel === 'Phone number';
 
   const [providers, setProviders] = useState([]);
   const [providerId, setProviderId] = useState('');
@@ -118,7 +126,8 @@ export default function Buy() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (!providerId || !recipient || !phone || !amount) {
+    const phoneToSend = isPhoneService ? recipient : phone;
+    if (!providerId || !recipient || (!isPhoneService && !phone) || !amount) {
       setError('Please fill in every field.');
       return;
     }
@@ -129,7 +138,7 @@ export default function Buy() {
         serviceID: providerId,
         variationCode: config.needsVariation ? variationCode : undefined,
         billersCode: recipient.trim(),
-        phone: phone.trim(),
+        phone: phoneToSend.trim(),
         amount,
       });
       await refreshCustomer();
@@ -227,10 +236,12 @@ export default function Buy() {
           </div>
         )}
 
-        <div className="field">
-          <label htmlFor="phone">Your phone number</label>
-          <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-        </div>
+        {!isPhoneService && (
+          <div className="field">
+            <label htmlFor="phone">Your phone number</label>
+            <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+          </div>
+        )}
 
         {amount > 0 && (
           <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 12px' }}>Total: ₦{amount.toLocaleString()}</p>
