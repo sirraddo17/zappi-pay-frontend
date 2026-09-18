@@ -58,6 +58,8 @@ export const getOrder = (id) => request(`/api/orders/${id}`);
 // --- Support ---
 export const getSupportTickets = () => request('/api/support/tickets');
 export const submitSupportTicket = (data) => request('/api/support/tickets', { method: 'POST', body: JSON.stringify(data) });
+export const getAdminSupportTickets = () => adminRequest('/api/admin/support/tickets');
+export const resolveSupportTicket = (id) => adminRequest(`/api/admin/support/tickets/${id}/resolve`, { method: 'PATCH' });
 
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
