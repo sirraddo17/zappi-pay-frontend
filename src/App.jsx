@@ -18,6 +18,7 @@ import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminCustomerDetail from './pages/admin/AdminCustomerDetail';
 import AdminPendingFunding from './pages/admin/AdminPendingFunding';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminSupport from './pages/admin/AdminSupport';
 import AdminAuditLog from './pages/admin/AdminAuditLog';
 import AdminStaff from './pages/admin/AdminStaff';
 
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/admin/customers/:id" element={<RequireAdmin><AdminCustomerDetail /></RequireAdmin>} />
           <Route path="/admin/pending-funding" element={<RequireAdmin><AdminPendingFunding /></RequireAdmin>} />
           <Route path="/admin/orders" element={<RequireAdmin><AdminOrders /></RequireAdmin>} />
+          <Route path="/admin/support" element={<RequireAdmin><AdminSupport /></RequireAdmin>} />
           <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
           <Route path="/admin/staff" element={<RequireAdmin><AdminStaff /></RequireAdmin>} />
 
