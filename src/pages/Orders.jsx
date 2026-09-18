@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getOrders } from '../api';
 import BottomNav from '../components/BottomNav';
 
@@ -42,7 +43,7 @@ export default function Orders() {
         <p className="empty-state">No orders yet.</p>
       ) : (
         orders.map((o) => (
-          <div className="card" key={o.id}>
+          <Link to={`/orders/${o.id}`} className="card" key={o.id} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontWeight: 700 }}>{o.service}</div>
@@ -54,7 +55,7 @@ export default function Orders() {
               </div>
             </div>
             <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 8 }}>{fmtDate(o.createdAt)}</div>
-          </div>
+          </Link>
         ))
       )}
 
