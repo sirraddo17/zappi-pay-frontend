@@ -53,6 +53,11 @@ export const verifyBillersCode = (serviceID, billersCode, type) =>
   request(`/api/vtpass/verify?serviceID=${encodeURIComponent(serviceID)}&billersCode=${encodeURIComponent(billersCode)}${type ? `&type=${type}` : ''}`);
 export const purchase = (data) => request('/api/vtpass/purchase', { method: 'POST', body: JSON.stringify(data) });
 export const getOrders = () => request('/api/orders');
+export const getOrder = (id) => request(`/api/orders/${id}`);
+
+// --- Support ---
+export const getSupportTickets = () => request('/api/support/tickets');
+export const submitSupportTicket = (data) => request('/api/support/tickets', { method: 'POST', body: JSON.stringify(data) });
 
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
