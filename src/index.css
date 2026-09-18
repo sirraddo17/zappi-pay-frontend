@@ -260,3 +260,25 @@ th {
     padding: 8px 0;
   }
 }
+
+/* Printing/downloading a receipt: only the receipt itself should
+   show up, on a plain white background regardless of the app's
+   dark theme — everything else (nav, buttons, headers) is marked
+   .no-print and hidden for this one context. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .receipt {
+    color: #000;
+  }
+  .receipt .card {
+    background: #fff;
+    border: 1px solid #ccc;
+    color: #000;
+  }
+}
