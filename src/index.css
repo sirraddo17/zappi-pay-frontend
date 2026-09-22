@@ -1,10 +1,15 @@
 :root {
-  --orange: #f97316;
-  --orange-dark: #ea580c;
-  --slate-900: #0f172a;
-  --slate-800: #1e293b;
-  --slate-700: #334155;
-  --slate-400: #94a3b8;
+  --purple: #863bff;
+  --gold: #FFB830;
+  /* orange is kept as the app's legacy accent name so existing
+     buttons/badges elsewhere pick up the new brand color without
+     needing every reference renamed. */
+  --orange: #863bff;
+  --orange-dark: #6d2fd6;
+  --slate-900: #0f1628;
+  --slate-800: #1a2240;
+  --slate-700: #2a3454;
+  --slate-400: #8899bb;
   --slate-100: #f1f5f9;
   --red-500: #ef4444;
   --green-500: #22c55e;
@@ -158,22 +163,172 @@ th {
   text-transform: uppercase;
 }
 
+/* Dashboard redesign: purple header, wallet card, services grid,
+   recent transactions, and a bottom nav with icons + active dot.
+   These scoped classes don't touch the shared .card used by forms
+   elsewhere in the app. */
+.dash-header {
+  background: var(--purple);
+  padding: 20px 16px 32px;
+  border-radius: 0 0 28px 28px;
+}
+
+.dash-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dash-greeting {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  margin: 18px 0 4px;
+}
+
+.dash-question {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.wallet-card {
+  background: var(--slate-800);
+  border-radius: 20px;
+  padding: 20px;
+  margin: -22px 16px 20px;
+  position: relative;
+}
+
+.wallet-card .label {
+  font-size: 12px;
+  color: var(--slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wallet-card .value {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  margin: 6px 0 16px;
+}
+
+.fund-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid var(--purple);
+  color: var(--purple);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.section-label {
+  font-size: 12px;
+  color: var(--slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 16px 10px;
+}
+
 .service-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin: 0 16px 16px;
+  margin: 0 16px 20px;
 }
 
 .service-tile {
   background: var(--slate-800);
-  border: 1px solid var(--slate-700);
-  border-radius: var(--radius);
+  border-radius: 16px;
   padding: 16px 8px;
   text-align: center;
-  color: var(--slate-100);
+  color: #fff;
   text-decoration: none;
   font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.service-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tx-list {
+  background: var(--slate-800);
+  border-radius: 16px;
+  margin: 0 16px 90px;
+  overflow: hidden;
+}
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tx-row:last-child {
+  border-bottom: none;
+}
+
+.tx-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tx-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-date {
+  color: var(--slate-400);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.tx-amount {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tx-amount.debit {
+  color: var(--red-500);
+}
+
+.tx-amount.credit {
+  color: var(--green-500);
 }
 
 .bottom-nav {
@@ -185,20 +340,34 @@ th {
   max-width: 480px;
   display: flex;
   background: var(--slate-800);
-  border-top: 1px solid var(--slate-700);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 8px 0;
 }
 
 .bottom-nav a {
   flex: 1;
-  text-align: center;
-  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 0;
   color: var(--slate-400);
   text-decoration: none;
-  font-size: 12px;
+  font-size: 11px;
+  position: relative;
 }
 
 .bottom-nav a.active {
-  color: var(--orange);
+  color: var(--purple);
+}
+
+.nav-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--purple);
+  position: absolute;
+  top: -6px;
 }
 
 .page-loading {
