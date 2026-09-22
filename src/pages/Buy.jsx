@@ -59,6 +59,26 @@ const SERVICE_CONFIG = {
     recipientLabel: 'Profile ID (if any)',
     recipientPlaceholder: 'Leave blank if none',
   },
+  internet: {
+    label: 'Internet',
+    backendService: 'INTERNET',
+    identifier: 'internet',
+    needsVariation: true,
+    needsType: false,
+    canVerify: false,
+    recipientLabel: 'Account / MAC ID',
+    recipientPlaceholder: 'Account or MAC ID',
+  },
+  betting: {
+    label: 'Bet Funding',
+    backendService: 'BETTING',
+    identifier: 'betting',
+    needsVariation: false,
+    needsType: false,
+    canVerify: true,
+    recipientLabel: 'Betting account ID',
+    recipientPlaceholder: 'Your account ID on the platform',
+  },
 };
 
 export default function Buy() {
