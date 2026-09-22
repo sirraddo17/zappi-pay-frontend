@@ -13,6 +13,8 @@ export default function AdminSettings() {
   const [markupByService, setMarkupByService] = useState(
     Object.fromEntries(SERVICES.map((s) => [s, '0']))
   );
+  const [minFundingAmount, setMinFundingAmount] = useState('100');
+  const [minPurchaseAmount, setMinPurchaseAmount] = useState('50');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -34,6 +36,8 @@ export default function AdminSettings() {
         setVtpassPublicKey(s.vtpassPublicKey || '');
         const stored = s.markupPercentByService || {};
         setMarkupByService(Object.fromEntries(SERVICES.map((svc) => [svc, String(stored[svc] ?? 0)])));
+        setMinFundingAmount(String(s.minFundingAmount ?? 100));
+        setMinPurchaseAmount(String(s.minPurchaseAmount ?? 50));
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -74,6 +78,8 @@ export default function AdminSettings() {
         markupPercentByService: Object.fromEntries(
           SERVICES.map((svc) => [svc, Number(markupByService[svc] || 0)])
         ),
+        minFundingAmount: Number(minFundingAmount || 0),
+        minPurchaseAmount: Number(minPurchaseAmount || 0),
       });
       setSuccessMessage('Settings saved.');
     } catch (err) {
@@ -139,6 +145,29 @@ export default function AdminSettings() {
             />
           </div>
         ))}
+
+        <div className="field">
+          <label htmlFor="minFundingAmount">Minimum funding amount (₦)</label>
+          <input
+            id="minFundingAmount"
+            type="number"
+            step="1"
+            min="0"
+            value={minFundingAmount}
+            onChange={(e) => setMinFundingAmount(e.target.value)}
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="minPurchaseAmount">Minimum purchase amount (₦)</label>
+          <input
+            id="minPurchaseAmount"
+            type="number"
+            step="1"
+            min="0"
+            value={minPurchaseAmount}
+            onChange={(e) => setMinPurchaseAmount(e.target.value)}
+          />
+        </div>
 
         <button className="btn" type="submit" disabled={saving}>
           {saving ? 'Saving…' : 'Save Settings'}
