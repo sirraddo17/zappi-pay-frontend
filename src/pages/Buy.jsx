@@ -62,7 +62,8 @@ const SERVICE_CONFIG = {
   internet: {
     label: 'Internet',
     backendService: 'INTERNET',
-    identifier: 'internet',
+    identifier: 'other-services',
+    filterServiceIds: ['spectranet', 'smile-direct', 'swift-4g', 'ipnx'],
     needsVariation: true,
     needsType: false,
     canVerify: false,
@@ -72,7 +73,8 @@ const SERVICE_CONFIG = {
   betting: {
     label: 'Bet Funding',
     backendService: 'BETTING',
-    identifier: 'betting',
+    identifier: 'other-services',
+    filterServiceIds: ['bet9ja', 'betking', 'sportybet', 'bangbet', '1xbet', 'nairabet', 'merrybet'],
     needsVariation: false,
     needsType: false,
     canVerify: true,
@@ -111,7 +113,10 @@ export default function Buy() {
   useEffect(() => {
     if (!config) return;
     getVtpassServices(config.identifier)
-      .then((data) => setProviders(Array.isArray(data.content) ? data.content : []))
+      .then((data) => {
+        const list = Array.isArray(data.content) ? data.content : [];
+        setProviders(config.filterServiceIds ? list.filter((p) => config.filterServiceIds.includes(p.serviceID)) : list);
+      })
       .catch((err) => setError(err.message));
   }, [slug]);
 
