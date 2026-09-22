@@ -61,6 +61,11 @@ export const submitSupportTicket = (data) => request('/api/support/tickets', { m
 export const getAdminSupportTickets = () => adminRequest('/api/admin/support/tickets');
 export const resolveSupportTicket = (id) => adminRequest(`/api/admin/support/tickets/${id}/resolve`, { method: 'PATCH' });
 
+// --- Notifications ---
+export const getNotifications = () => request('/api/notifications');
+export const markNotificationRead = (id) => request(`/api/notifications/${id}/read`, { method: 'PATCH' });
+export const markAllNotificationsRead = () => request('/api/notifications/read-all', { method: 'PATCH' });
+
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
 export const changeAdminPassword = (data) => adminRequest('/api/admin/password', { method: 'PATCH', body: JSON.stringify(data) });
