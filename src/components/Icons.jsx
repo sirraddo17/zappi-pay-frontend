@@ -115,3 +115,22 @@ export function FundIcon({ size = 22, color = 'currentColor' }) {
     </svg>
   );
 }
+
+export function GlobeIcon({ size = 22, color = 'currentColor' }) {
+  return (
+    <svg {...base(size)}>
+      <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.8" />
+      <path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9z" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function TrophyIcon({ size = 22, color = 'currentColor' }) {
+  return (
+    <svg {...base(size)}>
+      <path d="M7 4h10v4a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4z" stroke={color} strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M7 5H4v1a4 4 0 0 0 4 4M17 5h3v1a4 4 0 0 1-4 4" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M12 13v3M9 20h6M10 17h4v3h-4z" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
