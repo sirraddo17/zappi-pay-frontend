@@ -9,6 +9,7 @@ import Buy from './pages/Buy';
 import Wallet from './pages/Wallet';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
+import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 
 import AdminLogin from './pages/admin/AdminLogin';
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/wallet" element={<RequireCustomer><Wallet /></RequireCustomer>} />
           <Route path="/orders" element={<RequireCustomer><Orders /></RequireCustomer>} />
           <Route path="/orders/:id" element={<RequireCustomer><OrderDetail /></RequireCustomer>} />
+          <Route path="/notifications" element={<RequireCustomer><Notifications /></RequireCustomer>} />
           <Route path="/profile" element={<RequireCustomer><Profile /></RequireCustomer>} />
 
           {/* Admin */}
