@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { updateMe, changePassword } from '../api';
+import { updateMe, changePassword, getSupportTickets } from '../api';
 import PasswordField from '../components/PasswordField';
 
 const MAX_AVATAR_BYTES = 1_500_000;
@@ -25,6 +25,14 @@ export default function Profile() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
+
+  const [tickets, setTickets] = useState(null);
+
+  useEffect(() => {
+    getSupportTickets()
+      .then((data) => setTickets(data.tickets))
+      .catch(() => setTickets([]));
+  }, []);
 
   const initial = (customer?.name || '?').charAt(0).toUpperCase();
 
@@ -181,6 +189,35 @@ export default function Profile() {
           {changingPassword ? 'Saving…' : 'Change Password'}
         </button>
       </form>
+
+      <div className="card" style={{ margin: '0 0 16px' }}>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>Support</h2>
+        <a
+          href="https://wa.me/2348134209037"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary btn"
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: 16 }}
+        >
+          Chat on WhatsApp
+        </a>
+        {tickets === null ? (
+          <p className="empty-state">Loading…</p>
+        ) : tickets.length === 0 ? (
+          <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: 0 }}>No support requests yet.</p>
+        ) : (
+          tickets.map((t) => (
+            <div key={t.id} style={{ borderTop: '1px solid var(--slate-700)', padding: '10px 0', fontSize: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                <span>{t.message}</span>
+                <span style={{ color: t.status === 'RESOLVED' ? 'var(--green-500)' : 'var(--orange)', whiteSpace: 'nowrap' }}>
+                  {t.status === 'RESOLVED' ? 'Solved' : 'Open'}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       <button className="btn-secondary btn" type="button" onClick={handleLogout}>
         Log Out
