@@ -2,6 +2,7 @@ import { useState } from 'react';
 import PasswordField from '../components/PasswordField';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Logo from '../components/Logo';
 
 export default function Login() {
   const { login } = useAuth();
@@ -28,6 +29,9 @@ export default function Login() {
 
   return (
     <div className="app-shell">
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0 8px' }}>
+        <Logo iconSize={56} wordmarkSize={26} />
+      </div>
       <div className="page-header">
         <h1>Welcome back</h1>
         <p>Log in to ZAPPI PAY</p>
