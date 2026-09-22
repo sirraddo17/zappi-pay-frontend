@@ -111,7 +111,7 @@ export default function Buy() {
   useEffect(() => {
     if (!config) return;
     getVtpassServices(config.identifier)
-      .then((data) => setProviders(data.content || []))
+      .then((data) => setProviders(Array.isArray(data.content) ? data.content : []))
       .catch((err) => setError(err.message));
   }, [slug]);
 
@@ -121,7 +121,7 @@ export default function Buy() {
     setVerifiedName('');
     if (!providerId || !config?.needsVariation) return;
     getVtpassVariations(providerId)
-      .then((data) => setVariations(data.content?.varations || data.content?.variations || []))
+      .then((data) => setVariations(Array.isArray(data.content?.varations || data.content?.variations) ? (data.content?.varations || data.content?.variations) : []))
       .catch((err) => setError(err.message));
   }, [providerId]);
 
