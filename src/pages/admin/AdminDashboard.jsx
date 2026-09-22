@@ -14,6 +14,10 @@ export default function AdminDashboard() {
           pendingFunding: f.transactions.length,
           orders: o.orders.length,
           successfulOrders: o.orders.filter((x) => x.status === 'SUCCESS').length,
+          failedOrders: o.orders.filter((x) => x.status === 'FAILED').length,
+          totalRevenue: o.orders
+            .filter((x) => x.status === 'SUCCESS')
+            .reduce((sum, x) => sum + Number(x.amount), 0),
         });
       })
       .catch((err) => setError(err.message));
@@ -45,6 +49,14 @@ export default function AdminDashboard() {
           <div className="card stat-card" style={{ margin: 0 }}>
             <div className="label">Successful Orders</div>
             <div className="value">{stats.successfulOrders}</div>
+          </div>
+          <div className="card stat-card" style={{ margin: 0 }}>
+            <div className="label">Failed Orders</div>
+            <div className="value">{stats.failedOrders}</div>
+          </div>
+          <div className="card stat-card" style={{ margin: 0 }}>
+            <div className="label">Total Revenue</div>
+            <div className="value">₦{stats.totalRevenue.toLocaleString()}</div>
           </div>
         </div>
       )}
