@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getWalletBalance, getWalletTransactions } from '../api';
 import BottomNav from '../components/BottomNav';
 import { LogoIcon, Wordmark } from '../components/Logo';
-import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon } from '../components/Icons';
+import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon } from '../components/Icons';
 
 const SERVICES = [
   { slug: 'airtime', label: 'Airtime', Icon: PhoneIcon, bg: '#863bff' },
@@ -13,6 +13,8 @@ const SERVICES = [
   { slug: 'cable', label: 'Cable TV', Icon: TvIcon, bg: '#2955a3' },
   { slug: 'education', label: 'Education', Icon: CapIcon, bg: '#8c2f4a' },
   { slug: 'transfer', label: 'Transfer', Icon: BuildingIcon, bg: '#1a7a72', comingSoon: true },
+  { slug: 'internet', label: 'Internet', Icon: GlobeIcon, bg: '#c2540f' },
+  { slug: 'betting', label: 'Bet Funding', Icon: TrophyIcon, bg: '#a38a0a' },
 ];
 
 function fmtTxDate(d) {
