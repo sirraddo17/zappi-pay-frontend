@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getWalletBalance, getWalletTransactions } from '../api';
+import { getWalletBalance, getWalletTransactions, getNotifications } from '../api';
 import BottomNav from '../components/BottomNav';
 import { LogoIcon, Wordmark } from '../components/Logo';
 import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon } from '../components/Icons';
@@ -40,6 +40,7 @@ export default function Dashboard() {
   const { customer } = useAuth();
   const [balance, setBalance] = useState(customer?.walletBalance ?? 0);
   const [transactions, setTransactions] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     getWalletBalance()
@@ -48,6 +49,9 @@ export default function Dashboard() {
     getWalletTransactions()
       .then((data) => setTransactions((data.transactions || []).slice(0, 5)))
       .catch(() => setTransactions([]));
+    getNotifications()
+      .then((data) => setUnreadCount(data.unreadCount || 0))
+      .catch(() => {});
   }, []);
 
   return (
@@ -58,7 +62,23 @@ export default function Dashboard() {
             <LogoIcon size={30} />
             <Wordmark size={17} />
           </div>
-          <BellIcon size={22} color="#fff" />
+          <Link to="/notifications" style={{ position: 'relative', display: 'inline-flex' }}>
+            <BellIcon size={22} color="#fff" />
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: -2,
+                  right: -2,
+                  width: 9,
+                  height: 9,
+                  borderRadius: '50%',
+                  background: 'var(--gold)',
+                  border: '1.5px solid var(--purple)',
+                }}
+              />
+            )}
+          </Link>
         </div>
         <p className="dash-greeting">Hi, {customer?.name?.split(' ')[0] || 'there'} 👋</p>
         <h1 className="dash-question">What would you like today?</h1>
