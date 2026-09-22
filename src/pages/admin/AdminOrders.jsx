@@ -17,15 +17,29 @@ const STATUS_COLORS = {
   REFUNDED: 'var(--orange)',
 };
 
+const SERVICE_FILTERS = [
+  { value: 'ALL', label: 'All' },
+  { value: 'AIRTIME', label: 'Airtime' },
+  { value: 'DATA', label: 'Data' },
+  { value: 'ELECTRICITY', label: 'Electricity' },
+  { value: 'CABLE', label: 'Cable TV' },
+  { value: 'EDUCATION', label: 'Education' },
+  { value: 'INTERNET', label: 'Internet' },
+  { value: 'BETTING', label: 'Bet Funding' },
+];
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState('');
+  const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
     getAdminOrders()
       .then((data) => setOrders(data.orders))
       .catch((err) => setError(err.message));
   }, []);
+
+  const filtered = orders === null ? null : filter === 'ALL' ? orders : orders.filter((o) => o.service === filter);
 
   return (
     <AdminLayout>
@@ -36,11 +50,25 @@ export default function AdminOrders() {
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
 
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+        {SERVICE_FILTERS.map((f) => (
+          <button
+            key={f.value}
+            type="button"
+            onClick={() => setFilter(f.value)}
+            className={f.value === filter ? 'btn' : 'btn-secondary btn'}
+            style={{ width: 'auto', padding: '6px 14px', fontSize: 13 }}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       <div className="card admin-table-wrap" style={{ margin: 0 }}>
-        {orders === null ? (
+        {filtered === null ? (
           <p className="empty-state">Loading…</p>
-        ) : orders.length === 0 ? (
-          <p className="empty-state">No orders yet.</p>
+        ) : filtered.length === 0 ? (
+          <p className="empty-state">No orders match this filter.</p>
         ) : (
           <table>
             <thead>
@@ -54,7 +82,7 @@ export default function AdminOrders() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((o) => (
+              {filtered.map((o) => (
                 <tr key={o.id}>
                   <td>{o.customer.name}</td>
                   <td>{o.service}</td>
