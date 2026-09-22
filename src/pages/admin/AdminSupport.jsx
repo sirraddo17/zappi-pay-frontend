@@ -75,6 +75,7 @@ export default function AdminSupport() {
                       <>
                         {t.order.service} — {t.order.recipient}
                         <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>{fmtMoney(t.order.amount)}</div>
+                        <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>Receipt: {fmtDate(t.order.createdAt)}</div>
                       </>
                     ) : (
                       <span style={{ color: 'var(--slate-400)' }}>General</span>
