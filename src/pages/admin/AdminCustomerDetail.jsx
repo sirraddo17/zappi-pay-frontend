@@ -111,6 +111,19 @@ export default function AdminCustomerDetail() {
       <div className="page-header" style={{ padding: 0, margin: '12px 0 16px' }}>
         <h1>{customer.name}</h1>
         <p>{customer.phone}{customer.email ? ` · ${customer.email}` : ''} · {customer.active ? 'Active' : 'Deactivated'} · Joined {fmtDate(customer.createdAt)}</p>
+        <p style={{ marginTop: 4 }}>
+          {customer.username ? `@${customer.username} · ` : ''}PIN {customer.hasPin ? 'set' : 'not set'}
+          {' · '}Referred {customer.referralCount || 0} customer{customer.referralCount === 1 ? '' : 's'}
+          {customer.referredBy && (
+            <>
+              {' · '}Invited by{' '}
+              <Link to={`/admin/customers/${customer.referredBy.id}`} style={{ color: 'var(--purple)' }}>
+                {customer.referredBy.name}
+              </Link>
+              {customer.referralBonusPaidAt ? ` (bonus ₦${Number(customer.referralBonusAmount || 0).toLocaleString()} paid)` : ' (bonus not paid yet)'}
+            </>
+          )}
+        </p>
       </div>
 
       <div className="card stat-card" style={{ margin: '0 0 16px', maxWidth: 260 }}>

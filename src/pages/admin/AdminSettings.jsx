@@ -15,6 +15,7 @@ const TABS = [
   { key: 'discount', label: 'Discounts' },
   { key: 'limits', label: 'Limits' },
   { key: 'airtimeCash', label: 'Airtime to Cash' },
+  { key: 'referral', label: 'Referrals' },
   { key: 'password', label: 'My Password' },
 ];
 
@@ -71,6 +72,10 @@ export default function AdminSettings() {
   const [a2cMin, setA2cMin] = useState('500');
   const [a2cNumbers, setA2cNumbers] = useState({});
 
+  const [refEnabled, setRefEnabled] = useState(false);
+  const [refBonus, setRefBonus] = useState('100');
+  const [refMin, setRefMin] = useState('500');
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -95,6 +100,9 @@ export default function AdminSettings() {
         setA2cFee(String(s.airtimeToCashFeePercent ?? 20));
         setA2cMin(String(s.airtimeToCashMinAmount ?? 500));
         setA2cNumbers(s.airtimeToCashNumbers || {});
+        setRefEnabled(Boolean(s.referralEnabled));
+        setRefBonus(String(s.referralBonusAmount ?? 100));
+        setRefMin(String(s.referralMinPurchase ?? 500));
       })
       .catch((err) => setLoadError(err.message))
       .finally(() => setLoading(false));
@@ -167,6 +175,21 @@ export default function AdminSettings() {
       },
       'Airtime to Cash settings saved.'
     );
+  }
+
+  function saveReferral(e) {
+    e.preventDefault();
+    const bonus = Number(refBonus);
+    const min = Number(refMin);
+    if (!Number.isFinite(bonus) || bonus < 0 || !Number.isFinite(min) || min < 0) {
+      setStatus((prev) => ({ ...prev, referral: { error: 'Amounts must be 0 or more.' } }));
+      return;
+    }
+    if (refEnabled && bonus <= 0) {
+      setStatus((prev) => ({ ...prev, referral: { error: 'Set a bonus above ₦0 before turning referrals on.' } }));
+      return;
+    }
+    save('referral', { referralEnabled: refEnabled, referralBonusAmount: bonus, referralMinPurchase: min }, 'Referral settings saved.');
   }
 
   async function savePassword(e) {
@@ -360,6 +383,32 @@ export default function AdminSettings() {
             </div>
           ))}
           {saveButton('airtimeCash', 'Save Airtime to Cash')}
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'referral' && (
+        <form className="card" style={cardStyle} onSubmit={saveReferral}>
+          <SectionHeader
+            title="Referral program"
+            hint="Each customer's username is their referral code. When someone signs up with a code and completes a first successful purchase of at least the minimum below, the referrer's wallet is credited the bonus — once per referred customer."
+          />
+          <Status state={status.referral} />
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, marginBottom: 16, cursor: 'pointer' }}>
+            <input type="checkbox" checked={refEnabled} onChange={(e) => setRefEnabled(e.target.checked)} style={{ width: 'auto' }} />
+            Pay referral bonuses
+          </label>
+          <div className="field">
+            <label htmlFor="refBonus">Bonus per referral (₦)</label>
+            <input id="refBonus" type="number" step="1" min="0" value={refBonus} onChange={(e) => setRefBonus(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="refMin">Referred customer's first purchase must be at least (₦)</label>
+            <input id="refMin" type="number" step="1" min="0" value={refMin} onChange={(e) => setRefMin(e.target.value)} />
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 0' }}>
+              A higher minimum makes it harder for people to farm bonuses with fake accounts. Keep the bonus below your margin on that purchase.
+            </p>
+          </div>
+          {saveButton('referral', 'Save Referral Settings')}
         </form>
       )}
 
