@@ -9,6 +9,7 @@ export default function Signup() {
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,7 +20,7 @@ export default function Signup() {
     setError('');
     setSubmitting(true);
     try {
-      await signup({ name: name.trim(), phone: phone.trim(), email: email.trim() || undefined, password });
+      await signup({ name: name.trim(), phone: phone.trim(), username: username.trim(), email: email.trim() || undefined, password });
       navigate('/');
     } catch (err) {
       setError(err.message || 'Could not create account.');
@@ -45,6 +46,21 @@ export default function Signup() {
         <div className="field">
           <label htmlFor="phone">Phone number</label>
           <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+        </div>
+        <div className="field">
+          <label htmlFor="username">Username</label>
+          <input
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            minLength={3}
+            maxLength={20}
+            pattern="[A-Za-z0-9_]+"
+            title="Letters, numbers, and underscores only"
+            placeholder="Choose a username"
+          />
         </div>
         <div className="field">
           <label htmlFor="email">Email (optional)</label>
