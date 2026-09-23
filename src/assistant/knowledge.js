@@ -139,7 +139,7 @@ export const TOPICS = [
     title: 'Change password',
     keywords: ['password', 'change password', 'reset password', 'forgot password', 'forgot my password'],
     answer:
-      'To change your password, go to Profile → Change Password. If you are locked out and forgot it, message us on WhatsApp and we will help you reset it.',
+      'To change your password, go to Profile → Change Password. If you forget it, tap "Forgot password?" on the login page to get a reset link by email, or message us on WhatsApp and support will give you a temporary password.',
     actions: [{ label: 'Go to Profile', to: '/profile' }],
   },
   {
