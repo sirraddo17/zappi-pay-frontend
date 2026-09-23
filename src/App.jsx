@@ -11,6 +11,7 @@ import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
 import Notifications from './pages/Notifications';
 import Legal from './pages/Legal';
+import Transfer from './pages/Transfer';
 import Profile from './pages/Profile';
 
 import AdminLogin from './pages/admin/AdminLogin';
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/orders/:id" element={<RequireCustomer><OrderDetail /></RequireCustomer>} />
           <Route path="/notifications" element={<RequireCustomer><Notifications /></RequireCustomer>} />
           <Route path="/legal/:doc" element={<Legal />} />
+          <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
           <Route path="/profile" element={<RequireCustomer><Profile /></RequireCustomer>} />
 
           {/* Admin */}
