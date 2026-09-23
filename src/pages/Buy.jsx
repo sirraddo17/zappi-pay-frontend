@@ -196,6 +196,9 @@ export default function Buy() {
   return (
     <div className="app-shell">
       <div className="page-header">
+        <Link to="/" style={{ color: 'var(--purple, var(--orange))', textDecoration: 'none', fontSize: 14 }}>
+          &larr; Back
+        </Link>
         <h1>Buy {config.label}</h1>
         <p>Pay from your wallet balance</p>
       </div>
