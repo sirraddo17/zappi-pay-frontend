@@ -51,6 +51,7 @@ export const getVtpassServices = (identifier) => request(`/api/vtpass/services?i
 export const getVtpassVariations = (serviceID) => request(`/api/vtpass/variations?serviceID=${encodeURIComponent(serviceID)}`);
 export const verifyBillersCode = (serviceID, billersCode, type) =>
   request(`/api/vtpass/verify?serviceID=${encodeURIComponent(serviceID)}&billersCode=${encodeURIComponent(billersCode)}${type ? `&type=${type}` : ''}`);
+export const getPricing = () => request('/api/pricing');
 export const purchase = (data) => request('/api/vtpass/purchase', { method: 'POST', body: JSON.stringify(data) });
 export const getOrders = () => request('/api/orders');
 export const getOrder = (id) => request(`/api/orders/${id}`);
