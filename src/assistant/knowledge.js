@@ -144,6 +144,22 @@ export const TOPICS = [
     actions: [{ label: 'Go to Profile', to: '/profile' }],
   },
   {
+    id: 'pin',
+    title: 'PIN & fingerprint',
+    keywords: ['pin', 'transaction pin', 'forgot pin', 'change pin', 'reset pin', 'wrong pin', 'pin locked', 'fingerprint', 'face id', 'biometric', 'quick login'],
+    answer:
+      'Your 4-digit PIN confirms every purchase and transfer. Create or change it in Profile → Security (you\'ll need your password). There you can also turn on quick login with your PIN and fingerprint / Face ID for this device. Five wrong PIN tries lock it for 15 minutes — logging in with your password unlocks it.',
+    actions: [{ label: 'Security settings', to: '/security' }],
+  },
+  {
+    id: 'referral',
+    title: 'Refer & earn',
+    keywords: ['refer', 'referral', 'invite', 'invite friend', 'referral code', 'referral bonus', 'earn money', 'bonus'],
+    answer:
+      'Your username is your referral code. Share it (or your invite link) from Refer & Earn. When a friend signs up with it and makes their first qualifying purchase, a bonus is added to your wallet automatically.',
+    actions: [{ label: 'Refer & Earn', to: '/refer' }],
+  },
+  {
     id: 'profile',
     title: 'Profile & photo',
     keywords: ['profile', 'photo', 'picture', 'avatar', 'name', 'email', 'edit account'],
