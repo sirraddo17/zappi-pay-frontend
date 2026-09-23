@@ -24,6 +24,7 @@ import AdminOrders from './pages/admin/AdminOrders';
 import AdminSupport from './pages/admin/AdminSupport';
 import AdminAuditLog from './pages/admin/AdminAuditLog';
 import AdminStaff from './pages/admin/AdminStaff';
+import AdminBroadcasts from './pages/admin/AdminBroadcasts';
 
 function RequireCustomer({ children }) {
   const { customer, loading } = useAuth();
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="/admin/support" element={<RequireAdmin><AdminSupport /></RequireAdmin>} />
           <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
           <Route path="/admin/staff" element={<RequireAdmin><AdminStaff /></RequireAdmin>} />
+          <Route path="/admin/broadcasts" element={<RequireAdmin><AdminBroadcasts /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

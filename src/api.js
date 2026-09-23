@@ -67,6 +67,12 @@ export const getNotifications = () => request('/api/notifications');
 export const markNotificationRead = (id) => request(`/api/notifications/${id}/read`, { method: 'PATCH' });
 export const markAllNotificationsRead = () => request('/api/notifications/read-all', { method: 'PATCH' });
 
+// --- Broadcasts ---
+export const getActiveBroadcasts = () => request('/api/broadcasts/active');
+export const getAdminBroadcasts = () => adminRequest('/api/admin/broadcasts');
+export const createBroadcast = (data) => adminRequest('/api/admin/broadcasts', { method: 'POST', body: JSON.stringify(data) });
+export const endBroadcast = (id) => adminRequest(`/api/admin/broadcasts/${id}/end`, { method: 'PATCH' });
+
 // --- Transfers ---
 export const lookupRecipient = (identifier) => request(`/api/wallet/lookup?identifier=${encodeURIComponent(identifier)}`);
 export const sendTransfer = (data) => request('/api/wallet/transfer', { method: 'POST', body: JSON.stringify(data) });
