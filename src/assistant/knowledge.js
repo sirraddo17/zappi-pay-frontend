@@ -8,6 +8,7 @@
 // the answer, and optional buttons ({ label, to }).
 
 export const WHATSAPP_NUMBER = '2348134209037';
+export const SUPPORT_EMAIL = 'support@zappipay.com.ng';
 
 export const TOPICS = [
   {
@@ -139,7 +140,7 @@ export const TOPICS = [
     title: 'Change password',
     keywords: ['password', 'change password', 'reset password', 'forgot password', 'forgot my password'],
     answer:
-      'To change your password, go to Profile → Change Password. If you forget it, tap "Forgot password?" on the login page to get a reset link by email, or message us on WhatsApp and support will give you a temporary password.',
+      'To change your password, go to Profile → Change Password. If you forget it, tap "Forgot password?" on the login page to get a reset link by email, or message us on WhatsApp or email support@zappipay.com.ng and support will give you a temporary password.',
     actions: [{ label: 'Go to Profile', to: '/profile' }],
   },
   {
@@ -160,6 +161,14 @@ export const TOPICS = [
     title: 'BVN / NIN',
     keywords: ['bvn', 'nin', 'kyc', 'verify identity', 'verification'],
     answer: 'BVN/NIN verification is coming soon. You do not need it to buy services or send money to other ZappiPay users today.',
+  },
+  {
+    id: 'contact',
+    title: 'Contact details',
+    keywords: ['support email', 'your email', 'zappipay email', 'contact', 'phone number of zappipay', 'reach you', 'office', 'address'],
+    answer: 'You can reach ZappiPay support by email at support@zappipay.com.ng, on WhatsApp, or by sending a message from this help chat. We are based in Ibadan, Nigeria.',
+    actions: [{ label: 'Contact page', to: '/legal/contact' }],
+    escalate: true,
   },
   {
     id: 'notifications',
