@@ -9,16 +9,40 @@ async function handleResponse(res) {
 // Customer and admin sessions are kept under separate localStorage keys
 // so a staff member can be logged into the admin panel and a customer
 // account in the same browser without one logging the other out.
+export class ApiError extends Error {
+  constructor(message, code, status) {
+    super(message);
+    this.code = code;
+    this.status = status;
+  }
+}
+
+async function handleCustomerResponse(res) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ApiError(data.error || `Request failed (${res.status})`, data.code, res.status);
+  return data;
+}
+
+function deviceToken() {
+  try {
+    return JSON.parse(localStorage.getItem('zappipay_quick_login') || 'null')?.deviceToken || null;
+  } catch {
+    return null;
+  }
+}
+
 export function request(path, options = {}) {
   const token = localStorage.getItem('zappipay_customer_token');
+  const device = deviceToken();
   return fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(device ? { 'X-Device-Token': device } : {}),
       ...options.headers,
     },
-  }).then(handleResponse);
+  }).then(handleCustomerResponse);
 }
 
 export function adminRequest(path, options = {}) {
@@ -41,6 +65,24 @@ export const updateMe = (data) => request('/api/auth/me', { method: 'PATCH', bod
 export const changePassword = (data) => request('/api/auth/password', { method: 'PATCH', body: JSON.stringify(data) });
 export const forgotPassword = (data) => request('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) });
 export const resetPassword = (data) => request('/api/auth/reset-password', { method: 'POST', body: JSON.stringify(data) });
+
+// --- Security: PIN, quick login, fingerprint / Face ID ---
+export const getSecurityStatus = () => request('/api/security/status');
+export const setPin = (data) => request('/api/security/pin', { method: 'POST', body: JSON.stringify(data) });
+export const trustThisDevice = (data) => request('/api/security/devices', { method: 'POST', body: JSON.stringify(data) });
+export const untrustThisDevice = () => request('/api/security/devices/current', { method: 'DELETE' });
+export const untrustOtherDevices = () => request('/api/security/devices', { method: 'DELETE' });
+export const biometricRegisterOptions = () => request('/api/security/webauthn/register-options', { method: 'POST' });
+export const biometricRegisterVerify = (response) => request('/api/security/webauthn/register-verify', { method: 'POST', body: JSON.stringify({ response }) });
+export const removeBiometric = () => request('/api/security/webauthn', { method: 'DELETE' });
+export const biometricTxOptions = () => request('/api/security/webauthn/tx-options', { method: 'POST' });
+export const quickLoginPin = (data) => request('/api/auth/quick/pin', { method: 'POST', body: JSON.stringify(data) });
+export const quickLoginBiometricOptions = (data) => request('/api/auth/quick/biometric-options', { method: 'POST', body: JSON.stringify(data) });
+export const quickLoginBiometric = (data) => request('/api/auth/quick/biometric', { method: 'POST', body: JSON.stringify(data) });
+
+// --- Referrals ---
+export const getReferralInfo = (code) => request(`/api/referrals/info${code ? `?code=${encodeURIComponent(code)}` : ''}`);
+export const getMyReferrals = () => request('/api/referrals');
 
 // --- Wallet ---
 export const getWalletBalance = () => request('/api/wallet/balance');

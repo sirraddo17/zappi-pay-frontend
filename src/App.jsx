@@ -18,6 +18,10 @@ import HelpAssistant from './components/HelpAssistant';
 import ChangePassword from './pages/ChangePassword';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Landing from './pages/Landing';
+import Security from './pages/Security';
+import Refer from './pages/Refer';
+import { getQuickLogin } from './lib/quickLogin';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -45,6 +49,18 @@ function RequireCustomer({ children }) {
   return children;
 }
 
+// zappipay.com.ng/ — the dashboard for logged-in customers, the PIN
+// screen for returning customers with quick login, and the public
+// landing page for everyone else.
+function Home() {
+  const { customer, loading } = useAuth();
+  const location = useLocation();
+  if (loading) return <div className="page-loading">Loading…</div>;
+  if (customer) return <RequireCustomer><Dashboard /></RequireCustomer>;
+  if (getQuickLogin()) return <Navigate to="/login" replace />;
+  return <Landing key={location.search} />;
+}
+
 function RequireAdmin({ children }) {
   const { admin } = useAdminAuth();
   if (!admin) return <Navigate to="/admin/login" replace />;
@@ -62,7 +78,10 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/change-password" element={<RequireCustomer><ChangePassword /></RequireCustomer>} />
-          <Route path="/" element={<RequireCustomer><Dashboard /></RequireCustomer>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/welcome" element={<Landing />} />
+          <Route path="/security" element={<RequireCustomer><Security /></RequireCustomer>} />
+          <Route path="/refer" element={<RequireCustomer><Refer /></RequireCustomer>} />
           <Route path="/buy/:service" element={<RequireCustomer><Buy /></RequireCustomer>} />
           <Route path="/wallet" element={<RequireCustomer><Wallet /></RequireCustomer>} />
           <Route path="/orders" element={<RequireCustomer><Orders /></RequireCustomer>} />
