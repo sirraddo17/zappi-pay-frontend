@@ -66,6 +66,10 @@ export const getNotifications = () => request('/api/notifications');
 export const markNotificationRead = (id) => request(`/api/notifications/${id}/read`, { method: 'PATCH' });
 export const markAllNotificationsRead = () => request('/api/notifications/read-all', { method: 'PATCH' });
 
+// --- Transfers ---
+export const lookupRecipient = (identifier) => request(`/api/wallet/lookup?identifier=${encodeURIComponent(identifier)}`);
+export const sendTransfer = (data) => request('/api/wallet/transfer', { method: 'POST', body: JSON.stringify(data) });
+
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
 export const changeAdminPassword = (data) => adminRequest('/api/admin/password', { method: 'PATCH', body: JSON.stringify(data) });
