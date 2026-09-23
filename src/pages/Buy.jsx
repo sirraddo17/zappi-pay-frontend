@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing } from '../api';
+import PinConfirm from '../components/PinConfirm';
 
 // Maps the URL slug to what the backend Order.service enum expects, the
 // VTpass category identifier used to fetch that service's provider list,
@@ -126,6 +127,7 @@ export default function Buy() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [pricing, setPricing] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     getPricing().then(setPricing).catch(() => setPricing(null));
@@ -186,20 +188,31 @@ export default function Buy() {
       setError('Please fill in every field.');
       return;
     }
+    setConfirmOpen(true);
+  }
+
+  // Runs once the customer has entered their PIN / used biometrics.
+  // Errors bubble back to PinConfirm, which keeps PIN mistakes in the
+  // sheet and passes everything else to setError below.
+  async function doPurchase(auth) {
+    const phoneToSend = isPhoneService ? recipient : (customer?.phone || phone);
     setSubmitting(true);
     try {
-      const order = await purchase({
+      await purchase({
         service: config.backendService,
         serviceID: providerId,
         variationCode: config.needsVariation ? variationCode : undefined,
         billersCode: recipient.trim(),
         phone: phoneToSend.trim(),
         amount,
+        ...auth,
       });
       await refreshCustomer();
+      setConfirmOpen(false);
       navigate('/orders');
     } catch (err) {
-      setError(err.message || 'Purchase failed.');
+      if (/refunded/i.test(err.message || '')) refreshCustomer().catch(() => {});
+      throw err;
     } finally {
       setSubmitting(false);
     }
@@ -329,6 +342,14 @@ export default function Buy() {
           {submitting ? 'Processing…' : `Pay ${naira(price.total)}`}
         </button>
       </form>
+
+      <PinConfirm
+        open={confirmOpen}
+        summary={`Pay ${naira(price.total)} · ${config.label} for ${recipient.trim()}`}
+        onSubmit={doPurchase}
+        onError={(err) => setError(err.message || 'Purchase failed.')}
+        onClose={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

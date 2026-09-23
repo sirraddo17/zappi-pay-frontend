@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts } from '../api';
+import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo } from '../api';
 import BottomNav from '../components/BottomNav';
 import { LogoIcon, Wordmark } from '../components/Logo';
 import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon } from '../components/Icons';
@@ -35,6 +35,7 @@ function txLabel(t) {
   if (t.type === 'FUND') return 'Wallet funded';
   if (t.type === 'REFUND') return t.note || 'Refund';
   if (t.type === 'AIRTIME_CASH') return t.note || 'Airtime to Cash';
+  if (t.type === 'REFERRAL_BONUS') return t.note || 'Referral bonus';
   if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
   if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
   return t.note || 'Purchase';
@@ -74,6 +75,7 @@ export default function Dashboard() {
   const [discounts, setDiscounts] = useState({});
   const [banners, setBanners] = useState([]);
   const [dismissed, setDismissed] = useState(readDismissed);
+  const [referral, setReferral] = useState(null);
 
   function dismissBanner(id) {
     const next = [...dismissed, id];
@@ -96,6 +98,9 @@ export default function Dashboard() {
       .catch(() => {});
     getPricing()
       .then((data) => setDiscounts(data.discountPercentByService || {}))
+      .catch(() => {});
+    getReferralInfo()
+      .then(setReferral)
       .catch(() => {});
   }, []);
 
@@ -197,6 +202,36 @@ export default function Dashboard() {
         })}
       </div>
 
+      {customer && !customer.hasPin && (
+        <Link
+          to="/security"
+          className="card"
+          style={{ display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: 'inherit', border: '1px solid var(--gold)', background: 'rgba(255,184,48,0.08)', marginTop: 16 }}
+        >
+          <span style={{ fontSize: 22 }}>🔒</span>
+          <span style={{ flex: 1 }}>
+            <b style={{ display: 'block', fontSize: 14 }}>Create your transaction PIN</b>
+            <span style={{ fontSize: 13, color: 'var(--slate-400)' }}>You'll need it to confirm payments. Then turn on PIN or fingerprint login.</span>
+          </span>
+          <span style={{ color: 'var(--slate-400)' }}>›</span>
+        </Link>
+      )}
+
+      {referral?.enabled && referral.bonusAmount > 0 && (
+        <Link
+          to="/refer"
+          className="card"
+          style={{ display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: '#fff', border: 'none', background: 'linear-gradient(135deg, #863bff, #5b1fc4)', marginTop: 16 }}
+        >
+          <span style={{ fontSize: 22 }}>🎁</span>
+          <span style={{ flex: 1 }}>
+            <b style={{ display: 'block', fontSize: 14 }}>Refer &amp; earn ₦{Number(referral.bonusAmount).toLocaleString()}</b>
+            <span style={{ fontSize: 13, opacity: 0.85 }}>Invite friends — get paid when they make their first purchase.</span>
+          </span>
+          <span style={{ color: 'var(--gold)' }}>›</span>
+        </Link>
+      )}
+
       <div className="section-label">Recent Transactions</div>
       <div className="tx-list">
         {transactions === null ? (
@@ -205,7 +240,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>

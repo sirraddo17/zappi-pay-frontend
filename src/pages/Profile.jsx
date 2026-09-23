@@ -178,6 +178,29 @@ export default function Profile() {
         </button>
       </form>
 
+      <div className="card" style={{ margin: '0 0 16px', paddingTop: 4, paddingBottom: 4 }}>
+        <Link
+          to="/security"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', color: 'var(--slate-100, #f1f5f9)', textDecoration: 'none', borderBottom: '1px solid var(--slate-700)' }}
+        >
+          <span>
+            <span style={{ display: 'block', fontWeight: 600 }}>Security</span>
+            <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 13 }}>PIN, quick login, fingerprint / Face ID</span>
+          </span>
+          <span style={{ color: 'var(--slate-400)' }}>›</span>
+        </Link>
+        <Link
+          to="/refer"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', color: 'var(--slate-100, #f1f5f9)', textDecoration: 'none', borderBottom: 'none' }}
+        >
+          <span>
+            <span style={{ display: 'block', fontWeight: 600 }}>Refer & Earn</span>
+            <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 13 }}>Invite friends and earn a bonus</span>
+          </span>
+          <span style={{ color: 'var(--slate-400)' }}>›</span>
+        </Link>
+      </div>
+
       <form className="card" style={{ margin: '0 0 16px' }} onSubmit={handlePasswordChange}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Change Password</h2>
         {passwordError && <p className="error-text" style={{ margin: '0 0 12px' }}>{passwordError}</p>}

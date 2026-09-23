@@ -107,7 +107,7 @@ export default function Wallet() {
               {transactions.map((t) => (
                 <tr key={t.id}>
                   <td>{fmtDate(t.createdAt)}</td>
-                  <td>{t.type}</td>
+                  <td>{String(t.type).replace(/_/g, ' ')}</td>
                   <td>{fmtMoney(t.amount)}</td>
                   <td>{t.status}</td>
                 </tr>

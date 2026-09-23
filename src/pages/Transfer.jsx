@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { lookupRecipient, sendTransfer } from '../api';
 import BottomNav from '../components/BottomNav';
+import PinConfirm from '../components/PinConfirm';
 
 export default function Transfer() {
   const { refreshCustomer } = useAuth();
@@ -18,6 +19,7 @@ export default function Transfer() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [sending, setSending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function handleVerify(e) {
     e.preventDefault();
@@ -40,17 +42,24 @@ export default function Transfer() {
     e.preventDefault();
     setError('');
     setSuccess('');
+    if (!(Number(amount) > 0)) {
+      setError('Enter an amount to send.');
+      return;
+    }
+    setConfirmOpen(true);
+  }
+
+  async function doSend(auth) {
     setSending(true);
     try {
-      await sendTransfer({ identifier: identifier.trim(), amount: Number(amount), note: note.trim() || undefined });
+      await sendTransfer({ identifier: identifier.trim(), amount: Number(amount), note: note.trim() || undefined, ...auth });
+      setConfirmOpen(false);
       setSuccess(`₦${Number(amount).toLocaleString()} sent to ${recipient.name}.`);
       setIdentifier('');
       setRecipient(null);
       setAmount('');
       setNote('');
       refreshCustomer();
-    } catch (err) {
-      setError(err.message || 'Could not complete transfer.');
     } finally {
       setSending(false);
     }
@@ -163,6 +172,14 @@ export default function Transfer() {
           </p>
         </div>
       )}
+
+      <PinConfirm
+        open={confirmOpen}
+        summary={recipient ? `Send ₦${Number(amount || 0).toLocaleString()} to ${recipient.name}` : ''}
+        onSubmit={doSend}
+        onError={(err) => setError(err.message || 'Could not complete transfer.')}
+        onClose={() => setConfirmOpen(false)}
+      />
 
       <BottomNav />
     </div>

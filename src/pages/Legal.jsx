@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const WHATSAPP_LINK = 'https://wa.me/2348134209037?text=' + encodeURIComponent('Hello ZappiPay, I need help with');
 
@@ -103,6 +104,9 @@ const DOCS = {
 export default function Legal() {
   const { doc } = useParams();
   const entry = DOCS[doc];
+  const { customer } = useAuth();
+  // Logged-out visitors arrive here from the landing page footer.
+  const back = customer ? { to: '/profile', label: 'Back to Profile' } : { to: '/welcome', label: 'Back to Home' };
 
   if (!entry) {
     return (
@@ -110,8 +114,8 @@ export default function Legal() {
         <div className="page-header">
           <h1>Not found</h1>
         </div>
-        <Link to="/profile" className="btn" style={{ margin: '0 16px', display: 'block', textAlign: 'center', textDecoration: 'none' }}>
-          Back to Profile
+        <Link to={back.to} className="btn" style={{ margin: '0 16px', display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+          {back.label}
         </Link>
       </div>
     );
@@ -125,8 +129,8 @@ export default function Legal() {
       <div style={{ padding: '0 16px 40px', lineHeight: 1.6, fontSize: 14, color: 'var(--slate-100, #f1f5f9)' }}>
         {entry.body}
       </div>
-      <Link to="/profile" style={{ display: 'block', margin: '0 16px 32px', color: 'var(--purple)', textAlign: 'center', textDecoration: 'none' }}>
-        &larr; Back to Profile
+      <Link to={back.to} style={{ display: 'block', margin: '0 16px 32px', color: 'var(--purple)', textAlign: 'center', textDecoration: 'none' }}>
+        &larr; {back.label}
       </Link>
     </div>
   );
