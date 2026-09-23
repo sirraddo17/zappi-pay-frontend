@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminSupportTickets, resolveSupportTicket } from '../../api';
+import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket } from '../../api';
+import { CATEGORIES, detectCategory, draftReply } from '../../assistant/replyTemplates';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -10,10 +11,116 @@ function fmtDate(d) {
   return new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+// Reply assistant for one ticket: guesses the complaint type, drafts a
+// professional reply from a template filled with this customer's name
+// and order details, and lets the admin edit it before sending. Nothing
+// goes to the customer until the admin presses Send.
+function ReplyPanel({ ticket, onSent, onClose }) {
+  const [category, setCategory] = useState(() => detectCategory(ticket));
+  const [text, setText] = useState(() => draftReply(ticket, detectCategory(ticket)));
+  const [edited, setEdited] = useState(false);
+  const [resolve, setResolve] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  function changeCategory(id) {
+    setCategory(id);
+    setText(draftReply(ticket, id));
+    setEdited(false);
+  }
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError('Could not copy — select the text and copy it manually.');
+    }
+  }
+
+  async function handleSend() {
+    setSending(true);
+    setError('');
+    try {
+      await replySupportTicket(ticket.id, { reply: text.trim(), resolve });
+      onSent();
+    } catch (err) {
+      setError(err.message || 'Could not send reply.');
+      setSending(false);
+    }
+  }
+
+  const hasPlaceholder = text.includes('[Add your answer here]');
+
+  return (
+    <div style={{ background: 'var(--slate-900)', borderRadius: 10, padding: 12 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
+        <label htmlFor={`cat-${ticket.id}`} style={{ fontSize: 13, color: 'var(--slate-400)' }}>Complaint type</label>
+        <select id={`cat-${ticket.id}`} value={category} onChange={(e) => changeCategory(e.target.value)} style={{ width: 'auto', fontSize: 13, padding: '6px 8px' }}>
+          {CATEGORIES.map((c) => (
+            <option key={c.id} value={c.id}>{c.label}</option>
+          ))}
+        </select>
+        {edited && (
+          <button type="button" className="btn-secondary btn" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} onClick={() => changeCategory(category)}>
+            Reset draft
+          </button>
+        )}
+      </div>
+      <textarea
+        rows={10}
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+          setEdited(true);
+        }}
+        maxLength={2000}
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          fontFamily: 'inherit',
+          fontSize: 14,
+          lineHeight: 1.45,
+          background: 'var(--slate-800)',
+          border: '1px solid var(--slate-700)',
+          borderRadius: 8,
+          color: 'var(--slate-100)',
+          padding: 10,
+          resize: 'vertical',
+        }}
+      />
+      <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 8px' }}>
+        Check the facts (amounts, refund status, dates) against the order and wallet before sending. {text.length}/2000
+      </p>
+      {hasPlaceholder && <p style={{ color: 'var(--orange)', fontSize: 13, margin: '0 0 8px' }}>Replace “[Add your answer here]” before sending.</p>}
+      <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, marginBottom: 10, cursor: 'pointer' }}>
+        <input type="checkbox" checked={resolve} onChange={(e) => setResolve(e.target.checked)} style={{ width: 'auto' }} />
+        Mark ticket as resolved when sending
+      </label>
+      {error && <p className="error-text" style={{ margin: '0 0 8px' }}>{error}</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button className="btn" type="button" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} disabled={sending || !text.trim() || hasPlaceholder} onClick={handleSend}>
+          {sending ? 'Sending…' : 'Send to customer'}
+        </button>
+        <button className="btn-secondary btn" type="button" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} onClick={handleCopy}>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+        <button className="btn-secondary btn" type="button" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} onClick={onClose} disabled={sending}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminSupport() {
   const [tickets, setTickets] = useState(null);
   const [error, setError] = useState('');
   const [resolvingId, setResolvingId] = useState(null);
+  const [replyingId, setReplyingId] = useState(null);
+  const [filter, setFilter] = useState('OPEN');
 
   function load() {
     getAdminSupportTickets()
@@ -36,20 +143,41 @@ export default function AdminSupport() {
     }
   }
 
+  const shown = tickets === null ? null : filter === 'ALL' ? tickets : tickets.filter((t) => t.status === filter);
+  const openCount = tickets ? tickets.filter((t) => t.status === 'OPEN').length : 0;
+
   return (
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16 }}>
         <h1>Support</h1>
-        <p>Customer complaints, general or tied to a specific order</p>
+        <p>Customer complaints — use Draft Reply to get a ready-to-edit professional response</p>
       </div>
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
 
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+        {[
+          ['OPEN', `Open${openCount ? ` (${openCount})` : ''}`],
+          ['RESOLVED', 'Resolved'],
+          ['ALL', 'All'],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setFilter(value)}
+            className={value === filter ? 'btn' : 'btn-secondary btn'}
+            style={{ width: 'auto', padding: '6px 14px', fontSize: 13 }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div className="card admin-table-wrap" style={{ margin: 0 }}>
-        {tickets === null ? (
+        {shown === null ? (
           <p className="empty-state">Loading…</p>
-        ) : tickets.length === 0 ? (
-          <p className="empty-state">No support tickets yet.</p>
+        ) : shown.length === 0 ? (
+          <p className="empty-state">No tickets here.</p>
         ) : (
           <table>
             <thead>
@@ -63,45 +191,81 @@ export default function AdminSupport() {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((t) => (
-                <tr key={t.id}>
-                  <td>
-                    {t.customer?.name}
-                    <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>{t.customer?.phone}</div>
-                  </td>
-                  <td style={{ maxWidth: 280 }}>{t.message}</td>
-                  <td>
-                    {t.order ? (
-                      <>
-                        {t.order.service} — {t.order.recipient}
-                        <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>{fmtMoney(t.order.amount)}</div>
-                        <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>Receipt: {fmtDate(t.order.createdAt)}</div>
-                      </>
-                    ) : (
-                      <span style={{ color: 'var(--slate-400)' }}>General</span>
-                    )}
-                  </td>
-                  <td>
-                    <span
-                      className={`admin-badge ${t.status === 'RESOLVED' ? 'active' : 'inactive'}`}
-                    >
-                      {t.status === 'RESOLVED' ? 'Solved' : 'Open'}
-                    </span>
-                  </td>
-                  <td style={{ color: 'var(--slate-400)', fontSize: 13 }}>{fmtDate(t.createdAt)}</td>
-                  <td>
-                    {t.status !== 'RESOLVED' && (
-                      <button
-                        className="btn-secondary btn"
-                        style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }}
-                        onClick={() => handleResolve(t.id)}
-                        disabled={resolvingId === t.id}
-                      >
-                        {resolvingId === t.id ? 'Saving…' : 'Mark Resolved'}
-                      </button>
-                    )}
-                  </td>
-                </tr>
+              {shown.map((t) => (
+                <Fragment key={t.id}>
+                  <tr>
+                    <td>
+                      {t.customer?.name}
+                      <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>{t.customer?.phone}</div>
+                    </td>
+                    <td style={{ maxWidth: 280 }}>
+                      {t.message}
+                      {t.adminReply && (
+                        <div style={{ marginTop: 6, fontSize: 12, color: 'var(--slate-400)' }}>
+                          Replied {t.repliedAt ? fmtDate(t.repliedAt) : ''}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      {t.order ? (
+                        <>
+                          {t.order.service} — {t.order.recipient}
+                          <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>{fmtMoney(t.order.amount)} · {t.order.status}</div>
+                          <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>Receipt: {fmtDate(t.order.createdAt)}</div>
+                        </>
+                      ) : (
+                        <span style={{ color: 'var(--slate-400)' }}>General</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`admin-badge ${t.status === 'RESOLVED' ? 'active' : 'inactive'}`}>
+                        {t.status === 'RESOLVED' ? 'Solved' : 'Open'}
+                      </span>
+                    </td>
+                    <td style={{ color: 'var(--slate-400)', fontSize: 13 }}>{fmtDate(t.createdAt)}</td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <button
+                          className="btn"
+                          style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }}
+                          onClick={() => setReplyingId(replyingId === t.id ? null : t.id)}
+                        >
+                          {t.adminReply ? 'Reply again' : 'Draft reply'}
+                        </button>
+                        {t.status !== 'RESOLVED' && (
+                          <button
+                            className="btn-secondary btn"
+                            style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }}
+                            onClick={() => handleResolve(t.id)}
+                            disabled={resolvingId === t.id}
+                          >
+                            {resolvingId === t.id ? 'Saving…' : 'Mark Resolved'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                  {(replyingId === t.id || t.adminReply) && (
+                    <tr>
+                      <td colSpan={6} style={{ paddingTop: 0 }}>
+                        {replyingId === t.id ? (
+                          <ReplyPanel
+                            ticket={t}
+                            onClose={() => setReplyingId(null)}
+                            onSent={() => {
+                              setReplyingId(null);
+                              load();
+                            }}
+                          />
+                        ) : (
+                          <div style={{ fontSize: 13, color: 'var(--slate-400)', whiteSpace: 'pre-wrap', borderLeft: '3px solid var(--purple)', paddingLeft: 10 }}>
+                            <strong style={{ color: 'var(--slate-100)' }}>Your reply:</strong> {t.adminReply}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
