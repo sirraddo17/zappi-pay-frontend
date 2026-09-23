@@ -4,6 +4,7 @@ import { useAdminAuth } from '../context/AdminAuthContext';
 const TABS = [
   { to: '/admin', label: 'Overview', end: true },
   { to: '/admin/pending-funding', label: 'Pending Funding' },
+  { to: '/admin/airtime-cash', label: 'Airtime to Cash' },
   { to: '/admin/customers', label: 'Customers' },
   { to: '/admin/staff', label: 'Staff' },
   { to: '/admin/orders', label: 'Orders' },
