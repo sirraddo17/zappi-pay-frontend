@@ -73,6 +73,14 @@ export const getAdminBroadcasts = () => adminRequest('/api/admin/broadcasts');
 export const createBroadcast = (data) => adminRequest('/api/admin/broadcasts', { method: 'POST', body: JSON.stringify(data) });
 export const endBroadcast = (id) => adminRequest(`/api/admin/broadcasts/${id}/end`, { method: 'PATCH' });
 
+// --- Airtime to Cash ---
+export const getAirtimeCashConfig = () => request('/api/airtime-cash/config');
+export const getMyAirtimeCashRequests = () => request('/api/airtime-cash/requests');
+export const submitAirtimeCashRequest = (data) => request('/api/airtime-cash/requests', { method: 'POST', body: JSON.stringify(data) });
+export const getAdminAirtimeCash = (status) => adminRequest(`/api/admin/airtime-cash?status=${encodeURIComponent(status)}`);
+export const approveAirtimeCash = (id, data) => adminRequest(`/api/admin/airtime-cash/${id}/approve`, { method: 'POST', body: JSON.stringify(data || {}) });
+export const rejectAirtimeCash = (id, reason) => adminRequest(`/api/admin/airtime-cash/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) });
+
 // --- Transfers ---
 export const lookupRecipient = (identifier) => request(`/api/wallet/lookup?identifier=${encodeURIComponent(identifier)}`);
 export const sendTransfer = (data) => request('/api/wallet/transfer', { method: 'POST', body: JSON.stringify(data) });

@@ -13,6 +13,7 @@ import Notifications from './pages/Notifications';
 import Legal from './pages/Legal';
 import Transfer from './pages/Transfer';
 import Profile from './pages/Profile';
+import AirtimeCash from './pages/AirtimeCash';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -25,6 +26,7 @@ import AdminSupport from './pages/admin/AdminSupport';
 import AdminAuditLog from './pages/admin/AdminAuditLog';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminBroadcasts from './pages/admin/AdminBroadcasts';
+import AdminAirtimeCash from './pages/admin/AdminAirtimeCash';
 
 function RequireCustomer({ children }) {
   const { customer, loading } = useAuth();
@@ -56,6 +58,7 @@ export default function App() {
           <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
           <Route path="/profile" element={<RequireCustomer><Profile /></RequireCustomer>} />
+          <Route path="/airtime-cash" element={<RequireCustomer><AirtimeCash /></RequireCustomer>} />
 
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -69,6 +72,7 @@ export default function App() {
           <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
           <Route path="/admin/staff" element={<RequireAdmin><AdminStaff /></RequireAdmin>} />
           <Route path="/admin/broadcasts" element={<RequireAdmin><AdminBroadcasts /></RequireAdmin>} />
+          <Route path="/admin/airtime-cash" element={<RequireAdmin><AdminAirtimeCash /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
