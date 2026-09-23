@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { updateMe, changePassword, getSupportTickets } from '../api';
 import PasswordField from '../components/PasswordField';
+import BottomNav from '../components/BottomNav';
 
 const MAX_AVATAR_BYTES = 1_500_000;
 
@@ -111,6 +112,9 @@ export default function Profile() {
 
   return (
     <div style={{ maxWidth: 420, margin: '0 auto', padding: '24px 16px 90px' }}>
+      <Link to="/" style={{ display: 'inline-block', marginBottom: 12, color: 'var(--purple, var(--orange))', textDecoration: 'none', fontSize: 14 }}>
+        &larr; Back
+      </Link>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
         <input
           ref={fileInputRef}
@@ -241,6 +245,8 @@ export default function Profile() {
       <button className="btn-secondary btn" type="button" onClick={handleLogout}>
         Log Out
       </button>
+
+      <BottomNav />
     </div>
   );
 }
