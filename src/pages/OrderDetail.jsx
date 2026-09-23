@@ -156,6 +156,16 @@ export default function OrderDetail() {
         </button>
       </div>
 
+      {order.service === 'AIRTIME' && order.status === 'SUCCESS' && (
+        <Link
+          to={`/airtime-cash?order=${order.id}`}
+          className="btn-secondary btn no-print"
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: 8, boxSizing: 'border-box' }}
+        >
+          Bought by mistake? Convert to cash
+        </Link>
+      )}
+
       {!reportOpen ? (
         <button className="btn-secondary btn no-print" type="button" onClick={() => setReportOpen(true)}>
           Report Issue

@@ -15,6 +15,7 @@ const SERVICES = [
   { slug: 'transfer', label: 'Send Money', Icon: BuildingIcon, bg: '#1a7a72' },
   { slug: 'internet', service: 'INTERNET', label: 'Internet', Icon: GlobeIcon, bg: '#c2540f' },
   { slug: 'betting', service: 'BETTING', label: 'Bet Funding', Icon: TrophyIcon, bg: '#a38a0a' },
+  { slug: 'airtime-cash', to: '/airtime-cash', label: 'Airtime to Cash', Icon: FundIcon, bg: '#5b3fa8' },
 ];
 
 function fmtTxDate(d) {
@@ -33,6 +34,9 @@ function fmtTxDate(d) {
 function txLabel(t) {
   if (t.type === 'FUND') return 'Wallet funded';
   if (t.type === 'REFUND') return t.note || 'Refund';
+  if (t.type === 'AIRTIME_CASH') return t.note || 'Airtime to Cash';
+  if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
+  if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
   return t.note || 'Purchase';
 }
 
@@ -165,7 +169,7 @@ export default function Dashboard() {
           const Icon = s.Icon;
           const off = s.service ? Number(discounts[s.service] || 0) : 0;
           return (
-            <Link key={s.slug} to={s.slug === 'transfer' ? '/transfer' : s.comingSoon ? '#' : `/buy/${s.slug}`} className="service-tile" style={{ position: 'relative' }}>
+            <Link key={s.slug} to={s.to || (s.slug === 'transfer' ? '/transfer' : s.comingSoon ? '#' : `/buy/${s.slug}`)} className="service-tile" style={{ position: 'relative' }}>
               {off > 0 && (
                 <span
                   style={{
@@ -201,7 +205,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = t.type === 'FUND' || t.type === 'REFUND';
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>
