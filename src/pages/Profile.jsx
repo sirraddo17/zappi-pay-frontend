@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { updateMe, changePassword, getSupportTickets } from '../api';
 import PasswordField from '../components/PasswordField';
 import BottomNav from '../components/BottomNav';
+import { SUPPORT_EMAIL } from '../assistant/knowledge';
 
 const MAX_AVATAR_BYTES = 1_500_000;
 
@@ -201,9 +202,16 @@ export default function Profile() {
           target="_blank"
           rel="noopener noreferrer"
           className="btn-secondary btn"
-          style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: 16 }}
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: 8 }}
         >
           Chat on WhatsApp
+        </a>
+        <a
+          href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('ZappiPay support')}`}
+          className="btn-secondary btn"
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: 16 }}
+        >
+          Email {SUPPORT_EMAIL}
         </a>
         {tickets === null ? (
           <p className="empty-state">Loading…</p>

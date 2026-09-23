@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { forgotPassword } from '../api';
-import { WHATSAPP_NUMBER } from '../assistant/knowledge';
+import { WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../assistant/knowledge';
 
 export default function ForgotPassword() {
   const [identifier, setIdentifier] = useState('');
@@ -66,6 +66,9 @@ export default function ForgotPassword() {
         >
           Contact support on WhatsApp
         </a>
+        <p style={{ margin: '10px 0 0', fontSize: 13, textAlign: 'center', color: 'var(--slate-400)' }}>
+          or email <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Password reset')}`} style={{ color: 'var(--purple)' }}>{SUPPORT_EMAIL}</a>
+        </p>
       </div>
     </div>
   );

@@ -49,7 +49,7 @@ const DOCS = {
         <p>We may update these Terms from time to time. Continued use of the App after changes take effect means you accept the updated Terms.</p>
         <h3>9. Governing Law</h3>
         <p>These Terms are governed by the laws of the Federal Republic of Nigeria.</p>
-        <p>If you have questions about these Terms, contact us at zappipaysupport@gmail.com.</p>
+        <p>If you have questions about these Terms, contact us at support@zappipay.com.ng.</p>
       </>
     ),
   },
@@ -72,7 +72,7 @@ const DOCS = {
         <p>You can review and update your profile information in the App at any time. To request account closure or data deletion, contact us using the details below, subject to any records we are legally required to keep.</p>
         <h3>7. Changes to This Policy</h3>
         <p>We may update this Privacy Policy from time to time. We'll notify you of material changes through the App.</p>
-        <p>Questions about this Privacy Policy can be sent to zappipaysupport@gmail.com.</p>
+        <p>Questions about this Privacy Policy can be sent to support@zappipay.com.ng.</p>
       </>
     ),
   },
@@ -84,7 +84,7 @@ const DOCS = {
         <div className="card" style={{ margin: '16px 0' }}>
           <div style={{ marginBottom: 14 }}>
             <div style={{ color: 'var(--slate-400)', fontSize: 13 }}>Email</div>
-            <a href="mailto:zappipaysupport@gmail.com" style={{ color: 'var(--purple)' }}>zappipaysupport@gmail.com</a>
+            <a href="mailto:support@zappipay.com.ng" style={{ color: 'var(--purple)' }}>support@zappipay.com.ng</a>
           </div>
           <div style={{ marginBottom: 14 }}>
             <div style={{ color: 'var(--slate-400)', fontSize: 13 }}>WhatsApp</div>
