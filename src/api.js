@@ -61,6 +61,7 @@ export const getSupportTickets = () => request('/api/support/tickets');
 export const submitSupportTicket = (data) => request('/api/support/tickets', { method: 'POST', body: JSON.stringify(data) });
 export const getAdminSupportTickets = () => adminRequest('/api/admin/support/tickets');
 export const resolveSupportTicket = (id) => adminRequest(`/api/admin/support/tickets/${id}/resolve`, { method: 'PATCH' });
+export const replySupportTicket = (id, data) => adminRequest(`/api/admin/support/tickets/${id}/reply`, { method: 'POST', body: JSON.stringify(data) });
 
 // --- Notifications ---
 export const getNotifications = () => request('/api/notifications');

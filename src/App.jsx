@@ -14,6 +14,7 @@ import Legal from './pages/Legal';
 import Transfer from './pages/Transfer';
 import Profile from './pages/Profile';
 import AirtimeCash from './pages/AirtimeCash';
+import HelpAssistant from './components/HelpAssistant';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -76,6 +77,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <HelpAssistant />
       </AdminAuthProvider>
     </AuthProvider>
   );
