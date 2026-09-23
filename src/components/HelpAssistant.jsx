@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { submitSupportTicket, getOrders } from '../api';
-import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER } from '../assistant/knowledge';
+import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../assistant/knowledge';
 
 // Floating "Help" chat for logged-in customers. Entirely rule-based
 // (see assistant/knowledge.js) — nothing is sent anywhere except when
@@ -269,6 +269,13 @@ export default function HelpAssistant() {
                 style={{ ...chip, padding: '8px 12px', textDecoration: 'none' }}
               >
                 WhatsApp
+              </a>
+              <a
+                href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('ZappiPay support')}&body=${encodeURIComponent(ticketText)}`}
+                className="btn-secondary btn"
+                style={{ ...chip, padding: '8px 12px', textDecoration: 'none' }}
+              >
+                Email
               </a>
             </div>
           </form>
