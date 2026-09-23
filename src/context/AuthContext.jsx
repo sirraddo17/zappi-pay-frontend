@@ -19,8 +19,8 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
-  async function login(phone, password) {
-    const data = await apiLogin({ phone, password });
+  async function login(identifier, password) {
+    const data = await apiLogin({ identifier, password });
     localStorage.setItem('zappipay_customer_token', data.token);
     setCustomer(data.customer);
   }
