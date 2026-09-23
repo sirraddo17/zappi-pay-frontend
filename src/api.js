@@ -39,6 +39,8 @@ export const login = (data) => request('/api/auth/login', { method: 'POST', body
 export const getMe = () => request('/api/auth/me');
 export const updateMe = (data) => request('/api/auth/me', { method: 'PATCH', body: JSON.stringify(data) });
 export const changePassword = (data) => request('/api/auth/password', { method: 'PATCH', body: JSON.stringify(data) });
+export const forgotPassword = (data) => request('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) });
+export const resetPassword = (data) => request('/api/auth/reset-password', { method: 'POST', body: JSON.stringify(data) });
 
 // --- Wallet ---
 export const getWalletBalance = () => request('/api/wallet/balance');
@@ -97,6 +99,7 @@ export const updateSettings = (data) => adminRequest('/api/admin/settings', { me
 // --- Admin: customers ---
 export const getCustomers = () => adminRequest('/api/admin/customers');
 export const getCustomerDetail = (id) => adminRequest(`/api/admin/customers/${id}`);
+export const adminResetCustomerPassword = (id) => adminRequest(`/api/admin/customers/${id}/reset-password`, { method: 'POST' });
 export const setCustomerActive = (id, active) =>
   adminRequest(`/api/admin/customers/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) });
 

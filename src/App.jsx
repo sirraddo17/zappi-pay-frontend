@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext';
 
@@ -15,6 +15,9 @@ import Transfer from './pages/Transfer';
 import Profile from './pages/Profile';
 import AirtimeCash from './pages/AirtimeCash';
 import HelpAssistant from './components/HelpAssistant';
+import ChangePassword from './pages/ChangePassword';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -31,8 +34,14 @@ import AdminAirtimeCash from './pages/admin/AdminAirtimeCash';
 
 function RequireCustomer({ children }) {
   const { customer, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <div className="page-loading">Loading…</div>;
   if (!customer) return <Navigate to="/login" replace />;
+  // After support issues a temporary password, nothing else in the
+  // app is reachable until the customer sets their own.
+  if (customer.mustChangePassword && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
+  }
   return children;
 }
 
@@ -50,6 +59,9 @@ export default function App() {
           {/* Customer */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/change-password" element={<RequireCustomer><ChangePassword /></RequireCustomer>} />
           <Route path="/" element={<RequireCustomer><Dashboard /></RequireCustomer>} />
           <Route path="/buy/:service" element={<RequireCustomer><Buy /></RequireCustomer>} />
           <Route path="/wallet" element={<RequireCustomer><Wallet /></RequireCustomer>} />
