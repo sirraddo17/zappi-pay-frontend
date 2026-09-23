@@ -124,6 +124,12 @@ export default function OrderDetail() {
             <span style={{ color: 'var(--slate-400)' }}>Recipient</span>
             <span>{order.recipient}</span>
           </div>
+          {Number(order.discountAmount) > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--slate-400)' }}>Discount</span>
+              <span style={{ color: 'var(--green-500)' }}>−{fmtMoney(order.discountAmount)}</span>
+            </div>
+          )}
           {order.recipientName && (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--slate-400)' }}>Name</span>

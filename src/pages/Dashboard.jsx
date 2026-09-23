@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getWalletBalance, getWalletTransactions, getNotifications } from '../api';
+import { getWalletBalance, getWalletTransactions, getNotifications, getPricing } from '../api';
 import BottomNav from '../components/BottomNav';
 import { LogoIcon, Wordmark } from '../components/Logo';
 import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon } from '../components/Icons';
 
 const SERVICES = [
-  { slug: 'airtime', label: 'Airtime', Icon: PhoneIcon, bg: '#863bff' },
-  { slug: 'data', label: 'Data', Icon: WifiIcon, bg: '#7a5a10' },
-  { slug: 'electricity', label: 'Electricity', Icon: BoltIcon, bg: '#1f6b4a' },
-  { slug: 'cable', label: 'Cable TV', Icon: TvIcon, bg: '#2955a3' },
-  { slug: 'education', label: 'Education', Icon: CapIcon, bg: '#8c2f4a' },
+  { slug: 'airtime', service: 'AIRTIME', label: 'Airtime', Icon: PhoneIcon, bg: '#863bff' },
+  { slug: 'data', service: 'DATA', label: 'Data', Icon: WifiIcon, bg: '#7a5a10' },
+  { slug: 'electricity', service: 'ELECTRICITY', label: 'Electricity', Icon: BoltIcon, bg: '#1f6b4a' },
+  { slug: 'cable', service: 'CABLE', label: 'Cable TV', Icon: TvIcon, bg: '#2955a3' },
+  { slug: 'education', service: 'EDUCATION', label: 'Education', Icon: CapIcon, bg: '#8c2f4a' },
   { slug: 'transfer', label: 'Send Money', Icon: BuildingIcon, bg: '#1a7a72' },
-  { slug: 'internet', label: 'Internet', Icon: GlobeIcon, bg: '#c2540f' },
-  { slug: 'betting', label: 'Bet Funding', Icon: TrophyIcon, bg: '#a38a0a' },
+  { slug: 'internet', service: 'INTERNET', label: 'Internet', Icon: GlobeIcon, bg: '#c2540f' },
+  { slug: 'betting', service: 'BETTING', label: 'Bet Funding', Icon: TrophyIcon, bg: '#a38a0a' },
 ];
 
 function fmtTxDate(d) {
@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [balance, setBalance] = useState(customer?.walletBalance ?? 0);
   const [transactions, setTransactions] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [discounts, setDiscounts] = useState({});
 
   useEffect(() => {
     getWalletBalance()
@@ -51,6 +52,9 @@ export default function Dashboard() {
       .catch(() => setTransactions([]));
     getNotifications()
       .then((data) => setUnreadCount(data.unreadCount || 0))
+      .catch(() => {});
+    getPricing()
+      .then((data) => setDiscounts(data.discountPercentByService || {}))
       .catch(() => {});
   }, []);
 
@@ -97,8 +101,27 @@ export default function Dashboard() {
       <div className="service-grid">
         {SERVICES.map((s) => {
           const Icon = s.Icon;
+          const off = s.service ? Number(discounts[s.service] || 0) : 0;
           return (
-            <Link key={s.slug} to={s.slug === 'transfer' ? '/transfer' : s.comingSoon ? '#' : `/buy/${s.slug}`} className="service-tile">
+            <Link key={s.slug} to={s.slug === 'transfer' ? '/transfer' : s.comingSoon ? '#' : `/buy/${s.slug}`} className="service-tile" style={{ position: 'relative' }}>
+              {off > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 4,
+                    background: 'var(--gold)',
+                    color: '#1a0b3d',
+                    fontSize: 9,
+                    fontWeight: 800,
+                    padding: '2px 5px',
+                    borderRadius: 6,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {off}% OFF
+                </span>
+              )}
               <div className="service-icon" style={{ background: s.bg }}>
                 <Icon size={22} color="#fff" />
               </div>

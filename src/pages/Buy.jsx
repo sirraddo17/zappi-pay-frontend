@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase } from '../api';
+import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing } from '../api';
 
 // Maps the URL slug to what the backend Order.service enum expects, the
 // VTpass category identifier used to fetch that service's provider list,
@@ -83,6 +83,22 @@ const SERVICE_CONFIG = {
   },
 };
 
+// Display-only mirror of computePrice() in the backend's
+// lib/pricing.js: VTpass price + markup, then minus any discount,
+// rounded to whole naira at each step. The backend recomputes this
+// itself on purchase, so this only has to match, not be trusted.
+function priceFor(base, service, pricing) {
+  const markup = Number(pricing?.markupPercentByService?.[service] || 0);
+  const discountPct = Math.min(100, Math.max(0, Number(pricing?.discountPercentByService?.[service] || 0)));
+  const markedUp = Math.round(Number(base || 0) * (1 + markup / 100));
+  const discount = Math.round(markedUp * (discountPct / 100));
+  return { markedUp, discount, discountPct, total: Math.max(0, markedUp - discount) };
+}
+
+function naira(n) {
+  return `₦${Number(n).toLocaleString()}`;
+}
+
 export default function Buy() {
   const { service: slug } = useParams();
   const navigate = useNavigate();
@@ -109,6 +125,11 @@ export default function Buy() {
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [pricing, setPricing] = useState(null);
+
+  useEffect(() => {
+    getPricing().then(setPricing).catch(() => setPricing(null));
+  }, []);
 
   useEffect(() => {
     if (!config) return;
@@ -147,6 +168,10 @@ export default function Buy() {
 
   const selectedVariation = variations.find((v) => v.variation_code === variationCode);
   const amount = config?.needsVariation ? Number(selectedVariation?.variation_amount || 0) : Number(customAmount || 0);
+  // amount stays VTpass's own price (what the backend expects to
+  // receive); price.total is what the wallet will actually be charged.
+  const price = priceFor(amount, config?.backendService, pricing);
+  const discountPct = price.discountPct;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -203,6 +228,15 @@ export default function Buy() {
         <p>Pay from your wallet balance</p>
       </div>
 
+      {discountPct > 0 && (
+        <div
+          className="card"
+          style={{ background: 'rgba(255,184,48,0.12)', border: '1px solid var(--gold)', padding: '10px 14px', fontSize: 14, fontWeight: 600 }}
+        >
+          🎉 {discountPct}% off all {config.label} purchases right now — applied automatically.
+        </div>
+      )}
+
       {error && <p className="error-text">{error}</p>}
 
       <form className="card" onSubmit={handleSubmit}>
@@ -257,7 +291,7 @@ export default function Buy() {
               <option value="">Select…</option>
               {variations.map((v) => (
                 <option key={v.variation_code} value={v.variation_code}>
-                  {v.name} — ₦{Number(v.variation_amount).toLocaleString()}
+                  {v.name} — {naira(priceFor(v.variation_amount, config.backendService, pricing).total)}
                 </option>
               ))}
             </select>
@@ -271,11 +305,28 @@ export default function Buy() {
 
         
         {amount > 0 && (
-          <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 12px' }}>Total: ₦{amount.toLocaleString()}</p>
+          <div style={{ margin: '0 0 12px' }}>
+            {price.discount > 0 && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--slate-400)' }}>
+                  <span>Price</span>
+                  <span style={{ textDecoration: 'line-through' }}>{naira(price.markedUp)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--green-500)', margin: '4px 0' }}>
+                  <span>Discount ({discountPct}%)</span>
+                  <span>−{naira(price.discount)}</span>
+                </div>
+              </>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 16 }}>
+              <span>Total</span>
+              <span>{naira(price.total)}</span>
+            </div>
+          </div>
         )}
 
         <button className="btn" type="submit" disabled={submitting || !amount}>
-          {submitting ? 'Processing…' : `Pay ₦${amount.toLocaleString()}`}
+          {submitting ? 'Processing…' : `Pay ${naira(price.total)}`}
         </button>
       </form>
     </div>
