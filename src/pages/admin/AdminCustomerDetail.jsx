@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getCustomerDetail, adjustWallet } from '../../api';
+import { getCustomerDetail, adjustWallet, adminResetCustomerPassword } from '../../api';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -31,6 +31,12 @@ export default function AdminCustomerDetail() {
   const [adjustSubmitting, setAdjustSubmitting] = useState(false);
   const [adjustError, setAdjustError] = useState('');
 
+  const [resetConfirming, setResetConfirming] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetResult, setResetResult] = useState(null);
+  const [resetError, setResetError] = useState('');
+  const [copied, setCopied] = useState(false);
+
   function load() {
     getCustomerDetail(id)
       .then(setData)
@@ -52,6 +58,31 @@ export default function AdminCustomerDetail() {
       setAdjustError(err.message || 'Could not adjust wallet.');
     } finally {
       setAdjustSubmitting(false);
+    }
+  }
+
+  async function handleResetPassword() {
+    setResetting(true);
+    setResetError('');
+    try {
+      const result = await adminResetCustomerPassword(id);
+      setResetResult(result);
+      setResetConfirming(false);
+      load();
+    } catch (err) {
+      setResetError(err.message || 'Could not reset password.');
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  async function copyTemp() {
+    try {
+      await navigator.clipboard.writeText(resetResult.temporaryPassword);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setResetError('Could not copy — select the password and copy it manually.');
     }
   }
 
@@ -85,6 +116,82 @@ export default function AdminCustomerDetail() {
       <div className="card stat-card" style={{ margin: '0 0 16px', maxWidth: 260 }}>
         <div className="label">Wallet Balance</div>
         <div className="value">{fmtMoney(customer.walletBalance)}</div>
+      </div>
+
+      <div className="card" style={{ margin: '0 0 16px', maxWidth: 400 }}>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>Reset Password</h2>
+        <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: '0 0 12px' }}>
+          For customers who forgot their password. This creates a temporary password (valid 24 hours) and the customer must choose a new
+          one as soon as they log in. Confirm it's really the account owner first — e.g. they're messaging from the registered number{' '}
+          {customer.phone}.
+        </p>
+        {customer.mustChangePassword && !resetResult && (
+          <p style={{ color: 'var(--orange)', fontSize: 13, margin: '0 0 12px' }}>
+            A temporary password is active
+            {customer.tempPasswordExpiresAt ? ` until ${fmtDate(customer.tempPasswordExpiresAt)}` : ''} — the customer hasn't set a new
+            password yet.
+          </p>
+        )}
+        {resetError && <p className="error-text" style={{ margin: '0 0 12px' }}>{resetError}</p>}
+
+        {resetResult ? (
+          <div>
+            <p style={{ fontSize: 13, margin: '0 0 6px' }}>Give this temporary password to the customer. It won't be shown again:</p>
+            <div
+              style={{
+                fontFamily: 'monospace',
+                fontSize: 20,
+                fontWeight: 700,
+                letterSpacing: 1,
+                background: 'var(--slate-900)',
+                borderRadius: 8,
+                padding: '10px 12px',
+                marginBottom: 8,
+                userSelect: 'all',
+              }}
+            >
+              {resetResult.temporaryPassword}
+            </div>
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 10px' }}>Expires {fmtDate(resetResult.expiresAt)}.</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button className="btn" type="button" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} onClick={copyTemp}>
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+              <a
+                className="btn-secondary btn"
+                style={{ width: 'auto', padding: '8px 14px', fontSize: 13, textDecoration: 'none' }}
+                target="_blank"
+                rel="noopener noreferrer"
+                href={`https://wa.me/${'234' + String(customer.phone).replace(/^0/, '')}?text=${encodeURIComponent(
+                  `Hello ${customer.name.split(' ')[0]}, your ZappiPay temporary password is: ${resetResult.temporaryPassword}\n\nLog in with your phone number or username and this password — you'll be asked to create a new password straight away. It expires in 24 hours. Never share your password with anyone.`
+                )}`}
+              >
+                Send via WhatsApp
+              </a>
+              <button className="btn-secondary btn" type="button" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} onClick={() => setResetResult(null)}>
+                Done
+              </button>
+            </div>
+          </div>
+        ) : !resetConfirming ? (
+          <button className="btn-secondary btn" type="button" onClick={() => setResetConfirming(true)}>
+            Reset Password
+          </button>
+        ) : (
+          <div>
+            <p style={{ fontSize: 14, margin: '0 0 10px' }}>
+              Reset {customer.name}'s password? Their current password will stop working immediately.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn" type="button" disabled={resetting} onClick={handleResetPassword}>
+                {resetting ? 'Resetting…' : 'Yes, reset'}
+              </button>
+              <button className="btn-secondary btn" type="button" disabled={resetting} onClick={() => setResetConfirming(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <form className="card" style={{ margin: '0 0 16px', maxWidth: 400 }} onSubmit={handleAdjustSubmit}>
