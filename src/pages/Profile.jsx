@@ -218,6 +218,12 @@ export default function Profile() {
                   {t.status === 'RESOLVED' ? 'Solved' : 'Open'}
                 </span>
               </div>
+              {t.adminReply && (
+                <div style={{ marginTop: 8, padding: '8px 10px', background: 'var(--slate-900)', borderRadius: 8, borderLeft: '3px solid var(--purple)', whiteSpace: 'pre-wrap', fontSize: 13 }}>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>ZappiPay Support replied:</div>
+                  {t.adminReply}
+                </div>
+              )}
             </div>
           ))
         )}
