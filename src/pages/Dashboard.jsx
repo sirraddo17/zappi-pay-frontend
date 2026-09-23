@@ -12,7 +12,7 @@ const SERVICES = [
   { slug: 'electricity', label: 'Electricity', Icon: BoltIcon, bg: '#1f6b4a' },
   { slug: 'cable', label: 'Cable TV', Icon: TvIcon, bg: '#2955a3' },
   { slug: 'education', label: 'Education', Icon: CapIcon, bg: '#8c2f4a' },
-  { slug: 'transfer', label: 'Transfer', Icon: BuildingIcon, bg: '#1a7a72', comingSoon: true },
+  { slug: 'transfer', label: 'Send Money', Icon: BuildingIcon, bg: '#1a7a72' },
   { slug: 'internet', label: 'Internet', Icon: GlobeIcon, bg: '#c2540f' },
   { slug: 'betting', label: 'Bet Funding', Icon: TrophyIcon, bg: '#a38a0a' },
 ];
@@ -98,7 +98,7 @@ export default function Dashboard() {
         {SERVICES.map((s) => {
           const Icon = s.Icon;
           return (
-            <Link key={s.slug} to={s.comingSoon ? '#' : `/buy/${s.slug}`} className="service-tile">
+            <Link key={s.slug} to={s.slug === 'transfer' ? '/transfer' : s.comingSoon ? '#' : `/buy/${s.slug}`} className="service-tile">
               <div className="service-icon" style={{ background: s.bg }}>
                 <Icon size={22} color="#fff" />
               </div>
