@@ -8,7 +8,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [phone, setPhone] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -18,7 +18,7 @@ export default function Login() {
     setError('');
     setSubmitting(true);
     try {
-      await login(phone.trim(), password);
+      await login(identifier.trim(), password);
       navigate('/');
     } catch (err) {
       setError(err.message || 'Could not log in.');
@@ -41,8 +41,8 @@ export default function Login() {
 
       <form className="card" onSubmit={handleSubmit}>
         <div className="field">
-          <label htmlFor="phone">Phone number</label>
-          <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+          <label htmlFor="identifier">Phone number or username</label>
+          <input id="identifier" type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>
