@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { updateMe, changePassword, getSupportTickets } from '../api';
 import PasswordField from '../components/PasswordField';
@@ -193,7 +193,7 @@ export default function Profile() {
       <div className="card" style={{ margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Support</h2>
         <a
-          href="https://wa.me/2348134209037"
+          href={`https://wa.me/2348134209037?text=${encodeURIComponent('Hello ZappiPay, I need help with')}`}
           target="_blank"
           rel="noopener noreferrer"
           className="btn-secondary btn"
@@ -217,6 +217,25 @@ export default function Profile() {
             </div>
           ))
         )}
+      </div>
+
+      <div className="card" style={{ margin: '0 0 16px' }}>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>About the App</h2>
+        {[
+          ['about', 'About Us'],
+          ['how-it-works', 'How It Works'],
+          ['terms', 'Terms & Conditions'],
+          ['privacy', 'Privacy Policy'],
+          ['contact', 'Contact Us'],
+        ].map(([slug, label]) => (
+          <Link
+            key={slug}
+            to={`/legal/${slug}`}
+            style={{ display: 'block', padding: '10px 0', color: 'var(--slate-100, #f1f5f9)', textDecoration: 'none', borderBottom: '1px solid var(--slate-700)' }}
+          >
+            {label}
+          </Link>
+        ))}
       </div>
 
       <button className="btn-secondary btn" type="button" onClick={handleLogout}>
