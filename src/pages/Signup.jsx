@@ -65,6 +65,7 @@ export default function Signup() {
         <div className="field">
           <label htmlFor="email">Email (optional)</label>
           <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 0' }}>Add one so you can reset your password by email if you forget it.</p>
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>

@@ -51,6 +51,9 @@ export default function Login() {
         <button className="btn" type="submit" disabled={submitting}>
           {submitting ? 'Logging in…' : 'Log In'}
         </button>
+        <p style={{ textAlign: 'center', margin: '12px 0 0', fontSize: 14 }}>
+          <Link to="/forgot-password" style={{ color: 'var(--slate-400)' }}>Forgot password?</Link>
+        </p>
       </form>
 
       <p style={{ textAlign: 'center', color: 'var(--slate-400)', fontSize: 14 }}>
