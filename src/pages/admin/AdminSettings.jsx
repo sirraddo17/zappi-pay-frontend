@@ -3,7 +3,11 @@ import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
 import { getSettings, updateSettings, changeAdminPassword } from '../../api';
 
-const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION'];
+const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
+
+function serviceLabel(s) {
+  return s.charAt(0) + s.slice(1).toLowerCase();
+}
 
 export default function AdminSettings() {
   const [vtpassMode, setVtpassMode] = useState('sandbox');
@@ -11,6 +15,9 @@ export default function AdminSettings() {
   const [vtpassSecretKey, setVtpassSecretKey] = useState('');
   const [vtpassPublicKey, setVtpassPublicKey] = useState('');
   const [markupByService, setMarkupByService] = useState(
+    Object.fromEntries(SERVICES.map((s) => [s, '0']))
+  );
+  const [discountByService, setDiscountByService] = useState(
     Object.fromEntries(SERVICES.map((s) => [s, '0']))
   );
   const [minFundingAmount, setMinFundingAmount] = useState('100');
@@ -36,6 +43,8 @@ export default function AdminSettings() {
         setVtpassPublicKey(s.vtpassPublicKey || '');
         const stored = s.markupPercentByService || {};
         setMarkupByService(Object.fromEntries(SERVICES.map((svc) => [svc, String(stored[svc] ?? 0)])));
+        const storedDiscount = s.discountPercentByService || {};
+        setDiscountByService(Object.fromEntries(SERVICES.map((svc) => [svc, String(storedDiscount[svc] ?? 0)])));
         setMinFundingAmount(String(s.minFundingAmount ?? 100));
         setMinPurchaseAmount(String(s.minPurchaseAmount ?? 50));
       })
@@ -45,6 +54,10 @@ export default function AdminSettings() {
 
   function setMarkupFor(service, value) {
     setMarkupByService((prev) => ({ ...prev, [service]: value }));
+  }
+
+  function setDiscountFor(service, value) {
+    setDiscountByService((prev) => ({ ...prev, [service]: value }));
   }
 
   async function handlePasswordChange(e) {
@@ -68,6 +81,14 @@ export default function AdminSettings() {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
+    const badDiscount = SERVICES.find((svc) => {
+      const n = Number(discountByService[svc] || 0);
+      return !Number.isFinite(n) || n < 0 || n > 100;
+    });
+    if (badDiscount) {
+      setError(`Discount for ${serviceLabel(badDiscount)} must be between 0 and 100.`);
+      return;
+    }
     setSaving(true);
     try {
       await updateSettings({
@@ -77,6 +98,9 @@ export default function AdminSettings() {
         vtpassPublicKey,
         markupPercentByService: Object.fromEntries(
           SERVICES.map((svc) => [svc, Number(markupByService[svc] || 0)])
+        ),
+        discountPercentByService: Object.fromEntries(
+          SERVICES.map((svc) => [svc, Number(discountByService[svc] || 0)])
         ),
         minFundingAmount: Number(minFundingAmount || 0),
         minPurchaseAmount: Number(minPurchaseAmount || 0),
@@ -134,7 +158,7 @@ export default function AdminSettings() {
         </p>
         {SERVICES.map((service) => (
           <div className="field" key={service}>
-            <label htmlFor={`markup-${service}`}>{service.charAt(0) + service.slice(1).toLowerCase()}</label>
+            <label htmlFor={`markup-${service}`}>{serviceLabel(service)}</label>
             <input
               id={`markup-${service}`}
               type="number"
@@ -145,6 +169,38 @@ export default function AdminSettings() {
             />
           </div>
         ))}
+
+        <h2 style={{ fontSize: 15, marginBottom: 4 }}>Discount per service (%)</h2>
+        <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 0, marginBottom: 12 }}>
+          Taken off the marked-up price automatically on every purchase of that service. Customers see a
+          "% OFF" badge on the dashboard and the discounted total before paying. Set to 0 to end a discount.
+        </p>
+        {SERVICES.map((service) => {
+          const markup = Number(markupByService[service] || 0);
+          const discount = Number(discountByService[service] || 0);
+          // Net effect on ₦100 of VTpass price — below 100 means this
+          // service is now being sold under what VTpass charges us.
+          const net = Math.round(100 * (1 + markup / 100)) * (1 - discount / 100);
+          return (
+            <div className="field" key={service}>
+              <label htmlFor={`discount-${service}`}>{serviceLabel(service)}</label>
+              <input
+                id={`discount-${service}`}
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                value={discountByService[service]}
+                onChange={(e) => setDiscountFor(service, e.target.value)}
+              />
+              {discount > 0 && net < 100 && (
+                <p style={{ color: 'var(--orange)', fontSize: 12, margin: '4px 0 0' }}>
+                  Heads up: this discount is bigger than the markup, so {serviceLabel(service)} sells below VTpass cost.
+                </p>
+              )}
+            </div>
+          );
+        })}
 
         <div className="field">
           <label htmlFor="minFundingAmount">Minimum funding amount (₦)</label>
