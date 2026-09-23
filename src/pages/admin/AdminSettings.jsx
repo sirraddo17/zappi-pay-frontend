@@ -14,7 +14,15 @@ const TABS = [
   { key: 'markup', label: 'Markup' },
   { key: 'discount', label: 'Discounts' },
   { key: 'limits', label: 'Limits' },
+  { key: 'airtimeCash', label: 'Airtime to Cash' },
   { key: 'password', label: 'My Password' },
+];
+
+const A2C_NETWORKS = [
+  { key: 'mtn', label: 'MTN' },
+  { key: 'glo', label: 'Glo' },
+  { key: 'airtel', label: 'Airtel' },
+  { key: 'etisalat', label: '9mobile' },
 ];
 
 function serviceLabel(s) {
@@ -58,6 +66,11 @@ export default function AdminSettings() {
   const [minFundingAmount, setMinFundingAmount] = useState('100');
   const [minPurchaseAmount, setMinPurchaseAmount] = useState('50');
 
+  const [a2cEnabled, setA2cEnabled] = useState(false);
+  const [a2cFee, setA2cFee] = useState('20');
+  const [a2cMin, setA2cMin] = useState('500');
+  const [a2cNumbers, setA2cNumbers] = useState({});
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -78,6 +91,10 @@ export default function AdminSettings() {
         setDiscountByService(toServiceMap(s.discountPercentByService));
         setMinFundingAmount(String(s.minFundingAmount ?? 100));
         setMinPurchaseAmount(String(s.minPurchaseAmount ?? 50));
+        setA2cEnabled(Boolean(s.airtimeToCashEnabled));
+        setA2cFee(String(s.airtimeToCashFeePercent ?? 20));
+        setA2cMin(String(s.airtimeToCashMinAmount ?? 500));
+        setA2cNumbers(s.airtimeToCashNumbers || {});
       })
       .catch((err) => setLoadError(err.message))
       .finally(() => setLoading(false));
@@ -125,6 +142,30 @@ export default function AdminSettings() {
       'limits',
       { minFundingAmount: Number(minFundingAmount || 0), minPurchaseAmount: Number(minPurchaseAmount || 0) },
       'Limits saved.'
+    );
+  }
+
+  function saveAirtimeCash(e) {
+    e.preventDefault();
+    const fee = Number(a2cFee || 0);
+    if (!Number.isFinite(fee) || fee < 0 || fee >= 100) {
+      setStatus((prev) => ({ ...prev, airtimeCash: { error: 'Fee must be at least 0 and below 100.' } }));
+      return;
+    }
+    const hasNumber = A2C_NETWORKS.some((n) => String(a2cNumbers[n.key] || '').trim());
+    if (a2cEnabled && !hasNumber) {
+      setStatus((prev) => ({ ...prev, airtimeCash: { error: 'Add at least one receiving number before turning this on.' } }));
+      return;
+    }
+    save(
+      'airtimeCash',
+      {
+        airtimeToCashEnabled: a2cEnabled,
+        airtimeToCashFeePercent: fee,
+        airtimeToCashMinAmount: Number(a2cMin || 0),
+        airtimeToCashNumbers: Object.fromEntries(A2C_NETWORKS.map((n) => [n.key, String(a2cNumbers[n.key] || '').trim()])),
+      },
+      'Airtime to Cash settings saved.'
     );
   }
 
@@ -278,6 +319,47 @@ export default function AdminSettings() {
             <input id="minPurchaseAmount" type="number" step="1" min="0" value={minPurchaseAmount} onChange={(e) => setMinPurchaseAmount(e.target.value)} />
           </div>
           {saveButton('limits', 'Save Limits')}
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'airtimeCash' && (
+        <form className="card" style={cardStyle} onSubmit={saveAirtimeCash}>
+          <SectionHeader
+            title="Airtime to Cash"
+            hint="Customers transfer airtime to your line for that network, then you approve it in Admin → Airtime to Cash and their wallet is credited minus the fee. Only networks with a number filled in can be chosen."
+          />
+          <Status state={status.airtimeCash} />
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, marginBottom: 16, cursor: 'pointer' }}>
+            <input type="checkbox" checked={a2cEnabled} onChange={(e) => setA2cEnabled(e.target.checked)} style={{ width: 'auto' }} />
+            Accept Airtime to Cash requests
+          </label>
+          <div className="field">
+            <label htmlFor="a2cFee">Service fee (%)</label>
+            <input id="a2cFee" type="number" step="0.1" min="0" max="99" value={a2cFee} onChange={(e) => setA2cFee(e.target.value)} />
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 0' }}>
+              e.g. at {Number(a2cFee || 0)}%, ₦1,000 airtime pays out ₦{Math.floor(1000 * (1 - Number(a2cFee || 0) / 100)).toLocaleString()}.
+            </p>
+          </div>
+          <div className="field">
+            <label htmlFor="a2cMin">Minimum airtime amount (₦)</label>
+            <input id="a2cMin" type="number" step="1" min="0" value={a2cMin} onChange={(e) => setA2cMin(e.target.value)} />
+          </div>
+          <h3 style={{ fontSize: 14, margin: '4px 0 8px' }}>Receiving numbers</h3>
+          {A2C_NETWORKS.map((n) => (
+            <div className="field" key={n.key}>
+              <label htmlFor={`a2c-${n.key}`}>{n.label}</label>
+              <input
+                id={`a2c-${n.key}`}
+                type="tel"
+                inputMode="numeric"
+                maxLength={11}
+                value={a2cNumbers[n.key] || ''}
+                onChange={(e) => setA2cNumbers((prev) => ({ ...prev, [n.key]: e.target.value }))}
+                placeholder="Leave blank to not accept this network"
+              />
+            </div>
+          ))}
+          {saveButton('airtimeCash', 'Save Airtime to Cash')}
         </form>
       )}
 
