@@ -8,7 +8,7 @@ import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER } from '../assis
 // (see assistant/knowledge.js) — nothing is sent anywhere except when
 // the customer chooses to open a support ticket, which goes through
 // the normal support ticket API. Hidden on admin, auth and legal pages.
-const HIDDEN_PREFIXES = ['/admin', '/login', '/signup', '/legal'];
+const HIDDEN_PREFIXES = ['/admin', '/login', '/signup', '/legal', '/forgot-password', '/reset-password', '/change-password'];
 
 function botText(text, extra = {}) {
   return { from: 'bot', text, ...extra };
