@@ -16,7 +16,7 @@ export const TOPICS = [
     title: 'Fund my wallet',
     keywords: ['fund', 'deposit', 'add money', 'top up wallet', 'topup', 'credit wallet', 'load wallet', 'pay in', 'transfer to wallet'],
     answer:
-      'To fund your wallet: go to Wallet, transfer to our account, then submit the amount and your transfer reference. An admin confirms it and your balance updates — you get a notification once it is approved.',
+      'To fund your wallet: go to Wallet and get your personal account number (a one-time step with your BVN or NIN). Any bank transfer to that account is added to your wallet automatically, usually within a minute. You can also send to our business account and submit the reference for an admin to approve.',
     actions: [{ label: 'Go to Wallet', to: '/wallet' }],
   },
   {
@@ -24,7 +24,7 @@ export const TOPICS = [
     title: 'Funding not credited',
     keywords: ['not credited', 'funding pending', 'wallet not updated', 'money not reflect', 'not reflecting', 'balance not', 'still pending', 'fund not', 'funded but', 'sent money but'],
     answer:
-      'Funding requests are checked manually against our bank alerts, so it can take a little while. Make sure you entered the correct amount and transfer reference. If it has been a long time, talk to support and include the reference.',
+      'Transfers to your personal account number are usually credited within a minute — on the Wallet page, tap "I\'ve sent money — check now". Manual funding requests are checked against our bank alerts, so they can take a little while. If it has been a long time, talk to support and include the transfer reference.',
     actions: [{ label: 'Check Wallet', to: '/wallet' }],
     escalate: true,
   },

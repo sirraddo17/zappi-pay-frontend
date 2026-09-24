@@ -124,6 +124,11 @@ export default function AdminCustomerDetail() {
             </>
           )}
         </p>
+        <p style={{ marginTop: 4 }}>
+          {Array.isArray(customer.bankAccounts) && customer.bankAccounts.length > 0
+            ? `Funding account${customer.bankAccounts.length > 1 ? 's' : ''}: ${customer.bankAccounts.map((a) => `${a.bankName} ${a.accountNumber}`).join(', ')} · verified with ${customer.kycType || 'ID'}`
+            : 'No funding account number yet'}
+        </p>
       </div>
 
       <div className="card stat-card" style={{ margin: '0 0 16px', maxWidth: 260 }}>

@@ -66,6 +66,8 @@ export default function AdminSettings() {
   const [discountByService, setDiscountByService] = useState(toServiceMap({}));
   const [minFundingAmount, setMinFundingAmount] = useState('100');
   const [minPurchaseAmount, setMinPurchaseAmount] = useState('50');
+  const [bankFeePercent, setBankFeePercent] = useState('0');
+  const [bankFeeCap, setBankFeeCap] = useState('0');
 
   const [a2cEnabled, setA2cEnabled] = useState(false);
   const [a2cFee, setA2cFee] = useState('20');
@@ -96,6 +98,8 @@ export default function AdminSettings() {
         setDiscountByService(toServiceMap(s.discountPercentByService));
         setMinFundingAmount(String(s.minFundingAmount ?? 100));
         setMinPurchaseAmount(String(s.minPurchaseAmount ?? 50));
+        setBankFeePercent(String(s.bankFundingFeePercent ?? 0));
+        setBankFeeCap(String(s.bankFundingFeeCap ?? 0));
         setA2cEnabled(Boolean(s.airtimeToCashEnabled));
         setA2cFee(String(s.airtimeToCashFeePercent ?? 20));
         setA2cMin(String(s.airtimeToCashMinAmount ?? 500));
@@ -148,7 +152,12 @@ export default function AdminSettings() {
     e.preventDefault();
     save(
       'limits',
-      { minFundingAmount: Number(minFundingAmount || 0), minPurchaseAmount: Number(minPurchaseAmount || 0) },
+      {
+        minFundingAmount: Number(minFundingAmount || 0),
+        minPurchaseAmount: Number(minPurchaseAmount || 0),
+        bankFundingFeePercent: Number(bankFeePercent || 0),
+        bankFundingFeeCap: Number(bankFeeCap || 0),
+      },
       'Limits saved.'
     );
   }
@@ -331,7 +340,7 @@ export default function AdminSettings() {
 
       {!loading && !loadError && tab === 'limits' && (
         <form className="card" style={cardStyle} onSubmit={saveLimits}>
-          <SectionHeader title="Limits" hint="Smallest amounts customers can fund or spend." />
+          <SectionHeader title="Limits & fees" hint="Smallest amounts customers can fund or spend, and the fee on automatic bank transfer funding." />
           <Status state={status.limits} />
           <div className="field">
             <label htmlFor="minFundingAmount">Minimum funding amount (₦)</label>
@@ -340,6 +349,16 @@ export default function AdminSettings() {
           <div className="field">
             <label htmlFor="minPurchaseAmount">Minimum purchase amount (₦)</label>
             <input id="minPurchaseAmount" type="number" step="1" min="0" value={minPurchaseAmount} onChange={(e) => setMinPurchaseAmount(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="bankFeePercent">Bank transfer funding fee (%)</label>
+            <input id="bankFeePercent" type="number" step="0.01" min="0" max="10" value={bankFeePercent} onChange={(e) => setBankFeePercent(e.target.value)} />
+            <small style={{ color: 'var(--slate-400)' }}>Kept from money customers send to their personal account number. 0 = free.</small>
+          </div>
+          <div className="field">
+            <label htmlFor="bankFeeCap">Maximum fee per transfer (₦)</label>
+            <input id="bankFeeCap" type="number" step="1" min="0" value={bankFeeCap} onChange={(e) => setBankFeeCap(e.target.value)} />
+            <small style={{ color: 'var(--slate-400)' }}>0 = no maximum.</small>
           </div>
           {saveButton('limits', 'Save Limits')}
         </form>

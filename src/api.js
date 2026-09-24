@@ -145,6 +145,9 @@ export const getMyReferrals = () => request('/api/referrals');
 export const getWalletBalance = () => request('/api/wallet/balance');
 export const getWalletTransactions = () => request('/api/wallet/transactions');
 export const submitFundRequest = (data) => request('/api/wallet/fund-request', { method: 'POST', body: JSON.stringify(data) });
+export const getBankAccount = () => request('/api/wallet/bank-account');
+export const createBankAccount = (data) => request('/api/wallet/bank-account', { method: 'POST', body: JSON.stringify(data) });
+export const checkBankPayments = () => request('/api/wallet/bank-account/check', { method: 'POST' });
 
 // --- VTpass ---
 export const getVtpassCategories = () => request('/api/vtpass/categories');
