@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getCustomerDetail, adjustWallet, adminResetCustomerPassword } from '../../api';
+import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount } from '../../api';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -130,6 +130,34 @@ export default function AdminCustomerDetail() {
             : 'No funding account number yet'}
         </p>
       </div>
+
+      {customer.deletedAt ? (
+        <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--slate-600)' }}>This account was deleted on {new Date(customer.deletedAt).toLocaleString('en-NG')}.</div>
+      ) : customer.deletionRequestedAt && (
+        <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--red-500)' }}>
+          <strong>Customer asked to delete their account</strong> ({new Date(customer.deletionRequestedAt).toLocaleString('en-NG')})
+          {customer.deletionReason && <div style={{ fontSize: 13, color: 'var(--slate-400)', marginTop: 4 }}>Reason: {customer.deletionReason}</div>}
+          <p style={{ fontSize: 13, color: 'var(--slate-400)' }}>
+            Deleting wipes their name, phone, email and saved details, and closes the account. Their transaction records stay for your accounts. The wallet must be ₦0 first.
+          </p>
+          <button
+            type="button"
+            className="btn"
+            style={{ width: 'auto', background: 'var(--red-500)' }}
+            onClick={async () => {
+              if (window.prompt('Type DELETE to permanently close this account') !== 'DELETE') return;
+              try {
+                await deleteCustomerAccount(customer.id);
+                window.location.reload();
+              } catch (err) {
+                alert(err.message);
+              }
+            }}
+          >
+            Delete account
+          </button>
+        </div>
+      )}
 
       <div className="card stat-card" style={{ margin: '0 0 16px', maxWidth: 260 }}>
         <div className="label">Wallet Balance</div>

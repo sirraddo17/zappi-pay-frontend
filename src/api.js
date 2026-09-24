@@ -196,6 +196,13 @@ export const lookupBankAccount = (bankCode, accountNumber) =>
 export const sendBankTransfer = (data) => request('/api/wallet/bank-transfer', { method: 'POST', body: JSON.stringify(data) });
 export const getBankTransfers = () => request('/api/wallet/bank-transfers');
 export const getStatement = (from, to) => request(`/api/wallet/statement?from=${from}&to=${to}`);
+export const getAppInfo = () => request('/api/app/info');
+export const getMyLimits = () => request('/api/account/limits');
+export const updatePreferences = (data) => request('/api/account/preferences', { method: 'PATCH', body: JSON.stringify(data) });
+export const requestAccountDeletion = (data) => request('/api/account/delete-request', { method: 'POST', body: JSON.stringify(data) });
+export const cancelAccountDeletion = () => request('/api/account/delete-request', { method: 'DELETE' });
+export const checkPromo = (code, service, amount) =>
+  request(`/api/promo/check?code=${encodeURIComponent(code)}&service=${encodeURIComponent(service)}&amount=${encodeURIComponent(amount)}`);
 export const getAdminAnalytics = (days) => adminRequest(`/api/admin/analytics?days=${days}`);
 
 // --- Admin auth ---
@@ -233,6 +240,14 @@ export const checkBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers
 export const cancelBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers/${id}/cancel`, { method: 'POST' });
 export const getMonnifyOverview = (light) => adminRequest(`/api/admin/monnify/overview${light ? '?light=1' : ''}`);
 export const resetMonnifyAccounts = () => adminRequest('/api/admin/monnify/reset-accounts', { method: 'POST', body: JSON.stringify({ confirm: 'RESET' }) });
+export const getAdminPromos = () => adminRequest('/api/admin/promos');
+export const createPromo = (data) => adminRequest('/api/admin/promos', { method: 'POST', body: JSON.stringify(data) });
+export const updatePromo = (id, data) => adminRequest(`/api/admin/promos/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const getAdminNotices = () => adminRequest('/api/admin/notices');
+export const createNotice = (data) => adminRequest('/api/admin/notices', { method: 'POST', body: JSON.stringify(data) });
+export const setNoticeActive = (id, active) => adminRequest(`/api/admin/notices/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) });
+export const getDeletionRequests = () => adminRequest('/api/admin/deletion-requests');
+export const deleteCustomerAccount = (id) => adminRequest(`/api/admin/customers/${id}/delete-account`, { method: 'POST', body: JSON.stringify({ confirm: 'DELETE' }) });
 
 // --- Admin: staff management ---
 export const getAdmins = () => adminRequest('/api/admin/admins');

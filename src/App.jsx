@@ -39,6 +39,8 @@ import AdminStaff from './pages/admin/AdminStaff';
 import AdminBroadcasts from './pages/admin/AdminBroadcasts';
 import AdminAirtimeCash from './pages/admin/AdminAirtimeCash';
 import AdminBankTransfers from './pages/admin/AdminBankTransfers';
+import AdminPromos from './pages/admin/AdminPromos';
+import AdminNotices from './pages/admin/AdminNotices';
 
 function RequireCustomer({ children }) {
   const { customer, loading } = useAuth();
@@ -112,6 +114,8 @@ export default function App() {
           <Route path="/admin/broadcasts" element={<RequireAdmin><AdminBroadcasts /></RequireAdmin>} />
           <Route path="/admin/airtime-cash" element={<RequireAdmin><AdminAirtimeCash /></RequireAdmin>} />
           <Route path="/admin/bank-transfers" element={<RequireAdmin><AdminBankTransfers /></RequireAdmin>} />
+          <Route path="/admin/promos" element={<RequireAdmin><AdminPromos /></RequireAdmin>} />
+          <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

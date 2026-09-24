@@ -4,7 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { updateMe, changePassword, getSupportTickets } from '../api';
 import PasswordField from '../components/PasswordField';
 import BottomNav from '../components/BottomNav';
-import { SUPPORT_EMAIL } from '../assistant/knowledge';
+import { SUPPORT_EMAIL, WHATSAPP_NUMBER } from '../assistant/knowledge';
+import { useAppInfo } from '../components/ServiceNotices';
+import AccountExtras from '../components/AccountExtras';
 
 const MAX_AVATAR_BYTES = 1_500_000;
 
@@ -36,6 +38,7 @@ export default function Profile() {
       .catch(() => setTickets([]));
   }, []);
 
+  const appInfo = useAppInfo();
   const initial = (customer?.name || '?').charAt(0).toUpperCase();
 
   async function handleSave(e) {
@@ -241,7 +244,7 @@ export default function Profile() {
       <div className="card" style={{ margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Support</h2>
         <a
-          href={`https://wa.me/2348134209037?text=${encodeURIComponent('Hello ZappiPay, I need help with')}`}
+          href={`https://wa.me/${appInfo?.supportWhatsapp || WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello ZappiPay, I need help with')}`}
           target="_blank"
           rel="noopener noreferrer"
           className="btn-secondary btn"
@@ -298,6 +301,8 @@ export default function Profile() {
           </Link>
         ))}
       </div>
+
+      <AccountExtras />
 
       <button className="btn-secondary btn" type="button" onClick={handleLogout}>
         Log Out

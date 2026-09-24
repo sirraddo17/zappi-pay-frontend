@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import ProfitPanel from '../../components/ProfitPanel';
 import { Link } from 'react-router-dom';
-import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview } from '../../api';
+import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests } from '../../api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
   const [monnify, setMonnify] = useState(null);
+  const [deletions, setDeletions] = useState([]);
 
   useEffect(() => {
     Promise.all([getCustomers(), getPendingFunding(), getAdminOrders()])
@@ -25,6 +26,7 @@ export default function AdminDashboard() {
       })
       .catch((err) => setError(err.message));
     getMonnifyOverview().then(setMonnify).catch(() => setMonnify(null));
+    getDeletionRequests().then((d) => setDeletions(d.customers)).catch(() => {});
   }, []);
 
   const low = monnify?.walletBalance != null && monnify.walletBalance < (monnify.lowBalanceThreshold || 10000);
@@ -65,6 +67,19 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {deletions.length > 0 && (
+        <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--red-500)' }}>
+          <strong>{deletions.length} account deletion request{deletions.length === 1 ? '' : 's'}</strong>
+          <div style={{ fontSize: 13, marginTop: 6 }}>
+            {deletions.map((c) => (
+              <div key={c.id}>
+                <Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--purple)' }}>{c.name}</Link> · {c.phone} · wallet ₦{Number(c.walletBalance).toLocaleString()}
+              </div>
+            ))}
           </div>
         </div>
       )}

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
+import ServiceNotices from '../components/ServiceNotices';
 import { LogoIcon, Wordmark } from '../components/Logo';
 import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon } from '../components/Icons';
 
@@ -37,6 +38,7 @@ function txLabel(t) {
   if (t.type === 'REFUND') return t.note || 'Refund';
   if (t.type === 'AIRTIME_CASH') return t.note || 'Airtime to Cash';
   if (t.type === 'REFERRAL_BONUS') return t.note || 'Referral bonus';
+  if (t.type === 'CASHBACK') return t.note || 'Cashback';
   if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
   if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
   return t.note || 'Purchase';
@@ -151,6 +153,8 @@ export default function Dashboard() {
         <p className="dash-greeting">Hi, {customer?.name?.split(' ')[0] || 'there'} 👋</p>
         <h1 className="dash-question">What would you like today?</h1>
       </div>
+
+      <ServiceNotices generalOnly />
 
       {banners.filter((b) => !dismissed.includes(b.id)).map((b) => {
         const st = BANNER_STYLES[b.type] || BANNER_STYLES.INFO;
@@ -283,7 +287,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>

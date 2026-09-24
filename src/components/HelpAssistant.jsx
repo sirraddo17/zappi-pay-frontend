@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { submitSupportTicket, getOrders } from '../api';
 import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../assistant/knowledge';
+import { useAppInfo } from './ServiceNotices';
 
 // Floating "Help" chat for logged-in customers. Entirely rule-based
 // (see assistant/knowledge.js) — nothing is sent anywhere except when
@@ -15,6 +16,7 @@ function botText(text, extra = {}) {
 }
 
 export default function HelpAssistant() {
+  const appInfo = useAppInfo();
   const { customer } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -262,7 +264,7 @@ export default function HelpAssistant() {
                 Cancel
               </button>
               <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(ticketText || 'Hello ZappiPay, I need help with')}`}
+                href={`https://wa.me/${appInfo?.supportWhatsapp || WHATSAPP_NUMBER}?text=${encodeURIComponent(ticketText || 'Hello ZappiPay, I need help with')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary btn"

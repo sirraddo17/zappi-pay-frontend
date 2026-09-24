@@ -18,6 +18,8 @@ const TABS = [
   { to: '/admin/orders', label: 'Orders' },
   { to: '/admin/support', label: 'Support' },
   { to: '/admin/broadcasts', label: 'Broadcasts' },
+  { to: '/admin/notices', label: 'Service Notices' },
+  { to: '/admin/promos', label: 'Promo Codes' },
   { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit-log', label: 'Audit Log' },
 ];

@@ -17,6 +17,8 @@ const TABS = [
   { key: 'limits', label: 'Limits' },
   { key: 'airtimeCash', label: 'Airtime to Cash' },
   { key: 'referral', label: 'Referrals' },
+  { key: 'cashback', label: 'Cashback' },
+  { key: 'alerts', label: 'Alerts & Limits' },
   { key: 'password', label: 'My Password' },
 ];
 
@@ -89,6 +91,14 @@ export default function AdminSettings() {
   const [a2cMin, setA2cMin] = useState('500');
   const [a2cNumbers, setA2cNumbers] = useState({});
 
+  const [cbEnabled, setCbEnabled] = useState(false);
+  const [cbByService, setCbByService] = useState(toServiceMap({}));
+  const [cbMax, setCbMax] = useState('500');
+  const [alertsOn, setAlertsOn] = useState(false);
+  const [limitsOn, setLimitsOn] = useState(false);
+  const [limitUnverified, setLimitUnverified] = useState('50000');
+  const [limitVerified, setLimitVerified] = useState('1000000');
+  const [whatsapp, setWhatsapp] = useState('');
   const [refEnabled, setRefEnabled] = useState(false);
   const [refBonus, setRefBonus] = useState('100');
   const [refMin, setRefMin] = useState('500');
@@ -129,6 +139,14 @@ export default function AdminSettings() {
         setA2cFee(String(s.airtimeToCashFeePercent ?? 20));
         setA2cMin(String(s.airtimeToCashMinAmount ?? 500));
         setA2cNumbers(s.airtimeToCashNumbers || {});
+        setCbEnabled(Boolean(s.cashbackEnabled));
+        setCbByService(toServiceMap(s.cashbackPercentByService));
+        setCbMax(String(s.cashbackMaxPerOrder ?? 500));
+        setAlertsOn(Boolean(s.emailAlertsEnabled));
+        setLimitsOn(Boolean(s.kycLimitsEnabled));
+        setLimitUnverified(String(s.dailyLimitUnverified ?? 50000));
+        setLimitVerified(String(s.dailyLimitVerified ?? 1000000));
+        setWhatsapp(s.supportWhatsapp || '');
         setRefEnabled(Boolean(s.referralEnabled));
         setRefBonus(String(s.referralBonusAmount ?? 100));
         setRefMin(String(s.referralMinPurchase ?? 500));
@@ -259,6 +277,31 @@ export default function AdminSettings() {
         airtimeToCashNumbers: Object.fromEntries(A2C_NETWORKS.map((n) => [n.key, String(a2cNumbers[n.key] || '').trim()])),
       },
       'Airtime to Cash settings saved.'
+    );
+  }
+
+  function saveCashback(e) {
+    e.preventDefault();
+    const bad = SERVICES.find((svc) => { const n = Number(cbByService[svc] || 0); return !Number.isFinite(n) || n < 0 || n > 20; });
+    if (bad) {
+      setStatus((prev) => ({ ...prev, cashback: { error: `Cashback for ${serviceLabel(bad)} must be between 0 and 20%.` } }));
+      return;
+    }
+    save('cashback', { cashbackEnabled: cbEnabled, cashbackPercentByService: toNumberMap(cbByService), cashbackMaxPerOrder: Number(cbMax || 0) }, 'Cashback settings saved.');
+  }
+
+  function saveAlerts(e) {
+    e.preventDefault();
+    save(
+      'alerts',
+      {
+        emailAlertsEnabled: alertsOn,
+        kycLimitsEnabled: limitsOn,
+        dailyLimitUnverified: Number(limitUnverified || 0),
+        dailyLimitVerified: Number(limitVerified || 0),
+        supportWhatsapp: whatsapp,
+      },
+      'Saved.'
     );
   }
 
@@ -589,6 +632,61 @@ export default function AdminSettings() {
             </div>
           ))}
           {saveButton('airtimeCash', 'Save Airtime to Cash')}
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'cashback' && (
+        <form className="card" style={cardStyle} onSubmit={saveCashback}>
+          <SectionHeader title="Cashback" hint="After a successful purchase, this % of the price goes back into the customer's wallet. It comes out of your profit — keep it below your markup." />
+          <Status state={status.cashback} />
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+            <input type="checkbox" checked={cbEnabled} onChange={(e) => setCbEnabled(e.target.checked)} style={{ width: 'auto' }} />
+            Give cashback
+          </label>
+          {SERVICES.map((service) => (
+            <div className="field" key={service}>
+              <label htmlFor={`cb-${service}`}>{serviceLabel(service)} (%)</label>
+              <input id={`cb-${service}`} type="number" step="0.1" min="0" max="20" value={cbByService[service]} onChange={(e) => setCbByService((m) => ({ ...m, [service]: e.target.value }))} />
+            </div>
+          ))}
+          <div className="field">
+            <label htmlFor="cbMax">Maximum cashback per purchase (₦)</label>
+            <input id="cbMax" type="number" min="0" value={cbMax} onChange={(e) => setCbMax(e.target.value)} />
+          </div>
+          {saveButton('cashback', 'Save Cashback')}
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'alerts' && (
+        <form className="card" style={cardStyle} onSubmit={saveAlerts}>
+          <SectionHeader title="Alerts, limits & support" />
+          <Status state={status.alerts} />
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+            <input type="checkbox" checked={alertsOn} onChange={(e) => setAlertsOn(e.target.checked)} style={{ width: 'auto' }} />
+            Send email alerts (money in/out, new logins)
+          </label>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
+            Uses your Resend email setup. Resend's free plan allows 100 emails a day — upgrade Resend before you have many customers.
+          </p>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+            <input type="checkbox" checked={limitsOn} onChange={(e) => setLimitsOn(e.target.checked)} style={{ width: 'auto' }} />
+            Daily spending limits by verification level
+          </label>
+          <div className="field">
+            <label htmlFor="limU">Not verified — daily limit (₦)</label>
+            <input id="limU" type="number" min="0" value={limitUnverified} onChange={(e) => setLimitUnverified(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="limV">Verified with BVN/NIN — daily limit (₦)</label>
+            <input id="limV" type="number" min="0" value={limitVerified} onChange={(e) => setLimitVerified(e.target.value)} />
+            <small style={{ color: 'var(--slate-400)' }}>Covers purchases, ZappiPay transfers and bank transfers per day.</small>
+          </div>
+          <div className="field">
+            <label htmlFor="wa">Support WhatsApp number</label>
+            <input id="wa" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="e.g. 08012345678" />
+            <small style={{ color: 'var(--slate-400)' }}>The number customers reach from "Chat on WhatsApp" in Profile and the help chat. Leave empty to keep the current number (08134209037).</small>
+          </div>
+          {saveButton('alerts', 'Save')}
         </form>
       )}
 

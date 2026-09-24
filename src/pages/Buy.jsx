@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries } from '../api';
+import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo } from '../api';
 import PinConfirm from '../components/PinConfirm';
+import ServiceNotices, { useAppInfo } from '../components/ServiceNotices';
 
 // Maps the URL slug to what the backend Order.service enum expects, the
 // VTpass category identifier used to fetch that service's provider list,
@@ -137,6 +138,11 @@ export default function Buy() {
   const [nickname, setNickname] = useState('');
   const [repeatOn, setRepeatOn] = useState(false);
   const [frequency, setFrequency] = useState('MONTHLY');
+  const [promoInput, setPromoInput] = useState('');
+  const [promo, setPromo] = useState(null);
+  const [promoMsg, setPromoMsg] = useState('');
+  const [promoOpen, setPromoOpen] = useState(false);
+  const appInfo = useAppInfo();
 
   useEffect(() => {
     getPricing().then(setPricing).catch(() => setPricing(null));
@@ -220,6 +226,30 @@ export default function Buy() {
   // receive); price.total is what the wallet will actually be charged.
   const price = priceFor(amount, config?.backendService, pricing);
   const discountPct = price.discountPct;
+  const promoDiscount = promo ? Math.min(promo.discount, price.total) : 0;
+  const payTotal = Math.max(0, price.total - promoDiscount);
+  const cashbackPct = Number(appInfo?.cashback?.[config?.backendService] || 0);
+
+  // A code checked for one amount/service must be re-checked if either changes.
+  useEffect(() => {
+    if (promo && (promo.forAmount !== price.total || promo.forService !== config?.backendService)) {
+      setPromo(null);
+      setPromoMsg('');
+    }
+  }, [price.total, config?.backendService]);
+
+  async function applyPromo() {
+    setPromoMsg('');
+    if (!promoInput.trim() || !price.total) return;
+    try {
+      const r = await checkPromo(promoInput.trim(), config.backendService, price.total);
+      setPromo({ ...r, forAmount: price.total, forService: config.backendService });
+      setPromoMsg(`${r.code} applied — you save ${naira(r.discount)}.`);
+    } catch (err) {
+      setPromo(null);
+      setPromoMsg(err.message);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -252,6 +282,7 @@ export default function Buy() {
         phone: phoneToSend.trim(),
         amount,
         meterType: config.needsType ? billType : undefined,
+        promoCode: promo ? promo.code : undefined,
         saveBeneficiary: saveIt && !alreadySaved ? { nickname: nickname.trim() || undefined } : undefined,
         repeat: repeatOn ? { frequency, nickname: nickname.trim() || undefined } : undefined,
         ...auth,
@@ -289,6 +320,8 @@ export default function Buy() {
         <h1>Buy {config.label}</h1>
         <p>Pay from your wallet balance</p>
       </div>
+
+      <ServiceNotices service={config.backendService} />
 
       {discountPct > 0 && (
         <div
@@ -415,9 +448,37 @@ export default function Buy() {
                 </div>
               </>
             )}
+            {promoDiscount > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--green-500)', margin: '4px 0' }}>
+                <span>Promo {promo.code}</span>
+                <span>−{naira(promoDiscount)}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 16 }}>
               <span>Total</span>
-              <span>{naira(price.total)}</span>
+              <span>{naira(payTotal)}</span>
+            </div>
+            {cashbackPct > 0 && payTotal > 0 && (
+              <div style={{ fontSize: 13, color: 'var(--green-500)', marginTop: 4 }}>
+                + {cashbackPct}% cashback (about {naira(Math.floor(payTotal * cashbackPct) / 100)}) back to your wallet
+              </div>
+            )}
+            <div style={{ marginTop: 10 }}>
+              {!promoOpen && !promo ? (
+                <button type="button" onClick={() => setPromoOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 14 }}>
+                  Have a promo code?
+                </button>
+              ) : (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())} placeholder="Promo code" aria-label="Promo code" style={{ flex: 1 }} />
+                  {promo ? (
+                    <button type="button" className="btn btn-secondary" style={{ width: 'auto' }} onClick={() => { setPromo(null); setPromoInput(''); setPromoMsg(''); }}>Remove</button>
+                  ) : (
+                    <button type="button" className="btn btn-secondary" style={{ width: 'auto' }} onClick={applyPromo}>Apply</button>
+                  )}
+                </div>
+              )}
+              {promoMsg && <p style={{ fontSize: 13, margin: '6px 0 0', color: promo ? 'var(--green-500)' : 'var(--red-500)' }}>{promoMsg}</p>}
             </div>
           </div>
         )}
@@ -454,13 +515,13 @@ export default function Buy() {
         </div>
 
         <button className="btn" type="submit" disabled={submitting || !amount}>
-          {submitting ? 'Processing…' : `Pay ${naira(price.total)}${repeatOn ? ' & schedule' : ''}`}
+          {submitting ? 'Processing…' : `Pay ${naira(payTotal)}${repeatOn ? ' & schedule' : ''}`}
         </button>
       </form>
 
       <PinConfirm
         open={confirmOpen}
-        summary={`Pay ${naira(price.total)} · ${config.label} for ${recipient.trim()}`}
+        summary={`Pay ${naira(payTotal)} · ${config.label} for ${recipient.trim()}`}
         onSubmit={doPurchase}
         onError={(err) => setError(err.message || 'Purchase failed.')}
         onClose={() => setConfirmOpen(false)}

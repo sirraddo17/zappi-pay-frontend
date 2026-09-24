@@ -20,6 +20,7 @@ const TYPE_LABEL = {
   DEBIT: 'Purchase',
   AIRTIME_CASH: 'Airtime to cash',
   REFERRAL_BONUS: 'Referral bonus',
+  CASHBACK: 'Cashback',
 };
 
 // Last 12 months as quick picks, plus a custom range.
