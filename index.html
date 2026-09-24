@@ -10,10 +10,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" id="app-title" content="ZAPPI PAY" />
     <script>
-      // Admin pages get their own installable app (name, icon, start
-      // page), so staff can keep "ZP Admin" next to the customer app.
+      // The admin app lives on its own address (admin.zappipay.com.ng):
+      // browsers only allow one installed app per site, so a separate
+      // subdomain is what lets "ZP Admin" sit next to the customer app.
+      // There, every page is an admin page ("/" → "/admin").
       (function () {
-        if (location.pathname.indexOf('/admin') !== 0) return;
+        var isAdminHost = location.hostname.indexOf('admin.') === 0;
+        if (isAdminHost && location.pathname.indexOf('/admin') !== 0) {
+          location.replace('/admin' + location.search);
+          return;
+        }
+        if (!isAdminHost && location.pathname.indexOf('/admin') !== 0) return;
         document.getElementById('app-manifest').href = '/admin.webmanifest';
         document.getElementById('app-touch-icon').href = '/admin-icon-192.png';
         document.getElementById('app-title').content = 'ZP Admin';
