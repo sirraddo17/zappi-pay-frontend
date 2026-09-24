@@ -72,7 +72,7 @@ export const setPin = (data) => request('/api/security/pin', { method: 'POST', b
 export const trustThisDevice = (data) => request('/api/security/devices', { method: 'POST', body: JSON.stringify(data) });
 export const untrustThisDevice = () => request('/api/security/devices/current', { method: 'DELETE' });
 export const untrustOtherDevices = () => request('/api/security/devices', { method: 'DELETE' });
-export const biometricRegisterOptions = () => request('/api/security/webauthn/register-options', { method: 'POST' });
+export const biometricRegisterOptions = (compat = false) => request('/api/security/webauthn/register-options', { method: 'POST', body: JSON.stringify({ compat }) });
 export const biometricRegisterVerify = (response) => request('/api/security/webauthn/register-verify', { method: 'POST', body: JSON.stringify({ response }) });
 export const removeBiometric = () => request('/api/security/webauthn', { method: 'DELETE' });
 export const biometricTxOptions = () => request('/api/security/webauthn/tx-options', { method: 'POST' });
