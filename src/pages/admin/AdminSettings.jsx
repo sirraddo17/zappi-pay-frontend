@@ -18,6 +18,7 @@ const TABS = [
   { key: 'airtimeCash', label: 'Airtime to Cash' },
   { key: 'referral', label: 'Referrals' },
   { key: 'cashback', label: 'Cashback' },
+  { key: 'agents', label: 'Agents' },
   { key: 'alerts', label: 'Alerts & Limits' },
   { key: 'password', label: 'My Password' },
 ];
@@ -91,6 +92,8 @@ export default function AdminSettings() {
   const [a2cMin, setA2cMin] = useState('500');
   const [a2cNumbers, setA2cNumbers] = useState({});
 
+  const [agentOn, setAgentOn] = useState(false);
+  const [agentByService, setAgentByService] = useState(toServiceMap({}));
   const [cbEnabled, setCbEnabled] = useState(false);
   const [cbByService, setCbByService] = useState(toServiceMap({}));
   const [cbMax, setCbMax] = useState('500');
@@ -139,6 +142,8 @@ export default function AdminSettings() {
         setA2cFee(String(s.airtimeToCashFeePercent ?? 20));
         setA2cMin(String(s.airtimeToCashMinAmount ?? 500));
         setA2cNumbers(s.airtimeToCashNumbers || {});
+        setAgentOn(Boolean(s.agentPricingEnabled));
+        setAgentByService(toServiceMap(s.agentDiscountPercentByService));
         setCbEnabled(Boolean(s.cashbackEnabled));
         setCbByService(toServiceMap(s.cashbackPercentByService));
         setCbMax(String(s.cashbackMaxPerOrder ?? 500));
@@ -278,6 +283,16 @@ export default function AdminSettings() {
       },
       'Airtime to Cash settings saved.'
     );
+  }
+
+  function saveAgents(e) {
+    e.preventDefault();
+    const bad = SERVICES.find((svc) => { const n = Number(agentByService[svc] || 0); return !Number.isFinite(n) || n < 0 || n > 50; });
+    if (bad) {
+      setStatus((prev) => ({ ...prev, agents: { error: `Agent discount for ${serviceLabel(bad)} must be between 0 and 50%.` } }));
+      return;
+    }
+    save('agents', { agentPricingEnabled: agentOn, agentDiscountPercentByService: toNumberMap(agentByService) }, 'Agent pricing saved.');
   }
 
   function saveCashback(e) {
@@ -632,6 +647,27 @@ export default function AdminSettings() {
             </div>
           ))}
           {saveButton('airtimeCash', 'Save Airtime to Cash')}
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'agents' && (
+        <form className="card" style={cardStyle} onSubmit={saveAgents}>
+          <SectionHeader
+            title="Agent / reseller pricing"
+            hint="Approved agents get this extra % off each service, on top of any normal discount. Customers apply from their Profile; you approve them on the Overview or their customer page. Keep it below your markup so you still make a profit."
+          />
+          <Status state={status.agents} />
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+            <input type="checkbox" checked={agentOn} onChange={(e) => setAgentOn(e.target.checked)} style={{ width: 'auto' }} />
+            Open agent accounts (show "Become an agent" to customers)
+          </label>
+          {SERVICES.map((service) => (
+            <div className="field" key={service}>
+              <label htmlFor={`ag-${service}`}>{serviceLabel(service)} — extra % off for agents</label>
+              <input id={`ag-${service}`} type="number" step="0.1" min="0" max="50" value={agentByService[service]} onChange={(e) => setAgentByService((m) => ({ ...m, [service]: e.target.value }))} />
+            </div>
+          ))}
+          {saveButton('agents', 'Save Agent Pricing')}
         </form>
       )}
 

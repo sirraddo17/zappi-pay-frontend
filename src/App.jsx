@@ -12,6 +12,7 @@ import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
 import Notifications from './pages/Notifications';
 import Legal from './pages/Legal';
+import DeleteAccountInfo from './pages/DeleteAccountInfo';
 import Transfer from './pages/Transfer';
 import Profile from './pages/Profile';
 import AirtimeCash from './pages/AirtimeCash';
@@ -96,6 +97,7 @@ export default function App() {
           <Route path="/orders/:id" element={<RequireCustomer><OrderDetail /></RequireCustomer>} />
           <Route path="/notifications" element={<RequireCustomer><Notifications /></RequireCustomer>} />
           <Route path="/legal/:doc" element={<Legal />} />
+          <Route path="/delete-account" element={<DeleteAccountInfo />} />
           <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
           <Route path="/profile" element={<RequireCustomer><Profile /></RequireCustomer>} />
           <Route path="/airtime-cash" element={<RequireCustomer><AirtimeCash /></RequireCustomer>} />

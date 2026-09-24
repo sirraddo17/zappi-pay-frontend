@@ -328,7 +328,9 @@ export default function Buy() {
           className="card"
           style={{ background: 'rgba(255,184,48,0.12)', border: '1px solid var(--gold)', padding: '10px 14px', fontSize: 14, fontWeight: 600 }}
         >
-          🎉 {discountPct}% off all {config.label} purchases right now — applied automatically.
+          {pricing?.agentPricing
+            ? `⭐ Agent price: ${discountPct}% off ${config.label} — applied automatically.`
+            : `🎉 ${discountPct}% off all ${config.label} purchases right now — applied automatically.`}
         </div>
       )}
 

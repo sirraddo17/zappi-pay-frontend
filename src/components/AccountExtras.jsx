@@ -46,7 +46,7 @@ export default function AccountExtras() {
     setBusy(true);
     try {
       await requestAccountDeletion({ password, reason });
-      setMsg("Request received. Our team will close your account within 7 days and email you. Spend or withdraw any money left in your wallet first.");
+      setMsg("Request received. Our team will close your account within 7 days. Spend or withdraw any money left in your wallet first.");
       setDeleteOpen(false);
       setPassword('');
       refreshCustomer?.();
@@ -126,7 +126,7 @@ export default function AccountExtras() {
         ) : (
           <form onSubmit={submitDelete}>
             <p style={{ fontSize: 13, color: 'var(--slate-400)', marginTop: 0 }}>
-              This closes your account and removes your personal details. Transaction records are kept as required by law. Spend or withdraw your wallet balance first.
+              This closes your account and removes your personal details. Transaction records are kept for record-keeping rules. Spend or withdraw your wallet balance first.
             </p>
             {err && <p className="error-text" style={{ margin: '0 0 8px' }}>{err}</p>}
             <div className="field">

@@ -197,6 +197,8 @@ export const sendBankTransfer = (data) => request('/api/wallet/bank-transfer', {
 export const getBankTransfers = () => request('/api/wallet/bank-transfers');
 export const getStatement = (from, to) => request(`/api/wallet/statement?from=${from}&to=${to}`);
 export const getAppInfo = () => request('/api/app/info');
+export const getAgentInfo = () => request('/api/agent/info');
+export const requestAgentAccount = (businessName) => request('/api/agent/request', { method: 'POST', body: JSON.stringify({ businessName }) });
 export const getMyLimits = () => request('/api/account/limits');
 export const updatePreferences = (data) => request('/api/account/preferences', { method: 'PATCH', body: JSON.stringify(data) });
 export const requestAccountDeletion = (data) => request('/api/account/delete-request', { method: 'POST', body: JSON.stringify(data) });
@@ -248,6 +250,8 @@ export const createNotice = (data) => adminRequest('/api/admin/notices', { metho
 export const setNoticeActive = (id, active) => adminRequest(`/api/admin/notices/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) });
 export const getDeletionRequests = () => adminRequest('/api/admin/deletion-requests');
 export const deleteCustomerAccount = (id) => adminRequest(`/api/admin/customers/${id}/delete-account`, { method: 'POST', body: JSON.stringify({ confirm: 'DELETE' }) });
+export const getAgentRequests = () => adminRequest('/api/admin/agent-requests');
+export const setCustomerAgent = (id, isAgent) => adminRequest(`/api/admin/customers/${id}/agent`, { method: 'POST', body: JSON.stringify({ isAgent }) });
 
 // --- Admin: staff management ---
 export const getAdmins = () => adminRequest('/api/admin/admins');

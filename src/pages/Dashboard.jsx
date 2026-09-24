@@ -150,7 +150,10 @@ export default function Dashboard() {
             )}
           </Link>
         </div>
-        <p className="dash-greeting">Hi, {customer?.name?.split(' ')[0] || 'there'} 👋</p>
+        <p className="dash-greeting">
+          Hi, {customer?.name?.split(' ')[0] || 'there'} 👋
+          {customer?.isAgent && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,184,46,0.2)', color: 'var(--gold, #f5b82e)' }}>⭐ AGENT</span>}
+        </p>
         <h1 className="dash-question">What would you like today?</h1>
       </div>
 

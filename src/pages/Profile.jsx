@@ -7,6 +7,7 @@ import BottomNav from '../components/BottomNav';
 import { SUPPORT_EMAIL, WHATSAPP_NUMBER } from '../assistant/knowledge';
 import { useAppInfo } from '../components/ServiceNotices';
 import AccountExtras from '../components/AccountExtras';
+import AgentCard from '../components/AgentCard';
 
 const MAX_AVATAR_BYTES = 1_500_000;
 
@@ -301,6 +302,8 @@ export default function Profile() {
           </Link>
         ))}
       </div>
+
+      <AgentCard />
 
       <AccountExtras />
 

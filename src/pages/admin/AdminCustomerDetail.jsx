@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount } from '../../api';
+import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, setCustomerAgent } from '../../api';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -130,6 +130,33 @@ export default function AdminCustomerDetail() {
             : 'No funding account number yet'}
         </p>
       </div>
+
+      {!customer.deletedAt && (
+        <div className="card" style={{ margin: '0 0 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div>
+            <strong>{customer.isAgent ? '⭐ Agent' : 'Regular customer'}</strong>
+            {customer.agentBusinessName && <span style={{ color: 'var(--slate-400)', fontSize: 13 }}> · {customer.agentBusinessName}</span>}
+            {!customer.isAgent && customer.agentRequestedAt && (
+              <div style={{ fontSize: 13, color: 'var(--orange, #f97316)' }}>Applied to be an agent on {new Date(customer.agentRequestedAt).toLocaleDateString('en-NG')}</div>
+            )}
+          </div>
+          <button
+            type="button"
+            className={customer.isAgent ? 'btn btn-secondary' : 'btn'}
+            style={{ width: 'auto' }}
+            onClick={async () => {
+              try {
+                await setCustomerAgent(customer.id, !customer.isAgent);
+                window.location.reload();
+              } catch (err) {
+                alert(err.message);
+              }
+            }}
+          >
+            {customer.isAgent ? 'Remove agent status' : customer.agentRequestedAt ? 'Approve as agent' : 'Make agent'}
+          </button>
+        </div>
+      )}
 
       {customer.deletedAt ? (
         <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--slate-600)' }}>This account was deleted on {new Date(customer.deletedAt).toLocaleString('en-NG')}.</div>

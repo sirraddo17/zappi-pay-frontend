@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import ProfitPanel from '../../components/ProfitPanel';
 import { Link } from 'react-router-dom';
-import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests } from '../../api';
+import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests } from '../../api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
   const [monnify, setMonnify] = useState(null);
   const [deletions, setDeletions] = useState([]);
+  const [agentReqs, setAgentReqs] = useState([]);
 
   useEffect(() => {
     Promise.all([getCustomers(), getPendingFunding(), getAdminOrders()])
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
       .catch((err) => setError(err.message));
     getMonnifyOverview().then(setMonnify).catch(() => setMonnify(null));
     getDeletionRequests().then((d) => setDeletions(d.customers)).catch(() => {});
+    getAgentRequests().then((d) => setAgentReqs(d.customers)).catch(() => {});
   }, []);
 
   const low = monnify?.walletBalance != null && monnify.walletBalance < (monnify.lowBalanceThreshold || 10000);
@@ -78,6 +80,19 @@ export default function AdminDashboard() {
             {deletions.map((c) => (
               <div key={c.id}>
                 <Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--purple)' }}>{c.name}</Link> · {c.phone} · wallet ₦{Number(c.walletBalance).toLocaleString()}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {agentReqs.length > 0 && (
+        <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--gold, #f5b82e)' }}>
+          <strong>{agentReqs.length} agent application{agentReqs.length === 1 ? '' : 's'}</strong>
+          <div style={{ fontSize: 13, marginTop: 6 }}>
+            {agentReqs.map((c) => (
+              <div key={c.id}>
+                <Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--purple)' }}>{c.name}</Link> · {c.agentBusinessName} · {c.phone}{c.kycType ? ' · ✓ verified' : ' · not verified'}
               </div>
             ))}
           </div>
