@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getBankTransferConfig, getBanks, lookupBankAccount, sendBankTransfer, getBankTransfers } from '../api';
 import PinConfirm from './PinConfirm';
 import ShowMore, { FIRST_COUNT } from './ShowMore';
+import { shareReceipt } from '../lib/receipt';
 
 function money(n) {
   return `₦${Number(n || 0).toLocaleString()}`;
@@ -237,6 +238,26 @@ export default function BankTransferForm({ onDone }) {
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{ fontWeight: 700 }}>{money(t.amount)}</div>
                   <div style={{ fontSize: 12, color: STATUS_COLOR[t.status] || 'var(--slate-400)' }}>{STATUS_LABEL[t.status] || t.status}</div>
+                  <button
+                    type="button"
+                    onClick={() => shareReceipt({
+                      title: 'Bank transfer receipt',
+                      amount: t.amount,
+                      status: t.status === 'SUCCESS' ? 'SENT' : t.status,
+                      rows: [
+                        ['To', t.accountName],
+                        ['Bank', t.bankName || t.bankCode],
+                        ['Account', t.accountNumber],
+                        ...(t.narration ? [['Description', t.narration]] : []),
+                        ['Fee', money(t.fee)],
+                        ['Date', new Date(t.createdAt).toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })],
+                        ['Reference', t.reference],
+                      ],
+                    }, `zappipay-transfer-${t.reference}.png`)}
+                    style={{ background: 'none', border: 'none', color: 'var(--purple)', fontSize: 12, cursor: 'pointer', padding: 0, marginTop: 2 }}
+                  >
+                    Receipt
+                  </button>
                 </div>
               </div>
             ))}

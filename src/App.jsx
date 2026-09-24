@@ -7,6 +7,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Buy from './pages/Buy';
 import Wallet from './pages/Wallet';
+import Statement from './pages/Statement';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
 import Notifications from './pages/Notifications';
@@ -88,6 +89,7 @@ export default function App() {
           <Route path="/saved" element={<RequireCustomer><Saved /></RequireCustomer>} />
           <Route path="/buy/:service" element={<RequireCustomer><Buy /></RequireCustomer>} />
           <Route path="/wallet" element={<RequireCustomer><Wallet /></RequireCustomer>} />
+          <Route path="/statement" element={<RequireCustomer><Statement /></RequireCustomer>} />
           <Route path="/orders" element={<RequireCustomer><Orders /></RequireCustomer>} />
           <Route path="/orders/:id" element={<RequireCustomer><OrderDetail /></RequireCustomer>} />
           <Route path="/notifications" element={<RequireCustomer><Notifications /></RequireCustomer>} />

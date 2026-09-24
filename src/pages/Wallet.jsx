@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments } from '../api';
 import BottomNav from '../components/BottomNav';
 import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
@@ -243,7 +244,11 @@ export default function Wallet() {
       )}
 
       <div className="card">
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Transaction History</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <h2 style={{ margin: 0, fontSize: 16 }}>Transaction History</h2>
+          <Link to="/statement" style={{ color: 'var(--purple)', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>Statement (PDF) ›</Link>
+        </div>
+        <div style={{ height: 12 }} />
         {transactions === null ? (
           <p className="empty-state">Loading…</p>
         ) : transactions.length === 0 ? (

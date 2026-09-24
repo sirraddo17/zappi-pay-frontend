@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import ProfitPanel from '../../components/ProfitPanel';
 import { Link } from 'react-router-dom';
 import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview } from '../../api';
 
@@ -67,6 +68,8 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      <ProfitPanel />
 
       {stats && (
         <div className="grid">

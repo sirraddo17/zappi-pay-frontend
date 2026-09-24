@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getOrder, submitSupportTicket } from '../api';
 import { buyAgainLink } from '../lib/repeat';
+import { shareReceipt, downloadReceipt, extractToken } from '../lib/receipt';
 
 const STATUS_COLORS = {
   DELIVERED: 'var(--green-500)',
@@ -35,27 +36,38 @@ export default function OrderDetail() {
       .catch((err) => setError(err.message || 'Could not load this receipt.'));
   }, [id]);
 
-  function handleDownload() {
-    window.print();
+  const token = order ? extractToken(order) : null;
+  const [copied, setCopied] = useState(false);
+  const [sharing, setSharing] = useState(false);
+
+  function receiptData() {
+    const rows = [
+      ['Service', order.service],
+      ['Provider', order.provider],
+      ['Recipient', order.recipient],
+    ];
+    if (order.recipientName) rows.push(['Name', order.recipientName]);
+    if (Number(order.discountAmount) > 0) rows.push(['Discount', fmtMoney(order.discountAmount)]);
+    rows.push(['Date', fmtDate(order.createdAt)], ['Reference', order.vtpassRequestId || order.id]);
+    return {
+      title: `${order.service.charAt(0)}${order.service.slice(1).toLowerCase()} receipt`,
+      amount: order.amount,
+      status: order.status,
+      rows,
+      highlight: token ? { label: order.service === 'ELECTRICITY' ? 'Token' : 'PIN / Code', value: token } : undefined,
+    };
+  }
+
+  async function handleDownload() {
+    await downloadReceipt(receiptData(), `zappipay-${order.id}.png`);
   }
 
   async function handleShare() {
-    if (!order) return;
-    const text = `ZAPPI PAY Receipt\n${order.service} - ${order.recipient}\nAmount: ${fmtMoney(order.amount)}\nStatus: ${order.status}\nDate: ${fmtDate(order.createdAt)}\nRef: ${order.vtpassRequestId || order.id}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'ZAPPI PAY Receipt', text });
-      } catch {
-        // person cancelled the share sheet — nothing to do
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(text);
-        setReportSuccess('');
-        alert('Receipt copied to clipboard.');
-      } catch {
-        alert('Could not share or copy this receipt.');
-      }
+    setSharing(true);
+    try {
+      await shareReceipt(receiptData(), `zappipay-${order.id}.png`);
+    } finally {
+      setSharing(false);
     }
   }
 
@@ -112,6 +124,21 @@ export default function OrderDetail() {
           {order.status}
         </div>
 
+        {token && (
+          <div style={{ background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)', borderRadius: 12, padding: 14, marginBottom: 18, textAlign: 'left' }}>
+            <div style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 4 }}>{order.service === 'ELECTRICITY' ? 'Your token' : 'PIN / code'}</div>
+            <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1, wordBreak: 'break-word' }}>{token}</div>
+            <button
+              type="button"
+              className="btn btn-secondary no-print"
+              style={{ width: 'auto', padding: '6px 12px', fontSize: 13, marginTop: 8 }}
+              onClick={() => navigator.clipboard?.writeText(token).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); })}
+            >
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+        )}
+
         <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--slate-400)' }}>Service</span>
@@ -150,10 +177,10 @@ export default function OrderDetail() {
 
       <div className="no-print" style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <button className="btn-secondary btn" type="button" onClick={handleDownload}>
-          Download
+          Save image
         </button>
-        <button className="btn-secondary btn" type="button" onClick={handleShare}>
-          Share
+        <button className="btn" type="button" onClick={handleShare} disabled={sharing}>
+          {sharing ? 'Preparing…' : 'Share receipt'}
         </button>
       </div>
 

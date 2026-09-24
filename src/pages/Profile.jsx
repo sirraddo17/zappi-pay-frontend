@@ -190,6 +190,16 @@ export default function Profile() {
           <span style={{ color: 'var(--slate-400)' }}>›</span>
         </Link>
         <Link
+          to="/statement"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', color: 'var(--slate-100, #f1f5f9)', textDecoration: 'none', borderBottom: '1px solid var(--slate-700)' }}
+        >
+          <span>
+            <span style={{ display: 'block', fontWeight: 600 }}>Account Statement</span>
+            <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 13 }}>Download your wallet history as PDF</span>
+          </span>
+          <span style={{ color: 'var(--slate-400)' }}>›</span>
+        </Link>
+        <Link
           to="/saved"
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', color: 'var(--slate-100, #f1f5f9)', textDecoration: 'none', borderBottom: '1px solid var(--slate-700)' }}
         >

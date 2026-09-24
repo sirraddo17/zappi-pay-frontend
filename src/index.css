@@ -599,3 +599,67 @@ th {
     transform: rotate(360deg);
   }
 }
+
+/* Account statement: a light, paper-like document inside the app that
+   prints cleanly to PDF. */
+.statement-doc {
+  margin: 0 16px 90px;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 12px;
+  padding: 20px;
+  font-size: 13px;
+}
+.statement-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 3px solid #7c3aed;
+  padding-bottom: 12px;
+}
+.statement-brand { font-size: 22px; font-weight: 800; color: #7c3aed; }
+.statement-sub { color: #64748b; }
+.statement-period { margin: 12px 0; font-weight: 600; }
+.statement-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.statement-summary div {
+  background: #f5f3ff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+.statement-summary span { color: #64748b; font-size: 12px; }
+.statement-summary strong { font-size: 15px; }
+.statement-doc .in { color: #15803d; }
+.statement-doc .out { color: #b91c1c; }
+.statement-doc .muted { color: #64748b; font-size: 11px; }
+.statement-table { width: 100%; border-collapse: collapse; }
+.statement-table th {
+  text-align: left;
+  font-size: 11px;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 6px 4px;
+}
+.statement-table td {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 6px 4px;
+  vertical-align: top;
+  color: #0f172a;
+}
+.statement-table .num { text-align: right; white-space: nowrap; }
+.statement-foot { margin-top: 16px; color: #94a3b8; font-size: 11px; }
+@media (min-width: 560px) {
+  .statement-summary { grid-template-columns: repeat(4, 1fr); }
+}
+@media print {
+  .bottom-nav, [style*="position: fixed"] { display: none !important; }
+  .app-shell { padding: 0 !important; }
+  .statement-doc { margin: 0; padding: 0; border-radius: 0; }
+  .statement-table tr { break-inside: avoid; }
+}

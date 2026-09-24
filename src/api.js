@@ -195,6 +195,8 @@ export const lookupBankAccount = (bankCode, accountNumber) =>
   request(`/api/wallet/bank-transfer/lookup?bankCode=${encodeURIComponent(bankCode)}&accountNumber=${encodeURIComponent(accountNumber)}`);
 export const sendBankTransfer = (data) => request('/api/wallet/bank-transfer', { method: 'POST', body: JSON.stringify(data) });
 export const getBankTransfers = () => request('/api/wallet/bank-transfers');
+export const getStatement = (from, to) => request(`/api/wallet/statement?from=${from}&to=${to}`);
+export const getAdminAnalytics = (days) => adminRequest(`/api/admin/analytics?days=${days}`);
 
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
