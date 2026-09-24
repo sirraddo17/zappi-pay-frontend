@@ -23,11 +23,23 @@ function trackedFetch(url, options) {
   return fetch(url, options).then(
     (res) => {
       done();
+      // A 502/503/504 that isn't our own JSON error means the server
+      // itself is down (host outage, suspended service), not a normal
+      // app error — tell the UI so it can explain calmly.
+      const isJson = (res.headers.get('content-type') || '').includes('json');
+      if ([502, 503, 504].includes(res.status) && !isJson) {
+        window.dispatchEvent(new CustomEvent('zp-server-down'));
+        throw new Error('ZappiPay is temporarily unavailable. Your money is safe — please try again in a few minutes.');
+      }
+      window.dispatchEvent(new CustomEvent('zp-server-up'));
       return res;
     },
     (err) => {
       done();
-      throw err;
+      window.dispatchEvent(new CustomEvent('zp-server-down'));
+      throw new Error(navigator.onLine === false
+        ? 'You appear to be offline. Check your internet connection and try again.'
+        : 'Could not reach ZappiPay. Please check your connection and try again.');
     }
   );
 }
