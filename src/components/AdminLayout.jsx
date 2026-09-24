@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import InstallAppButton from './InstallAppButton';
 
 const TABS = [
   { to: '/admin', label: 'Overview', end: true },
@@ -66,6 +67,7 @@ export default function AdminLayout({ children }) {
         ))}
         <div className="admin-account" style={{ padding: '16px 20px 0' }}>
           <div className="admin-name" style={{ color: 'var(--slate-400)', fontSize: 13, marginBottom: 8 }}>{admin?.name}</div>
+          <InstallAppButton label="Install admin app" style={{ marginBottom: 8, fontSize: 13 }} />
           <button className="btn-secondary btn" onClick={handleLogout}>Log Out</button>
         </div>
       </div>
