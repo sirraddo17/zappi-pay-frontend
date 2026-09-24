@@ -168,7 +168,7 @@ export default function Transfer() {
       ) : (
         <div className="card" style={{ margin: '0 16px 90px', textAlign: 'center' }}>
           <p style={{ color: 'var(--slate-400)', fontSize: 14 }}>
-            Sending to other banks is coming soon — this is pending approval of our payment provider (Monnify) integration.
+            Sending to other banks is coming soon. For now, you can send money instantly to any ZappiPay user.
           </p>
         </div>
       )}
