@@ -418,15 +418,144 @@ th {
   margin: 0 0 16px;
 }
 
+/* Keeps wide tables/forms inside the page instead of stretching it
+   (a stretched page makes phones zoom everything out). */
+.admin-main {
+  min-width: 0;
+}
+.admin-main td {
+  word-break: break-word;
+}
+.admin-table-wrap {
+  overflow-x: auto;
+}
+.admin-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 768px) {
   .admin-shell {
     flex-direction: column;
   }
+  /* Sidebar becomes a slim, swipeable tab bar pinned to the top. */
   .admin-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
     width: 100%;
     display: flex;
+    align-items: center;
+    gap: 6px;
     overflow-x: auto;
-    padding: 8px 0;
+    padding: 8px 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--slate-700);
+    scrollbar-width: none;
+  }
+  .admin-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+  .admin-sidebar .admin-brand {
+    padding: 0 6px 0 2px !important;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .admin-sidebar a {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--slate-700);
+    font-size: 13px;
+  }
+  .admin-sidebar a.active {
+    background: var(--purple);
+    color: #fff;
+    border: 1px solid var(--purple);
+  }
+  .admin-sidebar .admin-account {
+    display: flex;
+    align-items: center;
+    padding: 0 !important;
+    flex-shrink: 0;
+  }
+  .admin-sidebar .admin-account .admin-name {
+    display: none;
+  }
+  .admin-sidebar .admin-account .btn {
+    width: auto;
+    padding: 7px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .admin-main {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px 12px 40px;
+  }
+  .admin-main form.card,
+  .admin-main .card {
+    max-width: 100% !important;
+  }
+
+  /* Tables turn into stacked cards: each row is a card and each cell
+     shows its column name (data-label, filled in by AdminLayout). */
+  .admin-main table,
+  .admin-main tbody,
+  .admin-main tr,
+  .admin-main td {
+    display: block;
+    width: 100%;
+  }
+  .admin-main thead {
+    display: none;
+  }
+  .admin-main tr {
+    background: var(--slate-900);
+    border: 1px solid var(--slate-700);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+  }
+  .admin-main td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(42, 52, 84, 0.6);
+    text-align: right;
+    font-size: 14px;
+  }
+  .admin-main td:last-child {
+    border-bottom: none;
+  }
+  .admin-main td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    color: var(--slate-400);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: left;
+    padding-top: 2px;
+  }
+  .admin-main td[data-label='']::before,
+  .admin-main td:not([data-label])::before {
+    display: none;
+  }
+  .admin-main td[data-label=''],
+  .admin-main td:not([data-label]) {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .admin-main td > * {
+    min-width: 0;
+  }
+  .admin-main .admin-table-wrap {
+    padding: 10px;
   }
 }
 
