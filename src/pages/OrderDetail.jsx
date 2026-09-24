@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getOrder, submitSupportTicket } from '../api';
+import { buyAgainLink } from '../lib/repeat';
 
 const STATUS_COLORS = {
   DELIVERED: 'var(--green-500)',
@@ -155,6 +156,16 @@ export default function OrderDetail() {
           Share
         </button>
       </div>
+
+      {buyAgainLink(order) && (
+        <Link
+          to={buyAgainLink(order)}
+          className="btn no-print"
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: 8, boxSizing: 'border-box' }}
+        >
+          Buy again
+        </Link>
+      )}
 
       {order.service === 'AIRTIME' && order.status === 'SUCCESS' && (
         <Link
