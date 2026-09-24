@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { lookupRecipient, sendTransfer } from '../api';
 import BottomNav from '../components/BottomNav';
 import PinConfirm from '../components/PinConfirm';
+import BankTransferForm from '../components/BankTransferForm';
 
 export default function Transfer() {
   const { refreshCustomer } = useAuth();
@@ -94,8 +95,8 @@ export default function Transfer() {
         </button>
       </div>
 
-      {error && <p className="error-text" style={{ margin: '0 16px 12px' }}>{error}</p>}
-      {success && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{success}</p>}
+      {tab === 'user' && error && <p className="error-text" style={{ margin: '0 16px 12px' }}>{error}</p>}
+      {tab === 'user' && success && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{success}</p>}
 
       {tab === 'user' ? (
         <div className="card" style={{ margin: '0 16px 90px' }}>
@@ -166,11 +167,7 @@ export default function Transfer() {
           )}
         </div>
       ) : (
-        <div className="card" style={{ margin: '0 16px 90px', textAlign: 'center' }}>
-          <p style={{ color: 'var(--slate-400)', fontSize: 14 }}>
-            Sending to other banks is coming soon. For now, you can send money instantly to any ZappiPay user.
-          </p>
-        </div>
+        <BankTransferForm onDone={refreshCustomer} />
       )}
 
       <PinConfirm

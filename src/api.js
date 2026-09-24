@@ -189,6 +189,12 @@ export const rejectAirtimeCash = (id, reason) => adminRequest(`/api/admin/airtim
 // --- Transfers ---
 export const lookupRecipient = (identifier) => request(`/api/wallet/lookup?identifier=${encodeURIComponent(identifier)}`);
 export const sendTransfer = (data) => request('/api/wallet/transfer', { method: 'POST', body: JSON.stringify(data) });
+export const getBankTransferConfig = () => request('/api/wallet/bank-transfer/config');
+export const getBanks = () => request('/api/banks');
+export const lookupBankAccount = (bankCode, accountNumber) =>
+  request(`/api/wallet/bank-transfer/lookup?bankCode=${encodeURIComponent(bankCode)}&accountNumber=${encodeURIComponent(accountNumber)}`);
+export const sendBankTransfer = (data) => request('/api/wallet/bank-transfer', { method: 'POST', body: JSON.stringify(data) });
+export const getBankTransfers = () => request('/api/wallet/bank-transfers');
 
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
@@ -218,6 +224,11 @@ export const getAuditLog = () => adminRequest('/api/admin/audit-log');
 // --- Admin: manual wallet adjustments ---
 export const adjustWallet = (customerId, data) =>
   adminRequest(`/api/admin/customers/${customerId}/adjust-wallet`, { method: 'POST', body: JSON.stringify(data) });
+export const getAdminBankTransfers = (status) => adminRequest(`/api/admin/bank-transfers${status ? `?status=${status}` : ''}`);
+export const authorizeBankTransfer = (id, otp) => adminRequest(`/api/admin/bank-transfers/${id}/authorize`, { method: 'POST', body: JSON.stringify({ otp }) });
+export const resendBankTransferOtp = (id) => adminRequest(`/api/admin/bank-transfers/${id}/resend-otp`, { method: 'POST' });
+export const checkBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers/${id}/check`, { method: 'POST' });
+export const cancelBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers/${id}/cancel`, { method: 'POST' });
 
 // --- Admin: staff management ---
 export const getAdmins = () => adminRequest('/api/admin/admins');

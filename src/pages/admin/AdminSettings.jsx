@@ -70,6 +70,12 @@ export default function AdminSettings() {
   const [monnifySecretKey, setMonnifySecretKey] = useState('');
   const [monnifyContractCode, setMonnifyContractCode] = useState('');
   const [monnifyTest, setMonnifyTest] = useState(null);
+  const [walletAccount, setWalletAccount] = useState('');
+  const [btEnabled, setBtEnabled] = useState(false);
+  const [btFee, setBtFee] = useState('0');
+  const [btMin, setBtMin] = useState('100');
+  const [btMax, setBtMax] = useState('50000');
+  const [btDaily, setBtDaily] = useState('200000');
   const [minFundingAmount, setMinFundingAmount] = useState('100');
   const [minPurchaseAmount, setMinPurchaseAmount] = useState('50');
   const [bankFeePercent, setBankFeePercent] = useState('0');
@@ -106,6 +112,12 @@ export default function AdminSettings() {
         setMonnifyApiKey(s.monnifyApiKey || '');
         setMonnifySecretKey(s.monnifySecretKey || '');
         setMonnifyContractCode(s.monnifyContractCode || '');
+        setWalletAccount(s.monnifyWalletAccount || '');
+        setBtEnabled(Boolean(s.bankTransferEnabled));
+        setBtFee(String(s.bankTransferFee ?? 0));
+        setBtMin(String(s.bankTransferMin ?? 100));
+        setBtMax(String(s.bankTransferMax ?? 50000));
+        setBtDaily(String(s.bankTransferDailyMax ?? 200000));
         setMinFundingAmount(String(s.minFundingAmount ?? 100));
         setMinPurchaseAmount(String(s.minPurchaseAmount ?? 50));
         setBankFeePercent(String(s.bankFundingFeePercent ?? 0));
@@ -144,6 +156,26 @@ export default function AdminSettings() {
     e.preventDefault();
     setMonnifyTest(null);
     save('monnify', { monnifyMode, monnifyApiKey, monnifySecretKey, monnifyContractCode }, 'Monnify settings saved. Tap "Test connection" to check them.');
+  }
+
+  function saveBankTransfers(e) {
+    e.preventDefault();
+    if (btEnabled && !walletAccount.trim()) {
+      setStatus((prev) => ({ ...prev, bankTransfers: { error: 'Enter your Monnify wallet account number before turning this on.' } }));
+      return;
+    }
+    save(
+      'bankTransfers',
+      {
+        monnifyWalletAccount: walletAccount,
+        bankTransferEnabled: btEnabled,
+        bankTransferFee: Number(btFee || 0),
+        bankTransferMin: Number(btMin || 0),
+        bankTransferMax: Number(btMax || 0),
+        bankTransferDailyMax: Number(btDaily || 0),
+      },
+      btEnabled ? 'Saved — customers can now send to banks.' : 'Saved. Send to Bank is off for customers.'
+    );
   }
 
   async function runMonnifyTest() {
@@ -354,6 +386,45 @@ export default function AdminSettings() {
               {monnifyTest?.running ? 'Testing…' : 'Test connection'}
             </button>
           </div>
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'monnify' && (
+        <form className="card" style={{ ...cardStyle, marginTop: 16 }} onSubmit={saveBankTransfers}>
+          <SectionHeader
+            title="Send to Bank"
+            hint="Customers send money from their wallet to any bank account. It's paid out from your Monnify wallet, so keep that wallet funded."
+          />
+          <Status state={status.bankTransfers} />
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+            <input type="checkbox" checked={btEnabled} onChange={(e) => setBtEnabled(e.target.checked)} style={{ width: 'auto' }} />
+            Allow customers to send to banks
+          </label>
+          <div className="field">
+            <label htmlFor="walletAccount">Monnify wallet account number</label>
+            <input id="walletAccount" inputMode="numeric" value={walletAccount} onChange={(e) => setWalletAccount(e.target.value)} placeholder="From Monnify → Developer → API Keys & Contracts" />
+          </div>
+          <div className="field">
+            <label htmlFor="btFee">Fee per transfer (₦)</label>
+            <input id="btFee" type="number" min="0" step="1" value={btFee} onChange={(e) => setBtFee(e.target.value)} />
+            <small style={{ color: 'var(--slate-400)' }}>Charged to the customer on top of the amount. Set it to cover Monnify's transfer charge.</small>
+          </div>
+          <div className="field">
+            <label htmlFor="btMin">Minimum per transfer (₦)</label>
+            <input id="btMin" type="number" min="0" step="1" value={btMin} onChange={(e) => setBtMin(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="btMax">Maximum per transfer (₦)</label>
+            <input id="btMax" type="number" min="0" step="1" value={btMax} onChange={(e) => setBtMax(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="btDaily">Daily limit per customer (₦)</label>
+            <input id="btDaily" type="number" min="0" step="1" value={btDaily} onChange={(e) => setBtDaily(e.target.value)} />
+          </div>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 0 }}>
+            In Monnify → Developer → Webhook URLs, put the same webhook URL in the Disbursement box too.
+          </p>
+          {saveButton('bankTransfers', 'Save Send to Bank Settings')}
         </form>
       )}
 

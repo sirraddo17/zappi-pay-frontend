@@ -37,6 +37,7 @@ import AdminAuditLog from './pages/admin/AdminAuditLog';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminBroadcasts from './pages/admin/AdminBroadcasts';
 import AdminAirtimeCash from './pages/admin/AdminAirtimeCash';
+import AdminBankTransfers from './pages/admin/AdminBankTransfers';
 
 function RequireCustomer({ children }) {
   const { customer, loading } = useAuth();
@@ -108,6 +109,7 @@ export default function App() {
           <Route path="/admin/staff" element={<RequireAdmin><AdminStaff /></RequireAdmin>} />
           <Route path="/admin/broadcasts" element={<RequireAdmin><AdminBroadcasts /></RequireAdmin>} />
           <Route path="/admin/airtime-cash" element={<RequireAdmin><AdminAirtimeCash /></RequireAdmin>} />
+          <Route path="/admin/bank-transfers" element={<RequireAdmin><AdminBankTransfers /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
