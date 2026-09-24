@@ -484,7 +484,11 @@ th {
   .admin-sidebar .admin-account .admin-name {
     display: none;
   }
+  .admin-sidebar .admin-account {
+    gap: 6px;
+  }
   .admin-sidebar .admin-account .btn {
+    margin-bottom: 0 !important;
     width: auto;
     padding: 7px 12px;
     font-size: 13px;
