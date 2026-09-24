@@ -1,0 +1,15 @@
+{
+  "id": "/admin",
+  "name": "ZAPPI PAY Admin",
+  "short_name": "ZP Admin",
+  "description": "ZAPPI PAY staff dashboard: funding approvals, orders, customers and settings.",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "background_color": "#0f1628",
+  "theme_color": "#0f1628",
+  "icons": [
+    { "src": "/admin-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/admin-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
