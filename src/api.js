@@ -116,6 +116,15 @@ export const quickLoginPin = (data) => request('/api/auth/quick/pin', { method: 
 export const quickLoginBiometricOptions = (data) => request('/api/auth/quick/biometric-options', { method: 'POST', body: JSON.stringify(data) });
 export const quickLoginBiometric = (data) => request('/api/auth/quick/biometric', { method: 'POST', body: JSON.stringify(data) });
 
+// --- Saved beneficiaries & scheduled top-ups ---
+export const getBeneficiaries = (service) => request(`/api/beneficiaries${service ? `?service=${encodeURIComponent(service)}` : ''}`);
+export const saveBeneficiary = (data) => request('/api/beneficiaries', { method: 'POST', body: JSON.stringify(data) });
+export const renameBeneficiary = (id, nickname) => request(`/api/beneficiaries/${id}`, { method: 'PATCH', body: JSON.stringify({ nickname }) });
+export const deleteBeneficiary = (id) => request(`/api/beneficiaries/${id}`, { method: 'DELETE' });
+export const getSchedules = () => request('/api/schedules');
+export const updateSchedule = (id, data) => request(`/api/schedules/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteSchedule = (id) => request(`/api/schedules/${id}`, { method: 'DELETE' });
+
 // --- Referrals ---
 export const getReferralInfo = (code) => request(`/api/referrals/info${code ? `?code=${encodeURIComponent(code)}` : ''}`);
 export const getMyReferrals = () => request('/api/referrals');

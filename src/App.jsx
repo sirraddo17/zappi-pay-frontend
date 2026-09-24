@@ -22,6 +22,7 @@ import ResetPassword from './pages/ResetPassword';
 import Landing from './pages/Landing';
 import Security from './pages/Security';
 import Refer from './pages/Refer';
+import Saved from './pages/Saved';
 import { getQuickLogin } from './lib/quickLogin';
 
 import AdminLogin from './pages/admin/AdminLogin';
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="/welcome" element={<Landing />} />
           <Route path="/security" element={<RequireCustomer><Security /></RequireCustomer>} />
           <Route path="/refer" element={<RequireCustomer><Refer /></RequireCustomer>} />
+          <Route path="/saved" element={<RequireCustomer><Saved /></RequireCustomer>} />
           <Route path="/buy/:service" element={<RequireCustomer><Buy /></RequireCustomer>} />
           <Route path="/wallet" element={<RequireCustomer><Wallet /></RequireCustomer>} />
           <Route path="/orders" element={<RequireCustomer><Orders /></RequireCustomer>} />
