@@ -2,6 +2,7 @@ import { useState } from 'react';
 import PasswordField from '../../components/PasswordField';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import InstallAppButton from '../../components/InstallAppButton';
 
 export default function AdminLogin() {
   const { login } = useAdminAuth();
@@ -48,6 +49,13 @@ export default function AdminLogin() {
           {submitting ? 'Logging in…' : 'Log In'}
         </button>
       </form>
+
+      <div style={{ textAlign: 'center', margin: '8px 16px 24px' }}>
+        <InstallAppButton label="Install ZP Admin on this phone" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} />
+        <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '8px 0 0' }}>
+          Adds a separate admin app to your home screen that opens straight here.
+        </p>
+      </div>
     </div>
   );
 }
