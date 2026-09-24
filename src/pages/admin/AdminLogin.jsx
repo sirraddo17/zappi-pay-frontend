@@ -51,7 +51,7 @@ export default function AdminLogin() {
       </form>
 
       <div style={{ textAlign: 'center', margin: '8px 16px 24px' }}>
-        <InstallAppButton label="Install ZP Admin on this phone" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} />
+        <InstallAppButton admin label="Install ZP Admin on this phone" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} />
         <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '8px 0 0' }}>
           Adds a separate admin app to your home screen that opens straight here.
         </p>
