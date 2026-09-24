@@ -1,5 +1,41 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
+// Render's free tier puts the backend to sleep when idle, and the first
+// request then takes up to a minute. trackedFetch tells the UI (via
+// window events) when a request is slow so it can say "Connecting…"
+// instead of looking frozen. wakeServer() is fired on app start so the
+// server starts waking while the person is still reading/typing.
+let slowCount = 0;
+function trackedFetch(url, options) {
+  let slow = false;
+  const timer = setTimeout(() => {
+    slow = true;
+    slowCount += 1;
+    window.dispatchEvent(new CustomEvent('zp-server-slow', { detail: slowCount }));
+  }, 3000);
+  const done = () => {
+    clearTimeout(timer);
+    if (slow) {
+      slowCount -= 1;
+      window.dispatchEvent(new CustomEvent('zp-server-slow', { detail: slowCount }));
+    }
+  };
+  return fetch(url, options).then(
+    (res) => {
+      done();
+      return res;
+    },
+    (err) => {
+      done();
+      throw err;
+    }
+  );
+}
+
+export function wakeServer() {
+  fetch(`${API_URL}/api/health`, { cache: 'no-store' }).catch(() => {});
+}
+
 async function handleResponse(res) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
@@ -34,7 +70,7 @@ function deviceToken() {
 export function request(path, options = {}) {
   const token = localStorage.getItem('zappipay_customer_token');
   const device = deviceToken();
-  return fetch(`${API_URL}${path}`, {
+  return trackedFetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -47,7 +83,7 @@ export function request(path, options = {}) {
 
 export function adminRequest(path, options = {}) {
   const token = localStorage.getItem('zappipay_admin_token');
-  return fetch(`${API_URL}${path}`, {
+  return trackedFetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',

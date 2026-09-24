@@ -451,3 +451,18 @@ th {
     color: #000;
   }
 }
+
+.zp-spinner {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--slate-700);
+  border-top-color: var(--gold);
+  animation: zp-spin 0.8s linear infinite;
+}
+@keyframes zp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

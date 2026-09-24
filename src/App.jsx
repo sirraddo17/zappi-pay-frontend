@@ -15,6 +15,7 @@ import Transfer from './pages/Transfer';
 import Profile from './pages/Profile';
 import AirtimeCash from './pages/AirtimeCash';
 import HelpAssistant from './components/HelpAssistant';
+import ServerWaking from './components/ServerWaking';
 import ChangePassword from './pages/ChangePassword';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -109,6 +110,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <HelpAssistant />
+        <ServerWaking />
       </AdminAuthProvider>
     </AuthProvider>
   );
