@@ -152,6 +152,14 @@ export const TOPICS = [
     actions: [{ label: 'Security settings', to: '/security' }],
   },
   {
+    id: 'saved',
+    title: 'Saved numbers & auto top-up',
+    keywords: ['save number', 'saved number', 'beneficiary', 'beneficiaries', 'buy again', 'repeat', 'auto', 'automatic', 'schedule', 'scheduled', 'every month', 'subscription renew', 'auto renew', 'recurring'],
+    answer:
+      'When buying, tick "Save this number" to reuse it with one tap, or "Repeat this purchase automatically" to have it bought from your wallet every day, week or month. Tap "Buy again" on a receipt or the home screen to repeat a past purchase. Manage everything under Saved & Scheduled.',
+    actions: [{ label: 'Saved & Scheduled', to: '/saved' }],
+  },
+  {
     id: 'referral',
     title: 'Refer & earn',
     keywords: ['refer', 'referral', 'invite', 'invite friend', 'referral code', 'referral bonus', 'earn money', 'bonus'],
