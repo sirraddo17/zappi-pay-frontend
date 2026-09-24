@@ -197,6 +197,7 @@ export const changeAdminPassword = (data) => adminRequest('/api/admin/password',
 // --- Admin: settings ---
 export const getSettings = () => adminRequest('/api/admin/settings');
 export const updateSettings = (data) => adminRequest('/api/admin/settings', { method: 'PATCH', body: JSON.stringify(data) });
+export const testMonnifyConnection = () => adminRequest('/api/admin/monnify/test', { method: 'POST' });
 
 // --- Admin: customers ---
 export const getCustomers = () => adminRequest('/api/admin/customers');

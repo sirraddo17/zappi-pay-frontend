@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
-import { getSettings, updateSettings, changeAdminPassword } from '../../api';
+import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
 
@@ -11,6 +11,7 @@ const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTER
 // the VTpass keys (or vice versa) with stale values from another tab.
 const TABS = [
   { key: 'vtpass', label: 'VTpass' },
+  { key: 'monnify', label: 'Monnify' },
   { key: 'markup', label: 'Markup' },
   { key: 'discount', label: 'Discounts' },
   { key: 'limits', label: 'Limits' },
@@ -64,6 +65,11 @@ export default function AdminSettings() {
   const [vtpassPublicKey, setVtpassPublicKey] = useState('');
   const [markupByService, setMarkupByService] = useState(toServiceMap({}));
   const [discountByService, setDiscountByService] = useState(toServiceMap({}));
+  const [monnifyMode, setMonnifyMode] = useState('sandbox');
+  const [monnifyApiKey, setMonnifyApiKey] = useState('');
+  const [monnifySecretKey, setMonnifySecretKey] = useState('');
+  const [monnifyContractCode, setMonnifyContractCode] = useState('');
+  const [monnifyTest, setMonnifyTest] = useState(null);
   const [minFundingAmount, setMinFundingAmount] = useState('100');
   const [minPurchaseAmount, setMinPurchaseAmount] = useState('50');
   const [bankFeePercent, setBankFeePercent] = useState('0');
@@ -96,6 +102,10 @@ export default function AdminSettings() {
         setVtpassPublicKey(s.vtpassPublicKey || '');
         setMarkupByService(toServiceMap(s.markupPercentByService));
         setDiscountByService(toServiceMap(s.discountPercentByService));
+        setMonnifyMode(s.monnifyMode || 'sandbox');
+        setMonnifyApiKey(s.monnifyApiKey || '');
+        setMonnifySecretKey(s.monnifySecretKey || '');
+        setMonnifyContractCode(s.monnifyContractCode || '');
         setMinFundingAmount(String(s.minFundingAmount ?? 100));
         setMinPurchaseAmount(String(s.minPurchaseAmount ?? 50));
         setBankFeePercent(String(s.bankFundingFeePercent ?? 0));
@@ -128,6 +138,21 @@ export default function AdminSettings() {
   function saveVtpass(e) {
     e.preventDefault();
     save('vtpass', { vtpassMode, vtpassApiKey, vtpassSecretKey, vtpassPublicKey }, 'VTpass settings saved.');
+  }
+
+  function saveMonnify(e) {
+    e.preventDefault();
+    setMonnifyTest(null);
+    save('monnify', { monnifyMode, monnifyApiKey, monnifySecretKey, monnifyContractCode }, 'Monnify settings saved. Tap "Test connection" to check them.');
+  }
+
+  async function runMonnifyTest() {
+    setMonnifyTest({ running: true });
+    try {
+      setMonnifyTest(await testMonnifyConnection());
+    } catch (err) {
+      setMonnifyTest({ ok: false, error: err.message });
+    }
   }
 
   function saveMarkup(e) {
@@ -277,6 +302,58 @@ export default function AdminSettings() {
             <PasswordField id="publicKey" value={vtpassPublicKey} onChange={(e) => setVtpassPublicKey(e.target.value)} />
           </div>
           {saveButton('vtpass', 'Save VTpass Settings')}
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'monnify' && (
+        <form className="card" style={cardStyle} onSubmit={saveMonnify}>
+          <SectionHeader
+            title="Monnify Connection"
+            hint="Keys for customers' personal account numbers (automatic bank-transfer funding). Copy them from Monnify → Developer → API Keys & Contracts. Save first, then Test connection."
+          />
+          <Status state={status.monnify} />
+          <div className="field">
+            <label htmlFor="monnifyMode">Monnify mode</label>
+            <select id="monnifyMode" value={monnifyMode} onChange={(e) => setMonnifyMode(e.target.value)}>
+              <option value="sandbox">Sandbox (test) — keys start with MK_TEST_</option>
+              <option value="live">Live — keys start with MK_PROD_</option>
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="monnifyApiKey">API key</label>
+            <PasswordField id="monnifyApiKey" value={monnifyApiKey} onChange={(e) => setMonnifyApiKey(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="monnifySecretKey">Secret key</label>
+            <PasswordField id="monnifySecretKey" value={monnifySecretKey} onChange={(e) => setMonnifySecretKey(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="monnifyContractCode">Contract code</label>
+            <input id="monnifyContractCode" value={monnifyContractCode} onChange={(e) => setMonnifyContractCode(e.target.value)} />
+          </div>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 0 }}>
+            Webhook URL to set in Monnify (Transaction completion): https://zappi-pay-backend.onrender.com/api/webhooks/monnify
+          </p>
+          {monnifyTest && !monnifyTest.running && (
+            <div style={{ margin: '0 0 12px', fontSize: 14 }}>
+              {monnifyTest.ok ? (
+                <p style={{ color: 'var(--green-500)', margin: 0 }}>Connected to Monnify ({monnifyTest.mode}). Keys are working.</p>
+              ) : (
+                <>
+                  <p className="error-text" style={{ margin: 0 }}>Not connected: {monnifyTest.error}</p>
+                  {(monnifyTest.hints || []).map((h) => (
+                    <p key={h} style={{ color: 'var(--orange, #f97316)', margin: '4px 0 0' }}>{h}</p>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {saveButton('monnify', 'Save Monnify Settings')}
+            <button type="button" className="btn btn-secondary" disabled={monnifyTest?.running} onClick={runMonnifyTest}>
+              {monnifyTest?.running ? 'Testing…' : 'Test connection'}
+            </button>
+          </div>
         </form>
       )}
 
