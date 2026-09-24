@@ -129,13 +129,15 @@ export default function AdminCustomers() {
                   <td>{c.phone}</td>
                   <td>{fmtMoney(c.walletBalance)}</td>
                   <td>{c.active ? 'Active' : 'Deactivated'}</td>
-                  <td style={{ display: 'flex', gap: 6 }}>
+                  <td>
+                    <div className="admin-actions">
                     <button className="btn-secondary btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => openAdjust(c)}>
                       Adjust Wallet
                     </button>
                     <button className="btn-secondary btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => toggleActive(c)} disabled={busyId === c.id}>
                       {c.active ? 'Deactivate' : 'Reactivate'}
                     </button>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -161,7 +161,8 @@ export default function AdminStaff() {
                   <td>{a.email}</td>
                   <td>{fmtDate(a.createdAt)}</td>
                   <td>{a.active ? 'Active' : 'Deactivated'}</td>
-                  <td style={{ display: 'flex', gap: 6 }}>
+                  <td>
+                    <div className="admin-actions">
                     <button
                       className="btn-secondary btn"
                       style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }}
@@ -179,6 +180,7 @@ export default function AdminStaff() {
                         {a.active ? 'Deactivate' : 'Reactivate'}
                       </button>
                     )}
+                    </div>
                   </td>
                 </tr>
               ))}
