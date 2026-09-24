@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing } from '../api';
+import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries } from '../api';
 import PinConfirm from '../components/PinConfirm';
 
 // Maps the URL slug to what the backend Order.service enum expects, the
@@ -128,10 +128,49 @@ export default function Buy() {
   const [submitting, setSubmitting] = useState(false);
   const [pricing, setPricing] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  // A plan to select once the provider's plans have loaded — set from
+  // a "Buy again" link (?variation=...).
+  const pendingVariation = useRef(searchParams.get('variation') || '');
+  const [saved, setSaved] = useState([]);
+  const [saveIt, setSaveIt] = useState(false);
+  const [nickname, setNickname] = useState('');
+  const [repeatOn, setRepeatOn] = useState(false);
+  const [frequency, setFrequency] = useState('MONTHLY');
 
   useEffect(() => {
     getPricing().then(setPricing).catch(() => setPricing(null));
   }, []);
+
+  // Pre-fill from a "Buy again" / saved-number link.
+  useEffect(() => {
+    const p = searchParams.get('provider');
+    const r = searchParams.get('recipient');
+    const a = searchParams.get('amount');
+    const m = searchParams.get('meterType');
+    if (p) setProviderId(p);
+    if (r) setRecipient(r);
+    if (a) setCustomAmount(a);
+    if (m === 'prepaid' || m === 'postpaid') setBillType(m);
+    pendingVariation.current = searchParams.get('variation') || '';
+  }, [slug, searchParams]);
+
+  useEffect(() => {
+    if (!config) return;
+    getBeneficiaries(config.backendService)
+      .then((d) => setSaved(d.beneficiaries || []))
+      .catch(() => setSaved([]));
+  }, [slug]);
+
+  function useSaved(b) {
+    setProviderId(b.serviceID);
+    setRecipient(b.billersCode);
+    if (b.meterType) setBillType(b.meterType);
+    setVerifiedName('');
+    setSaveIt(false);
+  }
+
+  const alreadySaved = saved.some((b) => b.serviceID === providerId && b.billersCode === recipient.trim());
 
   useEffect(() => {
     if (!config) return;
@@ -149,7 +188,14 @@ export default function Buy() {
     setVerifiedName('');
     if (!providerId || !config?.needsVariation) return;
     getVtpassVariations(providerId)
-      .then((data) => setVariations(Array.isArray(data.content?.varations || data.content?.variations) ? (data.content?.varations || data.content?.variations) : []))
+      .then((data) => {
+        const list = Array.isArray(data.content?.varations || data.content?.variations) ? (data.content?.varations || data.content?.variations) : [];
+        setVariations(list);
+        if (pendingVariation.current && list.some((v) => v.variation_code === pendingVariation.current)) {
+          setVariationCode(pendingVariation.current);
+        }
+        pendingVariation.current = '';
+      })
       .catch((err) => setError(err.message));
   }, [providerId]);
 
@@ -205,6 +251,9 @@ export default function Buy() {
         billersCode: recipient.trim(),
         phone: phoneToSend.trim(),
         amount,
+        meterType: config.needsType ? billType : undefined,
+        saveBeneficiary: saveIt && !alreadySaved ? { nickname: nickname.trim() || undefined } : undefined,
+        repeat: repeatOn ? { frequency, nickname: nickname.trim() || undefined } : undefined,
         ...auth,
       });
       await refreshCustomer();
@@ -251,6 +300,41 @@ export default function Buy() {
       )}
 
       {error && <p className="error-text">{error}</p>}
+
+      {saved.length > 0 && (
+        <div style={{ padding: '0 16px 12px' }}>
+          <div style={{ fontSize: 13, color: 'var(--slate-400)', marginBottom: 6 }}>Saved</div>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+            {saved.map((b) => {
+              const active = b.serviceID === providerId && b.billersCode === recipient.trim();
+              const prov = providers.find((p) => p.serviceID === b.serviceID)?.name || b.serviceID;
+              return (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => useSaved(b)}
+                  style={{
+                    flexShrink: 0,
+                    textAlign: 'left',
+                    padding: '8px 12px',
+                    borderRadius: 12,
+                    border: `1px solid ${active ? 'var(--purple)' : 'var(--slate-700)'}`,
+                    background: active ? 'rgba(134,59,255,0.18)' : 'var(--slate-800)',
+                    color: 'var(--slate-100)',
+                    cursor: 'pointer',
+                    maxWidth: 180,
+                  }}
+                >
+                  <span style={{ display: 'block', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.nickname || b.billersCode}</span>
+                  <span style={{ display: 'block', fontSize: 11, color: 'var(--slate-400)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {b.nickname ? `${b.billersCode} · ` : ''}{prov}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <form className="card" onSubmit={handleSubmit}>
         <div className="field">
@@ -338,8 +422,39 @@ export default function Buy() {
           </div>
         )}
 
+        <div style={{ borderTop: '1px solid var(--slate-700)', paddingTop: 12, margin: '4px 0 14px' }}>
+          {!alreadySaved && (
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, cursor: 'pointer', marginBottom: 10 }}>
+              <input type="checkbox" checked={saveIt} onChange={(e) => setSaveIt(e.target.checked)} style={{ width: 'auto' }} />
+              Save this {config.recipientLabel.toLowerCase().replace(/ \(.*\)/, '')} for next time
+            </label>
+          )}
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, cursor: 'pointer' }}>
+            <input type="checkbox" checked={repeatOn} onChange={(e) => setRepeatOn(e.target.checked)} style={{ width: 'auto' }} />
+            Repeat this purchase automatically
+          </label>
+          {repeatOn && (
+            <div className="field" style={{ marginTop: 10, marginBottom: 0 }}>
+              <select value={frequency} onChange={(e) => setFrequency(e.target.value)} aria-label="How often">
+                <option value="DAILY">Every day</option>
+                <option value="WEEKLY">Every week (same day)</option>
+                <option value="MONTHLY">Every month (same date)</option>
+              </select>
+              <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '6px 0 0' }}>
+                We'll buy it from your wallet at about this time {frequency === 'DAILY' ? 'every day' : frequency === 'WEEKLY' ? 'every week' : 'every month'}
+                {config.needsVariation ? ', at the plan\'s price on the day' : ''}. Pause or cancel any time under Saved &amp; Scheduled.
+              </p>
+            </div>
+          )}
+          {(saveIt || repeatOn) && (
+            <div className="field" style={{ marginTop: 10, marginBottom: 0 }}>
+              <input value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={40} placeholder="Nickname (optional), e.g. Mum's line" aria-label="Nickname" />
+            </div>
+          )}
+        </div>
+
         <button className="btn" type="submit" disabled={submitting || !amount}>
-          {submitting ? 'Processing…' : `Pay ${naira(price.total)}`}
+          {submitting ? 'Processing…' : `Pay ${naira(price.total)}${repeatOn ? ' & schedule' : ''}`}
         </button>
       </form>
 

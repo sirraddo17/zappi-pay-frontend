@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo } from '../api';
+import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
+import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
 import { LogoIcon, Wordmark } from '../components/Logo';
 import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon } from '../components/Icons';
@@ -76,6 +77,7 @@ export default function Dashboard() {
   const [banners, setBanners] = useState([]);
   const [dismissed, setDismissed] = useState(readDismissed);
   const [referral, setReferral] = useState(null);
+  const [recent, setRecent] = useState([]);
 
   function dismissBanner(id) {
     const next = [...dismissed, id];
@@ -101,6 +103,22 @@ export default function Dashboard() {
       .catch(() => {});
     getReferralInfo()
       .then(setReferral)
+      .catch(() => {});
+    // Last few distinct successful purchases, for one-tap "Buy again".
+    getOrders()
+      .then((data) => {
+        const seen = new Set();
+        const list = [];
+        for (const o of data.orders || []) {
+          if (o.status !== 'SUCCESS') continue;
+          const key = `${o.service}|${o.provider}|${o.recipient}|${o.variationCode || o.costAmount}`;
+          if (seen.has(key) || !buyAgainLink(o)) continue;
+          seen.add(key);
+          list.push(o);
+          if (list.length >= 6) break;
+        }
+        setRecent(list);
+      })
       .catch(() => {});
   }, []);
 
@@ -167,6 +185,31 @@ export default function Dashboard() {
           Fund Wallet
         </Link>
       </div>
+
+      {recent.length > 0 && (
+        <>
+          <div className="section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <span>Buy again</span>
+            <Link to="/saved" style={{ fontSize: 12, color: 'var(--purple)', textDecoration: 'none', textTransform: 'none', letterSpacing: 0 }}>Saved &amp; Scheduled</Link>
+          </div>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '0 16px 4px' }}>
+            {recent.map((o) => (
+              <Link
+                key={o.id}
+                to={buyAgainLink(o)}
+                style={{ flexShrink: 0, padding: '8px 12px', borderRadius: 12, border: '1px solid var(--slate-700)', background: 'var(--slate-800)', color: 'var(--slate-100)', textDecoration: 'none', maxWidth: 170 }}
+              >
+                <span style={{ display: 'block', fontWeight: 600, fontSize: 13 }}>
+                  {SERVICE_LABEL[o.service]} · ₦{Number(o.amount).toLocaleString()}
+                </span>
+                <span style={{ display: 'block', fontSize: 11, color: 'var(--slate-400)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {o.recipient || o.provider}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="section-label">Services</div>
       <div className="service-grid">
