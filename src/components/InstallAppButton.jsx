@@ -21,7 +21,16 @@ function isStandalone() {
   return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 
-export default function InstallAppButton({ label = 'Install app', className = 'btn-secondary btn', style }) {
+// The admin app is installed from its own address (admin.<domain>),
+// since a browser allows only one installed app per site.
+function adminAppUrl() {
+  const { hostname, protocol } = window.location;
+  if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname) || hostname.endsWith('.vercel.app')) return null;
+  const base = hostname.replace(/^www\./, '');
+  return `${protocol}//admin.${base}/admin/login`;
+}
+
+export default function InstallAppButton({ label = 'Install app', className = 'btn-secondary btn', style, admin = false }) {
   const [, force] = useState(0);
   const [hint, setHint] = useState('');
 
@@ -32,6 +41,15 @@ export default function InstallAppButton({ label = 'Install app', className = 'b
   }, []);
 
   if (isStandalone()) return null;
+
+  const onAdminHost = window.location.hostname.startsWith('admin.');
+  if (admin && !onAdminHost && adminAppUrl()) {
+    return (
+      <a href={adminAppUrl()} className={className} style={{ textDecoration: 'none', textAlign: 'center', display: 'inline-block', ...style }}>
+        📲 {label}
+      </a>
+    );
+  }
 
   const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
