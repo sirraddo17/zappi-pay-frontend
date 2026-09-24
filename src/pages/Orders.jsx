@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getOrders } from '../api';
 import BottomNav from '../components/BottomNav';
+import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -21,6 +22,7 @@ const STATUS_COLORS = {
 export default function Orders() {
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState('');
+  const [shown, setShown] = useState(FIRST_COUNT);
 
   useEffect(() => {
     getOrders()
@@ -42,7 +44,8 @@ export default function Orders() {
       ) : orders.length === 0 ? (
         <p className="empty-state">No orders yet.</p>
       ) : (
-        orders.map((o) => (
+        <>
+        {orders.slice(0, shown).map((o) => (
           <Link to={`/orders/${o.id}`} className="card" key={o.id} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
@@ -56,7 +59,11 @@ export default function Orders() {
             </div>
             <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 8 }}>{fmtDate(o.createdAt)}</div>
           </Link>
-        ))
+        ))}
+        <div style={{ margin: '0 16px' }}>
+          <ShowMore total={orders.length} shown={shown} setShown={setShown} />
+        </div>
+        </>
       )}
 
       <BottomNav />

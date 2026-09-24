@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments } from '../api';
 import BottomNav from '../components/BottomNav';
+import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -148,6 +149,7 @@ export default function Wallet() {
   const [successMessage, setSuccessMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [bankInfo, setBankInfo] = useState(null);
+  const [shownTx, setShownTx] = useState(FIRST_COUNT);
 
   function load() {
     Promise.all([getWalletBalance(), getWalletTransactions()])
@@ -257,7 +259,7 @@ export default function Wallet() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((t) => (
+              {transactions.slice(0, shownTx).map((t) => (
                 <tr key={t.id}>
                   <td>{fmtDate(t.createdAt)}</td>
                   <td>{String(t.type).replace(/_/g, ' ')}</td>
@@ -267,6 +269,9 @@ export default function Wallet() {
               ))}
             </tbody>
           </table>
+        )}
+        {transactions && (
+          <ShowMore total={transactions.length} shown={shownTx} setShown={setShownTx} />
         )}
       </div>
 
