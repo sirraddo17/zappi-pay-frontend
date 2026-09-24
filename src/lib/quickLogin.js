@@ -87,5 +87,8 @@ export function runBiometricSetup(options) {
 export function biometricErrorMessage(err) {
   if (err?.name === 'NotAllowedError') return 'Fingerprint / Face ID was cancelled or timed out.';
   if (err?.name === 'InvalidStateError') return 'Fingerprint / Face ID is already set up on this device.';
+  if (err?.name === 'UnknownError' || /credential manager/i.test(err?.message || '')) {
+    return "Your phone couldn't save the fingerprint. Make sure a screen lock and fingerprint are set up in your phone settings, update Chrome and Google Play services, then try again. You can keep using your PIN.";
+  }
   return err?.message || 'Fingerprint / Face ID did not work. Please use your PIN.';
 }
