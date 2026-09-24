@@ -11,19 +11,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
-      manifest: {
-        name: 'ZAPPI PAY',
-        short_name: 'ZAPPI PAY',
-        description: 'Buy airtime, data, electricity, cable TV, and education pins from your wallet.',
-        theme_color: '#f97316',
-        background_color: '#0f172a',
-        display: 'standalone',
-        start_url: '/',
-        icons: [
-          { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
-        ],
-      },
+      // Two installable apps from one site: the customer app
+      // (public/manifest.webmanifest, scope "/") and the admin app
+      // (public/admin.webmanifest, scope "/admin"). index.html picks
+      // which manifest to link based on the URL, so each can be added
+      // to the home screen separately with its own name and icon.
+      manifest: false,
+      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png', 'admin-icon-192.png', 'admin-icon-512.png', 'manifest.webmanifest', 'admin.webmanifest'],
     }),
   ],
   server: {

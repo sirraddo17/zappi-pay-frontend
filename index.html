@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#863bff" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="manifest" id="app-manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" id="app-touch-icon" href="/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" id="app-title" content="ZAPPI PAY" />
+    <script>
+      // Admin pages get their own installable app (name, icon, start
+      // page), so staff can keep "ZP Admin" next to the customer app.
+      (function () {
+        if (location.pathname.indexOf('/admin') !== 0) return;
+        document.getElementById('app-manifest').href = '/admin.webmanifest';
+        document.getElementById('app-touch-icon').href = '/admin-icon-192.png';
+        document.getElementById('app-title').content = 'ZP Admin';
+        document.querySelector('meta[name="theme-color"]').content = '#0f1628';
+      })();
+    </script>
     <title>ZAPPI PAY</title>
   </head>
   <body>
