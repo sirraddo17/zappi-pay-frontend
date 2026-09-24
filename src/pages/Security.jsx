@@ -152,13 +152,24 @@ export default function Security() {
     setBusy(true);
     setError('');
     try {
-      const { options } = await biometricRegisterOptions();
       let response;
       try {
+        const { options } = await biometricRegisterOptions();
         response = await runBiometricSetup(options);
       } catch (err) {
-        setError(biometricErrorMessage(err));
-        return;
+        // Some Android phones reject the first request; retry once with
+        // looser options before giving up (not if the person cancelled).
+        if (err?.name === 'NotAllowedError' || err?.name === 'InvalidStateError' || err?.status) {
+          setError(err?.status ? err.message : biometricErrorMessage(err));
+          return;
+        }
+        try {
+          const { options } = await biometricRegisterOptions(true);
+          response = await runBiometricSetup(options);
+        } catch (err2) {
+          setError(biometricErrorMessage(err2));
+          return;
+        }
       }
       await biometricRegisterVerify(response);
       saveQuickLogin({ biometric: true });
