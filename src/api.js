@@ -229,6 +229,8 @@ export const authorizeBankTransfer = (id, otp) => adminRequest(`/api/admin/bank-
 export const resendBankTransferOtp = (id) => adminRequest(`/api/admin/bank-transfers/${id}/resend-otp`, { method: 'POST' });
 export const checkBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers/${id}/check`, { method: 'POST' });
 export const cancelBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers/${id}/cancel`, { method: 'POST' });
+export const getMonnifyOverview = (light) => adminRequest(`/api/admin/monnify/overview${light ? '?light=1' : ''}`);
+export const resetMonnifyAccounts = () => adminRequest('/api/admin/monnify/reset-accounts', { method: 'POST', body: JSON.stringify({ confirm: 'RESET' }) });
 
 // --- Admin: staff management ---
 export const getAdmins = () => adminRequest('/api/admin/admins');

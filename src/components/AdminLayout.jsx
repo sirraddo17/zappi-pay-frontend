@@ -1,7 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import InstallAppButton from './InstallAppButton';
+import { getMonnifyOverview } from '../api';
+
+// Remembered while the admin app is open so every page doesn't re-ask.
+let monnifyModeCache = null;
 
 const TABS = [
   { to: '/admin', label: 'Overview', end: true },
@@ -21,6 +26,17 @@ export default function AdminLayout({ children }) {
   const { admin, logout } = useAdminAuth();
   const navigate = useNavigate();
   const mainRef = useRef(null);
+  const [monnifyMode, setMonnifyMode] = useState(monnifyModeCache);
+
+  useEffect(() => {
+    if (monnifyModeCache !== null) return;
+    getMonnifyOverview(true)
+      .then((o) => {
+        monnifyModeCache = o.mode || '';
+        setMonnifyMode(monnifyModeCache);
+      })
+      .catch(() => {});
+  }, []);
 
   // On phones the admin tables are shown as stacked cards (see
   // index.css); each cell needs its column name as data-label for
@@ -72,7 +88,15 @@ export default function AdminLayout({ children }) {
           <button className="btn-secondary btn" onClick={handleLogout}>Log Out</button>
         </div>
       </div>
-      <div className="admin-main" ref={mainRef}>{children}</div>
+      <div className="admin-main" ref={mainRef}>
+        {monnifyMode === 'sandbox' && (
+          <div style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid var(--orange, #f97316)', color: 'var(--orange, #f97316)', borderRadius: 10, padding: '8px 12px', marginBottom: 16, fontSize: 13 }}>
+            <strong>Test mode:</strong> Monnify is on Sandbox. Bank-transfer funding and Send to Bank use test money — nothing real moves.{' '}
+            <Link to="/admin/settings" style={{ color: 'inherit', textDecoration: 'underline' }}>Settings → Monnify</Link>
+          </div>
+        )}
+        {children}
+      </div>
     </div>
   );
 }

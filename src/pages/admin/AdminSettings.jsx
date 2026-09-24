@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
-import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection } from '../../api';
+import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
 
@@ -70,6 +70,9 @@ export default function AdminSettings() {
   const [monnifySecretKey, setMonnifySecretKey] = useState('');
   const [monnifyContractCode, setMonnifyContractCode] = useState('');
   const [monnifyTest, setMonnifyTest] = useState(null);
+  const [resetText, setResetText] = useState('');
+  const [resetState, setResetState] = useState(null);
+  const [accountsCount, setAccountsCount] = useState(null);
   const [walletAccount, setWalletAccount] = useState('');
   const [btEnabled, setBtEnabled] = useState(false);
   const [btFee, setBtFee] = useState('0');
@@ -156,6 +159,22 @@ export default function AdminSettings() {
     e.preventDefault();
     setMonnifyTest(null);
     save('monnify', { monnifyMode, monnifyApiKey, monnifySecretKey, monnifyContractCode }, 'Monnify settings saved. Tap "Test connection" to check them.');
+  }
+
+  useEffect(() => {
+    if (tab === 'monnify') getMonnifyOverview().then((o) => setAccountsCount(o.accountsCount ?? 0)).catch(() => {});
+  }, [tab]);
+
+  async function runReset() {
+    setResetState({ running: true });
+    try {
+      const r = await resetMonnifyAccounts();
+      setResetState({ success: `Cleared ${r.cleared} customer account number${r.cleared === 1 ? '' : 's'}. Customers will get new ones the next time they open Wallet.` });
+      setResetText('');
+      setAccountsCount(0);
+    } catch (err) {
+      setResetState({ error: err.message });
+    }
   }
 
   function saveBankTransfers(e) {
@@ -426,6 +445,26 @@ export default function AdminSettings() {
           </p>
           {saveButton('bankTransfers', 'Save Send to Bank Settings')}
         </form>
+      )}
+
+      {!loading && !loadError && tab === 'monnify' && (
+        <div className="card" style={{ ...cardStyle, marginTop: 16, border: '1px solid var(--red-500)' }}>
+          <SectionHeader
+            title="Going live: reset account numbers"
+            hint="Account numbers created in Sandbox don't work in Live. After switching the mode above to Live (and testing the connection), clear them here. Each customer just enters their BVN/NIN again next time they open Wallet and gets real account numbers. Wallet balances are not touched."
+          />
+          <p style={{ fontSize: 14, margin: '0 0 10px' }}>
+            Customers with account numbers now: <strong>{accountsCount ?? '…'}</strong>
+          </p>
+          <Status state={resetState?.running ? null : resetState} />
+          <div className="field">
+            <label htmlFor="resetText">Type RESET to confirm</label>
+            <input id="resetText" value={resetText} onChange={(e) => setResetText(e.target.value.toUpperCase())} autoComplete="off" />
+          </div>
+          <button type="button" className="btn btn-secondary" disabled={resetText !== 'RESET' || resetState?.running} onClick={runReset}>
+            {resetState?.running ? 'Clearing…' : 'Clear all account numbers'}
+          </button>
+        </div>
       )}
 
       {!loading && !loadError && tab === 'markup' && (

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getCustomers, getPendingFunding, getAdminOrders } from '../../api';
+import { Link } from 'react-router-dom';
+import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview } from '../../api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
+  const [monnify, setMonnify] = useState(null);
 
   useEffect(() => {
     Promise.all([getCustomers(), getPendingFunding(), getAdminOrders()])
@@ -21,7 +23,10 @@ export default function AdminDashboard() {
         });
       })
       .catch((err) => setError(err.message));
+    getMonnifyOverview().then(setMonnify).catch(() => setMonnify(null));
   }, []);
+
+  const low = monnify?.walletBalance != null && monnify.walletBalance < (monnify.lowBalanceThreshold || 10000);
 
   return (
     <AdminLayout>
@@ -31,6 +36,37 @@ export default function AdminDashboard() {
       </div>
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
+
+      {monnify?.configured && (
+        <div className="card" style={{ margin: '0 0 16px', border: low ? '1px solid var(--red-500)' : undefined }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>
+                Monnify payout wallet · {monnify.mode === 'live' ? 'LIVE' : 'SANDBOX (test money)'}
+              </div>
+              <div style={{ fontSize: 26, fontWeight: 700 }}>
+                {monnify.walletBalance != null ? `₦${Number(monnify.walletBalance).toLocaleString()}` : monnify.walletAccount ? '—' : 'Not set up'}
+              </div>
+              {monnify.walletBalanceError && <div className="error-text" style={{ fontSize: 12, margin: 0 }}>Could not read balance: {monnify.walletBalanceError}</div>}
+              {!monnify.walletAccount && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Add your wallet account number in Settings → Monnify.</div>}
+              {low && (
+                <div style={{ color: 'var(--red-500)', fontSize: 13, marginTop: 4 }}>
+                  Low balance — fund your Monnify wallet or customer bank transfers will start failing (and be refunded).
+                </div>
+              )}
+            </div>
+            <div style={{ fontSize: 13 }}>
+              <div>Send to Bank: <strong>{monnify.transfersEnabled ? 'On' : 'Off'}</strong></div>
+              <div>Customers with account numbers: <strong>{monnify.accountsCount}</strong></div>
+              {monnify.waitingOtp > 0 && (
+                <div style={{ marginTop: 4 }}>
+                  <Link to="/admin/bank-transfers" style={{ color: 'var(--orange, #f97316)' }}>{monnify.waitingOtp} transfer{monnify.waitingOtp === 1 ? '' : 's'} need your OTP →</Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {stats && (
         <div className="grid">
