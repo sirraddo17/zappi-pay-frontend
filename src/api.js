@@ -198,6 +198,13 @@ export const getBankTransfers = () => request('/api/wallet/bank-transfers');
 export const getStatement = (from, to) => request(`/api/wallet/statement?from=${from}&to=${to}`);
 export const getAppInfo = () => request('/api/app/info');
 export const getAgentInfo = () => request('/api/agent/info');
+export const getPushKey = () => request('/api/push/key');
+export const subscribePush = (subscription) => request('/api/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription }) });
+export const unsubscribePush = (endpoint) => request('/api/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint }) });
+export const startBulkPurchase = (data) => request('/api/vtpass/bulk', { method: 'POST', body: JSON.stringify(data) });
+export const getBulkJob = (id) => request(`/api/vtpass/bulk/${id}`);
+export const getLoyalty = () => request('/api/loyalty');
+export const redeemLoyalty = () => request('/api/loyalty/redeem', { method: 'POST' });
 export const requestAgentAccount = (businessName) => request('/api/agent/request', { method: 'POST', body: JSON.stringify({ businessName }) });
 export const getMyLimits = () => request('/api/account/limits');
 export const updatePreferences = (data) => request('/api/account/preferences', { method: 'PATCH', body: JSON.stringify(data) });
@@ -215,6 +222,8 @@ export const settleAdminOrder = (id, outcome) => adminRequest(`/api/admin/orders
 export const getVtpassBalance = () => adminRequest('/api/admin/vtpass/balance');
 export const releaseBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers/${id}/release`, { method: 'POST' });
 export const sendTestDailySummary = () => adminRequest('/api/admin/daily-summary/test', { method: 'POST' });
+export const sendPushBroadcast = (data) => adminRequest('/api/admin/push/broadcast', { method: 'POST', body: JSON.stringify(data) });
+export const getPushStats = () => adminRequest('/api/admin/push/stats');
 export const changeAdminPassword = (data) => adminRequest('/api/admin/password', { method: 'PATCH', body: JSON.stringify(data) });
 
 // --- Admin: settings ---

@@ -17,7 +17,9 @@ export default defineConfig({
       // which manifest to link based on the URL, so each can be added
       // to the home screen separately with its own name and icon.
       manifest: false,
-      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png', 'admin-icon-192.png', 'admin-icon-512.png', 'manifest.webmanifest', 'admin.webmanifest'],
+      // Push notification handlers live in public/push-sw.js.
+      workbox: { importScripts: ['/push-sw.js'] },
+      includeAssets: ['push-sw.js', 'icon.svg', 'icon-192.png', 'icon-512.png', 'admin-icon-192.png', 'admin-icon-512.png', 'manifest.webmanifest', 'admin.webmanifest'],
     }),
   ],
   server: {

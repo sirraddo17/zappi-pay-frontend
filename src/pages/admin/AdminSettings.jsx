@@ -19,6 +19,7 @@ const TABS = [
   { key: 'referral', label: 'Referrals' },
   { key: 'cashback', label: 'Cashback' },
   { key: 'agents', label: 'Agents' },
+  { key: 'loyalty', label: 'Loyalty Points' },
   { key: 'alerts', label: 'Alerts & Limits' },
   { key: 'security', label: 'Security' },
   { key: 'password', label: 'My Password' },
@@ -93,6 +94,10 @@ export default function AdminSettings() {
   const [a2cMin, setA2cMin] = useState('500');
   const [a2cNumbers, setA2cNumbers] = useState({});
 
+  const [loyOn, setLoyOn] = useState(false);
+  const [loyPer100, setLoyPer100] = useState('1');
+  const [loyValue, setLoyValue] = useState('0.5');
+  const [loyMin, setLoyMin] = useState('200');
   const [fraudOn, setFraudOn] = useState(true);
   const [fraudAmount, setFraudAmount] = useState('20000');
   const [fraudHours, setFraudHours] = useState('24');
@@ -153,6 +158,10 @@ export default function AdminSettings() {
         setA2cFee(String(s.airtimeToCashFeePercent ?? 20));
         setA2cMin(String(s.airtimeToCashMinAmount ?? 500));
         setA2cNumbers(s.airtimeToCashNumbers || {});
+        setLoyOn(Boolean(s.loyaltyEnabled));
+        setLoyPer100(String(s.loyaltyPointsPer100 ?? 1));
+        setLoyValue(String(s.loyaltyPointValue ?? 0.5));
+        setLoyMin(String(s.loyaltyMinRedeem ?? 200));
         setFraudOn(s.fraudHoldEnabled !== false);
         setFraudAmount(String(s.fraudHoldAmount ?? 20000));
         setFraudHours(String(s.fraudHoldHours ?? 24));
@@ -311,6 +320,11 @@ export default function AdminSettings() {
       },
       'Airtime to Cash settings saved.'
     );
+  }
+
+  function saveLoyalty(e) {
+    e.preventDefault();
+    save('loyalty', { loyaltyEnabled: loyOn, loyaltyPointsPer100: Number(loyPer100 || 0), loyaltyPointValue: Number(loyValue || 0), loyaltyMinRedeem: Number(loyMin || 1) }, 'Loyalty settings saved.');
   }
 
   function saveSecurity(e) {
@@ -722,6 +736,34 @@ export default function AdminSettings() {
             </div>
           ))}
           {saveButton('airtimeCash', 'Save Airtime to Cash')}
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'loyalty' && (
+        <form className="card" style={cardStyle} onSubmit={saveLoyalty}>
+          <SectionHeader title="Loyalty points" hint="Customers earn points on every successful purchase and turn them into wallet credit. It's a cost to you, so keep the reward small." />
+          <Status state={status.loyalty} />
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+            <input type="checkbox" checked={loyOn} onChange={(e) => setLoyOn(e.target.checked)} style={{ width: 'auto' }} />
+            Give loyalty points
+          </label>
+          <div className="field">
+            <label htmlFor="loyPer100">Points earned per ₦100 spent</label>
+            <input id="loyPer100" type="number" step="0.1" min="0" value={loyPer100} onChange={(e) => setLoyPer100(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="loyValue">Value of 1 point when redeemed (₦)</label>
+            <input id="loyValue" type="number" step="0.01" min="0" value={loyValue} onChange={(e) => setLoyValue(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="loyMin">Minimum points to redeem</label>
+            <input id="loyMin" type="number" min="1" value={loyMin} onChange={(e) => setLoyMin(e.target.value)} />
+          </div>
+          <p style={{ fontSize: 13, color: 'var(--slate-400)', marginTop: 0 }}>
+            With these numbers a customer gets back about <strong>{((Number(loyPer100 || 0) * Number(loyValue || 0))).toFixed(2)}%</strong> of what they spend
+            (₦{((10000 / 100) * Number(loyPer100 || 0) * Number(loyValue || 0)).toLocaleString()} on every ₦10,000).
+          </p>
+          {saveButton('loyalty', 'Save Loyalty Settings')}
         </form>
       )}
 

@@ -21,6 +21,7 @@ const TYPE_LABEL = {
   AIRTIME_CASH: 'Airtime to cash',
   REFERRAL_BONUS: 'Referral bonus',
   CASHBACK: 'Cashback',
+  LOYALTY: 'Points redeemed',
 };
 
 // Last 12 months as quick picks, plus a custom range.

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getMyLimits, updatePreferences, requestAccountDeletion, cancelAccountDeletion } from '../api';
 import PasswordField from './PasswordField';
+import PushToggle from './PushToggle';
 
 function money(n) {
   return `₦${Number(n || 0).toLocaleString()}`;
@@ -109,6 +110,8 @@ export default function AccountExtras() {
           <span style={{ position: 'absolute', top: 3, left: emailAlerts ? 25 : 3, width: 22, height: 22, borderRadius: '50%', background: '#fff', transition: 'left 0.15s' }} />
         </button>
       </div>
+
+      <PushToggle />
 
       <div style={{ padding: '12px 0' }}>
         {msg && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '0 0 8px' }}>{msg}</p>}

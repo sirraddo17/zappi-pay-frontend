@@ -5,6 +5,8 @@ import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, 
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
 import ServiceNotices from '../components/ServiceNotices';
+import LoyaltyCard from '../components/LoyaltyCard';
+import PushToggle from '../components/PushToggle';
 import { LogoIcon, Wordmark } from '../components/Logo';
 import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon } from '../components/Icons';
 
@@ -39,6 +41,7 @@ function txLabel(t) {
   if (t.type === 'AIRTIME_CASH') return t.note || 'Airtime to Cash';
   if (t.type === 'REFERRAL_BONUS') return t.note || 'Referral bonus';
   if (t.type === 'CASHBACK') return t.note || 'Cashback';
+  if (t.type === 'LOYALTY') return t.note || 'Points redeemed';
   if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
   if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
   return t.note || 'Purchase';
@@ -193,6 +196,16 @@ export default function Dashboard() {
         </Link>
       </div>
 
+      <PushToggle variant="nudge" />
+      <LoyaltyCard />
+      <Link to="/bulk" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '12px 16px' }}>
+        <span>
+          <strong style={{ fontSize: 14 }}>Bulk airtime &amp; data</strong>
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--slate-400)' }}>Send to up to 50 numbers at once</span>
+        </span>
+        <span style={{ color: 'var(--purple)' }}>›</span>
+      </Link>
+
       {recent.length > 0 && (
         <>
           <div className="section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -290,7 +303,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>

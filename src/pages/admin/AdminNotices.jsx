@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminNotices, createNotice, setNoticeActive } from '../../api';
+import { getAdminNotices, createNotice, setNoticeActive, sendPushBroadcast, getPushStats } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
 
@@ -14,6 +14,32 @@ export default function AdminNotices() {
   const [hours, setHours] = useState('6');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+
+  const [pushTitle, setPushTitle] = useState('');
+  const [pushMsg, setPushMsg] = useState('');
+  const [pushStats, setPushStats] = useState(null);
+  const [pushResult, setPushResult] = useState('');
+
+  useEffect(() => {
+    getPushStats().then(setPushStats).catch(() => {});
+  }, []);
+
+  async function sendPush(e) {
+    e.preventDefault();
+    if (!window.confirm(`Send this notification to ${pushStats?.devices ?? 'all'} device(s)?`)) return;
+    setPushResult('');
+    setBusy(true);
+    try {
+      const r = await sendPushBroadcast({ title: pushTitle, message: pushMsg });
+      setPushResult(`Sent to ${r.sent} device${r.sent === 1 ? '' : 's'}.`);
+      setPushTitle('');
+      setPushMsg('');
+    } catch (err) {
+      setPushResult(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   function load() {
     getAdminNotices().then((d) => setNotices(d.notices)).catch((e) => setError(e.message));
@@ -77,6 +103,23 @@ export default function AdminNotices() {
           </div>
         </div>
         <button className="btn" type="submit" disabled={busy}>{busy ? 'Posting…' : 'Post notice'}</button>
+      </form>
+
+      <form className="card" style={{ margin: '0 0 16px', maxWidth: 560 }} onSubmit={sendPush}>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>Push notification to everyone</h2>
+        <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -6 }}>
+          Goes to the {pushStats ? `${pushStats.devices} device${pushStats.devices === 1 ? '' : 's'} (${pushStats.customers} customer${pushStats.customers === 1 ? '' : 's'})` : ''} that turned on notifications. Use it sparingly — too many and people switch them off.
+        </p>
+        <div className="field">
+          <label htmlFor="pt">Title</label>
+          <input id="pt" value={pushTitle} onChange={(e) => setPushTitle(e.target.value)} maxLength={60} placeholder="5% off data today!" required />
+        </div>
+        <div className="field">
+          <label htmlFor="pm">Message</label>
+          <input id="pm" value={pushMsg} onChange={(e) => setPushMsg(e.target.value)} maxLength={180} placeholder="Buy any data plan before midnight and save 5%." required />
+        </div>
+        {pushResult && <p style={{ fontSize: 13, margin: '0 0 8px' }}>{pushResult}</p>}
+        <button className="btn" type="submit" disabled={busy || !pushStats?.devices}>Send notification</button>
       </form>
 
       {notices === null ? (

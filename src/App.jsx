@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Buy from './pages/Buy';
 import Wallet from './pages/Wallet';
 import Statement from './pages/Statement';
+import Bulk from './pages/Bulk';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
 import Notifications from './pages/Notifications';
@@ -93,6 +94,7 @@ export default function App() {
           <Route path="/buy/:service" element={<RequireCustomer><Buy /></RequireCustomer>} />
           <Route path="/wallet" element={<RequireCustomer><Wallet /></RequireCustomer>} />
           <Route path="/statement" element={<RequireCustomer><Statement /></RequireCustomer>} />
+          <Route path="/bulk" element={<RequireCustomer><Bulk /></RequireCustomer>} />
           <Route path="/orders" element={<RequireCustomer><Orders /></RequireCustomer>} />
           <Route path="/orders/:id" element={<RequireCustomer><OrderDetail /></RequireCustomer>} />
           <Route path="/notifications" element={<RequireCustomer><Notifications /></RequireCustomer>} />
