@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
+import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
 import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, setCustomerAgent, adminSetUsername } from '../../api';
 
 // Set a username for older accounts (or correct one). It is the
@@ -63,6 +64,8 @@ const STATUS_COLORS = {
 export default function AdminCustomerDetail() {
   const { id } = useParams();
   const [data, setData] = useState(null);
+  const [ordersShown, setOrdersShown] = useState(FIRST_COUNT);
+  const [txShown, setTxShown] = useState(FIRST_COUNT);
   const [error, setError] = useState('');
 
   const [adjustType, setAdjustType] = useState('CREDIT');
@@ -84,6 +87,7 @@ export default function AdminCustomerDetail() {
   }
 
   useEffect(load, [id]);
+  useEffect(() => { setOrdersShown(FIRST_COUNT); setTxShown(FIRST_COUNT); }, [id]);
 
   async function handleAdjustSubmit(e) {
     e.preventDefault();
@@ -333,7 +337,7 @@ export default function AdminCustomerDetail() {
       </form>
 
       <div className="card admin-table-wrap" style={{ margin: '0 0 16px' }}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Orders</h2>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>Orders{orders.length > 0 ? ` (${orders.length})` : ''}</h2>
         {orders.length === 0 ? (
           <p className="empty-state">No orders yet.</p>
         ) : (
@@ -348,7 +352,7 @@ export default function AdminCustomerDetail() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((o) => (
+              {orders.slice(0, ordersShown).map((o) => (
                 <tr key={o.id}>
                   <td>{o.service}</td>
                   <td>{o.recipient}</td>
@@ -360,10 +364,11 @@ export default function AdminCustomerDetail() {
             </tbody>
           </table>
         )}
+        <ShowMore total={orders.length} shown={ordersShown} setShown={setOrdersShown} />
       </div>
 
       <div className="card admin-table-wrap" style={{ margin: 0 }}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Wallet History</h2>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>Wallet History{walletTransactions.length > 0 ? ` (${walletTransactions.length})` : ''}</h2>
         {walletTransactions.length === 0 ? (
           <p className="empty-state">No transactions yet.</p>
         ) : (
@@ -378,7 +383,7 @@ export default function AdminCustomerDetail() {
               </tr>
             </thead>
             <tbody>
-              {walletTransactions.map((t) => (
+              {walletTransactions.slice(0, txShown).map((t) => (
                 <tr key={t.id}>
                   <td>{t.type}</td>
                   <td>{fmtMoney(t.amount)}</td>
@@ -390,6 +395,7 @@ export default function AdminCustomerDetail() {
             </tbody>
           </table>
         )}
+        <ShowMore total={walletTransactions.length} shown={txShown} setShown={setTxShown} />
       </div>
     </AdminLayout>
   );
