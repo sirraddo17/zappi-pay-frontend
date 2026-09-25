@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
-import { getAdminBankTransfers, authorizeBankTransfer, resendBankTransferOtp, checkBankTransfer, cancelBankTransfer } from '../../api';
+import { getAdminBankTransfers, authorizeBankTransfer, resendBankTransferOtp, checkBankTransfer, cancelBankTransfer, releaseBankTransfer } from '../../api';
 
 function money(n) {
   return `₦${Number(n || 0).toLocaleString()}`;
@@ -14,13 +14,14 @@ function fmtDate(d) {
 
 const FILTERS = [
   { key: '', label: 'All' },
+  { key: 'HELD', label: 'Held (fraud check)' },
   { key: 'PENDING_AUTHORIZATION', label: 'Needs OTP' },
   { key: 'PROCESSING', label: 'Processing' },
   { key: 'SUCCESS', label: 'Sent' },
   { key: 'FAILED', label: 'Failed' },
 ];
 
-const COLORS = { SUCCESS: 'var(--green-500)', FAILED: 'var(--red-500)', REVERSED: 'var(--red-500)', PROCESSING: 'var(--orange, #f97316)', PENDING_AUTHORIZATION: 'var(--orange, #f97316)' };
+const COLORS = { SUCCESS: 'var(--green-500)', FAILED: 'var(--red-500)', REVERSED: 'var(--red-500)', PROCESSING: 'var(--orange, #f97316)', HELD: 'var(--red-500)', PENDING_AUTHORIZATION: 'var(--orange, #f97316)' };
 
 // Customer transfers to bank accounts. Monnify asks for an email OTP on
 // each transfer unless 2FA is turned off for API transfers — those wait
@@ -69,6 +70,15 @@ export default function AdminBankTransfers() {
         <p>Customers sending money from their wallet to bank accounts</p>
       </div>
 
+      {data?.held > 0 && (
+        <div className="card" style={{ margin: '0 0 12px', border: '1px solid var(--red-500)' }}>
+          <strong>{data.held} transfer{data.held === 1 ? '' : 's'} held for a fraud check.</strong>
+          <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: '4px 0 0' }}>
+            Large transfers soon after signup or a PIN/password/new-device change wait here. If in doubt, call the customer on their registered number before releasing.
+          </p>
+        </div>
+      )}
+
       {data?.waiting > 0 && (
         <div className="card" style={{ margin: '0 0 12px', border: '1px solid var(--orange, #f97316)' }}>
           <strong>{data.waiting} transfer{data.waiting === 1 ? '' : 's'} waiting for your OTP.</strong>
@@ -105,12 +115,12 @@ export default function AdminBankTransfers() {
                     From <Link to={`/admin/customers/${t.customer.id}`} style={{ color: 'var(--purple)' }}>{t.customer.name}</Link> · {t.customer.phone}
                   </div>
                   <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>{fmtDate(t.createdAt)} · Ref {t.reference}</div>
-                  {t.failureReason && <div style={{ color: 'var(--red-500)', fontSize: 12, marginTop: 4 }}>{t.failureReason}</div>}
+                  {t.failureReason && <div style={{ color: 'var(--red-500)', fontSize: 12, marginTop: 4 }}>{t.status === 'HELD' ? `Held: ${t.failureReason}` : t.failureReason}</div>}
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: 18 }}>{money(t.amount)}</div>
                   {Number(t.fee) > 0 && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>+ {money(t.fee)} fee</div>}
-                  <div style={{ fontSize: 13, color: COLORS[t.status] || 'var(--slate-400)' }}>{t.status === 'PENDING_AUTHORIZATION' ? 'NEEDS OTP' : t.status}</div>
+                  <div style={{ fontSize: 13, color: COLORS[t.status] || 'var(--slate-400)' }}>{t.status === 'PENDING_AUTHORIZATION' ? 'NEEDS OTP' : t.status === 'HELD' ? 'HELD' : t.status}</div>
                 </div>
               </div>
 
@@ -145,6 +155,17 @@ export default function AdminBankTransfers() {
                       Cancel & refund
                     </button>
                   </div>
+                </div>
+              )}
+
+              {t.status === 'HELD' && (
+                <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                  <button className="btn" style={{ width: 'auto' }} disabled={busyId === t.id} onClick={() => window.confirm(`Send ${money(t.amount)} to ${t.accountName}?`) && run(t.id, () => releaseBankTransfer(t.id), (r) => `Released — status: ${r.status}.`)}>
+                    Release & send
+                  </button>
+                  <button className="btn btn-secondary" style={{ width: 'auto' }} disabled={busyId === t.id} onClick={() => window.confirm('Cancel this transfer and refund the customer?') && run(t.id, () => cancelBankTransfer(t.id), () => 'Cancelled — customer refunded.')}>
+                    Cancel & refund
+                  </button>
                 </div>
               )}
 

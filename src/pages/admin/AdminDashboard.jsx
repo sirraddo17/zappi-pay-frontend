@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import ProfitPanel from '../../components/ProfitPanel';
 import { Link } from 'react-router-dom';
-import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests } from '../../api';
+import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance } from '../../api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -10,6 +10,7 @@ export default function AdminDashboard() {
   const [monnify, setMonnify] = useState(null);
   const [deletions, setDeletions] = useState([]);
   const [agentReqs, setAgentReqs] = useState([]);
+  const [vtpass, setVtpass] = useState(null);
 
   useEffect(() => {
     Promise.all([getCustomers(), getPendingFunding(), getAdminOrders()])
@@ -29,6 +30,7 @@ export default function AdminDashboard() {
     getMonnifyOverview().then(setMonnify).catch(() => setMonnify(null));
     getDeletionRequests().then((d) => setDeletions(d.customers)).catch(() => {});
     getAgentRequests().then((d) => setAgentReqs(d.customers)).catch(() => {});
+    getVtpassBalance().then(setVtpass).catch(() => {});
   }, []);
 
   const low = monnify?.walletBalance != null && monnify.walletBalance < (monnify.lowBalanceThreshold || 10000);
@@ -41,6 +43,17 @@ export default function AdminDashboard() {
       </div>
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
+
+      {vtpass && (
+        <div className="card" style={{ margin: '0 0 16px', border: vtpass.balance != null && vtpass.balance < 20000 ? '1px solid var(--red-500)' : undefined }}>
+          <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>VTpass wallet · {vtpass.mode === 'live' ? 'LIVE' : vtpass.mode ? 'SANDBOX (test)' : ''}</div>
+          <div style={{ fontSize: 26, fontWeight: 700 }}>{vtpass.balance != null ? `₦${Number(vtpass.balance).toLocaleString()}` : '—'}</div>
+          {vtpass.error && <div className="error-text" style={{ fontSize: 12, margin: 0 }}>Could not read balance: {vtpass.error}</div>}
+          {vtpass.balance != null && vtpass.balance < 20000 && (
+            <div style={{ color: 'var(--red-500)', fontSize: 13, marginTop: 4 }}>Low balance — top up your VTpass wallet or customer purchases will start failing (and be refunded).</div>
+          )}
+        </div>
+      )}
 
       {monnify?.configured && (
         <div className="card" style={{ margin: '0 0 16px', border: low ? '1px solid var(--red-500)' : undefined }}>
@@ -63,6 +76,11 @@ export default function AdminDashboard() {
             <div style={{ fontSize: 13 }}>
               <div>Send to Bank: <strong>{monnify.transfersEnabled ? 'On' : 'Off'}</strong></div>
               <div>Customers with account numbers: <strong>{monnify.accountsCount}</strong></div>
+              {monnify.held > 0 && (
+                <div style={{ marginTop: 4 }}>
+                  <Link to="/admin/bank-transfers" style={{ color: 'var(--red-500)' }}>{monnify.held} transfer{monnify.held === 1 ? '' : 's'} held for review →</Link>
+                </div>
+              )}
               {monnify.waitingOtp > 0 && (
                 <div style={{ marginTop: 4 }}>
                   <Link to="/admin/bank-transfers" style={{ color: 'var(--orange, #f97316)' }}>{monnify.waitingOtp} transfer{monnify.waitingOtp === 1 ? '' : 's'} need your OTP →</Link>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
-import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts } from '../../api';
+import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
 
@@ -20,6 +20,7 @@ const TABS = [
   { key: 'cashback', label: 'Cashback' },
   { key: 'agents', label: 'Agents' },
   { key: 'alerts', label: 'Alerts & Limits' },
+  { key: 'security', label: 'Security' },
   { key: 'password', label: 'My Password' },
 ];
 
@@ -92,6 +93,12 @@ export default function AdminSettings() {
   const [a2cMin, setA2cMin] = useState('500');
   const [a2cNumbers, setA2cNumbers] = useState({});
 
+  const [fraudOn, setFraudOn] = useState(true);
+  const [fraudAmount, setFraudAmount] = useState('20000');
+  const [fraudHours, setFraudHours] = useState('24');
+  const [twoFactor, setTwoFactor] = useState(false);
+  const [summaryOn, setSummaryOn] = useState(false);
+  const [summaryTest, setSummaryTest] = useState(null);
   const [agentOn, setAgentOn] = useState(false);
   const [agentByService, setAgentByService] = useState(toServiceMap({}));
   const [cbEnabled, setCbEnabled] = useState(false);
@@ -146,6 +153,11 @@ export default function AdminSettings() {
         setA2cFee(String(s.airtimeToCashFeePercent ?? 20));
         setA2cMin(String(s.airtimeToCashMinAmount ?? 500));
         setA2cNumbers(s.airtimeToCashNumbers || {});
+        setFraudOn(s.fraudHoldEnabled !== false);
+        setFraudAmount(String(s.fraudHoldAmount ?? 20000));
+        setFraudHours(String(s.fraudHoldHours ?? 24));
+        setTwoFactor(Boolean(s.adminTwoFactorEnabled));
+        setSummaryOn(Boolean(s.dailySummaryEnabled));
         setAgentOn(Boolean(s.agentPricingEnabled));
         setAgentByService(toServiceMap(s.agentDiscountPercentByService));
         setCbEnabled(Boolean(s.cashbackEnabled));
@@ -299,6 +311,31 @@ export default function AdminSettings() {
       },
       'Airtime to Cash settings saved.'
     );
+  }
+
+  function saveSecurity(e) {
+    e.preventDefault();
+    save(
+      'security',
+      {
+        fraudHoldEnabled: fraudOn,
+        fraudHoldAmount: Number(fraudAmount || 0),
+        fraudHoldHours: Number(fraudHours || 24),
+        adminTwoFactorEnabled: twoFactor,
+        dailySummaryEnabled: summaryOn,
+      },
+      'Security settings saved.'
+    );
+  }
+
+  async function runSummaryTest() {
+    setSummaryTest({ running: true });
+    try {
+      const r = await sendTestDailySummary();
+      setSummaryTest({ ok: r.sent > 0, text: r.sent > 0 ? `Sent to ${r.sent} admin email${r.sent === 1 ? '' : 's'}.` : 'No email was sent — check your Resend setup.' });
+    } catch (err) {
+      setSummaryTest({ ok: false, text: err.message });
+    }
   }
 
   function saveAgents(e) {
@@ -685,6 +722,55 @@ export default function AdminSettings() {
             </div>
           ))}
           {saveButton('airtimeCash', 'Save Airtime to Cash')}
+        </form>
+      )}
+
+      {!loading && !loadError && tab === 'security' && (
+        <form className="card" style={cardStyle} onSubmit={saveSecurity}>
+          <SectionHeader title="Security" />
+          <Status state={status.security} />
+
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>Fraud check on bank transfers</div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+            <input type="checkbox" checked={fraudOn} onChange={(e) => setFraudOn(e.target.checked)} style={{ width: 'auto' }} />
+            Hold large transfers for my review
+          </label>
+          <div className="field">
+            <label htmlFor="fraudAmount">Hold transfers of at least (₦)</label>
+            <input id="fraudAmount" type="number" min="0" value={fraudAmount} onChange={(e) => setFraudAmount(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="fraudHours">…made within this many hours of signup, a PIN/password change or a new-device login</label>
+            <input id="fraudHours" type="number" min="1" max="720" value={fraudHours} onChange={(e) => setFraudHours(e.target.value)} />
+            <small style={{ color: 'var(--slate-400)' }}>Held transfers wait under Bank Transfers → Held. You'll get an email for each one.</small>
+          </div>
+
+          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '14px 0', paddingTop: 14 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Two-step admin login</div>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+              <input type="checkbox" checked={twoFactor} onChange={(e) => setTwoFactor(e.target.checked)} style={{ width: 'auto' }} />
+              Email a 6-digit code on every admin login
+            </label>
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: 0 }}>
+              Admins can tick “Trust this device for 30 days”. Test that your admin email receives messages (e.g. with the summary test below) before turning this on. Emergency: adding ADMIN_2FA_DISABLED = 1 on Render turns it off.
+            </p>
+          </div>
+
+          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '14px 0', paddingTop: 14 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Daily summary email</div>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+              <input type="checkbox" checked={summaryOn} onChange={(e) => setSummaryOn(e.target.checked)} style={{ width: 'auto' }} />
+              Email admins yesterday's numbers at 7am
+            </label>
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto' }} disabled={summaryTest?.running} onClick={runSummaryTest}>
+              {summaryTest?.running ? 'Sending…' : 'Send me a summary now'}
+            </button>
+            {summaryTest && !summaryTest.running && (
+              <p style={{ fontSize: 13, margin: '6px 0 0', color: summaryTest.ok ? 'var(--green-500)' : 'var(--red-500)' }}>{summaryTest.text}</p>
+            )}
+          </div>
+
+          {saveButton('security', 'Save Security Settings')}
         </form>
       )}
 

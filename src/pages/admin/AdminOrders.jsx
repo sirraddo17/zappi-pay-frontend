@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminOrders } from '../../api';
+import { getAdminOrders, recheckAdminOrder, settleAdminOrder } from '../../api';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -12,7 +12,7 @@ function fmtDate(d) {
 
 const STATUS_COLORS = {
   SUCCESS: 'var(--green-500)',
-  PENDING: 'var(--slate-400)',
+  PENDING: 'var(--orange, #f97316)',
   FAILED: 'var(--red-500)',
   REFUNDED: 'var(--orange)',
 };
@@ -33,11 +33,32 @@ export default function AdminOrders() {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('ALL');
 
-  useEffect(() => {
+  const [busy, setBusy] = useState(null);
+  const [message, setMessage] = useState('');
+
+  function load() {
     getAdminOrders()
       .then((data) => setOrders(data.orders))
       .catch((err) => setError(err.message));
-  }, []);
+  }
+  useEffect(load, []);
+
+  async function act(o, fn, text) {
+    setBusy(o.id);
+    setError('');
+    setMessage('');
+    try {
+      const r = await fn();
+      setMessage(`${o.service} for ${o.recipient}: ${text(r)}`);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const pendingCount = (orders || []).filter((o) => o.status === 'PENDING').length;
 
   const filtered = orders === null ? null : filter === 'ALL' ? orders : orders.filter((o) => o.service === filter);
 
@@ -49,6 +70,12 @@ export default function AdminOrders() {
       </div>
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
+      {message && <p style={{ color: 'var(--green-500)', margin: '0 0 12px' }}>{message}</p>}
+      {pendingCount > 0 && (
+        <div className="card" style={{ margin: '0 0 12px', border: '1px solid var(--orange, #f97316)', fontSize: 14 }}>
+          <strong>{pendingCount} order{pendingCount === 1 ? '' : 's'} waiting on VTpass.</strong> These are re-checked automatically and settled (or refunded) as soon as VTpass confirms. Use “Check now”, or settle by hand only after confirming with VTpass support.
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
         {SERVICE_FILTERS.map((f) => (
@@ -88,7 +115,22 @@ export default function AdminOrders() {
                   <td>{o.service}</td>
                   <td>{o.recipient}</td>
                   <td>{fmtMoney(o.amount)}</td>
-                  <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}>{o.status}</td>
+                  <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}>
+                    {o.status}
+                    {o.status === 'PENDING' && (
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => act(o, () => recheckAdminOrder(o.id), (r) => `status now ${r.status}`)}>
+                          Check now
+                        </button>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => window.confirm('Mark as DELIVERED? Only do this if VTpass confirmed it was delivered.') && act(o, () => settleAdminOrder(o.id, 'SUCCESS'), (r) => `marked ${r.status}`)}>
+                          Delivered
+                        </button>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => window.confirm('Mark as FAILED and refund the customer? Only do this if VTpass confirmed it was NOT delivered.') && act(o, () => settleAdminOrder(o.id, 'FAILED'), (r) => `marked ${r.status}, customer refunded`)}>
+                          Failed + refund
+                        </button>
+                      </div>
+                    )}
+                  </td>
                   <td>{fmtDate(o.createdAt)}</td>
                 </tr>
               ))}

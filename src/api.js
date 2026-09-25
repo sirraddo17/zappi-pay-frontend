@@ -209,6 +209,12 @@ export const getAdminAnalytics = (days) => adminRequest(`/api/admin/analytics?da
 
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
+export const adminLoginVerify = (data) => adminRequest('/api/admin/login/verify', { method: 'POST', body: JSON.stringify(data) });
+export const recheckAdminOrder = (id) => adminRequest(`/api/admin/orders/${id}/recheck`, { method: 'POST' });
+export const settleAdminOrder = (id, outcome) => adminRequest(`/api/admin/orders/${id}/settle`, { method: 'POST', body: JSON.stringify({ outcome }) });
+export const getVtpassBalance = () => adminRequest('/api/admin/vtpass/balance');
+export const releaseBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers/${id}/release`, { method: 'POST' });
+export const sendTestDailySummary = () => adminRequest('/api/admin/daily-summary/test', { method: 'POST' });
 export const changeAdminPassword = (data) => adminRequest('/api/admin/password', { method: 'PATCH', body: JSON.stringify(data) });
 
 // --- Admin: settings ---

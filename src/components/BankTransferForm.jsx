@@ -8,8 +8,8 @@ function money(n) {
   return `₦${Number(n || 0).toLocaleString()}`;
 }
 
-const STATUS_COLOR = { SUCCESS: 'var(--green-500)', PROCESSING: 'var(--orange, #f97316)', FAILED: 'var(--red-500)', REVERSED: 'var(--red-500)' };
-const STATUS_LABEL = { SUCCESS: 'Sent', PROCESSING: 'Processing', FAILED: 'Failed · refunded', REVERSED: 'Reversed · refunded' };
+const STATUS_COLOR = { SUCCESS: 'var(--green-500)', PROCESSING: 'var(--orange, #f97316)', UNDER_REVIEW: 'var(--orange, #f97316)', FAILED: 'var(--red-500)', REVERSED: 'var(--red-500)' };
+const STATUS_LABEL = { SUCCESS: 'Sent', PROCESSING: 'Processing', UNDER_REVIEW: 'Under review', FAILED: 'Failed · refunded', REVERSED: 'Reversed · refunded' };
 
 // Send to any Nigerian bank account from the wallet.
 export default function BankTransferForm({ onDone }) {
@@ -119,7 +119,9 @@ export default function BankTransferForm({ onDone }) {
     setSuccess(
       res.transfer.status === 'SUCCESS'
         ? `${money(amt)} sent to ${account.accountName}.`
-        : `${money(amt)} to ${account.accountName} is processing. You'll get a notification when it lands — if it fails, your money comes straight back.`
+        : res.transfer.status === 'UNDER_REVIEW'
+          ? `${money(amt)} to ${account.accountName} is under a quick security review. It will be sent shortly, or refunded if we can't confirm it's you.`
+          : `${money(amt)} to ${account.accountName} is processing. You'll get a notification when it lands — if it fails, your money comes straight back.`
     );
     setAmount('');
     setNarration('');

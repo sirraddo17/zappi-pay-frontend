@@ -124,6 +124,12 @@ export default function OrderDetail() {
           {order.status}
         </div>
 
+        {order.status === 'PENDING' && (
+          <p style={{ fontSize: 13, color: 'var(--orange, #f97316)', margin: '-8px 0 16px' }}>
+            Waiting for the provider to confirm. Please don't buy again — we'll notify you, and refund you automatically if it doesn't go through.
+          </p>
+        )}
+
         {token && (
           <div style={{ background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)', borderRadius: 12, padding: 14, marginBottom: 18, textAlign: 'left' }}>
             <div style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 4 }}>{order.service === 'ELECTRICITY' ? 'Your token' : 'PIN / code'}</div>
