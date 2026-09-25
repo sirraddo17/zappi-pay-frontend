@@ -42,6 +42,7 @@ import AdminBroadcasts from './pages/admin/AdminBroadcasts';
 import AdminAirtimeCash from './pages/admin/AdminAirtimeCash';
 import AdminBankTransfers from './pages/admin/AdminBankTransfers';
 import AdminPromos from './pages/admin/AdminPromos';
+import AdminAssistant from './pages/admin/AdminAssistant';
 import AdminNotices from './pages/admin/AdminNotices';
 
 function RequireCustomer({ children }) {
@@ -119,6 +120,7 @@ export default function App() {
           <Route path="/admin/airtime-cash" element={<RequireAdmin><AdminAirtimeCash /></RequireAdmin>} />
           <Route path="/admin/bank-transfers" element={<RequireAdmin><AdminBankTransfers /></RequireAdmin>} />
           <Route path="/admin/promos" element={<RequireAdmin><AdminPromos /></RequireAdmin>} />
+          <Route path="/admin/assistant" element={<RequireAdmin><AdminAssistant /></RequireAdmin>} />
           <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

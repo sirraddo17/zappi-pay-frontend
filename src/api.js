@@ -6,9 +6,11 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 // instead of looking frozen. wakeServer() is fired on app start so the
 // server starts waking while the person is still reading/typing.
 let slowCount = 0;
-function trackedFetch(url, options) {
+function trackedFetch(url, { quiet, ...options } = {}) {
   let slow = false;
-  const timer = setTimeout(() => {
+  // quiet: requests that are slow by nature (AI answers) shouldn't
+  // show the "Connecting…" banner.
+  const timer = quiet ? null : setTimeout(() => {
     slow = true;
     slowCount += 1;
     window.dispatchEvent(new CustomEvent('zp-server-slow', { detail: slowCount }));
@@ -230,6 +232,13 @@ export const changeAdminPassword = (data) => adminRequest('/api/admin/password',
 
 // --- Admin: settings ---
 export const getSettings = () => adminRequest('/api/admin/settings');
+export const getAiStatus = () => request('/api/ai/status');
+export const aiChat = (messages) => request('/api/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages }) });
+export const getAdminAiStatus = () => adminRequest('/api/admin/ai/status');
+export const adminAiChat = (messages) => adminRequest('/api/admin/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages }) });
+export const adminAiDraftReply = (ticketId, instructions) => adminRequest('/api/admin/ai/draft-reply', { method: 'POST', quiet: true, body: JSON.stringify({ ticketId, instructions }) });
+export const testAiConnection = (model) => adminRequest('/api/admin/ai/test', { method: 'POST', body: JSON.stringify({ model }) });
+export const getAiUsage = () => adminRequest('/api/admin/ai/usage');
 export const updateSettings = (data) => adminRequest('/api/admin/settings', { method: 'PATCH', body: JSON.stringify(data) });
 export const testMonnifyConnection = () => adminRequest('/api/admin/monnify/test', { method: 'POST' });
 

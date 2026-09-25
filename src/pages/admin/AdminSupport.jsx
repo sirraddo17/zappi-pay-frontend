@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket } from '../../api';
+import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply } from '../../api';
 import { CATEGORIES, detectCategory, draftReply } from '../../assistant/replyTemplates';
 
 function fmtMoney(n) {
@@ -15,7 +15,7 @@ function fmtDate(d) {
 // professional reply from a template filled with this customer's name
 // and order details, and lets the admin edit it before sending. Nothing
 // goes to the customer until the admin presses Send.
-function ReplyPanel({ ticket, onSent, onClose }) {
+function ReplyPanel({ ticket, onSent, onClose, aiOn }) {
   const [category, setCategory] = useState(() => detectCategory(ticket));
   const [text, setText] = useState(() => draftReply(ticket, detectCategory(ticket)));
   const [edited, setEdited] = useState(false);
@@ -23,6 +23,23 @@ function ReplyPanel({ ticket, onSent, onClose }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiNote, setAiNote] = useState('');
+
+  // Claude drafts from this customer's real orders, refunds and wallet.
+  async function draftWithAi() {
+    setAiBusy(true);
+    setError('');
+    try {
+      const res = await adminAiDraftReply(ticket.id, aiNote.trim() || undefined);
+      setText(res.draft.slice(0, 2000));
+      setEdited(true);
+    } catch (err) {
+      setError(err.message || 'Could not draft with AI.');
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   function changeCategory(id) {
     setCategory(id);
@@ -69,6 +86,21 @@ function ReplyPanel({ ticket, onSent, onClose }) {
           </button>
         )}
       </div>
+      {aiOn && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+          <input
+            value={aiNote}
+            onChange={(e) => setAiNote(e.target.value)}
+            maxLength={300}
+            placeholder="Optional note for AI, e.g. “apologise, refund already done”"
+            aria-label="Instructions for AI"
+            style={{ flex: '1 1 220px', fontSize: 13 }}
+          />
+          <button type="button" className="btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} disabled={aiBusy || sending} onClick={draftWithAi}>
+            {aiBusy ? 'Drafting…' : '✨ Draft with AI'}
+          </button>
+        </div>
+      )}
       <textarea
         rows={10}
         value={text}
@@ -121,6 +153,11 @@ export default function AdminSupport() {
   const [resolvingId, setResolvingId] = useState(null);
   const [replyingId, setReplyingId] = useState(null);
   const [filter, setFilter] = useState('OPEN');
+  const [aiOn, setAiOn] = useState(false);
+
+  useEffect(() => {
+    getAdminAiStatus().then((st) => setAiOn(Boolean(st.adminEnabled))).catch(() => {});
+  }, []);
 
   function load() {
     getAdminSupportTickets()
@@ -249,7 +286,7 @@ export default function AdminSupport() {
                     <tr>
                       <td colSpan={6} style={{ paddingTop: 0 }}>
                         {replyingId === t.id ? (
-                          <ReplyPanel
+                          <ReplyPanel aiOn={aiOn}
                             ticket={t}
                             onClose={() => setReplyingId(null)}
                             onSent={() => {

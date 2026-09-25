@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { submitSupportTicket, getOrders } from '../api';
+import { submitSupportTicket, getOrders, getAiStatus, aiChat } from '../api';
 import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../assistant/knowledge';
 import { useAppInfo } from './ServiceNotices';
 
-// Floating "Help" chat for logged-in customers. Entirely rule-based
-// (see assistant/knowledge.js) — nothing is sent anywhere except when
-// the customer chooses to open a support ticket, which goes through
-// the normal support ticket API. Hidden on admin, auth and legal pages.
+// Floating "Help" chat for logged-in customers. Quick topics are
+// rule-based (assistant/knowledge.js). When the AI assistant is on in
+// Admin → Settings, typed questions go to it (it can look up the
+// customer's own orders and wallet, read-only); if it is off, busy or
+// over the daily limit, the rule-based answers are used instead.
+// Hidden on admin, auth and legal pages.
 const HIDDEN_PREFIXES = ['/admin', '/login', '/signup', '/legal', '/forgot-password', '/reset-password', '/change-password'];
 
 function botText(text, extra = {}) {
@@ -30,8 +32,14 @@ export default function HelpAssistant() {
   const [sending, setSending] = useState(false);
   const [ticketError, setTicketError] = useState('');
   const endRef = useRef(null);
+  const [ai, setAi] = useState(null); // { enabled, remaining }
+  const [thinking, setThinking] = useState(false);
 
   const hidden = !customer || HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p));
+
+  useEffect(() => {
+    if (open && ai === null) getAiStatus().then(setAi).catch(() => setAi({ enabled: false }));
+  }, [open]);
 
   useEffect(() => {
     if (open && messages.length === 0) {
@@ -87,11 +95,33 @@ export default function HelpAssistant() {
     return [botText("Sorry, I didn't quite get that. Try describing it differently, or pick one of these topics:", { quick: true })];
   }
 
-  function send(text) {
+  async function send(text) {
     const clean = text.trim();
-    if (!clean) return;
-    setMessages((prev) => [...prev, { from: 'user', text: clean }, ...respond(clean)]);
+    if (!clean || thinking) return;
     setInput('');
+    if (!ai?.enabled) {
+      setMessages((prev) => [...prev, { from: 'user', text: clean }, ...respond(clean)]);
+      return;
+    }
+    const next = [...messages, { from: 'user', text: clean }];
+    setMessages(next);
+    setThinking(true);
+    // Only real conversation text goes to the AI (not the greeting).
+    const history = next
+      .filter((m, i) => i > 0 && m.text)
+      .map((m) => ({ role: m.from === 'user' ? 'user' : 'assistant', content: m.text }));
+    try {
+      const res = await aiChat(history);
+      setAi((a) => ({ ...a, remaining: res.remaining }));
+      setMessages((prev) => [...prev, botText(res.reply, { actions: res.actions, offerHuman: res.offerHuman, ai: true })]);
+    } catch (err) {
+      // Fall back to the built-in answers so the customer still gets help.
+      if (err.code === 'AI_LIMIT' || err.code === 'AI_OFF' || err.code === 'AI_NO_KEY' || err.code === 'AI_BUDGET') setAi({ enabled: false });
+      const note = err.code === 'AI_LIMIT' ? botText(err.message) : null;
+      setMessages((prev) => [...prev, ...(note ? [note] : []), ...respond(clean)]);
+    } finally {
+      setThinking(false);
+    }
   }
 
   function pickTopic(id) {
@@ -178,7 +208,7 @@ export default function HelpAssistant() {
       <div style={{ background: 'var(--purple)', color: '#fff', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ fontWeight: 700 }}>ZappiPay Help</div>
-          <div style={{ fontSize: 12, opacity: 0.85 }}>Instant answers · real people when you need them</div>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>{ai?.enabled ? 'AI assistant · checks your own orders' : 'Instant answers'} · real people when you need them</div>
         </div>
         <button type="button" aria-label="Close help" onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer' }}>
           ×
@@ -201,6 +231,7 @@ export default function HelpAssistant() {
             >
               {m.text}
             </div>
+            {m.ai && <div style={{ fontSize: 10, color: 'var(--slate-500, #64748b)', marginTop: 2 }}>AI answer · check Orders for exact details</div>}
             {(m.actions?.length > 0 || m.offerHuman || m.quick) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                 {m.actions?.map((a) => (
@@ -223,6 +254,12 @@ export default function HelpAssistant() {
             )}
           </div>
         ))}
+
+        {thinking && (
+          <div style={{ alignSelf: 'flex-start', background: 'var(--slate-900)', color: 'var(--slate-400)', padding: '8px 12px', borderRadius: 12, fontSize: 14 }}>
+            Checking…
+          </div>
+        )}
 
         {ticketMode && (
           <form onSubmit={submitTicket} style={{ background: 'var(--slate-900)', borderRadius: 12, padding: 10 }}>
@@ -292,8 +329,8 @@ export default function HelpAssistant() {
         }}
         style={{ display: 'flex', gap: 6, padding: 10, borderTop: '1px solid var(--slate-700)' }}
       >
-        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type your question…" aria-label="Your question" style={{ fontSize: 14 }} />
-        <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 14px' }} disabled={!input.trim()}>
+        <input value={input} onChange={(e) => setInput(e.target.value)} maxLength={800} placeholder={ai?.enabled ? 'Ask anything about your account…' : 'Type your question…'} aria-label="Your question" style={{ fontSize: 14 }} />
+        <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 14px' }} disabled={!input.trim() || thinking}>
           Send
         </button>
       </form>

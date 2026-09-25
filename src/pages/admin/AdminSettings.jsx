@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
+import AiSettingsPanel from '../../components/AiSettingsPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -22,6 +23,7 @@ const TABS = [
   { key: 'loyalty', label: 'Loyalty Points' },
   { key: 'alerts', label: 'Alerts & Limits' },
   { key: 'security', label: 'Security' },
+  { key: 'ai', label: 'AI Assistant' },
   { key: 'password', label: 'My Password' },
 ];
 
@@ -917,6 +919,8 @@ export default function AdminSettings() {
           {saveButton('referral', 'Save Referral Settings')}
         </form>
       )}
+
+      {!loading && !loadError && tab === 'ai' && <AiSettingsPanel />}
 
       {tab === 'password' && (
         <form className="card" style={cardStyle} onSubmit={savePassword}>
