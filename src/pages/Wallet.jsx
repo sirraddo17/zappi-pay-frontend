@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments } from '../api';
 import BottomNav from '../components/BottomNav';
 import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
+import { useAppInfo } from '../components/ServiceNotices';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -167,6 +168,7 @@ export default function Wallet() {
   }, []);
 
   const autoFunding = Boolean(bankInfo?.available);
+  const appInfo = useAppInfo();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -187,12 +189,23 @@ export default function Wallet() {
     }
   }
 
+  const manual = appInfo?.manualFunding;
   const manualForm = (
       <form onSubmit={handleSubmit} style={autoFunding ? { marginTop: 12 } : undefined}>
           <h2 style={{ marginTop: 0, fontSize: 16 }}>{autoFunding ? 'Manual funding' : 'Fund Wallet'}</h2>
           <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>
-            Send a bank transfer, then submit the details below for approval.
+            Transfer to the account below, then submit the details for approval.
           </p>
+          {manual && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'rgba(134,59,255,0.1)', border: '1px solid var(--purple)', borderRadius: 10, padding: 12, marginBottom: 14 }}>
+              <div>
+                <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{manual.bankName}</div>
+                <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1 }}>{manual.accountNumber}</div>
+                <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{manual.accountName}</div>
+              </div>
+              <CopyButton text={manual.accountNumber} />
+            </div>
+          )}
           <div className="field">
             <label htmlFor="amount">Amount (₦)</label>
             <input id="amount" type="number" min="100" value={amount} onChange={(e) => setAmount(e.target.value)} required />
@@ -234,7 +247,7 @@ export default function Wallet() {
         />
       )}
 
-      {autoFunding ? (
+      {!manual ? null : autoFunding ? (
         <details className="card">
           <summary style={{ cursor: 'pointer', fontSize: 14 }}>Other way: send to our business account for manual approval</summary>
           {manualForm}

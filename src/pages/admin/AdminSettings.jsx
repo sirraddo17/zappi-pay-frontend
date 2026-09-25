@@ -102,6 +102,10 @@ export default function AdminSettings() {
   const [limitUnverified, setLimitUnverified] = useState('50000');
   const [limitVerified, setLimitVerified] = useState('1000000');
   const [whatsapp, setWhatsapp] = useState('');
+  const [manualOn, setManualOn] = useState(true);
+  const [manualBank, setManualBank] = useState('');
+  const [manualNumber, setManualNumber] = useState('');
+  const [manualName, setManualName] = useState('');
   const [refEnabled, setRefEnabled] = useState(false);
   const [refBonus, setRefBonus] = useState('100');
   const [refMin, setRefMin] = useState('500');
@@ -152,6 +156,10 @@ export default function AdminSettings() {
         setLimitUnverified(String(s.dailyLimitUnverified ?? 50000));
         setLimitVerified(String(s.dailyLimitVerified ?? 1000000));
         setWhatsapp(s.supportWhatsapp || '');
+        setManualOn(s.manualFundingEnabled !== false);
+        setManualBank(s.manualBankName || '');
+        setManualNumber(s.manualAccountNumber || '');
+        setManualName(s.manualAccountName || '');
         setRefEnabled(Boolean(s.referralEnabled));
         setRefBonus(String(s.referralBonusAmount ?? 100));
         setRefMin(String(s.referralMinPurchase ?? 500));
@@ -249,9 +257,17 @@ export default function AdminSettings() {
 
   function saveLimits(e) {
     e.preventDefault();
+    if (manualOn && manualNumber && manualNumber.replace(/\D/g, '').length !== 10) {
+      setStatus((prev) => ({ ...prev, limits: { error: 'Account number must be 10 digits.' } }));
+      return;
+    }
     save(
       'limits',
       {
+        manualFundingEnabled: manualOn,
+        manualBankName: manualBank,
+        manualAccountNumber: manualNumber,
+        manualAccountName: manualName,
         minFundingAmount: Number(minFundingAmount || 0),
         minPurchaseAmount: Number(minPurchaseAmount || 0),
         bankFundingFeePercent: Number(bankFeePercent || 0),
@@ -594,6 +610,28 @@ export default function AdminSettings() {
           <div className="field">
             <label htmlFor="minPurchaseAmount">Minimum purchase amount (₦)</label>
             <input id="minPurchaseAmount" type="number" step="1" min="0" value={minPurchaseAmount} onChange={(e) => setMinPurchaseAmount(e.target.value)} />
+          </div>
+          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '8px 0 14px', paddingTop: 14 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Manual funding account</div>
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 0 }}>
+              Your business account customers transfer to, then submit for approval under Pending Funding. Leave the number empty to hide manual funding.
+            </p>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+              <input type="checkbox" checked={manualOn} onChange={(e) => setManualOn(e.target.checked)} style={{ width: 'auto' }} />
+              Offer manual funding
+            </label>
+            <div className="field">
+              <label htmlFor="manualBank">Bank name</label>
+              <input id="manualBank" value={manualBank} onChange={(e) => setManualBank(e.target.value)} placeholder="e.g. Moniepoint" />
+            </div>
+            <div className="field">
+              <label htmlFor="manualNumber">Account number</label>
+              <input id="manualNumber" inputMode="numeric" maxLength={10} value={manualNumber} onChange={(e) => setManualNumber(e.target.value.replace(/\D/g, ''))} />
+            </div>
+            <div className="field">
+              <label htmlFor="manualName">Account name</label>
+              <input id="manualName" value={manualName} onChange={(e) => setManualName(e.target.value)} placeholder="e.g. SIRRADDO VENTURE" />
+            </div>
           </div>
           <div className="field">
             <label htmlFor="bankFeePercent">Bank transfer funding fee (%)</label>
