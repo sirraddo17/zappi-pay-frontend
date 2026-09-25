@@ -159,6 +159,26 @@ export default function Statement() {
             </table>
           )}
 
+          {data.transactions.length > 0 && (
+            <div className="statement-list">
+              {data.transactions.map((t) => (
+                <div className="statement-item" key={t.id}>
+                  <div className="statement-item-main">
+                    <div className="statement-item-title">{TYPE_LABEL[t.type] || t.type}</div>
+                    {t.note && <div className="muted">{t.note}</div>}
+                    <div className="muted">{new Date(t.date).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
+                  </div>
+                  <div className="statement-item-nums">
+                    <div className={t.credit ? 'in' : 'out'} style={{ fontWeight: 700 }}>
+                      {t.credit ? `+${money(t.credit)}` : `−${money(t.debit)}`}
+                    </div>
+                    <div className="muted">Bal {money(t.balance)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="statement-foot">
             Generated {new Date().toLocaleString('en-NG')} · ZAPPI PAY by Sirraddo Venture · support@zappipay.com.ng
           </div>

@@ -663,3 +663,26 @@ th {
   .statement-doc { margin: 0; padding: 0; border-radius: 0; }
   .statement-table tr { break-inside: avoid; }
 }
+
+/* Phones: the 5-column statement table doesn't fit, so show each
+   transaction as a row with amount and running balance on the right.
+   The full table is still used on wider screens and in the PDF. */
+.statement-list { display: none; }
+.statement-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.statement-item-main { min-width: 0; }
+.statement-item-title { font-weight: 600; color: #0f172a; }
+.statement-item-nums { text-align: right; white-space: nowrap; flex-shrink: 0; }
+@media screen and (max-width: 559px) {
+  .statement-doc .statement-table { display: none; }
+  .statement-list { display: block; }
+}
+@media print {
+  .statement-list { display: none !important; }
+  .statement-doc .statement-table { display: table !important; }
+}
