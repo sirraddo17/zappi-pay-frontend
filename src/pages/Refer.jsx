@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getMyReferrals } from '../api';
 import BottomNav from '../components/BottomNav';
+import SetUsername from '../components/SetUsername';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
 
@@ -110,9 +111,7 @@ export default function Refer() {
               </button>
             </div>
           ) : (
-            <div className="card">
-              <p style={{ margin: 0, fontSize: 14 }}>Your account doesn't have a username yet, which is used as your referral code. Please contact support to add one.</p>
-            </div>
+            <SetUsername onDone={(username) => setData((d) => ({ ...d, code: username }))} />
           )}
 
           <div className="card" style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>

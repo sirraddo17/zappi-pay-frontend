@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import ProfitPanel from '../../components/ProfitPanel';
 import { Link } from 'react-router-dom';
-import { getCustomers, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance } from '../../api';
+import { getCustomerList, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance } from '../../api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -13,10 +13,10 @@ export default function AdminDashboard() {
   const [vtpass, setVtpass] = useState(null);
 
   useEffect(() => {
-    Promise.all([getCustomers(), getPendingFunding(), getAdminOrders()])
+    Promise.all([getCustomerList({ view: 'active' }), getPendingFunding(), getAdminOrders()])
       .then(([c, f, o]) => {
         setStats({
-          customers: c.customers.length,
+          customers: c.counts.active,
           pendingFunding: f.transactions.length,
           orders: o.orders.length,
           successfulOrders: o.orders.filter((x) => x.status === 'SUCCESS').length,

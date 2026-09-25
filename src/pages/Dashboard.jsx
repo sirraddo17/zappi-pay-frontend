@@ -265,6 +265,21 @@ export default function Dashboard() {
         })}
       </div>
 
+      {customer && !customer.username && (
+        <Link
+          to="/refer"
+          className="card"
+          style={{ display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: 'inherit', border: '1px solid var(--purple, #863bff)', background: 'rgba(134,59,255,0.08)', marginTop: 16 }}
+        >
+          <span style={{ fontSize: 22 }}>🏷️</span>
+          <span style={{ flex: 1 }}>
+            <b style={{ display: 'block', fontSize: 14 }}>Choose your username</b>
+            <span style={{ fontSize: 13, color: 'var(--slate-400)' }}>Get your referral code and let friends send you money with it.</span>
+          </span>
+          <span style={{ color: 'var(--slate-400)' }}>›</span>
+        </Link>
+      )}
+
       {customer && !customer.hasPin && (
         <Link
           to="/security"

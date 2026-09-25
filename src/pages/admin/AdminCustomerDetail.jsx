@@ -1,7 +1,47 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, setCustomerAgent } from '../../api';
+import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, setCustomerAgent, adminSetUsername } from '../../api';
+
+// Set a username for older accounts (or correct one). It is the
+// customer's referral code, so changing it breaks links they shared.
+function UsernameEditor({ customer, onSaved }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(customer.username || '');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  if (customer.deletedAt) return null;
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 13, marginLeft: 6 }}>
+        {customer.username ? 'Change username' : 'Set username'}
+      </button>
+    );
+  }
+  async function save(e) {
+    e.preventDefault();
+    if (customer.username && !window.confirm(`Change @${customer.username} to @${value.trim().toLowerCase()}? Referral links they already shared will stop working.`)) return;
+    setBusy(true);
+    setErr('');
+    try {
+      await adminSetUsername(customer.id, value);
+      setOpen(false);
+      onSaved();
+    } catch (error) {
+      setErr(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <form onSubmit={save} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 8 }}>
+      <input value={value} onChange={(e) => setValue(e.target.value.replace(/\s/g, ''))} placeholder="username" maxLength={21} style={{ maxWidth: 200 }} />
+      <button className="btn" type="submit" style={{ width: 'auto', padding: '6px 14px' }} disabled={busy || value.trim().length < 3}>{busy ? 'Saving…' : 'Save'}</button>
+      <button className="btn btn-secondary" type="button" style={{ width: 'auto', padding: '6px 14px' }} onClick={() => setOpen(false)}>Cancel</button>
+      {err && <span className="error-text" style={{ fontSize: 13 }}>{err}</span>}
+    </form>
+  );
+}
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -111,8 +151,10 @@ export default function AdminCustomerDetail() {
       <div className="page-header" style={{ padding: 0, margin: '12px 0 16px' }}>
         <h1>{customer.name}</h1>
         <p>{customer.phone}{customer.email ? ` · ${customer.email}` : ''} · {customer.active ? 'Active' : 'Deactivated'} · Joined {fmtDate(customer.createdAt)}</p>
-        <p style={{ marginTop: 4 }}>
-          {customer.username ? `@${customer.username} · ` : ''}PIN {customer.hasPin ? 'set' : 'not set'}
+        <div style={{ marginTop: 4, color: 'var(--slate-400)', fontSize: 14 }}>
+          {customer.username ? `@${customer.username}` : 'No username'}
+          <UsernameEditor key={customer.username || ''} customer={customer} onSaved={load} />
+          {' · '}PIN {customer.hasPin ? 'set' : 'not set'}
           {' · '}Referred {customer.referralCount || 0} customer{customer.referralCount === 1 ? '' : 's'}
           {customer.referredBy && (
             <>
@@ -123,7 +165,7 @@ export default function AdminCustomerDetail() {
               {customer.referralBonusPaidAt ? ` (bonus ₦${Number(customer.referralBonusAmount || 0).toLocaleString()} paid)` : ' (bonus not paid yet)'}
             </>
           )}
-        </p>
+        </div>
         <p style={{ marginTop: 4 }}>
           {Array.isArray(customer.bankAccounts) && customer.bankAccounts.length > 0
             ? `Funding account${customer.bankAccounts.length > 1 ? 's' : ''}: ${customer.bankAccounts.map((a) => `${a.bankName} ${a.accountNumber}`).join(', ')} · verified with ${customer.kycType || 'ID'}`

@@ -1,16 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getCustomers, setCustomerActive, adjustWallet } from '../../api';
+import { getCustomerList, setCustomerActive, adjustWallet } from '../../api';
+
+const TABS = [
+  { key: 'active', label: 'Active' },
+  { key: 'deactivated', label: 'Deactivated' },
+  { key: 'deletion', label: 'Deletion requests' },
+  { key: 'deleted', label: 'Deleted' },
+];
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
 }
 
 export default function AdminCustomers() {
-  const [customers, setCustomers] = useState(null);
+  const [view, setView] = useState('active');
+  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
+  const [browseAll, setBrowseAll] = useState(false);
+  const [page, setPage] = useState(0);
+  const [result, setResult] = useState(null);
+  const customers = result?.customers ?? null;
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
+  const latest = useRef(0);
 
   const [adjustingCustomer, setAdjustingCustomer] = useState(null);
   const [adjustType, setAdjustType] = useState('CREDIT');
@@ -19,13 +33,28 @@ export default function AdminCustomers() {
   const [adjustSubmitting, setAdjustSubmitting] = useState(false);
   const [adjustError, setAdjustError] = useState('');
 
+  // Wait until typing pauses before searching.
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(query.trim()), 350);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  useEffect(() => { setPage(0); }, [view, search, browseAll]);
+
   function load() {
-    getCustomers()
-      .then((data) => setCustomers(data.customers))
-      .catch((err) => setError(err.message));
+    const n = ++latest.current;
+    getCustomerList({ view, q: search, all: browseAll, page })
+      .then((data) => { if (n === latest.current) { setResult(data); setError(''); } })
+      .catch((err) => { if (n === latest.current) setError(err.message); });
   }
 
-  useEffect(load, []);
+  useEffect(load, [view, search, browseAll, page]);
+
+  function pickTab(key) {
+    if (key === view) return;
+    setResult(null);
+    setView(key);
+  }
 
   async function toggleActive(customer) {
     setBusyId(customer.id);
@@ -71,8 +100,41 @@ export default function AdminCustomers() {
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16 }}>
         <h1>Customers</h1>
-        <p>Everyone with a ZAPPI PAY account</p>
+        <p>Search by name, phone number, username or email</p>
       </div>
+
+      <div className="admin-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+        {TABS.map((t) => (
+          <button key={t.key} type="button" className={view === t.key ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '6px 14px' }} onClick={() => pickTab(t.key)}>
+            {t.label}{result?.counts ? ` (${Number(result.counts[t.key] || 0).toLocaleString()})` : ''}
+          </button>
+        ))}
+      </div>
+
+      <div className="field" style={{ maxWidth: 480, marginBottom: 12 }}>
+        <input
+          type="search"
+          aria-label="Search customers"
+          placeholder="🔍 Search name, phone, username or email"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
+      {result && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '0 0 8px', fontSize: 13, color: 'var(--slate-400)' }}>
+          <span>
+            {result.mode === 'top' && 'Top 5 most active customers (successful orders in the last 30 days). Search to find anyone else.'}
+            {result.mode === 'search' && `${result.total.toLocaleString()} match${result.total === 1 ? '' : 'es'} for "${result.q}"`}
+            {result.mode === 'all' && `${result.total.toLocaleString()} customer${result.total === 1 ? '' : 's'}`}
+          </span>
+          {view === 'active' && !search && (
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 12px', fontSize: 13 }} onClick={() => { setResult(null); setBrowseAll((b) => !b); }}>
+              {browseAll ? 'Show top 5 only' : 'Browse all active'}
+            </button>
+          )}
+        </div>
+      )}
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
 
@@ -110,13 +172,18 @@ export default function AdminCustomers() {
         {customers === null ? (
           <p className="empty-state">Loading…</p>
         ) : customers.length === 0 ? (
-          <p className="empty-state">No customers yet.</p>
+          <p className="empty-state">
+            {search ? 'No customer matches that search in this tab.'
+              : result?.mode === 'top' ? 'No purchases in the last 30 days yet. Use search or "Browse all active".'
+                : 'No customers here.'}
+          </p>
         ) : (
           <table>
             <thead>
               <tr>
                 <th>Name</th>
                 <th>Phone</th>
+                {result?.mode === 'top' && <th>Orders (30d)</th>}
                 <th>Balance</th>
                 <th>Status</th>
                 <th></th>
@@ -125,11 +192,19 @@ export default function AdminCustomers() {
             <tbody>
               {customers.map((c) => (
                 <tr key={c.id}>
-                  <td><Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--orange)' }}>{c.name}</Link></td>
-                  <td>{c.phone}</td>
-                  <td>{fmtMoney(c.walletBalance)}</td>
-                  <td>{c.active ? 'Active' : 'Deactivated'}</td>
                   <td>
+                    <Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--orange)' }}>{c.name}</Link>
+                    {c.username && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>@{c.username}</div>}
+                  </td>
+                  <td>{c.deletedAt ? '—' : c.phone}</td>
+                  {result?.mode === 'top' && <td>{c.orders30d}</td>}
+                  <td>{fmtMoney(c.walletBalance)}</td>
+                  <td>
+                    {c.deletedAt ? `Deleted ${new Date(c.deletedAt).toLocaleDateString('en-NG')}` : c.active ? 'Active' : 'Deactivated'}
+                    {!c.deletedAt && c.deletionRequestedAt && <div style={{ fontSize: 12, color: 'var(--red-500)' }}>Wants deletion</div>}
+                  </td>
+                  <td>
+                    {!c.deletedAt && (
                     <div className="admin-actions">
                     <button className="btn-secondary btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => openAdjust(c)}>
                       Adjust Wallet
@@ -138,6 +213,7 @@ export default function AdminCustomers() {
                       {c.active ? 'Deactivate' : 'Reactivate'}
                     </button>
                     </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -145,6 +221,14 @@ export default function AdminCustomers() {
           </table>
         )}
       </div>
+
+      {result && result.mode !== 'top' && result.total > result.pageSize && (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 12, fontSize: 13 }}>
+          <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 14px' }} disabled={page === 0} onClick={() => setPage((p) => p - 1)}>‹ Prev</button>
+          <span>Page {page + 1} of {Math.ceil(result.total / result.pageSize)}</span>
+          <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 14px' }} disabled={(page + 1) * result.pageSize >= result.total} onClick={() => setPage((p) => p + 1)}>Next ›</button>
+        </div>
+      )}
     </AdminLayout>
   );
 }

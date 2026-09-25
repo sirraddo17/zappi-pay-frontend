@@ -140,6 +140,8 @@ export const deleteSchedule = (id) => request(`/api/schedules/${id}`, { method: 
 // --- Referrals ---
 export const getReferralInfo = (code) => request(`/api/referrals/info${code ? `?code=${encodeURIComponent(code)}` : ''}`);
 export const getMyReferrals = () => request('/api/referrals');
+export const checkUsername = (username) => request(`/api/account/username/check?username=${encodeURIComponent(username)}`);
+export const setMyUsername = (username) => request('/api/account/username', { method: 'POST', body: JSON.stringify({ username }) });
 
 // --- Wallet ---
 export const getWalletBalance = () => request('/api/wallet/balance');
@@ -233,6 +235,13 @@ export const testMonnifyConnection = () => adminRequest('/api/admin/monnify/test
 
 // --- Admin: customers ---
 export const getCustomers = () => adminRequest('/api/admin/customers');
+export const getCustomerList = ({ view = 'active', q = '', all = false, page = 0 } = {}) => {
+  const qs = new URLSearchParams({ view, page: String(page) });
+  if (q) qs.set('q', q);
+  if (all) qs.set('all', '1');
+  return adminRequest(`/api/admin/customers/list?${qs}`);
+};
+export const adminSetUsername = (id, username) => adminRequest(`/api/admin/customers/${id}/username`, { method: 'POST', body: JSON.stringify({ username }) });
 export const getCustomerDetail = (id) => adminRequest(`/api/admin/customers/${id}`);
 export const adminResetCustomerPassword = (id) => adminRequest(`/api/admin/customers/${id}/reset-password`, { method: 'POST' });
 export const setCustomerActive = (id, active) =>
