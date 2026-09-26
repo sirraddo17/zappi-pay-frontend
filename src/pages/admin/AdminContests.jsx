@@ -26,6 +26,7 @@ function ContestForm({ initial, onSaved, onCancel }) {
   const [minReferrals, setMinReferrals] = useState(String(initial?.minReferrals ?? 3));
   const [minAmount, setMinAmount] = useState(String(initial?.minQualifyingAmount ?? 100));
   const [autoPay, setAutoPay] = useState(Boolean(initial?.autoPay));
+  const [requireVerified, setRequireVerified] = useState(initial ? initial.requireVerified !== false : true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -44,6 +45,7 @@ function ContestForm({ initial, onSaved, onCancel }) {
       minReferrals: Number(minReferrals),
       minQualifyingAmount: Number(minAmount),
       autoPay,
+      requireVerified,
     };
     try {
       if (initial) await updateContest(initial.id, body);
@@ -93,6 +95,10 @@ function ContestForm({ initial, onSaved, onCancel }) {
           <input id="ca" type="number" min="0" value={minAmount} disabled={started} onChange={(e) => setMinAmount(e.target.value)} />
         </div>
       </div>
+      <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+        <input type="checkbox" checked={requireVerified} disabled={started} onChange={(e) => setRequireVerified(e.target.checked)} style={{ width: 'auto' }} />
+        Friends must verify BVN/NIN to count (recommended — stops fake accounts)
+      </label>
       <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
         <input type="checkbox" checked={autoPay} onChange={(e) => setAutoPay(e.target.checked)} style={{ width: 'auto' }} />
         Pay winners automatically when it ends
@@ -149,7 +155,7 @@ function ContestDetail({ id, onChanged }) {
         <div>
           <h2 style={{ margin: 0, fontSize: 18 }}>{c.title}</h2>
           <div style={{ fontSize: 13, color: PHASE[c.phase]?.[1] }}>{PHASE[c.phase]?.[0]}</div>
-          <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>{fmt(c.startsAt)} → {fmt(c.endsAt)} · prizes {c.prizes.map(naira).join(' / ')} · min {c.minReferrals} friend{c.minReferrals === 1 ? '' : 's'}{c.minQualifyingAmount > 0 ? ` · qualifying spend ${naira(c.minQualifyingAmount)}` : ''} · {c.autoPay ? 'auto-pay' : 'you approve payout'}</div>
+          <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>{fmt(c.startsAt)} → {fmt(c.endsAt)} · prizes {c.prizes.map(naira).join(' / ')} · min {c.minReferrals} friend{c.minReferrals === 1 ? '' : 's'}{c.minQualifyingAmount > 0 ? ` · qualifying spend ${naira(c.minQualifyingAmount)}` : ''} · {c.requireVerified !== false ? 'BVN/NIN verified friends only' : 'verification not required'} · {c.autoPay ? 'auto-pay' : 'you approve payout'}</div>
         </div>
         <div className="admin-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           {(c.phase === 'LIVE' || c.phase === 'UPCOMING') && <button className="btn btn-secondary" style={{ width: 'auto' }} onClick={() => setEditing(true)}>Edit</button>}
@@ -194,7 +200,7 @@ function ContestDetail({ id, onChanged }) {
           {[...disq].map((cid) => <button key={cid} type="button" onClick={() => act('disqualify', null, { customerId: cid, restore: true })} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', fontSize: 13 }}>restore {cid.slice(-5)}</button>)}
         </p>
       )}
-      <p style={{ fontSize: 12, color: 'var(--slate-400)' }}>“Counted” = friends who signed up during the contest and bought something or sent to a bank. “Waiting” = signed up but no purchase yet. Removing someone takes them (and friends they referred) out of this contest.</p>
+      <p style={{ fontSize: 12, color: 'var(--slate-400)' }}>“Counted” = friends who signed up during the contest and bought something or sent to a bank{c.requireVerified !== false ? ', and verified their BVN/NIN' : ''}. “Waiting” = signed up but not finished yet. Removing someone takes them (and friends they referred) out of this contest.</p>
     </div>
   );
 }

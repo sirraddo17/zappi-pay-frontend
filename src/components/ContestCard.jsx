@@ -102,7 +102,7 @@ export default function ContestCard({ compact = false }) {
       {data.me && c.phase === 'LIVE' && (
         <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', background: 'var(--slate-900)', borderRadius: 10, padding: 10, marginBottom: 12 }}>
           <div><div style={{ fontSize: 22, fontWeight: 800 }}>{data.me.qualified}</div><div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Counted</div></div>
-          <div><div style={{ fontSize: 22, fontWeight: 800 }}>{data.me.pending}</div><div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Waiting for 1st purchase</div></div>
+          <div><div style={{ fontSize: 22, fontWeight: 800 }}>{data.me.pending}</div><div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{c.requireVerified ? 'Waiting (verify + buy)' : 'Waiting for 1st purchase'}</div></div>
           <div><div style={{ fontSize: 22, fontWeight: 800 }}>{data.me.rank ? `#${data.me.rank}` : '—'}</div><div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Your rank</div></div>
         </div>
       )}
@@ -124,7 +124,8 @@ export default function ContestCard({ compact = false }) {
         <ul style={{ fontSize: 13, color: 'var(--slate-300, #cbd5e1)', paddingLeft: 18, margin: '8px 0 0', lineHeight: 1.5 }}>
           <li>Runs from {fmt(c.startsAt)} to {fmt(c.endsAt)}.</li>
           <li>Only friends who <b>sign up with your code during the contest</b> count.</li>
-          <li>A friend counts only after they <b>buy something or send money to a bank</b> in the app{c.minQualifyingAmount > 0 ? ` (at least ${naira(c.minQualifyingAmount)})` : ''} before the contest ends.</li>
+          <li>A friend counts only after they <b>buy something or send money to a bank</b> in the app{c.minQualifyingAmount > 0 ? ` (at least ${naira(c.minQualifyingAmount)})` : ''}{c.requireVerified ? <> and <b>verify their BVN or NIN</b> (by getting their personal account number on the Wallet page)</> : ''} before the contest ends.</li>
+          {c.requireVerified && <li>One BVN/NIN can only be used on one ZAPPI PAY account, so every friend must be a real, different person.</li>}
           <li>The top {c.prizes.length} win{c.minReferrals > 1 ? `, with at least ${c.minReferrals} counted friends` : ''}. A tie goes to whoever reached it first.</li>
           <li>Prizes go straight into the winners' ZAPPI PAY wallets.</li>
           <li>Fake or duplicate accounts are removed from the contest.</li>
