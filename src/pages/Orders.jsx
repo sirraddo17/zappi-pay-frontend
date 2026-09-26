@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getOrders } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
+import RateExperience from '../components/RateExperience';
 import BottomNav from '../components/BottomNav';
 import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
 
@@ -43,6 +44,8 @@ export default function Orders() {
       </div>
 
       {error && <p className="error-text">{error}</p>}
+
+      {orders?.[0] && <RateExperience order={orders[0]} maxAgeMs={30 * 60 * 1000} />}
 
       {orders === null ? (
         <p className="empty-state">Loading…</p>

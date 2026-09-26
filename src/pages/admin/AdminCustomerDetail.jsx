@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
-import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, setCustomerAgent, adminSetUsername } from '../../api';
+import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, setCustomerAgent, adminSetUsername, testCustomerEmailAlert } from '../../api';
 
 // Set a username for older accounts (or correct one). It is the
 // customer's referral code, so changing it breaks links they shared.
@@ -60,6 +60,34 @@ const STATUS_COLORS = {
   REJECTED: 'var(--red-500)',
   REFUNDED: 'var(--orange)',
 };
+
+// Checks why money in/out emails may not reach this customer, and sends
+// a test email when everything is in place.
+function EmailAlertTest({ customerId }) {
+  const [state, setState] = useState(null);
+  async function run() {
+    setState({ busy: true });
+    try {
+      const r = await testCustomerEmailAlert(customerId);
+      setState(r.ok ? { ok: true, text: `Test email sent to ${r.email}. If it doesn't arrive, check their spam folder.` } : { ok: false, problems: r.problems });
+    } catch (err) {
+      setState({ ok: false, problems: [err.message] });
+    }
+  }
+  return (
+    <div style={{ marginTop: 6 }}>
+      <button type="button" onClick={run} disabled={state?.busy} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 13 }}>
+        {state?.busy ? 'Checking email alerts…' : '✉️ Test money-alert email'}
+      </button>
+      {state?.ok && <div style={{ color: 'var(--green-500)', fontSize: 13 }}>{state.text}</div>}
+      {state?.problems && (
+        <ul style={{ color: 'var(--orange, #f97316)', fontSize: 13, margin: '4px 0 0', paddingLeft: 18 }}>
+          {state.problems.map((p) => <li key={p}>{p}</li>)}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function AdminCustomerDetail() {
   const { id } = useParams();
@@ -175,6 +203,7 @@ export default function AdminCustomerDetail() {
             ? `Funding account${customer.bankAccounts.length > 1 ? 's' : ''}: ${customer.bankAccounts.map((a) => `${a.bankName} ${a.accountNumber}`).join(', ')} · verified with ${customer.kycType || 'ID'}`
             : 'No funding account number yet'}
         </p>
+        {!customer.deletedAt && <EmailAlertTest customerId={customer.id} />}
       </div>
 
       {!customer.deletedAt && (

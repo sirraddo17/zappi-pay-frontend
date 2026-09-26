@@ -1,4 +1,4 @@
-import { getPushKey, subscribePush, unsubscribePush } from '../api';
+import { getPushKey, subscribePush, unsubscribePush, getAdminPushKey, subscribeAdminPush, unsubscribeAdminPush } from '../api';
 
 // Phone/desktop notifications. iPhone needs iOS 16.4+ and the app
 // added to the Home Screen first.
@@ -51,5 +51,26 @@ export async function disablePush() {
   const sub = await currentSubscription();
   if (!sub) return;
   await unsubscribePush(sub.endpoint).catch(() => {});
+  await sub.unsubscribe().catch(() => {});
+}
+
+// Admin app: alerts when something needs attention (support, OTP...).
+export async function enableAdminPush() {
+  if (!pushSupported()) throw new Error("This browser can't show notifications.");
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') throw new Error('Notifications are blocked. Allow them for this site in your browser or phone settings.');
+  const { publicKey } = await getAdminPushKey();
+  if (!publicKey) throw new Error('Alerts are not available right now.');
+  const reg = await registration();
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
+  await subscribeAdminPush(sub.toJSON());
+  return true;
+}
+
+export async function disableAdminPush() {
+  const sub = await currentSubscription();
+  if (!sub) return;
+  await unsubscribeAdminPush(sub.endpoint).catch(() => {});
   await sub.unsubscribe().catch(() => {});
 }

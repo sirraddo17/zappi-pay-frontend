@@ -66,6 +66,9 @@ const AdminBankTransfers = lazy(() => import('./pages/admin/AdminBankTransfers')
 const AdminPromos = lazy(() => import('./pages/admin/AdminPromos'));
 const AdminAssistant = lazy(() => import('./pages/admin/AdminAssistant'));
 const AdminNotices = lazy(() => import('./pages/admin/AdminNotices'));
+const AdminContests = lazy(() => import('./pages/admin/AdminContests'));
+const AdminAds = lazy(() => import('./pages/admin/AdminAds'));
+const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 
 
 function RequireCustomer({ children }) {
@@ -145,6 +148,9 @@ export default function App() {
           <Route path="/admin/bank-transfers" element={<RequireAdmin><AdminBankTransfers /></RequireAdmin>} />
           <Route path="/admin/promos" element={<RequireAdmin><AdminPromos /></RequireAdmin>} />
           <Route path="/admin/assistant" element={<RequireAdmin><AdminAssistant /></RequireAdmin>} />
+          <Route path="/admin/contests" element={<RequireAdmin><AdminContests /></RequireAdmin>} />
+          <Route path="/admin/ads" element={<RequireAdmin><AdminAds /></RequireAdmin>} />
+          <Route path="/admin/feedback" element={<RequireAdmin><AdminFeedback /></RequireAdmin>} />
           <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

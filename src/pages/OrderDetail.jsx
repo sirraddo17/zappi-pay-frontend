@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getOrder, submitSupportTicket } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
+import RateExperience from '../components/RateExperience';
 import { buyAgainLink } from '../lib/repeat';
 import { shareReceipt, downloadReceipt, extractToken } from '../lib/receipt';
 
@@ -118,6 +119,8 @@ export default function OrderDetail() {
       {reportSuccess && (
         <p className="no-print" style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 0 12px' }}>{reportSuccess}</p>
       )}
+
+      <div className="no-print"><RateExperience order={order} flush /></div>
 
       <div className="card" style={{ margin: '0 0 16px', textAlign: 'center' }}>
         <h1 style={{ margin: '0 0 4px', fontSize: 18 }}>ZAPPI PAY</h1>

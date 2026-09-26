@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import ProfitPanel from '../../components/ProfitPanel';
+import AdminAlertsToggle from '../../components/AdminAlertsToggle';
 import { Link } from 'react-router-dom';
 import { getCustomerList, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
@@ -46,6 +47,8 @@ export default function AdminDashboard() {
         <h1>Overview</h1>
         <p>A quick look at ZAPPI PAY</p>
       </div>
+
+      <AdminAlertsToggle card />
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
 

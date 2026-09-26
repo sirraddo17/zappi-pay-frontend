@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getMyReferrals } from '../api';
 import BottomNav from '../components/BottomNav';
 import SetUsername from '../components/SetUsername';
+import ContestCard from '../components/ContestCard';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
 
@@ -80,6 +81,8 @@ export default function Refer() {
               </p>
             )}
           </div>
+
+          <ContestCard />
 
           {data.code ? (
             <div className="card">

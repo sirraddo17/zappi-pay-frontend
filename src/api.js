@@ -291,3 +291,27 @@ export const getAdmins = () => adminRequest('/api/admin/admins');
 export const createAdmin = (data) => adminRequest('/api/admin/admins', { method: 'POST', body: JSON.stringify(data) });
 export const setAdminActive = (id, active) => adminRequest(`/api/admin/admins/${id}/active`, { method: 'PATCH', body: JSON.stringify({ active }) });
 export const resetAdminPassword = (id, newPassword) => adminRequest(`/api/admin/admins/${id}/reset-password`, { method: 'POST', body: JSON.stringify({ newPassword }) });
+
+// --- Admin alerts, feedback, contests, adverts ---
+export const getAdminPushKey = () => adminRequest('/api/admin/push/key');
+export const subscribeAdminPush = (subscription) => adminRequest('/api/admin/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription }) });
+export const unsubscribeAdminPush = (endpoint) => adminRequest('/api/admin/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint }) });
+export const sendTestAdminAlert = () => adminRequest('/api/admin/alerts/test', { method: 'POST' });
+export const testCustomerEmailAlert = (customerId) => adminRequest('/api/admin/email/test-customer-alert', { method: 'POST', body: JSON.stringify({ customerId }) });
+export const shouldAskFeedback = () => request('/api/feedback/should-ask');
+export const sendFeedback = (data) => request('/api/feedback', { method: 'POST', body: JSON.stringify(data) });
+export const markFeedbackShared = (id) => request(`/api/feedback/${id}/shared`, { method: 'POST' });
+export const getAdminFeedback = () => adminRequest('/api/admin/feedback');
+export const getContest = () => request('/api/contest');
+export const getAdminContests = () => adminRequest('/api/admin/contests');
+export const getAdminContest = (id) => adminRequest(`/api/admin/contests/${id}`);
+export const createContest = (data) => adminRequest('/api/admin/contests', { method: 'POST', body: JSON.stringify(data) });
+export const updateContest = (id, data) => adminRequest(`/api/admin/contests/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const contestAction = (id, action, body) => adminRequest(`/api/admin/contests/${id}/${action}`, { method: 'POST', body: JSON.stringify(body || {}) });
+export const getAds = () => request('/api/ads');
+export const adImageUrl = (ad) => `${API_URL}/api/ads/${ad.id}/image?v=${ad.imageVersion}`;
+export const clickAd = (id) => fetch(`${API_URL}/api/ads/${id}/click`, { method: 'POST' }).catch(() => {});
+export const getAdminAds = () => adminRequest('/api/admin/ads');
+export const createAd = (data) => adminRequest('/api/admin/ads', { method: 'POST', body: JSON.stringify(data) });
+export const updateAd = (id, data) => adminRequest(`/api/admin/ads/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteAd = (id) => adminRequest(`/api/admin/ads/${id}`, { method: 'DELETE' });

@@ -22,6 +22,7 @@ const TYPE_LABEL = {
   REFERRAL_BONUS: 'Referral bonus',
   CASHBACK: 'Cashback',
   LOYALTY: 'Points redeemed',
+  CONTEST_PRIZE: 'Contest prize',
 };
 
 // Last 12 months as quick picks, plus a custom range.

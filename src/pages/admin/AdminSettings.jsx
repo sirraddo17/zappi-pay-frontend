@@ -112,6 +112,9 @@ export default function AdminSettings() {
   const [cbByService, setCbByService] = useState(toServiceMap({}));
   const [cbMax, setCbMax] = useState('500');
   const [alertsOn, setAlertsOn] = useState(false);
+  const [adminPushOn, setAdminPushOn] = useState(true);
+  const [adminEmailOn, setAdminEmailOn] = useState(true);
+  const [feedbackOn, setFeedbackOn] = useState(true);
   const [limitsOn, setLimitsOn] = useState(false);
   const [limitUnverified, setLimitUnverified] = useState('50000');
   const [limitVerified, setLimitVerified] = useState('1000000');
@@ -175,6 +178,9 @@ export default function AdminSettings() {
         setCbByService(toServiceMap(s.cashbackPercentByService));
         setCbMax(String(s.cashbackMaxPerOrder ?? 500));
         setAlertsOn(Boolean(s.emailAlertsEnabled));
+        setAdminPushOn(s.adminAlertPush !== false);
+        setAdminEmailOn(s.adminAlertEmail !== false);
+        setFeedbackOn(s.feedbackPromptEnabled !== false);
         setLimitsOn(Boolean(s.kycLimitsEnabled));
         setLimitUnverified(String(s.dailyLimitUnverified ?? 50000));
         setLimitVerified(String(s.dailyLimitVerified ?? 1000000));
@@ -380,6 +386,9 @@ export default function AdminSettings() {
       'alerts',
       {
         emailAlertsEnabled: alertsOn,
+        adminAlertPush: adminPushOn,
+        adminAlertEmail: adminEmailOn,
+        feedbackPromptEnabled: feedbackOn,
         kycLimitsEnabled: limitsOn,
         dailyLimitUnverified: Number(limitUnverified || 0),
         dailyLimitVerified: Number(limitVerified || 0),
@@ -872,6 +881,22 @@ export default function AdminSettings() {
           <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
             Uses your Resend email setup. Resend's free plan allows 100 emails a day — upgrade Resend before you have many customers.
           </p>
+          <div style={{ fontWeight: 600, margin: '4px 0 6px' }}>Alerts to me (admin)</div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+            <input type="checkbox" checked={adminPushOn} onChange={(e) => setAdminPushOn(e.target.checked)} style={{ width: 'auto' }} />
+            Push notifications to the admin app
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+            <input type="checkbox" checked={adminEmailOn} onChange={(e) => setAdminEmailOn(e.target.checked)} style={{ width: 'auto' }} />
+            Email to admin addresses
+          </label>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
+            For new support messages, transfers needing your Monnify OTP or held for review, funding and Airtime-to-Cash requests, deletion/agent requests, orders stuck over 15 minutes, low ratings and contest results. Turn on push per device with “Turn on alerts” in the menu.
+          </p>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
+            <input type="checkbox" checked={feedbackOn} onChange={(e) => setFeedbackOn(e.target.checked)} style={{ width: 'auto' }} />
+            Ask customers to rate their purchase (and share their referral link when happy)
+          </label>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
             <input type="checkbox" checked={limitsOn} onChange={(e) => setLimitsOn(e.target.checked)} style={{ width: 'auto' }} />
             Daily spending limits by verification level

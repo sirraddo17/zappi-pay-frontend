@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import InstallAppButton from './InstallAppButton';
+import AdminAlertsToggle from './AdminAlertsToggle';
 import { getMonnifyOverview } from '../api';
 
 // Remembered while the admin app is open so every page doesn't re-ask.
@@ -21,6 +22,9 @@ const TABS = [
   { to: '/admin/broadcasts', label: 'Broadcasts' },
   { to: '/admin/notices', label: 'Service Notices' },
   { to: '/admin/promos', label: 'Promo Codes' },
+  { to: '/admin/contests', label: '🏆 Referral Contests' },
+  { to: '/admin/ads', label: '📣 In-app Ads' },
+  { to: '/admin/feedback', label: '⭐ Feedback' },
   { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit-log', label: 'Audit Log' },
 ];
@@ -87,6 +91,7 @@ export default function AdminLayout({ children }) {
         ))}
         <div className="admin-account" style={{ padding: '16px 20px 0' }}>
           <div className="admin-name" style={{ color: 'var(--slate-400)', fontSize: 13, marginBottom: 8 }}>{admin?.name}</div>
+          <AdminAlertsToggle />
           <InstallAppButton admin label="Install admin app" style={{ marginBottom: 8, fontSize: 13 }} />
           <button className="btn-secondary btn" onClick={handleLogout}>Log Out</button>
         </div>

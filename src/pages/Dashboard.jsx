@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { cached } from '../lib/cache';
 import useAutoRefresh from '../lib/useAutoRefresh';
+import ContestCard from '../components/ContestCard';
+import { AdsCarousel, AdPopup } from '../components/Ads';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
@@ -44,6 +46,7 @@ function txLabel(t) {
   if (t.type === 'REFERRAL_BONUS') return t.note || 'Referral bonus';
   if (t.type === 'CASHBACK') return t.note || 'Cashback';
   if (t.type === 'LOYALTY') return t.note || 'Points redeemed';
+  if (t.type === 'CONTEST_PRIZE') return t.note || 'Contest prize';
   if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
   if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
   return t.note || 'Purchase';
@@ -197,6 +200,8 @@ export default function Dashboard() {
         </Link>
       </div>
 
+      <AdsCarousel />
+      <AdPopup />
       <PushToggle variant="nudge" />
       <LoyaltyCard />
       <Link to="/bulk" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '12px 16px' }}>
@@ -296,6 +301,8 @@ export default function Dashboard() {
         </Link>
       )}
 
+      <ContestCard compact />
+
       {referral?.enabled && referral.bonusAmount > 0 && (
         <Link
           to="/refer"
@@ -319,7 +326,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>
