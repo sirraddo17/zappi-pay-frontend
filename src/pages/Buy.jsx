@@ -326,6 +326,8 @@ export default function Buy() {
       clearTimeout(slowTimer);
       setSlow(false);
       setSubmitting(false);
+      // If the customer already went to Orders, update it now.
+      window.dispatchEvent(new Event('zp-refresh'));
     }
   }
 

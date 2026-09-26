@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { cached } from '../lib/cache';
+import useAutoRefresh from '../lib/useAutoRefresh';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
@@ -90,6 +91,14 @@ export default function Dashboard() {
     setDismissed(next);
     writeDismissed(next);
   }
+
+  // Balance and recent activity update when the app comes back to the
+  // front or a push notification arrives.
+  useAutoRefresh(() => {
+    getWalletBalance().then((d) => setBalance(d.walletBalance)).catch(() => {});
+    getWalletTransactions().then((d) => setTransactions((d.transactions || []).slice(0, 5))).catch(() => {});
+    getNotifications().then((d) => setUnreadCount(d.unreadCount || 0)).catch(() => {});
+  }, false);
 
   useEffect(() => {
     // Last known values show instantly; fresh ones replace them.

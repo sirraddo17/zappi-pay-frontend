@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getOrder, submitSupportTicket } from '../api';
+import useAutoRefresh from '../lib/useAutoRefresh';
 import { buyAgainLink } from '../lib/repeat';
 import { shareReceipt, downloadReceipt, extractToken } from '../lib/receipt';
 
@@ -30,11 +31,14 @@ export default function OrderDetail() {
   const [reportSuccess, setReportSuccess] = useState('');
   const [submittingReport, setSubmittingReport] = useState(false);
 
-  useEffect(() => {
+  function load() {
     getOrder(id)
-      .then((data) => setOrder(data.order))
-      .catch((err) => setError(err.message || 'Could not load this receipt.'));
-  }, [id]);
+      .then((data) => { setOrder(data.order); setError(''); })
+      .catch((err) => { if (!order) setError(err.message || 'Could not load this receipt.'); });
+  }
+
+  useEffect(load, [id]);
+  useAutoRefresh(load, order?.status === 'PENDING');
 
   const token = order ? extractToken(order) : null;
   const [copied, setCopied] = useState(false);

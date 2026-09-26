@@ -7,12 +7,18 @@ self.addEventListener('push', (event) => {
     data = { title: 'ZappiPay', body: event.data ? event.data.text() : '' };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || 'ZappiPay', {
-      body: data.body || '',
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
-      data: { url: data.url || '/' },
-    })
+    Promise.all([
+      self.registration.showNotification(data.title || 'ZappiPay', {
+        body: data.body || '',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        data: { url: data.url || '/' },
+      }),
+      // Tell open app windows so Orders / balance update straight away.
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+        .then((wins) => wins.forEach((w) => w.postMessage({ type: 'zp-push', url: data.url || '/' })))
+        .catch(() => {}),
+    ])
   );
 });
 

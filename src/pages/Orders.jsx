@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getOrders } from '../api';
+import useAutoRefresh from '../lib/useAutoRefresh';
 import BottomNav from '../components/BottomNav';
 import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
 
@@ -24,11 +25,15 @@ export default function Orders() {
   const [error, setError] = useState('');
   const [shown, setShown] = useState(FIRST_COUNT);
 
-  useEffect(() => {
+  function load() {
     getOrders()
-      .then((data) => setOrders(data.orders))
-      .catch((err) => setError(err.message));
-  }, []);
+      .then((data) => { setOrders(data.orders); setError(''); })
+      .catch((err) => { if (!orders) setError(err.message); });
+  }
+
+  useEffect(load, []);
+  // Pending orders switch to Successful / Refunded on their own.
+  useAutoRefresh(load, Boolean(orders?.some((o) => o.status === 'PENDING')));
 
   return (
     <div className="app-shell">
