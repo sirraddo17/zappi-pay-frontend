@@ -3,6 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import ProfitPanel from '../../components/ProfitPanel';
 import { Link } from 'react-router-dom';
 import { getCustomerList, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance } from '../../api';
+import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -12,7 +13,7 @@ export default function AdminDashboard() {
   const [agentReqs, setAgentReqs] = useState([]);
   const [vtpass, setVtpass] = useState(null);
 
-  useEffect(() => {
+  function loadAll() {
     Promise.all([getCustomerList({ view: 'active' }), getPendingFunding(), getAdminOrders()])
       .then(([c, f, o]) => {
         setStats({
@@ -31,7 +32,11 @@ export default function AdminDashboard() {
     getDeletionRequests().then((d) => setDeletions(d.customers)).catch(() => {});
     getAgentRequests().then((d) => setAgentReqs(d.customers)).catch(() => {});
     getVtpassBalance().then(setVtpass).catch(() => {});
-  }, []);
+  }
+
+  useEffect(loadAll, []);
+  // Once a minute: this page also asks VTpass and Monnify for balances.
+  useAutoRefresh(loadAll, true, { ...ADMIN_REFRESH, fastMs: 60000, slowMs: 60000 });
 
   const low = monnify?.walletBalance != null && monnify.walletBalance < (monnify.lowBalanceThreshold || 10000);
 

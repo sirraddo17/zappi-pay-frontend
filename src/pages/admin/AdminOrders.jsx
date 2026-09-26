@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminOrders, recheckAdminOrder, settleAdminOrder } from '../../api';
+import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -42,6 +43,7 @@ export default function AdminOrders() {
       .catch((err) => setError(err.message));
   }
   useEffect(load, []);
+  useAutoRefresh(load, true, ADMIN_REFRESH);
 
   async function act(o, fn, text) {
     setBusy(o.id);

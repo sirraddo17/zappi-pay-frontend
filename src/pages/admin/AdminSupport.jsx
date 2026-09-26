@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply } from '../../api';
+import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { CATEGORIES, detectCategory, draftReply } from '../../assistant/replyTemplates';
 
 function fmtMoney(n) {
@@ -166,6 +167,7 @@ export default function AdminSupport() {
   }
 
   useEffect(load, []);
+  useAutoRefresh(load, true, ADMIN_REFRESH);
 
   async function handleResolve(id) {
     setResolvingId(id);

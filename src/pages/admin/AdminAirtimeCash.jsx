@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminAirtimeCash, approveAirtimeCash, rejectAirtimeCash } from '../../api';
+import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 const STATUSES = [
   { value: 'PENDING', label: 'Pending' },
@@ -119,8 +120,8 @@ export default function AdminAirtimeCash() {
   const [pendingCount, setPendingCount] = useState(0);
   const [error, setError] = useState('');
 
-  function load(which = status) {
-    setRequests(null);
+  function load(which = status, quiet = false) {
+    if (!quiet) setRequests(null);
     getAdminAirtimeCash(which)
       .then((data) => {
         setRequests(data.requests || []);
@@ -133,6 +134,7 @@ export default function AdminAirtimeCash() {
   }
 
   useEffect(() => load(status), [status]);
+  useAutoRefresh(() => load(status, true), true, ADMIN_REFRESH);
 
   return (
     <AdminLayout>

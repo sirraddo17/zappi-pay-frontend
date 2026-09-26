@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAirtimeCashConfig, getMyAirtimeCashRequests, submitAirtimeCashRequest, getOrders } from '../api';
+import useAutoRefresh from '../lib/useAutoRefresh';
 import BottomNav from '../components/BottomNav';
 
 const STATUS_COLORS = { PENDING: 'var(--orange)', APPROVED: 'var(--green-500)', REJECTED: '#ef4444' };
@@ -42,6 +43,8 @@ export default function AirtimeCash() {
       .then((data) => setRequests(data.requests || []))
       .catch(() => setRequests([]));
   }
+
+  useAutoRefresh(loadRequests, Boolean(requests?.some((r) => r.status === 'PENDING')));
 
   useEffect(() => {
     getAirtimeCashConfig()

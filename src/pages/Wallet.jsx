@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments } from '../api';
+import useAutoRefresh from '../lib/useAutoRefresh';
 import BottomNav from '../components/BottomNav';
 import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
 import { useAppInfo } from '../components/ServiceNotices';
@@ -163,6 +164,9 @@ export default function Wallet() {
   }
 
   useEffect(load, []);
+  // Funding waiting for approval updates on its own; a bank transfer to
+  // the personal account shows up when the push arrives or on return.
+  useAutoRefresh(load, Boolean(transactions?.some((t) => t.status === 'PENDING')));
   useEffect(() => {
     getBankAccount().then(setBankInfo).catch(() => setBankInfo(null));
   }, []);

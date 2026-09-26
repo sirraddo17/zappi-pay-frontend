@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getPendingFunding, approveFunding, rejectFunding } from '../../api';
+import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -22,6 +23,7 @@ export default function AdminPendingFunding() {
   }
 
   useEffect(load, []);
+  useAutoRefresh(load, true, ADMIN_REFRESH);
 
   async function handleApprove(id) {
     setBusyId(id);

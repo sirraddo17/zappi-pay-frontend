@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
 import { getAdminBankTransfers, authorizeBankTransfer, resendBankTransferOtp, checkBankTransfer, cancelBankTransfer, releaseBankTransfer } from '../../api';
+import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 function money(n) {
   return `₦${Number(n || 0).toLocaleString()}`;
@@ -45,6 +46,9 @@ export default function AdminBankTransfers() {
     setShown(FIRST_COUNT);
     load(filter);
   }, [filter]);
+
+  // Keep statuses current (e.g. Processing → Sent after the OTP).
+  useAutoRefresh(() => load(), true, ADMIN_REFRESH);
 
   async function run(id, fn, okText) {
     setBusyId(id);

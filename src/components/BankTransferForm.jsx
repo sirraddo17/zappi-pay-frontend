@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getBankTransferConfig, getBanks, lookupBankAccount, sendBankTransfer, getBankTransfers } from '../api';
+import useAutoRefresh from '../lib/useAutoRefresh';
+import { useAuth } from '../context/AuthContext';
 import PinConfirm from './PinConfirm';
 import ShowMore, { FIRST_COUNT } from './ShowMore';
 import { shareReceipt } from '../lib/receipt';
@@ -31,9 +33,21 @@ export default function BankTransferForm({ onDone }) {
   const [success, setSuccess] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const { refreshCustomer } = useAuth();
+
   function loadHistory() {
-    getBankTransfers().then((d) => setHistory(d.transfers)).catch(() => setHistory([]));
+    getBankTransfers()
+      .then((d) => {
+        // A transfer that just finished (or was refunded) changes the balance.
+        const before = new Map((history || []).map((t) => [t.id, t.status]));
+        if (history && d.transfers.some((t) => before.has(t.id) && before.get(t.id) !== t.status)) refreshCustomer?.().catch(() => {});
+        setHistory(d.transfers);
+      })
+      .catch(() => setHistory((h) => h || []));
   }
+
+  // Processing / under-review transfers update on their own.
+  useAutoRefresh(() => { if (config?.available) loadHistory(); }, Boolean(history?.some((t) => t.status === 'PROCESSING' || t.status === 'UNDER_REVIEW')));
 
   useEffect(() => {
     getBankTransferConfig()

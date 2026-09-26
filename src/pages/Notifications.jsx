@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../api';
+import useAutoRefresh from '../lib/useAutoRefresh';
 import { BellIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 
@@ -19,6 +20,7 @@ export default function Notifications() {
   }
 
   useEffect(load, []);
+  useAutoRefresh(load, false);
 
   async function handleOpen(n) {
     if (n.read) return;
