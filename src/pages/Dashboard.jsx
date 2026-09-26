@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { cached } from '../lib/cache';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
@@ -91,40 +92,31 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    getWalletBalance()
-      .then((data) => setBalance(data.walletBalance))
-      .catch(() => {});
-    getWalletTransactions()
-      .then((data) => setTransactions((data.transactions || []).slice(0, 5)))
-      .catch(() => setTransactions([]));
+    // Last known values show instantly; fresh ones replace them.
+    const k = (name) => `${customer?.id || 'me'}:${name}`;
+    cached(k('balance'), getWalletBalance, (data) => setBalance(data.walletBalance)).catch(() => {});
+    cached(k('tx'), getWalletTransactions, (data) => setTransactions((data.transactions || []).slice(0, 5)))
+      .catch(() => setTransactions((t) => t || []));
     getNotifications()
       .then((data) => setUnreadCount(data.unreadCount || 0))
       .catch(() => {});
-    getActiveBroadcasts()
-      .then((data) => setBanners(data.broadcasts || []))
-      .catch(() => {});
-    getPricing()
-      .then((data) => setDiscounts(data.discountPercentByService || {}))
-      .catch(() => {});
-    getReferralInfo()
-      .then(setReferral)
-      .catch(() => {});
+    cached(k('banners'), getActiveBroadcasts, (data) => setBanners(data.broadcasts || [])).catch(() => {});
+    cached(k('pricing'), getPricing, (data) => setDiscounts(data.discountPercentByService || {})).catch(() => {});
+    cached(k('referral'), getReferralInfo, setReferral).catch(() => {});
     // Last few distinct successful purchases, for one-tap "Buy again".
-    getOrders()
-      .then((data) => {
-        const seen = new Set();
-        const list = [];
-        for (const o of data.orders || []) {
-          if (o.status !== 'SUCCESS') continue;
-          const key = `${o.service}|${o.provider}|${o.recipient}|${o.variationCode || o.costAmount}`;
-          if (seen.has(key) || !buyAgainLink(o)) continue;
-          seen.add(key);
-          list.push(o);
-          if (list.length >= 6) break;
-        }
-        setRecent(list);
-      })
-      .catch(() => {});
+    cached(k('recent'), () => getOrders().then((data) => {
+      const seen = new Set();
+      const list = [];
+      for (const o of data.orders || []) {
+        if (o.status !== 'SUCCESS') continue;
+        const key = `${o.service}|${o.provider}|${o.recipient}|${o.variationCode || o.costAmount}`;
+        if (seen.has(key) || !buyAgainLink(o)) continue;
+        seen.add(key);
+        list.push(o);
+        if (list.length >= 6) break;
+      }
+      return list;
+    }), setRecent).catch(() => {});
   }, []);
 
   return (

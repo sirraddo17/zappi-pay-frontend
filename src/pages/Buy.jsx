@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo } from '../api';
+import { cached } from '../lib/cache';
 import PinConfirm from '../components/PinConfirm';
 import ServiceNotices, { useAppInfo } from '../components/ServiceNotices';
 
@@ -127,6 +128,7 @@ export default function Buy() {
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [slow, setSlow] = useState(false);
   const [pricing, setPricing] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [searchParams] = useSearchParams();
@@ -180,12 +182,13 @@ export default function Buy() {
 
   useEffect(() => {
     if (!config) return;
-    getVtpassServices(config.identifier)
-      .then((data) => {
-        const list = Array.isArray(data.content) ? data.content : [];
-        setProviders(config.filterServiceIds ? list.filter((p) => config.filterServiceIds.includes(p.serviceID)) : list);
-      })
-      .catch((err) => setError(err.message));
+    // Networks/billers show instantly from the last visit, then refresh.
+    let shown = false;
+    cached(`services:${config.identifier}`, () => getVtpassServices(config.identifier), (data) => {
+      shown = true;
+      const list = Array.isArray(data.content) ? data.content : [];
+      setProviders(config.filterServiceIds ? list.filter((p) => config.filterServiceIds.includes(p.serviceID)) : list);
+    }, 24 * 60 * 60 * 1000).catch((err) => { if (!shown) setError(err.message); });
   }, [slug]);
 
   useEffect(() => {
@@ -193,19 +196,27 @@ export default function Buy() {
     setVariations([]);
     setVerifiedName('');
     if (!providerId || !config?.needsVariation) return;
-    getVtpassVariations(providerId)
-      .then((data) => {
-        const list = Array.isArray(data.content?.varations || data.content?.variations) ? (data.content?.varations || data.content?.variations) : [];
-        setVariations(list);
-        if (pendingVariation.current && list.some((v) => v.variation_code === pendingVariation.current)) {
-          setVariationCode(pendingVariation.current);
-        }
-        pendingVariation.current = '';
-      })
-      .catch((err) => setError(err.message));
+    // Plans show instantly from the last visit (kept up to 6 hours),
+    // then refresh. The price is always re-checked when paying.
+    let shown = false;
+    let active = true;
+    cached(`plans:${providerId}`, () => getVtpassVariations(providerId), (data) => {
+      if (!active) return;
+      shown = true;
+      const list = Array.isArray(data.content?.varations || data.content?.variations) ? (data.content?.varations || data.content?.variations) : [];
+      setVariations(list);
+      // Keep the chosen plan if it still exists in the fresh list.
+      setVariationCode((code) => (code && list.some((v) => v.variation_code === code) ? code : ''));
+      if (pendingVariation.current && list.some((v) => v.variation_code === pendingVariation.current)) {
+        setVariationCode(pendingVariation.current);
+      }
+    }, 6 * 60 * 60 * 1000)
+      .then(() => { pendingVariation.current = ''; })
+      .catch((err) => { if (!shown && active) setError(err.message); });
+    return () => { active = false; };
   }, [providerId]);
 
-  async function handleVerify() {
+  async function handleVerify(silent = false) {
     if (!config.canVerify || !providerId || !recipient) return;
     setVerifying(true);
     setVerifiedName('');
@@ -214,11 +225,27 @@ export default function Buy() {
       const data = await verifyBillersCode(providerId, recipient, config.needsType ? billType : undefined);
       setVerifiedName(data.content?.Customer_Name || data.content?.customerName || 'Verified');
     } catch (err) {
-      setError('Could not verify this number — double-check it before continuing.');
+      if (!silent) setError('Could not verify this number — double-check it before continuing.');
     } finally {
       setVerifying(false);
     }
   }
+
+  // Check the meter / decoder / account name as soon as the number
+  // looks complete, instead of waiting for the customer to tap Verify.
+  const autoVerified = useRef('');
+  useEffect(() => {
+    if (!config?.canVerify || !providerId || verifying || verifiedName) return undefined;
+    const code = recipient.trim();
+    if (!/^\d{10,13}$/.test(code)) return undefined;
+    const key = `${providerId}|${code}|${billType}`;
+    if (autoVerified.current === key) return undefined;
+    const t = setTimeout(() => {
+      autoVerified.current = key;
+      handleVerify(true);
+    }, 700);
+    return () => clearTimeout(t);
+  }, [recipient, providerId, billType, verifiedName]);
 
   const selectedVariation = variations.find((v) => v.variation_code === variationCode);
   const amount = config?.needsVariation ? Number(selectedVariation?.variation_amount || 0) : Number(customAmount || 0);
@@ -273,6 +300,8 @@ export default function Buy() {
   async function doPurchase(auth) {
     const phoneToSend = isPhoneService ? recipient : (customer?.phone || phone);
     setSubmitting(true);
+    setSlow(false);
+    const slowTimer = setTimeout(() => setSlow(true), 6000);
     try {
       await purchase({
         service: config.backendService,
@@ -294,6 +323,8 @@ export default function Buy() {
       if (/refunded/i.test(err.message || '')) refreshCustomer().catch(() => {});
       throw err;
     } finally {
+      clearTimeout(slowTimer);
+      setSlow(false);
       setSubmitting(false);
     }
   }
@@ -407,7 +438,7 @@ export default function Buy() {
               type="button"
               className="btn-secondary btn"
               style={{ marginTop: 8 }}
-              onClick={handleVerify}
+              onClick={() => handleVerify()}
               disabled={verifying || !providerId || !recipient}
             >
               {verifying ? 'Verifying…' : 'Verify'}
@@ -524,6 +555,14 @@ export default function Buy() {
       <PinConfirm
         open={confirmOpen}
         summary={`Pay ${naira(payTotal)} · ${config.label} for ${recipient.trim()}`}
+        notice={slow && (
+          <div style={{ background: 'rgba(255,184,48,0.1)', border: '1px solid var(--gold)', borderRadius: 10, padding: '10px 12px', fontSize: 13 }}>
+            ⏳ The network is taking a little longer than usual. You can leave this page. Your order keeps processing, and if it fails you're refunded automatically.
+            <div style={{ marginTop: 8 }}>
+              <Link to="/orders" style={{ color: 'var(--purple)', fontWeight: 600 }}>Go to Orders →</Link>
+            </div>
+          </div>
+        )}
         onSubmit={doPurchase}
         onError={(err) => setError(err.message || 'Purchase failed.')}
         onClose={() => setConfirmOpen(false)}

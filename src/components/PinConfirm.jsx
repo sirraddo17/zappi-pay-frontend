@@ -13,7 +13,7 @@ const PIN_CODES = ['PIN_WRONG', 'PIN_LOCKED', 'PIN_REQUIRED', 'BIOMETRIC_FAILED'
 // auth = { pin } or { webauthn }; PIN problems are shown here, any
 // other error goes to `onError` and the sheet closes. Customers who
 // have never made a PIN are walked through creating one first.
-export default function PinConfirm({ open, title = 'Confirm payment', summary, onSubmit, onError, onClose }) {
+export default function PinConfirm({ open, title = 'Confirm payment', summary, notice, onSubmit, onError, onClose }) {
   const { customer, refreshCustomer } = useAuth();
   const [mode, setMode] = useState('pin');
   const [error, setError] = useState('');
@@ -133,6 +133,7 @@ export default function PinConfirm({ open, title = 'Confirm payment', summary, o
           </button>
         </div>
         {summary && mode === 'pin' && <p style={{ margin: '0 0 12px', color: 'var(--slate-400)', fontSize: 14 }}>{summary}</p>}
+        {notice && <div style={{ margin: '0 0 12px' }}>{notice}</div>}
 
         {mode === 'setup-password' && (
           <form

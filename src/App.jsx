@@ -1,3 +1,4 @@
+import { lazy as reactLazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext';
@@ -7,43 +8,65 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Buy from './pages/Buy';
 import Wallet from './pages/Wallet';
-import Statement from './pages/Statement';
-import Bulk from './pages/Bulk';
 import Orders from './pages/Orders';
-import OrderDetail from './pages/OrderDetail';
-import Notifications from './pages/Notifications';
-import Legal from './pages/Legal';
-import DeleteAccountInfo from './pages/DeleteAccountInfo';
-import Transfer from './pages/Transfer';
-import Profile from './pages/Profile';
-import AirtimeCash from './pages/AirtimeCash';
 import HelpAssistant from './components/HelpAssistant';
 import ServerWaking from './components/ServerWaking';
-import ChangePassword from './pages/ChangePassword';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
 import Landing from './pages/Landing';
-import Security from './pages/Security';
-import Refer from './pages/Refer';
-import Saved from './pages/Saved';
 import { getQuickLogin } from './lib/quickLogin';
 
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminSettings from './pages/admin/AdminSettings';
-import AdminCustomers from './pages/admin/AdminCustomers';
-import AdminCustomerDetail from './pages/admin/AdminCustomerDetail';
-import AdminPendingFunding from './pages/admin/AdminPendingFunding';
-import AdminOrders from './pages/admin/AdminOrders';
-import AdminSupport from './pages/admin/AdminSupport';
-import AdminAuditLog from './pages/admin/AdminAuditLog';
-import AdminStaff from './pages/admin/AdminStaff';
-import AdminBroadcasts from './pages/admin/AdminBroadcasts';
-import AdminAirtimeCash from './pages/admin/AdminAirtimeCash';
-import AdminBankTransfers from './pages/admin/AdminBankTransfers';
-import AdminPromos from './pages/admin/AdminPromos';
-import AdminAssistant from './pages/admin/AdminAssistant';
-import AdminNotices from './pages/admin/AdminNotices';
+// Screens used less often load only when opened, so the app starts faster.
+// If a screen's file is missing because a newer version was published
+// while the app was open, reload once to pick up the new version.
+function lazy(load) {
+  return reactLazy(() =>
+    load().catch((error) => {
+      const key = 'zappipay_chunk_reload';
+      let reloaded = false;
+      try { reloaded = sessionStorage.getItem(key) === '1'; sessionStorage.setItem(key, '1'); } catch { /* ignore */ }
+      if (!reloaded) {
+        window.location.reload();
+        return new Promise(() => {});
+      }
+      throw error;
+    }).then((mod) => {
+      try { sessionStorage.removeItem('zappipay_chunk_reload'); } catch { /* ignore */ }
+      return mod;
+    })
+  );
+}
+
+const Statement = lazy(() => import('./pages/Statement'));
+const Bulk = lazy(() => import('./pages/Bulk'));
+const OrderDetail = lazy(() => import('./pages/OrderDetail'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Legal = lazy(() => import('./pages/Legal'));
+const DeleteAccountInfo = lazy(() => import('./pages/DeleteAccountInfo'));
+const Transfer = lazy(() => import('./pages/Transfer'));
+const Profile = lazy(() => import('./pages/Profile'));
+const AirtimeCash = lazy(() => import('./pages/AirtimeCash'));
+const ChangePassword = lazy(() => import('./pages/ChangePassword'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Security = lazy(() => import('./pages/Security'));
+const Refer = lazy(() => import('./pages/Refer'));
+const Saved = lazy(() => import('./pages/Saved'));
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+const AdminCustomers = lazy(() => import('./pages/admin/AdminCustomers'));
+const AdminCustomerDetail = lazy(() => import('./pages/admin/AdminCustomerDetail'));
+const AdminPendingFunding = lazy(() => import('./pages/admin/AdminPendingFunding'));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
+const AdminSupport = lazy(() => import('./pages/admin/AdminSupport'));
+const AdminAuditLog = lazy(() => import('./pages/admin/AdminAuditLog'));
+const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
+const AdminBroadcasts = lazy(() => import('./pages/admin/AdminBroadcasts'));
+const AdminAirtimeCash = lazy(() => import('./pages/admin/AdminAirtimeCash'));
+const AdminBankTransfers = lazy(() => import('./pages/admin/AdminBankTransfers'));
+const AdminPromos = lazy(() => import('./pages/admin/AdminPromos'));
+const AdminAssistant = lazy(() => import('./pages/admin/AdminAssistant'));
+const AdminNotices = lazy(() => import('./pages/admin/AdminNotices'));
+
 
 function RequireCustomer({ children }) {
   const { customer, loading } = useAuth();
@@ -80,6 +103,7 @@ export default function App() {
   return (
     <AuthProvider>
       <AdminAuthProvider>
+        <Suspense fallback={<div className="page-loading">Loading…</div>}>
         <Routes>
           {/* Customer */}
           <Route path="/login" element={<Login />} />
@@ -125,6 +149,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
         <HelpAssistant />
         <ServerWaking />
       </AdminAuthProvider>

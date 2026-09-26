@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { login as apiLogin, signup as apiSignup, getMe } from '../api';
 import { getQuickLogin, isUnlocked, markUnlocked, clearUnlocked, saveQuickLogin } from '../lib/quickLogin';
+import { readCache, writeCache, clearCache } from '../lib/cache';
 
 const AuthContext = createContext(null);
 
@@ -19,11 +20,29 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
+    // Open instantly with the last known account details, then refresh.
+    // If the server is still waking up, the customer can already look
+    // around; only a real "logged out" answer ends the session.
+    const known = readCache('me');
+    if (known) {
+      setCustomer(known);
+      setLoading(false);
+    }
     getMe()
       .then((data) => setCustomer(data.customer))
-      .catch(() => localStorage.removeItem('zappipay_customer_token'))
+      .catch((err) => {
+        if (!known || err?.status === 401 || err?.status === 403) {
+          localStorage.removeItem('zappipay_customer_token');
+          clearCache();
+          setCustomer(null);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (customer) writeCache('me', customer);
+  }, [customer]);
 
   function startSession(data) {
     localStorage.setItem('zappipay_customer_token', data.token);
@@ -48,6 +67,7 @@ export function AuthProvider({ children }) {
     // Quick-login details stay, so next time it's just PIN / fingerprint.
     localStorage.removeItem('zappipay_customer_token');
     clearUnlocked();
+    clearCache();
     setCustomer(null);
   }
 
