@@ -18,6 +18,20 @@ function botText(text, extra = {}) {
   return { from: 'bot', text, ...extra };
 }
 
+export const SUPPORT_TOPICS = [
+  'Purchase problem',
+  'Wallet funding',
+  'Transfer to bank',
+  'Login, password or PIN',
+  'Security question or date of birth',
+  'Change phone number or email',
+  'Account frozen or closed',
+  'Agent account',
+  'Suggestion',
+  'Complaint',
+  'Other',
+];
+
 export default function HelpAssistant() {
   const appInfo = useAppInfo();
   const { customer } = useAuth();
@@ -33,6 +47,7 @@ export default function HelpAssistant() {
   const [orders, setOrders] = useState([]);
   const [sending, setSending] = useState(false);
   const [ticketError, setTicketError] = useState('');
+  const [ticketTopic, setTicketTopic] = useState('');
   const endRef = useRef(null);
   const [ai, setAi] = useState(null); // { enabled, remaining }
   const [thinking, setThinking] = useState(false);
@@ -55,6 +70,18 @@ export default function HelpAssistant() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, ticketMode]);
+
+  // Other pages (Profile → Support) can open the message form directly:
+  // window.dispatchEvent(new CustomEvent('zappipay:support', { detail: { topic } }))
+  useEffect(() => {
+    const onOpen = (e) => {
+      setOpen(true);
+      setTicketTopic(e.detail?.topic || '');
+      openTicket('');
+    };
+    window.addEventListener('zappipay:support', onOpen);
+    return () => window.removeEventListener('zappipay:support', onOpen);
+  });
 
   if (hidden) return null;
 
@@ -145,11 +172,12 @@ export default function HelpAssistant() {
     setSending(true);
     setTicketError('');
     try {
-      await submitSupportTicket({ message: ticketText.trim(), orderId: ticketOrderId || undefined, images: ticketImages.length ? ticketImages : undefined });
+      await submitSupportTicket({ message: `${ticketTopic ? `${ticketTopic}: ` : ''}${ticketText.trim()}`, orderId: ticketOrderId || undefined, images: ticketImages.length ? ticketImages : undefined });
       setTicketImages([]);
       setTicketMode(false);
       setTicketText('');
       setTicketOrderId('');
+      setTicketTopic('');
       setMessages((prev) => [
         ...prev,
         botText("Done — your message is with our support team. You'll get their reply in your notifications, and you can see it under Profile → Support."),
@@ -267,6 +295,10 @@ export default function HelpAssistant() {
         {ticketMode && (
           <form onSubmit={submitTicket} style={{ background: 'var(--slate-900)', borderRadius: 12, padding: 10 }}>
             <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>Message support</div>
+            <select value={ticketTopic} onChange={(e) => setTicketTopic(e.target.value)} aria-label="Topic" style={{ marginBottom: 6, fontSize: 13 }}>
+              <option value="">What's it about?</option>
+              {SUPPORT_TOPICS.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
             <textarea
               rows={3}
               value={ticketText}

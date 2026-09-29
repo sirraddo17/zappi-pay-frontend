@@ -261,6 +261,15 @@ export default function Profile() {
 
       <div className="card" style={{ margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Support</h2>
+        <button
+          type="button"
+          className="btn"
+          style={{ marginBottom: 10 }}
+          onClick={() => window.dispatchEvent(new CustomEvent('zappipay:support', { detail: {} }))}
+        >
+          💬 Message support in the app
+        </button>
+        <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '-4px 0 10px' }}>Problems, account changes, suggestions — anything. You can add screenshots. We reply here and in your notifications.</p>
         <a
           href={`https://wa.me/${appInfo?.supportWhatsapp || WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello ZappiPay, I need help with')}`}
           target="_blank"

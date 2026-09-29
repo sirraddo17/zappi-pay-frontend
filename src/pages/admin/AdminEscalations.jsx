@@ -30,6 +30,7 @@ function Checks({ c }) {
       {item(c.debitConfirmed, 'Staff confirmed the debit and no delivery')}
       {c.vtpassStatus && <li>VTpass status when requested: <b>{c.vtpassStatus}</b></li>}
       {c.monnifyStatus && <li>Monnify status when requested: <b>{c.monnifyStatus}</b></li>}
+      {(c.newPhone || c.newEmail) && <li>Change to: <b>{[c.newPhone, c.newEmail].filter(Boolean).join(' · ')}</b></li>}
       {c.monnifySync && <li>{c.monnifySync}</li>}
       {c.bankReference && <li>Bank session ID / reference: <b>{c.bankReference}</b> — check it in your Monnify dashboard before approving</li>}
       {c.staffNote && <li>Note: {c.staffNote}</li>}

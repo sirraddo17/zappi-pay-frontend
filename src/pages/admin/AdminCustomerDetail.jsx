@@ -4,6 +4,7 @@ import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
 import { IdentityCheck, AgentPanel } from '../../components/admin/CustomerPanels';
 import RequestApproval, { FundingCheck } from '../../components/admin/RequestApproval';
+import AccountTools from '../../components/admin/AccountTools';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, adminSetUsername, testCustomerEmailAlert } from '../../api';
 
@@ -211,6 +212,8 @@ export default function AdminCustomerDetail() {
       </div>
 
       {!customer.deletedAt && <IdentityCheck customer={customer} orders={orders} walletTransactions={walletTransactions} onChanged={load} canReset={isOwner} />}
+
+      {isOwner && !customer.deletedAt && <AccountTools customer={customer} onDone={load} />}
 
       {!customer.deletedAt && <FundingCheck customer={customer} onDone={load} />}
 

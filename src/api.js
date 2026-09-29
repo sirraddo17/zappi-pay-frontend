@@ -345,3 +345,4 @@ export const rejectEscalation = (id, note) => adminRequest(`/api/admin/escalatio
 export const reportOrderToVtpass = (id, note) => adminRequest(`/api/admin/orders/${id}/vtpass-escalate`, { method: 'POST', body: JSON.stringify({ note }) });
 export const checkCustomerFunding = (id, reference) => adminRequest(`/api/admin/customers/${id}/check-funding`, { method: 'POST', body: JSON.stringify({ reference }) });
 export const setAdminRole = (id, role) => adminRequest(`/api/admin/admins/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
+export const customerAccountTool = (id, data) => adminRequest(`/api/admin/customers/${id}/account-tool`, { method: 'POST', body: JSON.stringify(data) });

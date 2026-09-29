@@ -3,6 +3,9 @@ import { createEscalation, setCustomerActive, checkCustomerFunding } from '../..
 
 const TYPES = [
   ['PASSWORD_RESET', 'Reset their password'],
+  ['PIN_RESET', 'Reset their transaction PIN'],
+  ['DEVICES_RESET', 'Lost phone: remove quick login & fingerprint'],
+  ['CONTACT_CHANGE', 'Change their phone number or email'],
   ['ORDER_REFUND', 'Refund a purchase that wasn’t delivered'],
   ['WALLET_CREDIT', 'Credit their wallet'],
   ['WALLET_DEBIT', 'Debit their wallet'],
@@ -31,6 +34,8 @@ export default function RequestApproval({ customer, orders, onDone }) {
   const needsOrder = type === 'ORDER_REFUND';
   const needsAmount = type === 'WALLET_CREDIT' || type === 'WALLET_DEBIT' || type === 'FUNDING_MISSING';
   const [bankRef, setBankRef] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [newEmail, setNewEmail] = useState('');
 
   async function submit(e) {
     e.preventDefault();
@@ -38,7 +43,7 @@ export default function RequestApproval({ customer, orders, onDone }) {
     setErr('');
     setMsg('');
     try {
-      const r = await createEscalation({ type, customerId: customer.id, orderId: orderId || undefined, amount: needsAmount ? Number(amount) : undefined, bankReference: type === 'FUNDING_MISSING' ? bankRef : undefined, reason, identityVerified: idOk, debitConfirmed: debitOk, checkNote });
+      const r = await createEscalation({ type, customerId: customer.id, orderId: orderId || undefined, amount: needsAmount ? Number(amount) : undefined, bankReference: type === 'FUNDING_MISSING' ? bankRef : undefined, newPhone: type === 'CONTACT_CHANGE' ? newPhone : undefined, newEmail: type === 'CONTACT_CHANGE' ? newEmail : undefined, reason, identityVerified: idOk, debitConfirmed: debitOk, checkNote });
       if (r.resolved) setMsg(r.message);
       else setMsg(`Sent for approval (${r.escalation.ref}). ${customer.name.split(' ')[0]} has been told it's with a senior admin.`);
       setReason('');
@@ -85,6 +90,18 @@ export default function RequestApproval({ customer, orders, onDone }) {
             ))}
           </select>
           {needsOrder && <small style={{ color: 'var(--slate-400)' }}>We ask VTpass first — if they confirm it failed, the customer is refunded automatically and no approval is needed. Delivered-but-not-received? Use “Report to VTpass” on the Orders page.</small>}
+        </div>
+      )}
+      {type === 'CONTACT_CHANGE' && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="field" style={{ flex: '1 1 160px' }}>
+            <label htmlFor="ra-phone">New phone (optional)</label>
+            <input id="ra-phone" inputMode="tel" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="08031234567" />
+          </div>
+          <div className="field" style={{ flex: '1 1 200px' }}>
+            <label htmlFor="ra-email">New email (optional)</label>
+            <input id="ra-email" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+          </div>
         </div>
       )}
       {type === 'FUNDING_MISSING' && (
