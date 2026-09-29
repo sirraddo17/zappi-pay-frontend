@@ -11,6 +11,8 @@ const SUGGESTIONS = [
   'Which service made the most profit this month?',
   'Show failed orders today and why',
   'Who are my top 5 customers this month?',
+  'How much did I really make this month, line by line?',
+  'If customers spend ₦1,000 on each service, how much do I keep?',
 ];
 
 // Ask questions about the business in plain English. Read-only: it

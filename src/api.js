@@ -334,3 +334,4 @@ export const adminClearSecurityDetails = (id) => adminRequest(`/api/admin/custom
 export const rejectAgent = (id, reason) => adminRequest(`/api/admin/customers/${id}/agent-reject`, { method: 'POST', body: JSON.stringify({ reason }) });
 export const redeemCoupon = (code) => request('/api/wallet/coupon', { method: 'POST', body: JSON.stringify({ code }) });
 export const getFundingBanks = () => adminRequest('/api/admin/funding-banks');
+export const estimateEarnings = (data) => adminRequest('/api/admin/earnings/estimate', { method: 'POST', body: JSON.stringify(data) });

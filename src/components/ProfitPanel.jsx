@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getAdminAnalytics } from '../api';
+import EarningsCalculator from './admin/EarningsCalculator';
 
 function money(n) {
   return `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
@@ -72,6 +73,50 @@ function ProfitChart({ days }) {
   );
 }
 
+const INCOME = [
+  ['vtpassCommission', 'VTpass commission', 'VTpass charges you less than face value'],
+  ['purchaseMarkup', 'Your markup on purchases', 'Price paid − face value, after discounts & promo codes'],
+  ['sendToBankFees', 'Send-to-bank fees', 'Fee you charge per transfer'],
+  ['bankFundingFees', 'Bank-funding fees', 'Fee you keep from automatic funding'],
+  ['airtimeToCashFees', 'Airtime-to-Cash fees', 'Kept as airtime on your line'],
+];
+const COSTS = [
+  ['monnifyFundingFees', 'Monnify: bank funding', '1.5% (max ₦2,000) + VAT on each deposit'],
+  ['monnifyPayoutFees', 'Monnify: send-to-bank', '₦10 / ₦20 / ₦40 + VAT per transfer'],
+  ['rewards', 'Rewards paid', 'Cashback, referral, loyalty, contest prizes, coupons'],
+];
+
+// Every naira in and out, so the profit number isn't a mystery.
+function Breakdown({ b, profit, exact, orders }) {
+  const row = ([k, label, hint], sign) => {
+    const v = Number(b[sign > 0 ? 'income' : 'costs']?.[k] || 0);
+    if (!v && k !== 'vtpassCommission') return null;
+    return (
+      <tr key={k}>
+        <td>{label}<div style={{ fontSize: 11, color: 'var(--slate-400)' }}>{hint}</div></td>
+        <td style={{ textAlign: 'right', color: sign > 0 ? (v < 0 ? 'var(--red-500)' : 'var(--green-500)') : 'var(--red-500)', whiteSpace: 'nowrap' }}>{sign > 0 ? (v < 0 ? '−' : '+') : '−'}{money(Math.abs(v))}</td>
+      </tr>
+    );
+  };
+  return (
+    <div className="card" style={{ margin: '0 0 12px' }}>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>Where your profit comes from</div>
+      <table>
+        <tbody>
+          {INCOME.map((x) => row(x, 1))}
+          {COSTS.map((x) => row(x, -1))}
+          <tr><td><strong>Profit</strong></td><td style={{ textAlign: 'right' }}><strong>{money(profit)}</strong></td></tr>
+        </tbody>
+      </table>
+      {orders > 0 && (
+        <p style={{ fontSize: 11, color: 'var(--slate-400)', margin: '8px 0 0' }}>
+          Commission is exact (from VTpass) on {exact} of {orders} orders; the rest use VTpass's published rates. Monnify fees use its published prices.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function ProfitPanel() {
   const [range, setRange] = useState(30);
   const [data, setData] = useState(null);
@@ -111,11 +156,13 @@ export default function ProfitPanel() {
       {data && (
         <>
           <div className="grid" style={{ marginBottom: 12 }}>
-            {tile('Profit', money(t.profit), `Purchases ${money(t.purchaseProfit)} + transfer fees ${money(t.transferFees)}`)}
+            {tile('Profit', money(t.profit), 'After VTpass commission, your fees, Monnify fees and rewards')}
             {tile('Sales', money(t.revenue), `${t.orders} successful order${t.orders === 1 ? '' : 's'}`)}
             {tile('Margin', t.revenue ? `${((t.purchaseProfit / t.revenue) * 100).toFixed(1)}%` : '—', 'Profit on purchases ÷ sales')}
             {tile('Failed orders', t.failedOrders, 'Refunded automatically')}
           </div>
+
+          {data.breakdown && <Breakdown b={data.breakdown} profit={t.profit} exact={t.commissionExactOrders} orders={t.orders} />}
 
           <div className="card" style={{ margin: '0 0 12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
@@ -143,26 +190,29 @@ export default function ProfitPanel() {
               <p className="empty-state">No sales in this period.</p>
             ) : (
               <table>
-                <thead><tr><th>Service</th><th>Orders</th><th>Sales</th><th>Cost</th><th>Profit</th></tr></thead>
+                <thead><tr><th>Service</th><th>Orders</th><th>Sales</th><th>VTpass commission</th><th>Your markup</th><th>Profit</th></tr></thead>
                 <tbody>
                   {data.byService.map((s) => (
                     <tr key={s.service}>
                       <td>{s.service.charAt(0) + s.service.slice(1).toLowerCase()}</td>
                       <td>{s.orders}</td>
                       <td>{money(s.revenue)}</td>
-                      <td>{money(s.cost)}</td>
+                      <td>{money(s.commission)}</td>
+                      <td>{money(s.margin)}</td>
                       <td><strong>{money(s.profit)}</strong></td>
                     </tr>
                   ))}
                   {t.transfers > 0 && (
                     <tr>
-                      <td>Bank transfers</td><td>{t.transfers}</td><td>{money(t.transferVolume)}</td><td>—</td><td><strong>{money(t.transferFees)}</strong></td>
+                      <td>Send to bank</td><td>{t.transfers}</td><td>{money(t.transferVolume)}</td><td>—</td><td>{money(t.transferFees)} fees</td><td><strong>{money(t.transferFees - (data.breakdown?.costs?.monnifyPayoutFees || 0))}</strong></td>
                     </tr>
                   )}
                 </tbody>
               </table>
             )}
           </div>
+
+          <EarningsCalculator />
         </>
       )}
     </div>
