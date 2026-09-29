@@ -105,7 +105,11 @@ export default function BankTransferForm({ onDone }) {
   }
 
   const amt = Number(amount || 0);
-  const total = amt + Number(config.fee || 0);
+  // Fee depends on the amount (same bands as the server).
+  const tiers = config.feeTiers || { base: Number(config.fee || 0), mid: Number(config.fee || 0), high: Number(config.fee || 0) };
+  const feeNow = amt >= 50000 ? tiers.high : amt >= 10000 ? tiers.mid : tiers.base;
+  const total = amt + Number(feeNow || 0);
+  const tiered = tiers.mid !== tiers.base || tiers.high !== tiers.base;
 
   function pickRecent(t) {
     const b = banks.find((x) => x.code === t.bankCode) || { code: t.bankCode, name: t.bankName || t.bankCode };
@@ -219,7 +223,7 @@ export default function BankTransferForm({ onDone }) {
           <label htmlFor="bankAmount">Amount (₦)</label>
           <input id="bankAmount" type="number" min={config.min || 1} step="1" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           <small style={{ color: 'var(--slate-400)' }}>
-            {config.fee > 0 ? `Fee ${money(config.fee)} · ` : 'No fee · '}
+            {amt > 0 ? (feeNow > 0 ? `Fee ${money(feeNow)} · ` : 'No fee · ') : tiered ? `Fee ${money(tiers.base)} under ₦10,000, ${money(tiers.mid)} up to ₦49,999, ${money(tiers.high)} from ₦50,000 · ` : tiers.base > 0 ? `Fee ${money(tiers.base)} · ` : 'No fee · '}
             {config.min ? `min ${money(config.min)}` : ''}{config.max ? ` · max ${money(config.max)} per transfer` : ''}
           </small>
         </div>
