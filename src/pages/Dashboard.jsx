@@ -51,6 +51,9 @@ function txLabel(t) {
   if (t.type === 'COUPON') return t.note || 'Coupon';
   if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
   if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
+  if (t.type === 'SAVINGS_IN') return 'Moved to savings';
+  if (t.type === 'SAVINGS_OUT') return 'From savings';
+  if (t.type === 'INTEREST') return 'Savings interest';
   return t.note || 'Purchase';
 }
 
@@ -347,7 +350,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>

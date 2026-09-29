@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import TestModeBanner from '../components/TestModeBanner';
+import SavingsCard from '../components/SavingsCard';
 import { Link } from 'react-router-dom';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
@@ -359,6 +360,8 @@ export default function Wallet() {
         <div className="label">Wallet Balance</div>
         <div className="value">{fmtMoney(balance)}</div>
       </div>
+
+      <SavingsCard onChanged={load} />
 
       {error && <p className="error-text">{error}</p>}
       {successMessage && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{successMessage}</p>}

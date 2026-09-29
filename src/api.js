@@ -345,4 +345,9 @@ export const rejectEscalation = (id, note) => adminRequest(`/api/admin/escalatio
 export const reportOrderToVtpass = (id, note) => adminRequest(`/api/admin/orders/${id}/vtpass-escalate`, { method: 'POST', body: JSON.stringify({ note }) });
 export const checkCustomerFunding = (id, reference) => adminRequest(`/api/admin/customers/${id}/check-funding`, { method: 'POST', body: JSON.stringify({ reference }) });
 export const setAdminRole = (id, role) => adminRequest(`/api/admin/admins/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
+export const getSavings = () => request('/api/savings');
+export const saveToSavings = (amount) => request('/api/savings/deposit', { method: 'POST', body: JSON.stringify({ amount }) });
+export const withdrawSavings = (amount) => request('/api/savings/withdraw', { method: 'POST', body: JSON.stringify({ amount }) });
+export const getSavingsOverview = () => adminRequest('/api/admin/savings');
+export const runSavingsInterest = () => adminRequest('/api/admin/savings/run', { method: 'POST' });
 export const customerAccountTool = (id, data) => adminRequest(`/api/admin/customers/${id}/account-tool`, { method: 'POST', body: JSON.stringify(data) });

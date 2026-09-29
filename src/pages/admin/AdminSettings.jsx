@@ -4,6 +4,7 @@ import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
 import RewardGuardPanel from '../../components/admin/RewardGuardPanel';
+import SavingsPanel from '../../components/admin/SavingsPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -23,6 +24,7 @@ const TABS = [
   { key: 'cashback', label: 'Cashback' },
   { key: 'agents', label: 'Agents' },
   { key: 'loyalty', label: 'Loyalty Points' },
+  { key: 'savings', label: 'Savings (interest)' },
   { key: 'alerts', label: 'Alerts & Limits' },
   { key: 'security', label: 'Security' },
   { key: 'ai', label: 'AI Assistant' },
@@ -967,6 +969,7 @@ export default function AdminSettings() {
       )}
 
       {!loading && !loadError && tab === 'ai' && <AiSettingsPanel />}
+      {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
 
       {tab === 'password' && (
         <form className="card" style={cardStyle} onSubmit={savePassword}>

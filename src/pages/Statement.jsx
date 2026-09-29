@@ -24,6 +24,9 @@ const TYPE_LABEL = {
   LOYALTY: 'Points redeemed',
   CONTEST_PRIZE: 'Contest prize',
   COUPON: 'Coupon',
+  SAVINGS_IN: 'Moved to savings',
+  SAVINGS_OUT: 'From savings',
+  INTEREST: 'Savings interest',
 };
 
 // Last 12 months as quick picks, plus a custom range.
