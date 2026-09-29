@@ -1,5 +1,5 @@
-import { createContext, useContext, useState } from 'react';
-import { adminLogin as apiAdminLogin, adminLoginVerify } from '../api';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { adminLogin as apiAdminLogin, adminLoginVerify, getAdminMe } from '../api';
 
 const AdminAuthContext = createContext(null);
 
@@ -12,6 +12,22 @@ export function AdminAuthProvider({ children }) {
     const stored = localStorage.getItem('zappipay_admin');
     return stored ? JSON.parse(stored) : null;
   });
+
+  // Refresh the role (OWNER / SUPPORT) — it can change after login.
+  useEffect(() => {
+    if (!admin) return;
+    getAdminMe()
+      .then((d) => {
+        if (!d?.admin) return;
+        const next = { ...admin, ...d.admin };
+        if (next.role !== admin.role || next.name !== admin.name) {
+          localStorage.setItem('zappipay_admin', JSON.stringify(next));
+          setAdmin(next);
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [admin?.id]);
 
   function finish(data) {
     localStorage.setItem('zappipay_admin_token', data.token);
@@ -41,7 +57,7 @@ export function AdminAuthProvider({ children }) {
   }
 
   return (
-    <AdminAuthContext.Provider value={{ admin, login, verifyCode, logout }}>
+    <AdminAuthContext.Provider value={{ admin, isOwner: (admin?.role || 'OWNER') !== 'SUPPORT', login, verifyCode, logout }}>
       {children}
     </AdminAuthContext.Provider>
   );

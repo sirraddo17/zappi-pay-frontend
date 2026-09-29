@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminOrders, recheckAdminOrder, settleAdminOrder } from '../../api';
+import { getAdminOrders, recheckAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { useShowMore } from '../../components/ShowMore';
 
@@ -31,6 +32,7 @@ const SERVICE_FILTERS = [
 ];
 
 export default function AdminOrders() {
+  const { isOwner } = useAdminAuth();
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('ALL');
@@ -45,6 +47,19 @@ export default function AdminOrders() {
   }
   useEffect(load, []);
   useAutoRefresh(load, true, ADMIN_REFRESH);
+
+  async function reportVtpass(o) {
+    const note = window.prompt(`What should VTpass check for ${o.service} ${o.recipient}? (e.g. "customer says token not received")`);
+    if (!note) return;
+    act(o, () => reportOrderToVtpass(o.id, note), (r) => r.message || 'reported to VTpass');
+  }
+
+  async function askRefund(o) {
+    const reason = window.prompt('Why should this be refunded? What did you check? (the owner sees this)');
+    if (!reason) return;
+    if (!window.confirm('Confirm: the customer was debited and did NOT receive the service?')) return;
+    act(o, () => createEscalation({ type: 'ORDER_REFUND', customerId: o.customer.id, orderId: o.id, reason, debitConfirmed: true }), (r) => (r.resolved ? r.message : `sent for approval (${r.escalation.ref}); the customer was told`));
+  }
 
   async function act(o, fn, text) {
     setBusy(o.id);
@@ -123,7 +138,21 @@ export default function AdminOrders() {
                   <td>{fmtMoney(o.amount)}</td>
                   <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}>
                     {o.status}
-                    {o.status === 'PENDING' && (
+                    {o.status === 'SUCCESS' && (
+                      <div style={{ marginTop: 4 }}>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>
+                          {o.vtpassEscalatedAt ? 'Reported ✓' : 'Report to VTpass'}
+                        </button>
+                      </div>
+                    )}
+                    {o.status === 'PENDING' && !isOwner && (
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => act(o, () => recheckAdminOrder(o.id), (r) => `status now ${r.status}`)}>Check now</button>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>Report to VTpass</button>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => askRefund(o)}>Ask admin to refund</button>
+                      </div>
+                    )}
+                    {o.status === 'PENDING' && isOwner && (
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => act(o, () => recheckAdminOrder(o.id), (r) => `status now ${r.status}`)}>
                           Check now
@@ -133,6 +162,9 @@ export default function AdminOrders() {
                         </button>
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => window.confirm('Mark as FAILED and refund the customer? Only do this if VTpass confirmed it was NOT delivered.') && act(o, () => settleAdminOrder(o.id, 'FAILED'), (r) => `marked ${r.status}, customer refunded`)}>
                           Failed + refund
+                        </button>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>
+                          Report to VTpass
                         </button>
                       </div>
                     )}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getCustomerList, setCustomerActive, adjustWallet } from '../../api';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 
 const TABS = [
   { key: 'active', label: 'Active' },
@@ -15,6 +16,7 @@ function fmtMoney(n) {
 }
 
 export default function AdminCustomers() {
+  const { isOwner } = useAdminAuth();
   const [view, setView] = useState('active');
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
@@ -206,12 +208,16 @@ export default function AdminCustomers() {
                   <td>
                     {!c.deletedAt && (
                     <div className="admin-actions">
-                    <button className="btn-secondary btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => openAdjust(c)}>
-                      Adjust Wallet
-                    </button>
-                    <button className="btn-secondary btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => toggleActive(c)} disabled={busyId === c.id}>
-                      {c.active ? 'Deactivate' : 'Reactivate'}
-                    </button>
+                    {isOwner && (
+                      <button className="btn-secondary btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => openAdjust(c)}>
+                        Adjust Wallet
+                      </button>
+                    )}
+                    {(isOwner || c.active) && (
+                      <button className="btn-secondary btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => toggleActive(c)} disabled={busyId === c.id}>
+                        {c.active ? (isOwner ? 'Deactivate' : 'Freeze') : 'Reactivate'}
+                      </button>
+                    )}
                     </div>
                     )}
                   </td>

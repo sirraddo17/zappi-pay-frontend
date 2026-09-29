@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import InstallAppButton from './InstallAppButton';
 import AdminAlertsToggle from './AdminAlertsToggle';
@@ -19,6 +19,7 @@ const TABS = [
   { to: '/admin/staff', label: 'Staff' },
   { to: '/admin/orders', label: 'Orders' },
   { to: '/admin/support', label: 'Support' },
+  { to: '/admin/escalations', label: '✅ Approvals' },
   { to: '/admin/broadcasts', label: 'Broadcasts' },
   { to: '/admin/notices', label: 'Service Notices' },
   { to: '/admin/promos', label: 'Promo Codes' },
@@ -30,14 +31,20 @@ const TABS = [
   { to: '/admin/audit-log', label: 'Audit Log' },
 ];
 
+// What support staff (role SUPPORT) can open.
+const SUPPORT_TABS = ['/admin/customers', '/admin/orders', '/admin/support', '/admin/escalations'];
+
 export default function AdminLayout({ children }) {
-  const { admin, logout } = useAdminAuth();
+  const { admin, logout, isOwner } = useAdminAuth();
+  const { pathname } = useLocation();
+  const tabs = isOwner ? TABS : TABS.filter((t) => SUPPORT_TABS.includes(t.to)).map((t) => (t.to === '/admin/escalations' ? { ...t, label: '✅ My requests' } : t));
+  const allowed = isOwner || SUPPORT_TABS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const navigate = useNavigate();
   const mainRef = useRef(null);
   const [monnifyMode, setMonnifyMode] = useState(monnifyModeCache);
 
   useEffect(() => {
-    if (monnifyModeCache !== null) return;
+    if (monnifyModeCache !== null || !isOwner) return;
     getMonnifyOverview(true)
       .then((o) => {
         monnifyModeCache = o.mode || '';
@@ -81,30 +88,38 @@ export default function AdminLayout({ children }) {
     navigate('/admin/login');
   }
 
+  if (!isOwner && pathname === '/admin') return <Navigate to="/admin/support" replace />;
+
   return (
     <div className="admin-shell">
       <div className="admin-sidebar">
         <div className="admin-brand" style={{ padding: '0 20px 16px', fontWeight: 700 }}>ZAPPI PAY</div>
-        {TABS.map((t) => (
+        {tabs.map((t) => (
           <NavLink key={t.to} to={t.to} end={t.end} className={({ isActive }) => (isActive ? 'active' : '')}>
             {t.label}
           </NavLink>
         ))}
         <div className="admin-account" style={{ padding: '16px 20px 0' }}>
-          <div className="admin-name" style={{ color: 'var(--slate-400)', fontSize: 13, marginBottom: 8 }}>{admin?.name}</div>
-          <AdminAlertsToggle />
+          <div className="admin-name" style={{ color: 'var(--slate-400)', fontSize: 13, marginBottom: 8 }}>{admin?.name}{!isOwner && ' · Support staff'}</div>
+          {isOwner && <AdminAlertsToggle />}
           <InstallAppButton admin label="Install admin app" style={{ marginBottom: 8, fontSize: 13 }} />
           <button className="btn-secondary btn" onClick={handleLogout}>Log Out</button>
         </div>
       </div>
       <div className="admin-main" ref={mainRef}>
-        {monnifyMode === 'sandbox' && (
+        {isOwner && monnifyMode === 'sandbox' && (
           <div style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid var(--orange, #f97316)', color: 'var(--orange, #f97316)', borderRadius: 10, padding: '8px 12px', marginBottom: 16, fontSize: 13 }}>
             <strong>Test mode:</strong> Monnify is on Sandbox. Bank-transfer funding and Send to Bank use test money — nothing real moves.{' '}
             <Link to="/admin/settings" style={{ color: 'inherit', textDecoration: 'underline' }}>Settings → Monnify</Link>
           </div>
         )}
-        {children}
+        {allowed ? children : (
+          <div className="card" style={{ margin: 0, maxWidth: 520 }}>
+            <h2 style={{ marginTop: 0, fontSize: 18 }}>Not available for support staff</h2>
+            <p style={{ color: 'var(--slate-400)' }}>This part of the admin app is for owners. You can help customers from Customers, Orders and Support, and send anything sensitive for approval.</p>
+            <NavLink to="/admin/support" className="btn" style={{ display: 'inline-block', width: 'auto', textDecoration: 'none' }}>Go to Support</NavLink>
+          </div>
+        )}
       </div>
     </div>
   );

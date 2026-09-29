@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import PasswordField from '../../components/PasswordField';
-import { getAdmins, createAdmin, setAdminActive, resetAdminPassword } from '../../api';
+import { getAdmins, createAdmin, setAdminActive, resetAdminPassword, setAdminRole } from '../../api';
 
 function fmtDate(d) {
   return new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -19,6 +19,7 @@ export default function AdminStaff() {
 
   const [savingActiveId, setSavingActiveId] = useState(null);
   const [resettingId, setResettingId] = useState(null);
+  const [role, setRole] = useState('SUPPORT');
   const [resetPassword, setResetPassword] = useState('');
   const [resetError, setResetError] = useState('');
   const [savingReset, setSavingReset] = useState(false);
@@ -36,7 +37,7 @@ export default function AdminStaff() {
     setFormError('');
     setSubmitting(true);
     try {
-      await createAdmin({ name: name.trim(), email: email.trim(), password });
+      await createAdmin({ name: name.trim(), email: email.trim(), password, role });
       setName('');
       setEmail('');
       setPassword('');
@@ -45,6 +46,17 @@ export default function AdminStaff() {
       setFormError(err.message || 'Could not create admin.');
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function changeRole(admin, next) {
+    if (!window.confirm(next === 'OWNER' ? `Give ${admin.name} FULL access (money, passwords, settings)?` : `Limit ${admin.name} to support staff access?`)) return;
+    setError('');
+    try {
+      await setAdminRole(admin.id, next);
+      load();
+    } catch (err) {
+      setError(err.message);
     }
   }
 
@@ -98,7 +110,7 @@ export default function AdminStaff() {
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
 
       <form className="card" style={{ margin: '0 0 16px', maxWidth: 400 }} onSubmit={handleSubmit}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Add Admin</h2>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>Add staff</h2>
         {formError && <p className="error-text" style={{ margin: '0 0 12px' }}>{formError}</p>}
         <div className="field">
           <label htmlFor="name">Name</label>
@@ -112,8 +124,16 @@ export default function AdminStaff() {
           <label htmlFor="password">Password</label>
           <PasswordField id="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
         </div>
+        <div className="field">
+          <label htmlFor="role">Access</label>
+          <select id="role" value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="SUPPORT">Support staff — customers, support tickets, orders; sensitive actions need your approval</option>
+            <option value="OWNER">Owner — full access to everything</option>
+          </select>
+          <small style={{ color: 'var(--slate-400)' }}>Support staff can check identity, reply to tickets, re-check orders and report to VTpass. Password resets, refunds and wallet changes go to Approvals for an owner.</small>
+        </div>
         <button className="btn" type="submit" disabled={submitting}>
-          {submitting ? 'Adding…' : 'Add Admin'}
+          {submitting ? 'Adding…' : 'Add staff'}
         </button>
       </form>
 
@@ -150,6 +170,7 @@ export default function AdminStaff() {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Added</th>
+                <th>Access</th>
                 <th>Status</th>
                 <th></th>
               </tr>
@@ -160,6 +181,7 @@ export default function AdminStaff() {
                   <td>{a.name}</td>
                   <td>{a.email}</td>
                   <td>{fmtDate(a.createdAt)}</td>
+                  <td>{(a.role || 'OWNER') === 'OWNER' ? 'Owner (full)' : 'Support staff'}</td>
                   <td>{a.active ? 'Active' : 'Deactivated'}</td>
                   <td>
                     <div className="admin-actions">
@@ -170,6 +192,15 @@ export default function AdminStaff() {
                     >
                       Reset Password
                     </button>
+                    {a.id !== firstAdminId && (
+                      <button
+                        className="btn-secondary btn"
+                        style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }}
+                        onClick={() => changeRole(a, (a.role || 'OWNER') === 'OWNER' ? 'SUPPORT' : 'OWNER')}
+                      >
+                        {(a.role || 'OWNER') === 'OWNER' ? 'Make support staff' : 'Make owner'}
+                      </button>
+                    )}
                     {a.id !== firstAdminId && (
                       <button
                         className="btn-secondary btn"

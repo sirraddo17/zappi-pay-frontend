@@ -60,6 +60,7 @@ const AdminPendingFunding = lazy(() => import('./pages/admin/AdminPendingFunding
 const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminSupport = lazy(() => import('./pages/admin/AdminSupport'));
 const AdminAuditLog = lazy(() => import('./pages/admin/AdminAuditLog'));
+const AdminEscalations = lazy(() => import('./pages/admin/AdminEscalations'));
 const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
 const AdminBroadcasts = lazy(() => import('./pages/admin/AdminBroadcasts'));
 const AdminAirtimeCash = lazy(() => import('./pages/admin/AdminAirtimeCash'));
@@ -145,6 +146,7 @@ export default function App() {
           <Route path="/admin/orders" element={<RequireAdmin><AdminOrders /></RequireAdmin>} />
           <Route path="/admin/support" element={<RequireAdmin><AdminSupport /></RequireAdmin>} />
           <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
+          <Route path="/admin/escalations" element={<RequireAdmin><AdminEscalations /></RequireAdmin>} />
           <Route path="/admin/staff" element={<RequireAdmin><AdminStaff /></RequireAdmin>} />
           <Route path="/admin/broadcasts" element={<RequireAdmin><AdminBroadcasts /></RequireAdmin>} />
           <Route path="/admin/airtime-cash" element={<RequireAdmin><AdminAirtimeCash /></RequireAdmin>} />

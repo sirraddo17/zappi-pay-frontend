@@ -335,3 +335,12 @@ export const rejectAgent = (id, reason) => adminRequest(`/api/admin/customers/${
 export const redeemCoupon = (code) => request('/api/wallet/coupon', { method: 'POST', body: JSON.stringify({ code }) });
 export const getFundingBanks = () => adminRequest('/api/admin/funding-banks');
 export const estimateEarnings = (data) => adminRequest('/api/admin/earnings/estimate', { method: 'POST', body: JSON.stringify(data) });
+
+// Staff roles & escalations
+export const getAdminMe = () => adminRequest('/api/admin/me');
+export const getEscalations = (status = 'PENDING') => adminRequest(`/api/admin/escalations?status=${encodeURIComponent(status)}`);
+export const createEscalation = (data) => adminRequest('/api/admin/escalations', { method: 'POST', body: JSON.stringify(data) });
+export const approveEscalation = (id, note) => adminRequest(`/api/admin/escalations/${id}/approve`, { method: 'POST', body: JSON.stringify({ note }) });
+export const rejectEscalation = (id, note) => adminRequest(`/api/admin/escalations/${id}/reject`, { method: 'POST', body: JSON.stringify({ note }) });
+export const reportOrderToVtpass = (id, note) => adminRequest(`/api/admin/orders/${id}/vtpass-escalate`, { method: 'POST', body: JSON.stringify({ note }) });
+export const setAdminRole = (id, role) => adminRequest(`/api/admin/admins/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
