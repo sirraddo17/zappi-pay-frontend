@@ -3,6 +3,7 @@ import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
+import RewardGuardPanel from '../../components/admin/RewardGuardPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -664,6 +665,7 @@ export default function AdminSettings() {
         </form>
       )}
 
+      {!loading && !loadError && tab === 'discount' && <RewardGuardPanel />}
       {!loading && !loadError && tab === 'discount' && (
         <form className="card" style={cardStyle} onSubmit={saveDiscount}>
           <SectionHeader

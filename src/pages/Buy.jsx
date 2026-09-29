@@ -272,7 +272,7 @@ export default function Buy() {
     setPromoMsg('');
     if (!promoInput.trim() || !price.total) return;
     try {
-      const r = await checkPromo(promoInput.trim(), config.backendService, price.total);
+      const r = await checkPromo(promoInput.trim(), config.backendService, price.total, Number(amount) || undefined, providerId);
       setPromo({ ...r, forAmount: price.total, forService: config.backendService });
       setPromoMsg(`${r.code} applied — you save ${naira(r.discount)}.`);
     } catch (err) {

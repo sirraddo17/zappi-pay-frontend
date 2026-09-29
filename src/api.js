@@ -214,8 +214,8 @@ export const getMyLimits = () => request('/api/account/limits');
 export const updatePreferences = (data) => request('/api/account/preferences', { method: 'PATCH', body: JSON.stringify(data) });
 export const requestAccountDeletion = (data) => request('/api/account/delete-request', { method: 'POST', body: JSON.stringify(data) });
 export const cancelAccountDeletion = () => request('/api/account/delete-request', { method: 'DELETE' });
-export const checkPromo = (code, service, amount) =>
-  request(`/api/promo/check?code=${encodeURIComponent(code)}&service=${encodeURIComponent(service)}&amount=${encodeURIComponent(amount)}`);
+export const checkPromo = (code, service, amount, base, provider) =>
+  request(`/api/promo/check?code=${encodeURIComponent(code)}&service=${encodeURIComponent(service)}&amount=${encodeURIComponent(amount)}${base ? `&base=${encodeURIComponent(base)}&provider=${encodeURIComponent(provider || '')}` : ''}`);
 export const getAdminAnalytics = (days) => adminRequest(`/api/admin/analytics?days=${days}`);
 
 // --- Admin auth ---
