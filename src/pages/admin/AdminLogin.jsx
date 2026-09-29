@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { idleMessage } from '../../lib/useIdleLogout';
 import PasswordField from '../../components/PasswordField';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
@@ -15,6 +16,7 @@ export default function AdminLogin() {
   const [challenge, setChallenge] = useState(null);
   const [code, setCode] = useState('');
   const [remember, setRemember] = useState(true);
+  const [idle] = useState(() => idleMessage('admin'));
 
   async function handleVerify(e) {
     e.preventDefault();
@@ -56,6 +58,7 @@ export default function AdminLogin() {
         <p>Log in to the admin panel</p>
       </div>
 
+      {idle && <p style={{ margin: '0 0 12px', padding: '10px 12px', borderRadius: 10, fontSize: 13, background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)' }}>🔒 {idle}</p>}
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
 
       {challenge ? (

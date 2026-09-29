@@ -48,6 +48,7 @@ export default function AccountTools({ customer, onDone }) {
 
       {row('Forgot transaction PIN', customer.hasPin ? 'Clears the PIN (and quick login). They create a new one in Security.' : 'No PIN set yet — nothing to reset.', 'Reset PIN',
         () => run('RESET_PIN', `Reset ${first}'s PIN? They'll create a new one before their next payment.`), !customer.hasPin)}
+      {customer.loginLocked && row('Login locked (5 wrong passwords)', 'Unlocks password login now instead of waiting 15 minutes. Check it’s really them first.', 'Unlock login', () => run('UNLOCK_LOGIN'))}
       {customer.pinLocked && row('PIN locked (too many wrong tries)', 'Unlocks it now instead of waiting 15 minutes.', 'Unlock PIN', () => run('UNLOCK_PIN'))}
       {row('Lost or changed phone', `Turns off quick login (${customer.quickLoginDevices ?? 0}) and fingerprint (${customer.fingerprintLogins ?? 0}) on every device. They log in with their password.`, 'Remove devices',
         () => run('REMOVE_DEVICES', `Remove quick login and fingerprint from all of ${first}'s devices?`), !(customer.quickLoginDevices || customer.fingerprintLogins))}

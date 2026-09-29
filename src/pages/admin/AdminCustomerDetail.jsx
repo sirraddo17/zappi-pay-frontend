@@ -3,6 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
 import { IdentityCheck, AgentPanel } from '../../components/admin/CustomerPanels';
+import RequestApproval, { FundingCheck } from '../../components/admin/RequestApproval';
+import AccountTools from '../../components/admin/AccountTools';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, adminSetUsername, testCustomerEmailAlert } from '../../api';
 
 // Set a username for older accounts (or correct one). It is the
@@ -91,6 +94,7 @@ function EmailAlertTest({ customerId }) {
 }
 
 export default function AdminCustomerDetail() {
+  const { isOwner } = useAdminAuth();
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [ordersShown, setOrdersShown] = useState(FIRST_COUNT);
@@ -186,7 +190,7 @@ export default function AdminCustomerDetail() {
         <p>{customer.phone}{customer.email ? ` · ${customer.email}` : ''} · {customer.active ? 'Active' : 'Deactivated'} · Joined {fmtDate(customer.createdAt)}</p>
         <div style={{ marginTop: 4, color: 'var(--slate-400)', fontSize: 14 }}>
           {customer.username ? `@${customer.username}` : 'No username'}
-          <UsernameEditor key={customer.username || ''} customer={customer} onSaved={load} />
+          {isOwner && <UsernameEditor key={customer.username || ''} customer={customer} onSaved={load} />}
           {' · '}PIN {customer.hasPin ? 'set' : 'not set'}
           {' · '}Referred {customer.referralCount || 0} customer{customer.referralCount === 1 ? '' : 's'}
           {customer.referredBy && (
@@ -204,16 +208,22 @@ export default function AdminCustomerDetail() {
             ? `Funding account${customer.bankAccounts.length > 1 ? 's' : ''}: ${customer.bankAccounts.map((a) => `${a.bankName} ${a.accountNumber}`).join(', ')} · verified with ${customer.kycType || 'ID'}`
             : 'No funding account number yet'}
         </p>
-        {!customer.deletedAt && <EmailAlertTest customerId={customer.id} />}
+        {isOwner && !customer.deletedAt && <EmailAlertTest customerId={customer.id} />}
       </div>
 
-      {!customer.deletedAt && <IdentityCheck customer={customer} orders={orders} walletTransactions={walletTransactions} onChanged={load} />}
+      {!customer.deletedAt && <IdentityCheck customer={customer} orders={orders} walletTransactions={walletTransactions} onChanged={load} canReset={isOwner} />}
 
-      {!customer.deletedAt && <AgentPanel customer={customer} orders={orders} onChanged={load} />}
+      {isOwner && !customer.deletedAt && <AccountTools customer={customer} onDone={load} />}
+
+      {!customer.deletedAt && <FundingCheck customer={customer} onDone={load} />}
+
+      {!isOwner && !customer.deletedAt && <RequestApproval customer={customer} orders={orders} onDone={load} />}
+
+      {isOwner && !customer.deletedAt && <AgentPanel customer={customer} orders={orders} onChanged={load} />}
 
       {customer.deletedAt ? (
         <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--slate-600)' }}>This account was deleted on {new Date(customer.deletedAt).toLocaleString('en-NG')}.</div>
-      ) : customer.deletionRequestedAt && (
+      ) : isOwner && customer.deletionRequestedAt && (
         <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--red-500)' }}>
           <strong>Customer asked to delete their account</strong> ({new Date(customer.deletionRequestedAt).toLocaleString('en-NG')})
           {customer.deletionReason && <div style={{ fontSize: 13, color: 'var(--slate-400)', marginTop: 4 }}>Reason: {customer.deletionReason}</div>}
@@ -244,6 +254,8 @@ export default function AdminCustomerDetail() {
         <div className="value">{fmtMoney(customer.walletBalance)}</div>
       </div>
 
+      {isOwner && (
+        <>
       <div className="card" style={{ margin: '0 0 16px', maxWidth: 400 }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Reset Password</h2>
         <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: '0 0 12px' }}>
@@ -342,6 +354,9 @@ export default function AdminCustomerDetail() {
           {adjustSubmitting ? 'Saving…' : 'Apply Adjustment'}
         </button>
       </form>
+
+        </>
+      )}
 
       <div className="card admin-table-wrap" style={{ margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Orders{orders.length > 0 ? ` (${orders.length})` : ''}</h2>

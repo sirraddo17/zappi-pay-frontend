@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
 import PinPad, { FingerprintIcon } from '../components/PinPad';
 import { quickLoginPin, quickLoginBiometricOptions, quickLoginBiometric } from '../api';
+import { idleMessage } from '../lib/useIdleLogout';
 import { getQuickLogin, clearQuickLogin, saveQuickLogin, runBiometricPrompt, biometricErrorMessage } from '../lib/quickLogin';
 
 function QuickLogin({ quick, onUsePassword, onSwitchAccount }) {
@@ -130,6 +131,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [idle] = useState(() => idleMessage('customer'));
+  const idleNote = idle && <p style={{ margin: '12px 16px 0', padding: '10px 12px', borderRadius: 10, fontSize: 13, background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)' }}>🔒 {idle}</p>;
 
   useEffect(() => {
     if (customer) navigate('/', { replace: true });
@@ -151,6 +154,8 @@ export default function Login() {
 
   if (quick && !usePassword) {
     return (
+      <>
+      {idleNote}
       <QuickLogin
         quick={quick}
         onUsePassword={(msg) => {
@@ -163,6 +168,7 @@ export default function Login() {
           setQuick(null);
         }}
       />
+      </>
     );
   }
 
@@ -179,6 +185,7 @@ export default function Login() {
       </div>
 
       <TestModeBanner />
+      {idleNote}
 
       {error && <p className="error-text">{error}</p>}
 

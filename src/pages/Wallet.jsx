@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import TestModeBanner from '../components/TestModeBanner';
+import SavingsCard from '../components/SavingsCard';
 import { Link } from 'react-router-dom';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
@@ -29,6 +31,52 @@ function CopyButton({ text }) {
   );
 }
 
+// Same fee rule as the server (lib/monnify.js computeFee).
+function fundingFee(amount, info) {
+  let fee = Math.round(amount * info.feePercent) / 100;
+  if (info.feeCap > 0) fee = Math.min(fee, info.feeCap);
+  return Math.max(0, Math.min(fee, amount));
+}
+
+// "I want ₦1,000 in my wallet" → how much to send so the fee is added
+// on top instead of coming out of what they wanted.
+function amountToSend(want, info) {
+  const p = info.feePercent / 100;
+  let n = Math.ceil(want / (1 - p));
+  if (info.feeCap > 0 && fundingFee(n, info) >= info.feeCap) n = Math.ceil(want + info.feeCap);
+  while (n - fundingFee(n, info) < want) n += 1;
+  return n;
+}
+
+function FundingHelper({ info }) {
+  const [want, setWant] = useState('');
+  const w = Number(want);
+  const send = w > 0 ? amountToSend(w, info) : 0;
+  const fee = send ? fundingFee(send, info) : 0;
+  const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  return (
+    <div style={{ background: 'rgba(134,59,255,0.08)', border: '1px solid var(--slate-700)', borderRadius: 10, padding: 12, margin: '10px 0' }}>
+      <label htmlFor="want" style={{ fontSize: 13, fontWeight: 600 }}>How much do you want in your wallet?</label>
+      <input id="want" type="number" inputMode="numeric" min="1" value={want} onChange={(e) => setWant(e.target.value)} placeholder="e.g. 1000" style={{ marginTop: 6 }} />
+      {send > 0 && (
+        <div style={{ fontSize: 13, marginTop: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Amount for your wallet</span><span>{naira(w)}</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--slate-400)' }}>
+            <span>Bank processing fee{info.feeIsPassThrough ? ' (paid to our payment partner)' : ''}</span><span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>+ {naira(fee)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--slate-700)', marginTop: 6, paddingTop: 6 }}>
+            <b>Send exactly</b>
+            <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}><b style={{ fontSize: 18 }}>{naira(send)}</b><CopyButton text={String(send)} /></span>
+          </div>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '6px 0 0' }}>
+            You'll get at least {naira(w)} in your wallet.{info.feeIsPassThrough ? ' Banks and payment companies charge for receiving transfers — this fee covers that charge; ZAPPI PAY does not keep it.' : ''}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Personal account number(s): money sent here is added to the wallet
 // automatically. First time, the customer verifies with BVN or NIN.
 function BankFunding({ info, onCreated, onCredited }) {
@@ -39,7 +87,7 @@ function BankFunding({ info, onCreated, onCredited }) {
   const [message, setMessage] = useState('');
 
   const feeText = info.feePercent > 0
-    ? `A ${info.feePercent}% fee${info.feeCap > 0 ? ` (max ₦${Number(info.feeCap).toLocaleString()})` : ''} applies to each transfer.`
+    ? `A ${info.feePercent}% bank processing fee${info.feeCap > 0 ? ` (max ₦${Number(info.feeCap).toLocaleString()})` : ''} applies to each transfer${info.feeIsPassThrough ? ' — it goes to our licensed payment partner for handling your transfer, not to ZAPPI PAY' : ''}.`
     : 'No fee.';
 
   async function create(e) {
@@ -137,6 +185,7 @@ function BankFunding({ info, onCreated, onCredited }) {
           <CopyButton text={a.accountNumber} />
         </div>
       ))}
+      {info.feePercent > 0 && info.accounts.length > 0 && <FundingHelper info={info} />}
       {error && <p className="error-text" style={{ margin: '8px 0' }}>{error}</p>}
       {message && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '8px 0' }}>{message}</p>}
       {info.accounts.length > 0 && <button className="btn btn-secondary" type="button" style={{ marginTop: 8 }} disabled={busy} onClick={check}>
@@ -305,10 +354,14 @@ export default function Wallet() {
         <p>Fund your wallet and track your transactions</p>
       </div>
 
+      <TestModeBanner />
+
       <div className="card stat-card">
         <div className="label">Wallet Balance</div>
         <div className="value">{fmtMoney(balance)}</div>
       </div>
+
+      <SavingsCard onChanged={load} />
 
       {error && <p className="error-text">{error}</p>}
       {successMessage && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{successMessage}</p>}

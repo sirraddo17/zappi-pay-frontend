@@ -38,7 +38,9 @@ export default function Profile() {
   const [changingPassword, setChangingPassword] = useState(false);
 
   const [tickets, setTickets] = useState(null);
-  const ticketPage = useShowMore(tickets, [], 3);
+  // Open tickets first, then solved (newest first within each).
+  const sortedTickets = tickets === null ? null : [...tickets].sort((x, y) => (x.status === 'RESOLVED') - (y.status === 'RESOLVED'));
+  const ticketPage = useShowMore(sortedTickets, [], 3);
 
   useEffect(() => {
     getSupportTickets()
@@ -259,6 +261,15 @@ export default function Profile() {
 
       <div className="card" style={{ margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Support</h2>
+        <button
+          type="button"
+          className="btn"
+          style={{ marginBottom: 10 }}
+          onClick={() => window.dispatchEvent(new CustomEvent('zappipay:support', { detail: {} }))}
+        >
+          💬 Message support in the app
+        </button>
+        <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '-4px 0 10px' }}>Problems, account changes, suggestions — anything. You can add screenshots. We reply here and in your notifications.</p>
         <a
           href={`https://wa.me/${appInfo?.supportWhatsapp || WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello ZappiPay, I need help with')}`}
           target="_blank"
@@ -280,22 +291,32 @@ export default function Profile() {
         ) : tickets.length === 0 ? (
           <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: 0 }}>No support requests yet.</p>
         ) : (
-          ticketPage.visible.map((t) => (
-            <div key={t.id} style={{ borderTop: '1px solid var(--slate-700)', padding: '10px 0', fontSize: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <span>{t.message}</span>
-                <span style={{ color: t.status === 'RESOLVED' ? 'var(--green-500)' : 'var(--orange)', whiteSpace: 'nowrap' }}>
-                  {t.status === 'RESOLVED' ? 'Solved' : 'Open'}
-                </span>
-              </div>
-              {t.adminReply && (
-                <div style={{ marginTop: 8, padding: '8px 10px', background: 'var(--slate-900)', borderRadius: 8, borderLeft: '3px solid var(--purple)', whiteSpace: 'pre-wrap', fontSize: 13 }}>
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>ZappiPay Support replied:</div>
-                  {t.adminReply}
-                </div>
-              )}
-            </div>
-          ))
+          ticketPage.visible.map((t) => {
+            const solved = t.status === 'RESOLVED';
+            return (
+              // Solved tickets fold to one line so the page stays short;
+              // tap to read the reply. Open ones stay expanded.
+              <details key={t.id} open={!solved} style={{ borderTop: '1px solid var(--slate-700)', padding: '10px 0', fontSize: 14 }}>
+                <summary style={{ display: 'flex', justifyContent: 'space-between', gap: 8, cursor: 'pointer', listStyle: 'none' }}>
+                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: solved ? 'nowrap' : 'normal' }}>
+                    {t.message}
+                    {t.createdAt && <span style={{ color: 'var(--slate-400)', fontSize: 12 }}> · {new Date(t.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}</span>}
+                  </span>
+                  <span style={{ color: solved ? 'var(--green-500)' : 'var(--orange)', whiteSpace: 'nowrap' }}>
+                    {solved ? 'Solved ▾' : 'Open'}
+                  </span>
+                </summary>
+                {t.adminReply ? (
+                  <div style={{ marginTop: 8, padding: '8px 10px', background: 'var(--slate-900)', borderRadius: 8, borderLeft: '3px solid var(--purple)', whiteSpace: 'pre-wrap', fontSize: 13 }}>
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>ZappiPay Support replied:</div>
+                    {t.adminReply}
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 6, color: 'var(--slate-400)', fontSize: 13 }}>{solved ? 'Marked solved.' : 'We’ve received this and will reply here.'}</div>
+                )}
+              </details>
+            );
+          })
         )}
         {ticketPage.more}
       </div>

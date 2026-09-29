@@ -2,6 +2,10 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { login as apiLogin, signup as apiSignup, getMe } from '../api';
 import { getQuickLogin, isUnlocked, markUnlocked, clearUnlocked, saveQuickLogin } from '../lib/quickLogin';
 import { readCache, writeCache, clearCache } from '../lib/cache';
+import useIdleLogout from '../lib/useIdleLogout';
+
+// Minutes without activity before a customer is logged out.
+export const CUSTOMER_IDLE_MINUTES = 10;
 
 const AuthContext = createContext(null);
 
@@ -70,6 +74,8 @@ export function AuthProvider({ children }) {
     clearCache();
     setCustomer(null);
   }
+
+  useIdleLogout({ active: Boolean(customer), minutes: CUSTOMER_IDLE_MINUTES, kind: 'customer', onTimeout: () => { logout(); window.location.replace('/login'); } });
 
   // Called after a wallet fund/purchase so the balance shown in the UI
   // stays in sync without a full page reload.

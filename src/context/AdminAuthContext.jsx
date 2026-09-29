@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { adminLogin as apiAdminLogin, adminLoginVerify, getAdminMe } from '../api';
+import useIdleLogout from '../lib/useIdleLogout';
 
 const AdminAuthContext = createContext(null);
 
@@ -55,6 +56,9 @@ export function AdminAuthProvider({ children }) {
     localStorage.removeItem('zappipay_admin');
     setAdmin(null);
   }
+
+  // Admin panel: 30 minutes without activity.
+  useIdleLogout({ active: Boolean(admin), minutes: 30, kind: 'admin', onTimeout: () => { logout(); window.location.replace('/admin/login'); } });
 
   return (
     <AdminAuthContext.Provider value={{ admin, isOwner: (admin?.role || 'OWNER') !== 'SUPPORT', login, verifyCode, logout }}>

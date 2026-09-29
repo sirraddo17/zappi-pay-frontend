@@ -3,6 +3,8 @@ import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
+import RewardGuardPanel from '../../components/admin/RewardGuardPanel';
+import SavingsPanel from '../../components/admin/SavingsPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -22,6 +24,7 @@ const TABS = [
   { key: 'cashback', label: 'Cashback' },
   { key: 'agents', label: 'Agents' },
   { key: 'loyalty', label: 'Loyalty Points' },
+  { key: 'savings', label: 'Savings (interest)' },
   { key: 'alerts', label: 'Alerts & Limits' },
   { key: 'security', label: 'Security' },
   { key: 'ai', label: 'AI Assistant' },
@@ -72,6 +75,7 @@ export default function AdminSettings() {
   const [vtpassSecretKey, setVtpassSecretKey] = useState('');
   const [vtpassPublicKey, setVtpassPublicKey] = useState('');
   const [markupByService, setMarkupByService] = useState(toServiceMap({}));
+  const [markupCapByService, setMarkupCapByService] = useState({});
   const [discountByService, setDiscountByService] = useState(toServiceMap({}));
   const [monnifyMode, setMonnifyMode] = useState('sandbox');
   const [monnifyApiKey, setMonnifyApiKey] = useState('');
@@ -84,6 +88,8 @@ export default function AdminSettings() {
   const [walletAccount, setWalletAccount] = useState('');
   const [btEnabled, setBtEnabled] = useState(false);
   const [btFee, setBtFee] = useState('0');
+  const [btFeeMid, setBtFeeMid] = useState('');
+  const [btFeeHigh, setBtFeeHigh] = useState('');
   const [btMin, setBtMin] = useState('100');
   const [btMax, setBtMax] = useState('50000');
   const [btDaily, setBtDaily] = useState('200000');
@@ -145,6 +151,7 @@ export default function AdminSettings() {
         setVtpassSecretKey(s.vtpassSecretKey || '');
         setVtpassPublicKey(s.vtpassPublicKey || '');
         setMarkupByService(toServiceMap(s.markupPercentByService));
+        setMarkupCapByService(Object.fromEntries(Object.entries(s.markupCapByService || {}).map(([k, v]) => [k, String(v)])));
         setDiscountByService(toServiceMap(s.discountPercentByService));
         setMonnifyMode(s.monnifyMode || 'sandbox');
         setMonnifyApiKey(s.monnifyApiKey || '');
@@ -153,6 +160,8 @@ export default function AdminSettings() {
         setWalletAccount(s.monnifyWalletAccount || '');
         setBtEnabled(Boolean(s.bankTransferEnabled));
         setBtFee(String(s.bankTransferFee ?? 0));
+        setBtFeeMid(s.bankTransferFeeMid == null ? '' : String(s.bankTransferFeeMid));
+        setBtFeeHigh(s.bankTransferFeeHigh == null ? '' : String(s.bankTransferFeeHigh));
         setBtMin(String(s.bankTransferMin ?? 100));
         setBtMax(String(s.bankTransferMax ?? 50000));
         setBtDaily(String(s.bankTransferDailyMax ?? 200000));
@@ -250,6 +259,8 @@ export default function AdminSettings() {
         monnifyWalletAccount: walletAccount,
         bankTransferEnabled: btEnabled,
         bankTransferFee: Number(btFee || 0),
+        bankTransferFeeMid: btFeeMid === '' ? null : Number(btFeeMid),
+        bankTransferFeeHigh: btFeeHigh === '' ? null : Number(btFeeHigh),
         bankTransferMin: Number(btMin || 0),
         bankTransferMax: Number(btMax || 0),
         bankTransferDailyMax: Number(btDaily || 0),
@@ -269,7 +280,8 @@ export default function AdminSettings() {
 
   function saveMarkup(e) {
     e.preventDefault();
-    save('markup', { markupPercentByService: toNumberMap(markupByService) }, 'Markup saved.');
+    const caps = Object.fromEntries(Object.entries(markupCapByService).map(([k, v]) => [k, Number(v || 0)]).filter(([, v]) => v > 0));
+    save('markup', { markupPercentByService: toNumberMap(markupByService), markupCapByService: caps }, 'Markup saved.');
   }
 
   function saveDiscount(e) {
@@ -553,9 +565,21 @@ export default function AdminSettings() {
             <input id="walletAccount" inputMode="numeric" value={walletAccount} onChange={(e) => setWalletAccount(e.target.value)} placeholder="From Monnify → Developer → API Keys & Contracts" />
           </div>
           <div className="field">
-            <label htmlFor="btFee">Fee per transfer (₦)</label>
+            <label htmlFor="btFee">Fee for transfers under ₦10,000 (₦)</label>
             <input id="btFee" type="number" min="0" step="1" value={btFee} onChange={(e) => setBtFee(e.target.value)} />
-            <small style={{ color: 'var(--slate-400)' }}>Charged to the customer on top of the amount. Set it to cover Monnify's transfer charge.</small>
+            <small style={{ color: 'var(--slate-400)' }}>Charged to the customer on top of the amount. Monnify charges you ₦10.75 (incl. VAT) here.</small>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="field" style={{ flex: '1 1 200px' }}>
+              <label htmlFor="btFeeMid">Fee ₦10,000 – ₦49,999 (₦)</label>
+              <input id="btFeeMid" type="number" min="0" step="1" value={btFeeMid} onChange={(e) => setBtFeeMid(e.target.value)} placeholder="Same as above" />
+              <small style={{ color: 'var(--slate-400)' }}>Monnify charges you ₦21.50.</small>
+            </div>
+            <div className="field" style={{ flex: '1 1 200px' }}>
+              <label htmlFor="btFeeHigh">Fee ₦50,000 and above (₦)</label>
+              <input id="btFeeHigh" type="number" min="0" step="1" value={btFeeHigh} onChange={(e) => setBtFeeHigh(e.target.value)} placeholder="Same as above" />
+              <small style={{ color: 'var(--slate-400)' }}>Monnify charges you ₦43.</small>
+            </div>
           </div>
           <div className="field">
             <label htmlFor="btMin">Minimum per transfer (₦)</label>
@@ -598,25 +622,52 @@ export default function AdminSettings() {
 
       {!loading && !loadError && tab === 'markup' && (
         <form className="card" style={cardStyle} onSubmit={saveMarkup}>
-          <SectionHeader title="Markup per service (%)" hint="Added on top of VTpass's own price for that service." />
+          <SectionHeader title="Markup per service (%)" hint="Added on top of VTpass's own price for that service. Set a maximum so big bills (e.g. DStv Premium) don't get an expensive charge — e.g. 1% but never more than ₦100." />
           <Status state={status.markup} />
-          {SERVICES.map((service) => (
-            <div className="field" key={service}>
-              <label htmlFor={`markup-${service}`}>{serviceLabel(service)}</label>
-              <input
-                id={`markup-${service}`}
-                type="number"
-                step="0.1"
-                min="0"
-                value={markupByService[service]}
-                onChange={(e) => setMarkupByService((prev) => ({ ...prev, [service]: e.target.value }))}
-              />
-            </div>
-          ))}
+          {SERVICES.map((service) => {
+            const pct = Number(markupByService[service] || 0);
+            const cap = Number(markupCapByService[service] || 0);
+            const on = (amt) => Math.round(cap > 0 ? Math.min((amt * pct) / 100, cap) : (amt * pct) / 100);
+            return (
+              <div key={service} style={{ marginBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div className="field" style={{ flex: '1 1 160px', margin: 0 }}>
+                    <label htmlFor={`markup-${service}`}>{serviceLabel(service)} (%)</label>
+                    <input
+                      id={`markup-${service}`}
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={markupByService[service]}
+                      onChange={(e) => setMarkupByService((prev) => ({ ...prev, [service]: e.target.value }))}
+                    />
+                  </div>
+                  <div className="field" style={{ flex: '1 1 160px', margin: 0 }}>
+                    <label htmlFor={`markupcap-${service}`}>Max per purchase (₦)</label>
+                    <input
+                      id={`markupcap-${service}`}
+                      type="number"
+                      step="1"
+                      min="0"
+                      placeholder="No maximum"
+                      value={markupCapByService[service] || ''}
+                      onChange={(e) => setMarkupCapByService((prev) => ({ ...prev, [service]: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                {pct > 0 && (
+                  <small style={{ color: 'var(--slate-400)' }}>
+                    Customer pays extra: ₦{on(1000).toLocaleString()} on ₦1,000 · ₦{on(10000).toLocaleString()} on ₦10,000 · ₦{on(30000).toLocaleString()} on ₦30,000
+                  </small>
+                )}
+              </div>
+            );
+          })}
           {saveButton('markup', 'Save Markup')}
         </form>
       )}
 
+      {!loading && !loadError && tab === 'discount' && <RewardGuardPanel />}
       {!loading && !loadError && tab === 'discount' && (
         <form className="card" style={cardStyle} onSubmit={saveDiscount}>
           <SectionHeader
@@ -918,6 +969,7 @@ export default function AdminSettings() {
       )}
 
       {!loading && !loadError && tab === 'ai' && <AiSettingsPanel />}
+      {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
 
       {tab === 'password' && (
         <form className="card" style={cardStyle} onSubmit={savePassword}>
