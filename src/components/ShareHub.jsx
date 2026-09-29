@@ -32,6 +32,7 @@ function Round({ bg, icon, label, onClick, href }) {
 export default function ShareHub({ code, link, firstName, bonus, minPurchase }) {
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');
+  const [preview, setPreview] = useState(null); // { url, blob, fileName, video, app }
 
   const text = `Join me on ZAPPI PAY — airtime, data, electricity, cable TV & exam PINs in seconds. Sign up with my code ${code}: ${link}`;
   const details = { code, link, firstName };
@@ -50,15 +51,14 @@ export default function ShareHub({ code, link, firstName, bonus, minPurchase }) 
     }
   }
 
-  async function shareImage(appName) {
+  // Make the picture/video, then show it so the person can see it
+  // before sharing or saving (on computers the share window alone
+  // doesn't show the picture).
+  async function makeImage(appName) {
     setBusy('image');
     try {
       const blob = await drawInviteImage(details);
-      const r = await shareFile(blob, `zappipay-invite-${code}.png`, text);
-      if (r === 'downloaded') {
-        await navigator.clipboard?.writeText(text).catch(() => {});
-        flash(`Picture saved and caption copied.${appName ? ` Open ${appName} and post it.` : ''}`);
-      }
+      openPreview({ blob, fileName: `zappipay-invite-${code}.png`, video: false, app: appName });
     } catch (err) {
       flash(err.message || 'Could not create the picture.');
     } finally {
@@ -66,17 +66,45 @@ export default function ShareHub({ code, link, firstName, bonus, minPurchase }) 
     }
   }
 
-  async function shareVideo() {
+  async function makeVideo() {
     setBusy('video');
     try {
       const { blob, ext } = await recordInviteAnimation(details);
-      const r = await shareFile(blob, `zappipay-invite-${code}.${ext}`, text);
-      if (r === 'downloaded') flash(`Video saved (${ext.toUpperCase()}). Post it on your WhatsApp Status, Instagram or TikTok.`);
+      openPreview({ blob, fileName: `zappipay-invite-${code}.${ext}`, video: true });
     } catch (err) {
       flash(err.message || 'Could not create the video.');
     } finally {
       setBusy('');
     }
+  }
+
+  function openPreview(p) {
+    if (preview?.url) URL.revokeObjectURL(preview.url);
+    setPreview({ ...p, url: URL.createObjectURL(p.blob) });
+  }
+
+  function closePreview() {
+    if (preview?.url) URL.revokeObjectURL(preview.url);
+    setPreview(null);
+  }
+
+  async function sharePreview() {
+    const r = await shareFile(preview.blob, preview.fileName, text);
+    if (r === 'downloaded') {
+      await navigator.clipboard?.writeText(text).catch(() => {});
+      flash('Saved to your downloads, and the caption is copied.');
+    }
+  }
+
+  function downloadPreview() {
+    const a = document.createElement('a');
+    a.href = preview.url;
+    a.download = preview.fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    navigator.clipboard?.writeText(text).catch(() => {});
+    flash('Saved to your downloads, and the caption is copied — paste it when you post.');
   }
 
   async function more() {
@@ -105,23 +133,44 @@ export default function ShareHub({ code, link, firstName, bonus, minPurchase }) 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px 6px', marginBottom: 14 }}>
           <Round bg="#25D366" icon="whatsapp" label="WhatsApp" href={`https://wa.me/?text=${enc(text)}`} />
           <Round bg="#000" icon="x" label="X" href={`https://twitter.com/intent/tweet?text=${enc(text)}`} />
-          <Round bg="linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4)" icon="instagram" label="Instagram" onClick={() => shareImage('Instagram')} />
-          <Round bg="#FFFC00" icon="snapchat" label="Snapchat" onClick={() => shareImage('Snapchat')} />
+          <Round bg="linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4)" icon="instagram" label="Instagram" onClick={() => makeImage('Instagram')} />
+          <Round bg="#FFFC00" icon="snapchat" label="Snapchat" onClick={() => makeImage('Snapchat')} />
           <Round bg="#1877F2" icon="facebook" label="Facebook" href={`https://www.facebook.com/sharer/sharer.php?u=${enc(link)}&quote=${enc(text)}`} />
-          <Round bg="#000" icon="tiktok" label="TikTok" onClick={() => shareImage('TikTok')} />
+          <Round bg="#000" icon="tiktok" label="TikTok" onClick={() => makeImage('TikTok')} />
           <Round bg="#29A9EB" icon="telegram" label="Telegram" href={`https://t.me/share/url?url=${enc(link)}&text=${enc(text)}`} />
           <Round bg="#1e293b" icon="more" label="More" onClick={more} />
         </div>
-        <button type="button" className="btn" style={btn} disabled={Boolean(busy)} onClick={() => shareImage()}>
+        <button type="button" className="btn" style={btn} disabled={Boolean(busy)} onClick={() => makeImage()}>
           🖼️ {busy === 'image' ? 'Creating picture…' : 'Create share image'}
         </button>
         {animationSupported() && (
-          <button type="button" className="btn btn-secondary" style={{ ...btn, marginTop: 8 }} disabled={Boolean(busy)} onClick={shareVideo}>
+          <button type="button" className="btn btn-secondary" style={{ ...btn, marginTop: 8 }} disabled={Boolean(busy)} onClick={makeVideo}>
             ✨ {busy === 'video' ? 'Recording 3 seconds…' : 'Create 3-second animated share'}
           </button>
         )}
         {msg && <p style={{ fontSize: 13, margin: '10px 0 0', color: 'var(--green-500)' }}>{msg}</p>}
       </div>
+
+      {preview && (
+        <div role="dialog" aria-label="Your invite" onClick={(e) => e.target === e.currentTarget && closePreview()} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 95, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ width: 'min(420px, 100%)', maxHeight: '94vh', overflowY: 'auto', background: 'var(--slate-800)', borderRadius: 18, padding: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <b>{preview.video ? 'Your 3-second invite video' : 'Your invite picture'}</b>
+              <button type="button" aria-label="Close" onClick={closePreview} style={{ background: 'none', border: 'none', color: 'var(--slate-400)', fontSize: 24, cursor: 'pointer' }}>×</button>
+            </div>
+            {preview.video
+              ? <video src={preview.url} autoPlay loop muted playsInline style={{ width: '100%', borderRadius: 12, display: 'block' }} />
+              : <img src={preview.url} alt="Invite picture with your code and QR" style={{ width: '100%', borderRadius: 12, display: 'block' }} />}
+            {preview.app && <p style={{ fontSize: 13, color: 'var(--slate-300, #cbd5e1)', margin: '10px 0 0' }}>Tap Share and pick {preview.app}, or Download it and post it from the {preview.app} app.</p>}
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button type="button" className="btn" onClick={sharePreview}>Share</button>
+              <button type="button" className="btn btn-secondary" onClick={downloadPreview}>Download</button>
+            </div>
+            <button type="button" onClick={() => copy(text, 'Caption')} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', fontSize: 13, marginTop: 10, padding: 0 }}>Copy caption to paste with it</button>
+            {msg && <p style={{ fontSize: 13, margin: '8px 0 0', color: 'var(--green-500)' }}>{msg}</p>}
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <b>Invitation tools</b>
