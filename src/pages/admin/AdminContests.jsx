@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminContests, getAdminContest, createContest, updateContest, contestAction } from '../../api';
+import { getAdminContests, getAdminContest, createContest, updateContest, contestAction, getContestFriends } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
@@ -115,11 +115,103 @@ function ContestForm({ initial, onSaved, onCancel }) {
   );
 }
 
+// Every friend who signed up under one contestant during the contest,
+// with each check (✓/✗) and warning signs for a manual review.
+function FriendsPanel({ contestId, contestantId, editable, onChanged, onClose }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState('');
+  const [busyId, setBusyId] = useState(null);
+
+  function load() {
+    getContestFriends(contestId, contestantId).then(setData).catch((err) => setError(err.message));
+  }
+  useEffect(load, [contestId, contestantId]);
+  const boxRef = useRef(null);
+  useEffect(() => { boxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [contestantId]);
+
+  async function toggle(friend) {
+    setBusyId(friend.id);
+    try {
+      await contestAction(contestId, 'disqualify', { customerId: friend.id, restore: friend.excluded });
+      load();
+      onChanged();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const when = (d) => new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+  return (
+    <div ref={boxRef} style={{ background: 'var(--slate-900)', borderRadius: 12, padding: 14, margin: '12px 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div>
+          <b style={{ fontSize: 16 }}>Friends of {data?.contestant.name || '…'}</b>
+          {data && (
+            <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>
+              {data.contestant.phone}{data.contestant.username ? ` · @${data.contestant.username}` : ''} · contestant {data.contestant.verified ? `verified with ${data.contestant.verified}` : 'not verified'}
+              {' · '}{data.summary.total} signed up · <span style={{ color: 'var(--green-500)' }}>{data.summary.counted} counted</span>
+              {data.summary.flagged > 0 && <span style={{ color: '#f59e0b' }}> · {data.summary.flagged} with warning signs</span>}
+            </div>
+          )}
+        </div>
+        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 12px' }} onClick={onClose}>Close</button>
+      </div>
+      {error && <p className="error-text">{error}</p>}
+      {!data ? <p className="empty-state">Loading…</p> : data.friends.length === 0 ? <p className="empty-state">Nobody has signed up under this contestant during the contest.</p> : (
+        <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
+          {data.friends.map((f) => (
+            <div key={f.id} style={{ border: `1px solid ${f.excluded ? 'var(--red-500)' : f.counted ? 'var(--green-500)' : 'var(--slate-700)'}`, borderRadius: 10, padding: 12, opacity: f.excluded ? 0.7 : 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                <div>
+                  <Link to={`/admin/customers/${f.id}`} style={{ color: 'var(--purple)', fontWeight: 700 }}>{f.name}</Link>
+                  <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>
+                    {f.phone}{f.email ? ` · ${f.email}` : ''}{f.username ? ` · @${f.username}` : ''} · joined {when(f.joinedAt)}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 700, color: f.excluded ? 'var(--red-500)' : f.counted ? 'var(--green-500)' : '#f59e0b' }}>
+                    {f.excluded ? 'Removed' : f.counted ? '✓ Counted' : 'Not counted yet'}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>
+                    {f.verification ? `🪪 ${f.verification.type} verified` : '🪪 Not verified'} · spent ₦{f.lifetime.total.toLocaleString('en-NG')} ({f.lifetime.count} order{f.lifetime.count === 1 ? '' : 's'})
+                  </div>
+                </div>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0', fontSize: 13 }}>
+                {f.checks.map((c) => (
+                  <li key={c.label} style={{ color: c.ok ? 'var(--slate-300, #cbd5e1)' : 'var(--red-500)' }}>{c.ok ? '✓' : '✗'} {c.label}</li>
+                ))}
+              </ul>
+              {f.flags.length > 0 && (
+                <ul style={{ listStyle: 'none', padding: 0, margin: '6px 0 0', fontSize: 13, color: '#f59e0b' }}>
+                  {f.flags.map((x) => <li key={x}>⚠️ {x}</li>)}
+                </ul>
+              )}
+              {editable && (
+                <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12, marginTop: 8 }} disabled={busyId === f.id} onClick={() => toggle(f)}>
+                  {f.excluded ? 'Count this friend again' : "Don't count this friend"}
+                </button>
+              )}
+            </div>
+          ))}
+          <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: 0 }}>
+            Warning signs are hints, not proof — family members can share a surname or Wi-Fi. “Same internet network” compares a scrambled fingerprint of the internet address (recorded from this update onwards); the real address is never stored.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ContestDetail({ id, onChanged }) {
   const [data, setData] = useState(null);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [friendsOf, setFriendsOf] = useState(null);
 
   function load() {
     getAdminContest(id).then(setData).catch((err) => setMsg(err.message));
@@ -187,13 +279,19 @@ function ContestDetail({ id, onChanged }) {
                   <td><Link to={`/admin/customers/${r.customerId}`} style={{ color: 'var(--purple)' }}>{r.name}</Link><div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{r.phone}{r.username ? ` · @${r.username}` : ''}</div></td>
                   <td>{r.qualified}</td>
                   <td>{r.pending}</td>
-                  <td>{c.status === 'ACTIVE' && <button className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} disabled={busy} onClick={() => act('disqualify', null, { customerId: r.customerId })}>Remove</button>}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <button className={friendsOf === r.customerId ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} onClick={() => setFriendsOf(friendsOf === r.customerId ? null : r.customerId)}>View friends ({r.qualified + r.pending})</button>
+                      {c.status === 'ACTIVE' && <button className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} disabled={busy} onClick={() => act('disqualify', 'Remove this contestant from the contest?', { customerId: r.customerId })}>Remove</button>}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+      {friendsOf && <FriendsPanel contestId={c.id} contestantId={friendsOf} editable={c.status === 'ACTIVE'} onChanged={load} onClose={() => setFriendsOf(null)} />}
       {disq.size > 0 && c.status === 'ACTIVE' && (
         <p style={{ fontSize: 13, color: 'var(--slate-400)' }}>
           Removed: {[...disq].length} customer(s).{' '}

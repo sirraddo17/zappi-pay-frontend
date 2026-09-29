@@ -315,3 +315,4 @@ export const getAdminAds = () => adminRequest('/api/admin/ads');
 export const createAd = (data) => adminRequest('/api/admin/ads', { method: 'POST', body: JSON.stringify(data) });
 export const updateAd = (id, data) => adminRequest(`/api/admin/ads/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteAd = (id) => adminRequest(`/api/admin/ads/${id}`, { method: 'DELETE' });
+export const getContestFriends = (contestId, customerId) => adminRequest(`/api/admin/contests/${contestId}/friends/${customerId}`);
