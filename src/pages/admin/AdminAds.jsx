@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
+import { useShowMore } from '../../components/ShowMore';
 import { getAdminAds, createAd, updateAd, deleteAd, adImageUrl } from '../../api';
 
 const PLACEMENTS = [
@@ -129,6 +130,7 @@ function AdForm({ initial, onSaved, onCancel }) {
 
 export default function AdminAds() {
   const [ads, setAds] = useState(null);
+  const listPage = useShowMore(ads, []);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(null); // null | 'new' | ad
 
@@ -162,7 +164,7 @@ export default function AdminAds() {
 
       {ads === null ? <p className="empty-state">Loading…</p> : ads.length === 0 ? (!editing && <p className="empty-state">No adverts yet.</p>) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
-          {ads.map((ad) => {
+          {listPage.visible.map((ad) => {
             const live = ad.active && (!ad.startsAt || new Date(ad.startsAt).getTime() <= now) && (!ad.endsAt || new Date(ad.endsAt).getTime() > now);
             return (
               <div key={ad.id} className="card" style={{ margin: 0, padding: 0, overflow: 'hidden', opacity: live ? 1 : 0.6 }}>
@@ -183,6 +185,7 @@ export default function AdminAds() {
           })}
         </div>
       )}
+      {listPage.more}
     </AdminLayout>
   );
 }

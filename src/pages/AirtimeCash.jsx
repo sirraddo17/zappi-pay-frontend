@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getAirtimeCashConfig, getMyAirtimeCashRequests, submitAirtimeCashRequest, getOrders } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import BottomNav from '../components/BottomNav';
+import { useShowMore } from '../components/ShowMore';
 
 const STATUS_COLORS = { PENDING: 'var(--orange)', APPROVED: 'var(--green-500)', REJECTED: '#ef4444' };
 const NETWORK_LABELS = { mtn: 'MTN', glo: 'Glo', airtel: 'Airtel', etisalat: '9mobile' };
@@ -27,6 +28,7 @@ export default function AirtimeCash() {
   const [searchParams] = useSearchParams();
   const [config, setConfig] = useState(null);
   const [requests, setRequests] = useState(null);
+  const reqPage = useShowMore(requests);
   const [airtimeOrders, setAirtimeOrders] = useState([]);
 
   const [orderId, setOrderId] = useState(searchParams.get('order') || '');
@@ -224,7 +226,7 @@ export default function AirtimeCash() {
           <p className="empty-state" style={{ margin: 0 }}>No requests yet.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {requests.map((r) => (
+            {reqPage.visible.map((r) => (
               <div key={r.id} style={{ borderBottom: '1px solid var(--slate-700)', paddingBottom: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                   <span style={{ fontWeight: 600 }}>
@@ -243,6 +245,7 @@ export default function AirtimeCash() {
                 )}
               </div>
             ))}
+            {reqPage.more}
           </div>
         )}
       </div>

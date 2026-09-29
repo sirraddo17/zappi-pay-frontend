@@ -51,6 +51,12 @@ function Toggle({ on, onClick, disabled, label }) {
   );
 }
 
+// Same easy-PIN check as the server: 1111, 1234, 4321, 1212…
+function weakPin(p) {
+  const seq = '0123456789012';
+  return /^(\d)\1{3}$/.test(p) || seq.includes(p) || seq.split('').reverse().join('').includes(p) || /^(\d\d)\1$/.test(p);
+}
+
 export default function Security() {
   const { customer, refreshCustomer } = useAuth();
   const [status, setStatus] = useState(null);
@@ -273,7 +279,10 @@ export default function Security() {
               <div style={{ marginTop: 14 }}>
                 <p style={{ textAlign: 'center', margin: '0 0 6px', fontSize: 14 }}>Choose a new 4-digit PIN</p>
                 <p style={{ ...sub, textAlign: 'center', margin: '0 0 6px' }}>Avoid easy PINs like 1234 or 0000.</p>
-                <PinPad resetKey={padKey} onComplete={(p) => { setNewPin(p); setError(''); setPinStep('confirm'); setPadKey((k) => k + 1); }} />
+                <PinPad resetKey={padKey} onComplete={(p) => {
+                  if (weakPin(p)) { setError('That PIN is too easy to guess (like 1234, 1111 or 1212). Choose another.'); setPadKey((k) => k + 1); return; }
+                  setNewPin(p); setError(''); setPinStep('confirm'); setPadKey((k) => k + 1);
+                }} />
               </div>
             )}
             {pinStep === 'confirm' && (

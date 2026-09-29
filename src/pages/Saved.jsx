@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getBeneficiaries, deleteBeneficiary, renameBeneficiary, getSchedules, updateSchedule, deleteSchedule } from '../api';
 import BottomNav from '../components/BottomNav';
+import { useShowMore } from '../components/ShowMore';
 import { beneficiaryLink, SERVICE_LABEL, FREQUENCY_LABEL } from '../lib/repeat';
 
 function fmtWhen(d) {
@@ -11,6 +12,8 @@ function fmtWhen(d) {
 export default function Saved() {
   const [schedules, setSchedules] = useState(null);
   const [beneficiaries, setBeneficiaries] = useState(null);
+  const schedPage = useShowMore(schedules);
+  const benPage = useShowMore(beneficiaries);
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState('');
   const [editing, setEditing] = useState(null);
@@ -59,7 +62,7 @@ export default function Saved() {
             None yet. When buying, tick <b>Repeat this purchase automatically</b> — great for monthly DStv/GOtv or weekly data.
           </p>
         ) : (
-          schedules.map((s, i) => (
+          schedPage.visible.map((s, i) => (
             <div key={s.id} style={{ padding: '12px 0', borderTop: i ? '1px solid var(--slate-700)' : 'none' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
                 <div style={{ minWidth: 0 }}>
@@ -99,6 +102,7 @@ export default function Saved() {
             </div>
           ))
         )}
+        {schedPage.more}
         <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '10px 0 0' }}>
           Keep enough in your wallet before each date. A top-up that fails 3 times in a row is paused and you'll get a notification.
         </p>
@@ -113,7 +117,7 @@ export default function Saved() {
             None yet. When buying, tick <b>Save this number for next time</b>.
           </p>
         ) : (
-          beneficiaries.map((b, i) => (
+          benPage.visible.map((b, i) => (
             <div key={b.id} style={{ padding: '12px 0', borderTop: i ? '1px solid var(--slate-700)' : 'none' }}>
               {editing === b.id ? (
                 <form
@@ -160,6 +164,7 @@ export default function Saved() {
             </div>
           ))
         )}
+        {benPage.more}
       </div>
 
       <BottomNav />

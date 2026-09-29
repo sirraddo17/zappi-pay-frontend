@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { useShowMore } from '../../components/ShowMore';
 import { getAdminNotices, createNotice, setNoticeActive, sendPushBroadcast, getPushStats } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -8,6 +9,7 @@ const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTER
 // a service's Buy page, e.g. "MTN data is delayed — we're on it."
 export default function AdminNotices() {
   const [notices, setNotices] = useState(null);
+  const listPage = useShowMore(notices, []);
   const [message, setMessage] = useState('');
   const [service, setService] = useState('');
   const [level, setLevel] = useState('WARNING');
@@ -127,7 +129,7 @@ export default function AdminNotices() {
       ) : notices.length === 0 ? (
         <p className="empty-state">No notices yet.</p>
       ) : (
-        notices.map((n) => (
+        listPage.visible.map((n) => (
           <div key={n.id} className="card" style={{ margin: '0 0 10px', opacity: live(n) ? 1 : 0.55 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
               <div>
@@ -147,6 +149,7 @@ export default function AdminNotices() {
           </div>
         ))
       )}
+      {listPage.more}
     </AdminLayout>
   );
 }

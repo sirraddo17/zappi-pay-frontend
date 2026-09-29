@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { useShowMore } from '../../components/ShowMore';
 import { getPendingFunding, approveFunding, rejectFunding } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
@@ -13,6 +14,7 @@ function fmtDate(d) {
 
 export default function AdminPendingFunding() {
   const [transactions, setTransactions] = useState(null);
+  const listPage = useShowMore(transactions, []);
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
 
@@ -65,7 +67,7 @@ export default function AdminPendingFunding() {
       ) : transactions.length === 0 ? (
         <p className="empty-state">Nothing pending.</p>
       ) : (
-        transactions.map((t) => (
+        listPage.visible.map((t) => (
           <div className="card" style={{ margin: '0 0 12px' }} key={t.id}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
@@ -88,6 +90,7 @@ export default function AdminPendingFunding() {
           </div>
         ))
       )}
+      {listPage.more}
     </AdminLayout>
   );
 }

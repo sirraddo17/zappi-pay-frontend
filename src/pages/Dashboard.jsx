@@ -47,6 +47,7 @@ function txLabel(t) {
   if (t.type === 'CASHBACK') return t.note || 'Cashback';
   if (t.type === 'LOYALTY') return t.note || 'Points redeemed';
   if (t.type === 'CONTEST_PRIZE') return t.note || 'Contest prize';
+  if (t.type === 'COUPON') return t.note || 'Coupon';
   if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
   if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
   return t.note || 'Purchase';
@@ -301,6 +302,21 @@ export default function Dashboard() {
         </Link>
       )}
 
+      {customer && customer.hasPin && (customer.hasDob === false || customer.hasSecurityQuestion === false) && (
+        <Link
+          to="/profile#security-details"
+          className="card"
+          style={{ display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: 'inherit', border: '1px solid var(--gold)', background: 'rgba(255,184,48,0.08)', marginTop: 16 }}
+        >
+          <span style={{ fontSize: 22 }}>🛡️</span>
+          <span style={{ flex: 1 }}>
+            <b style={{ display: 'block', fontSize: 14 }}>Protect your account</b>
+            <span style={{ fontSize: 13, color: 'var(--slate-400)' }}>Add your date of birth and a security question so support can confirm it's really you.</span>
+          </span>
+          <span style={{ color: 'var(--slate-400)' }}>›</span>
+        </Link>
+      )}
+
       <ContestCard compact />
 
       {referral?.enabled && referral.bonusAmount > 0 && (
@@ -326,7 +342,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>

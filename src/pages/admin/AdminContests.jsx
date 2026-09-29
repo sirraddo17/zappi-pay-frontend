@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useShowMore } from '../../components/ShowMore';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminContests, getAdminContest, createContest, updateContest, contestAction, getContestFriends } from '../../api';
@@ -121,6 +122,7 @@ function FriendsPanel({ contestId, contestantId, editable, onChanged, onClose })
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
+  const friendsPage = useShowMore(data?.friends);
 
   function load() {
     getContestFriends(contestId, contestantId).then(setData).catch((err) => setError(err.message));
@@ -162,7 +164,7 @@ function FriendsPanel({ contestId, contestantId, editable, onChanged, onClose })
       {error && <p className="error-text">{error}</p>}
       {!data ? <p className="empty-state">Loading…</p> : data.friends.length === 0 ? <p className="empty-state">Nobody has signed up under this contestant during the contest.</p> : (
         <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
-          {data.friends.map((f) => (
+          {friendsPage.visible.map((f) => (
             <div key={f.id} style={{ border: `1px solid ${f.excluded ? 'var(--red-500)' : f.counted ? 'var(--green-500)' : 'var(--slate-700)'}`, borderRadius: 10, padding: 12, opacity: f.excluded ? 0.7 : 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
                 <div>
@@ -197,6 +199,7 @@ function FriendsPanel({ contestId, contestantId, editable, onChanged, onClose })
               )}
             </div>
           ))}
+          {friendsPage.more}
           <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: 0 }}>
             Warning signs are hints, not proof — family members can share a surname or Wi-Fi. “Same internet network” compares a scrambled fingerprint of the internet address (recorded from this update onwards); the real address is never stored.
           </p>
@@ -212,6 +215,7 @@ function ContestDetail({ id, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
   const [friendsOf, setFriendsOf] = useState(null);
+  const standingsPage = useShowMore(data?.standings, [], 10);
 
   function load() {
     getAdminContest(id).then(setData).catch((err) => setMsg(err.message));
@@ -273,7 +277,7 @@ function ContestDetail({ id, onChanged }) {
           <table>
             <thead><tr><th>#</th><th>Customer</th><th>Counted</th><th>Waiting</th><th></th></tr></thead>
             <tbody>
-              {data.standings.map((r) => (
+              {standingsPage.visible.map((r) => (
                 <tr key={r.customerId} style={{ opacity: disq.has(r.customerId) ? 0.5 : 1 }}>
                   <td>{r.rank}</td>
                   <td><Link to={`/admin/customers/${r.customerId}`} style={{ color: 'var(--purple)' }}>{r.name}</Link><div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{r.phone}{r.username ? ` · @${r.username}` : ''}</div></td>
@@ -290,6 +294,7 @@ function ContestDetail({ id, onChanged }) {
             </tbody>
           </table>
         )}
+        {standingsPage.more}
       </div>
       {friendsOf && <FriendsPanel contestId={c.id} contestantId={friendsOf} editable={c.status === 'ACTIVE'} onChanged={load} onClose={() => setFriendsOf(null)} />}
       {disq.size > 0 && c.status === 'ACTIVE' && (

@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 // Shows the first few items of a list, then "Show more" / "Show less"
 // so long histories don't turn the page into an endless scroll.
 export const FIRST_COUNT = 5;
@@ -7,8 +9,8 @@ export function visibleSlice(items, shown) {
   return items.slice(0, shown);
 }
 
-export default function ShowMore({ total, shown, setShown }) {
-  if (total <= FIRST_COUNT) return null;
+export default function ShowMore({ total, shown, setShown, first = FIRST_COUNT }) {
+  if (total <= first) return null;
   const remaining = total - shown;
   const btn = {
     background: 'none',
@@ -27,11 +29,25 @@ export default function ShowMore({ total, shown, setShown }) {
           Show more ({remaining})
         </button>
       )}
-      {shown > FIRST_COUNT && (
-        <button type="button" style={{ ...btn, borderColor: 'var(--slate-600, #475569)', color: 'var(--slate-400)' }} onClick={() => setShown(FIRST_COUNT)}>
+      {shown > first && (
+        <button type="button" style={{ ...btn, borderColor: 'var(--slate-600, #475569)', color: 'var(--slate-400)' }} onClick={() => setShown(first)}>
           Show less
         </button>
       )}
     </div>
   );
+}
+
+// Hook version: const logs = useShowMore(list, [filter]);
+// then render logs.visible.map(...) and {logs.more} under the list.
+// resetKeys: when any of them changes, it goes back to the first few.
+export function useShowMore(items, resetKeys = [], first = FIRST_COUNT) {
+  const [shown, setShown] = useState(first);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setShown(first), resetKeys);
+  const list = items || [];
+  return {
+    visible: list.slice(0, shown),
+    more: <ShowMore total={list.length} shown={shown} setShown={setShown} first={first} />,
+  };
 }

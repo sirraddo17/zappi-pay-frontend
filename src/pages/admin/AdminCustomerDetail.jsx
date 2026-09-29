@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
-import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, setCustomerAgent, adminSetUsername, testCustomerEmailAlert } from '../../api';
+import { IdentityCheck, AgentPanel } from '../../components/admin/CustomerPanels';
+import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, adminSetUsername, testCustomerEmailAlert } from '../../api';
 
 // Set a username for older accounts (or correct one). It is the
 // customer's referral code, so changing it breaks links they shared.
@@ -206,32 +207,9 @@ export default function AdminCustomerDetail() {
         {!customer.deletedAt && <EmailAlertTest customerId={customer.id} />}
       </div>
 
-      {!customer.deletedAt && (
-        <div className="card" style={{ margin: '0 0 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <strong>{customer.isAgent ? '⭐ Agent' : 'Regular customer'}</strong>
-            {customer.agentBusinessName && <span style={{ color: 'var(--slate-400)', fontSize: 13 }}> · {customer.agentBusinessName}</span>}
-            {!customer.isAgent && customer.agentRequestedAt && (
-              <div style={{ fontSize: 13, color: 'var(--orange, #f97316)' }}>Applied to be an agent on {new Date(customer.agentRequestedAt).toLocaleDateString('en-NG')}</div>
-            )}
-          </div>
-          <button
-            type="button"
-            className={customer.isAgent ? 'btn btn-secondary' : 'btn'}
-            style={{ width: 'auto' }}
-            onClick={async () => {
-              try {
-                await setCustomerAgent(customer.id, !customer.isAgent);
-                window.location.reload();
-              } catch (err) {
-                alert(err.message);
-              }
-            }}
-          >
-            {customer.isAgent ? 'Remove agent status' : customer.agentRequestedAt ? 'Approve as agent' : 'Make agent'}
-          </button>
-        </div>
-      )}
+      {!customer.deletedAt && <IdentityCheck customer={customer} orders={orders} walletTransactions={walletTransactions} onChanged={load} />}
+
+      {!customer.deletedAt && <AgentPanel customer={customer} orders={orders} onChanged={load} />}
 
       {customer.deletedAt ? (
         <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--slate-600)' }}>This account was deleted on {new Date(customer.deletedAt).toLocaleString('en-NG')}.</div>
@@ -270,7 +248,7 @@ export default function AdminCustomerDetail() {
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Reset Password</h2>
         <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: '0 0 12px' }}>
           For customers who forgot their password. This creates a temporary password (valid 24 hours) and the customer must choose a new
-          one as soon as they log in. Confirm it's really the account owner first — e.g. they're messaging from the registered number{' '}
+          one as soon as they log in. <b>Confirm it's really the account owner first</b> with “Check it's really them” above (date of birth + security question), and that they're messaging from the registered number{' '}
           {customer.phone}.
         </p>
         {customer.mustChangePassword && !resetResult && (

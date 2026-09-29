@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useShowMore } from '../components/ShowMore';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { updateMe, changePassword, getSupportTickets } from '../api';
@@ -8,6 +9,10 @@ import { SUPPORT_EMAIL, WHATSAPP_NUMBER } from '../assistant/knowledge';
 import { useAppInfo } from '../components/ServiceNotices';
 import AccountExtras from '../components/AccountExtras';
 import AgentCard from '../components/AgentCard';
+import NewPasswordFields from '../components/NewPasswordFields';
+import SecurityDetailsCard from '../components/SecurityDetailsCard';
+import SocialLinks from '../components/SocialLinks';
+import { passwordIsStrong } from '../lib/passwordRules';
 
 const MAX_AVATAR_BYTES = 1_500_000;
 
@@ -27,11 +32,13 @@ export default function Profile() {
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
 
   const [tickets, setTickets] = useState(null);
+  const ticketPage = useShowMore(tickets, [], 3);
 
   useEffect(() => {
     getSupportTickets()
@@ -97,11 +104,14 @@ export default function Profile() {
     e.preventDefault();
     setPasswordError('');
     setPasswordSuccess('');
+    if (!passwordIsStrong(newPassword)) return setPasswordError('Your new password needs a capital letter, a small letter, a number and a special character, and at least 8 characters.');
+    if (newPassword !== confirmPassword) return setPasswordError("The two new passwords don't match.");
     setChangingPassword(true);
     try {
       await changePassword({ currentPassword, newPassword });
       setCurrentPassword('');
       setNewPassword('');
+      setConfirmPassword('');
       setPasswordSuccess('Password changed.');
     } catch (err) {
       setPasswordError(err.message || 'Could not change password.');
@@ -233,14 +243,19 @@ export default function Profile() {
           <label htmlFor="currentPassword">Current password</label>
           <PasswordField id="currentPassword" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoComplete="current-password" />
         </div>
-        <div className="field">
-          <label htmlFor="newPassword">New password</label>
-          <PasswordField id="newPassword" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
-        </div>
+        <NewPasswordFields password={newPassword} setPassword={setNewPassword} confirm={confirmPassword} setConfirm={setConfirmPassword} idPrefix="prof" label="New password" />
         <button className="btn" type="submit" disabled={changingPassword}>
           {changingPassword ? 'Saving…' : 'Change Password'}
         </button>
       </form>
+
+      <SecurityDetailsCard />
+
+      <div className="card" style={{ margin: '0 0 16px' }}>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>Follow us</h2>
+        <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -6 }}>Promos, new services and updates first.</p>
+        <SocialLinks />
+      </div>
 
       <div className="card" style={{ margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Support</h2>
@@ -265,7 +280,7 @@ export default function Profile() {
         ) : tickets.length === 0 ? (
           <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: 0 }}>No support requests yet.</p>
         ) : (
-          tickets.map((t) => (
+          ticketPage.visible.map((t) => (
             <div key={t.id} style={{ borderTop: '1px solid var(--slate-700)', padding: '10px 0', fontSize: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                 <span>{t.message}</span>
@@ -282,6 +297,7 @@ export default function Profile() {
             </div>
           ))
         )}
+        {ticketPage.more}
       </div>
 
       <div className="card" style={{ margin: '0 0 16px' }}>

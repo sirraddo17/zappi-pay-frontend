@@ -23,6 +23,7 @@ const TYPE_LABEL = {
   CASHBACK: 'Cashback',
   LOYALTY: 'Points redeemed',
   CONTEST_PRIZE: 'Contest prize',
+  COUPON: 'Coupon',
 };
 
 // Last 12 months as quick picks, plus a custom range.

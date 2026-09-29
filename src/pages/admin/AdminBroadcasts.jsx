@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { useShowMore } from '../../components/ShowMore';
 import { getAdminBroadcasts, createBroadcast, endBroadcast } from '../../api';
 
 const TYPES = [
@@ -16,6 +17,7 @@ function fmtDate(d) {
 
 export default function AdminBroadcasts() {
   const [broadcasts, setBroadcasts] = useState(null);
+  const listPage = useShowMore(broadcasts, []);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [type, setType] = useState('INFO');
@@ -166,7 +168,7 @@ export default function AdminBroadcasts() {
         <p className="empty-state">No broadcasts sent yet.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 640 }}>
-          {broadcasts.map((b) => (
+          {listPage.visible.map((b) => (
             <div key={b.id} className="card" style={{ margin: 0, borderLeft: `4px solid ${TYPE_COLORS[b.type] || 'var(--purple)'}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
                 <div style={{ minWidth: 0 }}>
@@ -193,6 +195,7 @@ export default function AdminBroadcasts() {
           ))}
         </div>
       )}
+      {listPage.more}
     </AdminLayout>
   );
 }

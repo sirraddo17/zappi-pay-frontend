@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useShowMore } from '../components/ShowMore';
 import { Link } from 'react-router-dom';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
@@ -11,6 +12,7 @@ function fmtDate(d) {
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState(null);
+  const listPage = useShowMore(notifications, [], 10);
   const [error, setError] = useState('');
 
   function load() {
@@ -74,7 +76,7 @@ export default function Notifications() {
         ) : notifications.length === 0 ? (
           <p className="empty-state">No notifications yet.</p>
         ) : (
-          notifications.map((n) => (
+          listPage.visible.map((n) => (
             <div
               key={n.id}
               onClick={() => handleOpen(n)}
@@ -99,6 +101,7 @@ export default function Notifications() {
             </div>
           ))
         )}
+        {listPage.more}
       </div>
 
       <BottomNav />

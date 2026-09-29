@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
+import { useShowMore } from '../../components/ShowMore';
 import { getAdminAirtimeCash, approveAirtimeCash, rejectAirtimeCash } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
@@ -117,6 +118,7 @@ function PendingCard({ r, onDone }) {
 export default function AdminAirtimeCash() {
   const [status, setStatus] = useState('PENDING');
   const [requests, setRequests] = useState(null);
+  const listPage = useShowMore(requests, [status]);
   const [pendingCount, setPendingCount] = useState(0);
   const [error, setError] = useState('');
 
@@ -165,7 +167,7 @@ export default function AdminAirtimeCash() {
         <p className="empty-state">No {status.toLowerCase()} requests.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 720 }}>
-          {requests.map((r) =>
+          {listPage.visible.map((r) =>
             status === 'PENDING' ? (
               <PendingCard key={r.id} r={r} onDone={() => load('PENDING')} />
             ) : (
@@ -188,6 +190,7 @@ export default function AdminAirtimeCash() {
           )}
         </div>
       )}
+      {listPage.more}
     </AdminLayout>
   );
 }

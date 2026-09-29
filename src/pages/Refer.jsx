@@ -7,12 +7,14 @@ import ContestCard from '../components/ContestCard';
 import ShareHub from '../components/ShareHub';
 import MyQr from '../components/MyQr';
 import useAutoRefresh from '../lib/useAutoRefresh';
+import { useShowMore } from '../components/ShowMore';
 import { useAuth } from '../context/AuthContext';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
 
 export default function Refer() {
   const [data, setData] = useState(null);
+  const refPage = useShowMore(data?.referrals);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
 
@@ -116,7 +118,7 @@ export default function Refer() {
             {data.referrals.length === 0 ? (
               <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: 0 }}>No one has joined with your code yet. Share it to start earning.</p>
             ) : (
-              data.referrals.map((r, i) => (
+              refPage.visible.map((r, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderTop: i ? '1px solid var(--slate-700)' : 'none' }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 14 }}>{r.name}</div>
@@ -128,15 +130,21 @@ export default function Refer() {
                       fontWeight: 700,
                       padding: '3px 8px',
                       borderRadius: 999,
-                      background: r.rewarded ? 'rgba(34,197,94,0.15)' : 'rgba(255,184,48,0.15)',
-                      color: r.rewarded ? 'var(--green-500)' : 'var(--gold)',
+                      textAlign: 'right',
+                      background: r.rewarded || r.purchased ? 'rgba(34,197,94,0.15)' : 'rgba(255,184,48,0.15)',
+                      color: r.rewarded || r.purchased ? 'var(--green-500)' : 'var(--gold)',
                     }}
                   >
-                    {r.rewarded ? `+${naira(r.amount)}` : `Waiting: first ${naira(data.minPurchase)}+ purchase`}
+                    {r.rewarded
+                      ? `+${naira(r.amount)}`
+                      : r.purchased
+                        ? (data.enabled ? '✓ Purchased — bonus on the way' : '✓ Purchased (bonus paused)')
+                        : `Waiting: first ${naira(data.minPurchase)}+ purchase`}
                   </span>
                 </div>
               ))
             )}
+            {refPage.more}
           </div>
 
           <div className="card">

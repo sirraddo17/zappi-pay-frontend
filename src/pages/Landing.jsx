@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import SocialLinks from '../components/SocialLinks';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LogoIcon, Wordmark } from '../components/Logo';
 import { PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon, FundIcon } from '../components/Icons';
@@ -262,6 +263,9 @@ export default function Landing() {
               <p style={{ margin: '10px 0 0', lineHeight: 1.5, maxWidth: 380 }}>
                 ZappiPay is operated by Sirraddo Venture (BN 7524870), Ibadan, Nigeria. Bill payments are delivered through VTpass.
               </p>
+              <div style={{ marginTop: 14 }}>
+                <SocialLinks />
+              </div>
             </div>
             <div>
               <h4>Company</h4>

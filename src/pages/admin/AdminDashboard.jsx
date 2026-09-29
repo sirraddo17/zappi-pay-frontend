@@ -118,7 +118,7 @@ export default function AdminDashboard() {
           <div style={{ fontSize: 13, marginTop: 6 }}>
             {agentReqs.map((c) => (
               <div key={c.id}>
-                <Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--purple)' }}>{c.name}</Link> · {c.agentBusinessName} · {c.phone}{c.kycType ? ' · ✓ verified' : ' · not verified'}
+                <Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--purple)' }}>{c.name}</Link> · {c.agentBusinessName}{c.agentShopAddress ? ` (${c.agentShopAddress})` : ''} · {c.phone}{c.kycType ? ' · ✓ verified' : ' · not verified'}
               </div>
             ))}
           </div>

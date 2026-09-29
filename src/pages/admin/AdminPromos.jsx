@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { useShowMore } from '../../components/ShowMore';
 import { getAdminPromos, createPromo, updatePromo } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -11,6 +12,7 @@ const EMPTY = { code: '', description: '', type: 'FLAT', value: '', maxDiscount:
 // Promo codes customers type at checkout.
 export default function AdminPromos() {
   const [promos, setPromos] = useState(null);
+  const listPage = useShowMore(promos, []);
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -52,8 +54,8 @@ export default function AdminPromos() {
   return (
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16 }}>
-        <h1>Promo Codes</h1>
-        <p>Discount codes customers enter when paying, e.g. FIRST50</p>
+        <h1>Promo Codes & Coupons</h1>
+        <p>Discount codes customers enter when paying (e.g. FIRST50), or wallet gift coupons they redeem on the Wallet page (e.g. WELCOME500 adds ₦500).</p>
       </div>
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
@@ -69,12 +71,13 @@ export default function AdminPromos() {
           <div className="field" style={{ flex: '1 1 120px' }}>
             <label htmlFor="pt">Type</label>
             <select id="pt" value={form.type} onChange={set('type')}>
-              <option value="FLAT">₦ off</option>
-              <option value="PERCENT">% off</option>
+              <option value="FLAT">₦ off at checkout</option>
+              <option value="PERCENT">% off at checkout</option>
+              <option value="CREDIT">🎟️ Wallet gift coupon (₦ added)</option>
             </select>
           </div>
           <div className="field" style={{ flex: '1 1 120px' }}>
-            <label htmlFor="pv">{form.type === 'PERCENT' ? 'Percent' : 'Amount (₦)'}</label>
+            <label htmlFor="pv">{form.type === 'PERCENT' ? 'Percent' : form.type === 'CREDIT' ? 'Wallet credit (₦)' : 'Amount (₦)'}</label>
             <input id="pv" type="number" min="1" step="any" value={form.value} onChange={set('value')} required />
           </div>
         </div>
@@ -89,10 +92,12 @@ export default function AdminPromos() {
               <input id="pm" type="number" min="0" value={form.maxDiscount} onChange={set('maxDiscount')} placeholder="No max" />
             </div>
           )}
-          <div className="field" style={{ flex: '1 1 140px' }}>
-            <label htmlFor="pmin">Min purchase (₦)</label>
-            <input id="pmin" type="number" min="0" value={form.minAmount} onChange={set('minAmount')} placeholder="0" />
-          </div>
+          {form.type !== 'CREDIT' && (
+            <div className="field" style={{ flex: '1 1 140px' }}>
+              <label htmlFor="pmin">Min purchase (₦)</label>
+              <input id="pmin" type="number" min="0" value={form.minAmount} onChange={set('minAmount')} placeholder="0" />
+            </div>
+          )}
           <div className="field" style={{ flex: '1 1 140px' }}>
             <label htmlFor="pu">Total uses allowed</label>
             <input id="pu" type="number" min="1" value={form.usageLimit} onChange={set('usageLimit')} placeholder="Unlimited" />
@@ -106,7 +111,12 @@ export default function AdminPromos() {
             <input id="pe" type="date" value={form.expiresAt} onChange={set('expiresAt')} />
           </div>
         </div>
-        <div className="field">
+        {form.type === 'CREDIT' && (
+          <p style={{ fontSize: 13, color: 'var(--gold)', margin: '0 0 12px' }}>
+            ⚠️ Each use adds real money to a wallet. Always set “Total uses allowed” (e.g. 100 uses × ₦200 = ₦20,000 maximum cost).
+          </p>
+        )}
+        {form.type !== 'CREDIT' && <div className="field">
           <label>Services (none ticked = all services)</label>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {SERVICES.map((s) => (
@@ -121,10 +131,10 @@ export default function AdminPromos() {
               </label>
             ))}
           </div>
-        </div>
+        </div>}
         <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, marginBottom: 12 }}>
           <input type="checkbox" style={{ width: 'auto' }} checked={form.newCustomersOnly} onChange={set('newCustomersOnly')} />
-          First purchase only (new customers)
+          {form.type === 'CREDIT' ? 'New customers only (no purchase yet)' : 'First purchase only (new customers)'}
         </label>
         <button className="btn" type="submit" disabled={saving}>{saving ? 'Creating…' : 'Create promo code'}</button>
       </form>
@@ -139,12 +149,12 @@ export default function AdminPromos() {
             <tr><th>Code</th><th>Discount</th><th>Rules</th><th>Used</th><th>Given away</th><th>Status</th></tr>
           </thead>
           <tbody>
-            {promos.map((p) => (
+            {listPage.visible.map((p) => (
               <tr key={p.id}>
                 <td><strong>{p.code}</strong>{p.description && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{p.description}</div>}</td>
-                <td>{p.type === 'PERCENT' ? `${Number(p.value)}%${p.maxDiscount ? ` (max ${money(p.maxDiscount)})` : ''}` : money(p.value)}</td>
+                <td>{p.type === 'CREDIT' ? `🎟️ ${money(p.value)} wallet gift` : p.type === 'PERCENT' ? `${Number(p.value)}%${p.maxDiscount ? ` (max ${money(p.maxDiscount)})` : ''}` : money(p.value)}</td>
                 <td style={{ fontSize: 12 }}>
-                  {p.services.length ? p.services.map(label).join(', ') : 'All services'}
+                  {p.type === 'CREDIT' ? 'Redeem on Wallet page' : p.services.length ? p.services.map(label).join(', ') : 'All services'}
                   {Number(p.minAmount) > 0 && ` · min ${money(p.minAmount)}`}
                   {p.newCustomersOnly && ' · first purchase'}
                   {p.expiresAt && ` · until ${new Date(p.expiresAt).toLocaleDateString('en-NG')}`}
@@ -161,6 +171,7 @@ export default function AdminPromos() {
           </tbody>
         </table>
       )}
+      {listPage.more}
     </AdminLayout>
   );
 }

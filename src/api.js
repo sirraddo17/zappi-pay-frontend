@@ -209,7 +209,7 @@ export const startBulkPurchase = (data) => request('/api/vtpass/bulk', { method:
 export const getBulkJob = (id) => request(`/api/vtpass/bulk/${id}`);
 export const getLoyalty = () => request('/api/loyalty');
 export const redeemLoyalty = () => request('/api/loyalty/redeem', { method: 'POST' });
-export const requestAgentAccount = (businessName) => request('/api/agent/request', { method: 'POST', body: JSON.stringify({ businessName }) });
+export const requestAgentAccount = (businessName, shopAddress) => request('/api/agent/request', { method: 'POST', body: JSON.stringify({ businessName, shopAddress }) });
 export const getMyLimits = () => request('/api/account/limits');
 export const updatePreferences = (data) => request('/api/account/preferences', { method: 'PATCH', body: JSON.stringify(data) });
 export const requestAccountDeletion = (data) => request('/api/account/delete-request', { method: 'POST', body: JSON.stringify(data) });
@@ -324,3 +324,13 @@ export async function adminImageUrl(path) {
   if (!res.ok) throw new Error('Could not load the picture.');
   return URL.createObjectURL(await res.blob());
 }
+
+// Security details (date of birth + security question), identity check,
+// agent reject, coupons, funding banks.
+export const getSecurityDetails = () => request('/api/auth/security-details');
+export const saveSecurityDetails = (data) => request('/api/auth/security-details', { method: 'POST', body: JSON.stringify(data) });
+export const adminVerifyIdentity = (id, data) => adminRequest(`/api/admin/customers/${id}/verify-identity`, { method: 'POST', body: JSON.stringify(data) });
+export const adminClearSecurityDetails = (id) => adminRequest(`/api/admin/customers/${id}/clear-security-details`, { method: 'POST' });
+export const rejectAgent = (id, reason) => adminRequest(`/api/admin/customers/${id}/agent-reject`, { method: 'POST', body: JSON.stringify({ reason }) });
+export const redeemCoupon = (code) => request('/api/wallet/coupon', { method: 'POST', body: JSON.stringify({ code }) });
+export const getFundingBanks = () => adminRequest('/api/admin/funding-banks');

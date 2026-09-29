@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import PasswordField from '../components/PasswordField';
+import NewPasswordFields from '../components/NewPasswordFields';
+import SecurityDetailsFields from '../components/SecurityDetailsFields';
+import { passwordIsStrong } from '../lib/passwordRules';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getReferralInfo } from '../api';
@@ -15,6 +17,10 @@ export default function Signup() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [dob, setDob] = useState('');
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
   const [searchParams] = useSearchParams();
   // ?ref= from an invite link wins; otherwise one remembered from an
   // earlier visit to the landing page with a link.
@@ -48,6 +54,9 @@ export default function Signup() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    if (!passwordIsStrong(password)) return setError('Your password needs a capital letter, a small letter, a number and a special character, and at least 8 characters.');
+    if (password !== confirm) return setError("The two passwords don't match.");
+    if (!dob || !question || answer.trim().length < 2) return setError('Fill in your date of birth and security question.');
     setSubmitting(true);
     try {
       await signup({
@@ -56,6 +65,9 @@ export default function Signup() {
         username: username.trim(),
         email: email.trim() || undefined,
         password,
+        dateOfBirth: dob,
+        securityQuestion: question,
+        securityAnswer: answer,
         referralCode: referralCode.trim() || undefined,
       });
       try {
@@ -112,9 +124,11 @@ export default function Signup() {
           <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 0' }}>Add one so you can reset your password by email if you forget it.</p>
         </div>
-        <div className="field">
-          <label htmlFor="password">Password</label>
-          <PasswordField id="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
+        <NewPasswordFields password={password} setPassword={setPassword} confirm={confirm} setConfirm={setConfirm} idPrefix="signup" />
+        <div style={{ borderTop: '1px solid var(--slate-700)', margin: '8px 0 12px', paddingTop: 12 }}>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>🔐 Account protection</div>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '2px 0 10px' }}>If you ever need help with your account, support will ask these to make sure it's really you.</p>
+          <SecurityDetailsFields dob={dob} setDob={setDob} question={question} setQuestion={setQuestion} answer={answer} setAnswer={setAnswer} idPrefix="signup" />
         </div>
         <div className="field">
           <label htmlFor="referralCode">Referral code (optional)</label>
@@ -129,7 +143,7 @@ export default function Signup() {
           {referrer?.name && <p style={{ color: 'var(--green-500)', fontSize: 12, margin: '4px 0 0' }}>✓ Invited by {referrer.name}</p>}
           {referrer?.notFound && <p style={{ color: 'var(--gold)', fontSize: 12, margin: '4px 0 0' }}>We couldn't find that code — check it or leave it empty.</p>}
         </div>
-        <button className="btn" type="submit" disabled={submitting}>
+        <button className="btn" type="submit" disabled={submitting || !passwordIsStrong(password) || password !== confirm}>
           {submitting ? 'Creating account…' : 'Sign Up'}
         </button>
       </form>

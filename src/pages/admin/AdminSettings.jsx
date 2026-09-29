@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
+import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -286,17 +287,9 @@ export default function AdminSettings() {
 
   function saveLimits(e) {
     e.preventDefault();
-    if (manualOn && manualNumber && manualNumber.replace(/\D/g, '').length !== 10) {
-      setStatus((prev) => ({ ...prev, limits: { error: 'Account number must be 10 digits.' } }));
-      return;
-    }
     save(
       'limits',
       {
-        manualFundingEnabled: manualOn,
-        manualBankName: manualBank,
-        manualAccountNumber: manualNumber,
-        manualAccountName: manualName,
         minFundingAmount: Number(minFundingAmount || 0),
         minPurchaseAmount: Number(minPurchaseAmount || 0),
         bankFundingFeePercent: Number(bankFeePercent || 0),
@@ -673,28 +666,7 @@ export default function AdminSettings() {
             <label htmlFor="minPurchaseAmount">Minimum purchase amount (₦)</label>
             <input id="minPurchaseAmount" type="number" step="1" min="0" value={minPurchaseAmount} onChange={(e) => setMinPurchaseAmount(e.target.value)} />
           </div>
-          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '8px 0 14px', paddingTop: 14 }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Manual funding account</div>
-            <p style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 0 }}>
-              Your business account customers transfer to, then submit for approval under Pending Funding. Leave the number empty to hide manual funding.
-            </p>
-            <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
-              <input type="checkbox" checked={manualOn} onChange={(e) => setManualOn(e.target.checked)} style={{ width: 'auto' }} />
-              Offer manual funding
-            </label>
-            <div className="field">
-              <label htmlFor="manualBank">Bank name</label>
-              <input id="manualBank" value={manualBank} onChange={(e) => setManualBank(e.target.value)} placeholder="e.g. Moniepoint" />
-            </div>
-            <div className="field">
-              <label htmlFor="manualNumber">Account number</label>
-              <input id="manualNumber" inputMode="numeric" maxLength={10} value={manualNumber} onChange={(e) => setManualNumber(e.target.value.replace(/\D/g, ''))} />
-            </div>
-            <div className="field">
-              <label htmlFor="manualName">Account name</label>
-              <input id="manualName" value={manualName} onChange={(e) => setManualName(e.target.value)} placeholder="e.g. SIRRADDO VENTURE" />
-            </div>
-          </div>
+          <FundingAccountsPanel />
           <div className="field">
             <label htmlFor="bankFeePercent">Bank transfer funding fee (%)</label>
             <input id="bankFeePercent" type="number" step="0.01" min="0" max="10" value={bankFeePercent} onChange={(e) => setBankFeePercent(e.target.value)} />

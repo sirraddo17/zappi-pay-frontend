@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply, adminImageUrl } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
+import { useShowMore } from '../../components/ShowMore';
 import { CATEGORIES, detectCategory, draftReply } from '../../assistant/replyTemplates';
 
 function fmtMoney(n) {
@@ -205,6 +206,7 @@ export default function AdminSupport() {
   }
 
   const shown = tickets === null ? null : filter === 'ALL' ? tickets : tickets.filter((t) => t.status === filter);
+  const page = useShowMore(shown, [filter]);
   const openCount = tickets ? tickets.filter((t) => t.status === 'OPEN').length : 0;
 
   return (
@@ -252,7 +254,7 @@ export default function AdminSupport() {
               </tr>
             </thead>
             <tbody>
-              {shown.map((t) => (
+              {page.visible.map((t) => (
                 <Fragment key={t.id}>
                   <tr>
                     <td>
@@ -336,6 +338,7 @@ export default function AdminSupport() {
             </tbody>
           </table>
         )}
+        {page.more}
       </div>
     </AdminLayout>
   );

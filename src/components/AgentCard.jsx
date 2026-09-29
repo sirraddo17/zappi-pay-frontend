@@ -11,6 +11,7 @@ export default function AgentCard() {
   const [info, setInfo] = useState(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -28,7 +29,7 @@ export default function AgentCard() {
     setErr('');
     setBusy(true);
     try {
-      await requestAgentAccount(name);
+      await requestAgentAccount(name, address);
       load();
       refreshCustomer?.();
     } catch (error) {
@@ -49,10 +50,16 @@ export default function AgentCard() {
         </p>
       ) : info.agentRequestedAt ? (
         <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>
-          Request received for <strong>{info.agentBusinessName}</strong>. We'll review it and notify you.
+          Request received for <strong>{info.agentBusinessName}</strong>{info.agentShopAddress ? ` (${info.agentShopAddress})` : ''}. We'll review it and notify you.
         </p>
       ) : (
         <>
+          {info.agentRejectedAt && (
+            <p style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--orange, #f97316)' }}>
+              Your last application was not approved{info.agentRejectReason ? `: ${info.agentRejectReason}` : '.'}
+              {Date.now() - new Date(info.agentRejectedAt).getTime() < 7 * 86400000 ? ' You can apply again 7 days after it was declined.' : ' You can apply again now.'}
+            </p>
+          )}
           <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 0 }}>
             Sell airtime, data and bills to your customers and buy at cheaper agent prices{rateText ? ` — ${rateText} extra off` : ''}.
           </p>
@@ -65,7 +72,12 @@ export default function AgentCard() {
                 <label htmlFor="agentName">Business or shop name</label>
                 <input id="agentName" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} required placeholder="e.g. Ade Phones & Accessories" />
               </div>
-              <button type="submit" className="btn" disabled={busy || !name.trim()}>{busy ? 'Sending…' : 'Send application'}</button>
+              <div className="field">
+                <label htmlFor="agentAddr">Shop address</label>
+                <textarea id="agentAddr" rows={2} value={address} onChange={(e) => setAddress(e.target.value)} maxLength={200} required placeholder="e.g. Shop 12, Bodija Market, Bodija, Ibadan, Oyo State" style={{ width: '100%', boxSizing: 'border-box' }} />
+                <small style={{ color: 'var(--slate-400)' }}>Street, area, town and state. We may visit or call to confirm.</small>
+              </div>
+              <button type="submit" className="btn" disabled={busy || !name.trim() || address.trim().length < 10}>{busy ? 'Sending…' : 'Send application'}</button>
             </form>
           )}
         </>

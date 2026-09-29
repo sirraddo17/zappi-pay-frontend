@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminOrders, recheckAdminOrder, settleAdminOrder } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
+import { useShowMore } from '../../components/ShowMore';
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -63,12 +64,15 @@ export default function AdminOrders() {
   const pendingCount = (orders || []).filter((o) => o.status === 'PENDING').length;
 
   const filtered = orders === null ? null : filter === 'ALL' ? orders : orders.filter((o) => o.service === filter);
+  // Last 5 of the chosen service (or all), the rest behind "Show more".
+  const page = useShowMore(filtered, [filter]);
+  const countFor = (v) => (orders || []).filter((o) => v === 'ALL' || o.service === v).length;
 
   return (
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16 }}>
         <h1>Orders</h1>
-        <p>Every purchase across all customers</p>
+        <p>Every purchase across all customers — the newest 5 show first; tap “Show more” for older ones.</p>
       </div>
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
@@ -88,7 +92,7 @@ export default function AdminOrders() {
             className={f.value === filter ? 'btn' : 'btn-secondary btn'}
             style={{ width: 'auto', padding: '6px 14px', fontSize: 13 }}
           >
-            {f.label}
+            {f.label}{orders ? ` (${countFor(f.value)})` : ''}
           </button>
         ))}
       </div>
@@ -111,7 +115,7 @@ export default function AdminOrders() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((o) => (
+              {page.visible.map((o) => (
                 <tr key={o.id}>
                   <td>{o.customer.name}</td>
                   <td>{o.service}</td>
@@ -139,6 +143,7 @@ export default function AdminOrders() {
             </tbody>
           </table>
         )}
+        {page.more}
       </div>
     </AdminLayout>
   );

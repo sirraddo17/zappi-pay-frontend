@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments } from '../api';
+import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import BottomNav from '../components/BottomNav';
 import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
@@ -119,6 +119,14 @@ function BankFunding({ info, onCreated, onCredited }) {
       <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>
         Transfer any amount from any bank app to your account below. It's added to your wallet automatically. {feeText}
       </p>
+      {info.accounts.length === 0 && (
+        <p style={{ fontSize: 13, color: 'var(--gold)', margin: '8px 0' }}>
+          ⚠️ Your bank account{info.pausedCount > 1 ? 's are' : ' is'} temporarily unavailable because of bank network issues. Please use the business account below for now — we'll switch it back on as soon as it's fixed.
+        </p>
+      )}
+      {info.pausedCount > 0 && info.accounts.length > 0 && (
+        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '4px 0' }}>Some of your account numbers are hidden for now because that bank is having network issues. Use the one{info.accounts.length > 1 ? 's' : ''} below.</p>
+      )}
       {info.accounts.map((a) => (
         <div key={a.accountNumber} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: '1px solid var(--slate-800, rgba(255,255,255,0.08))' }}>
           <div>
@@ -131,9 +139,52 @@ function BankFunding({ info, onCreated, onCredited }) {
       ))}
       {error && <p className="error-text" style={{ margin: '8px 0' }}>{error}</p>}
       {message && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '8px 0' }}>{message}</p>}
-      <button className="btn btn-secondary" type="button" style={{ marginTop: 8 }} disabled={busy} onClick={check}>
+      {info.accounts.length > 0 && <button className="btn btn-secondary" type="button" style={{ marginTop: 8 }} disabled={busy} onClick={check}>
         {busy ? 'Checking…' : 'I\'ve sent money — check now'}
-      </button>
+      </button>}
+    </div>
+  );
+}
+
+// Wallet gift coupons from promotions (e.g. "WELCOME500").
+function CouponBox({ onRedeemed }) {
+  const [open, setOpen] = useState(false);
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
+  async function submit(e) {
+    e.preventDefault();
+    setBusy(true);
+    setErr('');
+    setMsg('');
+    try {
+      const r = await redeemCoupon(code.trim());
+      setMsg(`🎉 ₦${Number(r.amount).toLocaleString()} added to your wallet!`);
+      setCode('');
+      onRedeemed();
+    } catch (error) {
+      setErr(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="card">
+      {!open ? (
+        <button type="button" onClick={() => setOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--purple)', fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 14 }}>🎟️ Have a coupon code?</button>
+      ) : (
+        <form onSubmit={submit}>
+          <h2 style={{ marginTop: 0, fontSize: 16 }}>Redeem a coupon</h2>
+          {err && <p className="error-text" style={{ margin: '0 0 8px' }}>{err}</p>}
+          {msg && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 0 8px' }}>{msg}</p>}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input aria-label="Coupon code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="e.g. WELCOME500" maxLength={20} autoCapitalize="characters" style={{ flex: 1 }} />
+            <button className="btn" type="submit" style={{ width: 'auto' }} disabled={busy || code.trim().length < 3}>{busy ? '…' : 'Redeem'}</button>
+          </div>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '6px 0 0' }}>Discount codes for airtime, data and bills are entered when you buy.</p>
+        </form>
+      )}
     </div>
   );
 }
@@ -153,6 +204,7 @@ export default function Wallet() {
   const [submitting, setSubmitting] = useState(false);
   const [bankInfo, setBankInfo] = useState(null);
   const [shownTx, setShownTx] = useState(FIRST_COUNT);
+  const [paidTo, setPaidTo] = useState('');
 
   function load() {
     Promise.all([getWalletBalance(), getWalletTransactions()])
@@ -178,9 +230,13 @@ export default function Wallet() {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
+    if (manualList.length > 1 && !paidTo) {
+      setError('Choose the account you sent the money to.');
+      return;
+    }
     setSubmitting(true);
     try {
-      await submitFundRequest({ amount: Number(amount), reference: reference.trim() || undefined, note: note.trim() || undefined });
+      await submitFundRequest({ amount: Number(amount), reference: reference.trim() || undefined, note: note.trim() || undefined, accountId: paidTo || undefined });
       setAmount('');
       setReference('');
       setNote('');
@@ -193,23 +249,37 @@ export default function Wallet() {
     }
   }
 
-  const manual = appInfo?.manualFunding;
+  const manualList = appInfo?.manualAccounts?.length ? appInfo.manualAccounts : appInfo?.manualFunding ? [{ id: '', ...appInfo.manualFunding }] : [];
+  const manual = manualList[0] || null;
   const manualForm = (
       <form onSubmit={handleSubmit} style={autoFunding ? { marginTop: 12 } : undefined}>
           <h2 style={{ marginTop: 0, fontSize: 16 }}>{autoFunding ? 'Manual funding' : 'Fund Wallet'}</h2>
           <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>
-            Transfer to the account below, then submit the details for approval.
+            {manualList.length > 1
+              ? 'Transfer to any one of the accounts below (if one bank is slow, use another), then tick the one you used and submit for approval.'
+              : 'Transfer to the account below, then submit the details for approval.'}
           </p>
-          {manual && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'rgba(134,59,255,0.1)', border: '1px solid var(--purple)', borderRadius: 10, padding: 12, marginBottom: 14 }}>
-              <div>
-                <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{manual.bankName}</div>
-                <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1 }}>{manual.accountNumber}</div>
-                <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{manual.accountName}</div>
+          {manualList.map((m) => {
+            const picked = manualList.length > 1 && paidTo === m.id;
+            return (
+              <div
+                key={m.id || m.accountNumber}
+                onClick={() => manualList.length > 1 && setPaidTo(m.id)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'rgba(134,59,255,0.1)', border: `${picked ? 2 : 1}px solid ${picked ? 'var(--gold, #FFB830)' : 'var(--purple)'}`, borderRadius: 10, padding: 12, marginBottom: 10, cursor: manualList.length > 1 ? 'pointer' : 'default' }}
+              >
+                {manualList.length > 1 && (
+                  <input type="radio" name="paidTo" aria-label={`I paid into ${m.bankName}`} checked={picked} onChange={() => setPaidTo(m.id)} style={{ width: 'auto', margin: 0 }} />
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{m.bankName}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1 }}>{m.accountNumber}</div>
+                  <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{m.accountName}</div>
+                </div>
+                <CopyButton text={m.accountNumber} />
               </div>
-              <CopyButton text={manual.accountNumber} />
-            </div>
-          )}
+            );
+          })}
+          <div style={{ height: 4 }} />
           <div className="field">
             <label htmlFor="amount">Amount (₦)</label>
             <input id="amount" type="number" min="100" value={amount} onChange={(e) => setAmount(e.target.value)} required />
@@ -251,7 +321,7 @@ export default function Wallet() {
         />
       )}
 
-      {!manual ? null : autoFunding ? (
+      {!manual ? null : autoFunding && !(bankInfo?.accounts && bankInfo.accounts.length === 0 && bankInfo.pausedCount > 0) ? (
         <details className="card">
           <summary style={{ cursor: 'pointer', fontSize: 14 }}>Other way: send to our business account for manual approval</summary>
           {manualForm}
@@ -259,6 +329,8 @@ export default function Wallet() {
       ) : (
         <div className="card">{manualForm}</div>
       )}
+
+      <CouponBox onRedeemed={load} />
 
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>

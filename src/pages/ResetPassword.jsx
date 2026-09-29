@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { resetPassword } from '../api';
 import PasswordField from '../components/PasswordField';
+import NewPasswordFields from '../components/NewPasswordFields';
+import { passwordIsStrong } from '../lib/passwordRules';
 
 // Opened from the link in the password-reset email
 // (/reset-password?token=...).
@@ -18,8 +20,8 @@ export default function ResetPassword() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (!passwordIsStrong(newPassword)) {
+      setError('Your password needs a capital letter, a small letter, a number and a special character, and at least 8 characters.');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -73,14 +75,7 @@ export default function ResetPassword() {
             </p>
           )}
           <form className="card" onSubmit={handleSubmit}>
-            <div className="field">
-              <label htmlFor="newPassword">New password</label>
-              <PasswordField id="newPassword" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
-            </div>
-            <div className="field">
-              <label htmlFor="confirmPassword">Confirm new password</label>
-              <PasswordField id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
-            </div>
+            <NewPasswordFields password={newPassword} setPassword={setNewPassword} confirm={confirmPassword} setConfirm={setConfirmPassword} label="New password" />
             <button className="btn" type="submit" disabled={saving}>
               {saving ? 'Saving…' : 'Save New Password'}
             </button>
