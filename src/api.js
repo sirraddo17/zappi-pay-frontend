@@ -235,7 +235,7 @@ export const getSettings = () => adminRequest('/api/admin/settings');
 export const getAiStatus = () => request('/api/ai/status');
 export const aiChat = (messages) => request('/api/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages }) });
 export const getAdminAiStatus = () => adminRequest('/api/admin/ai/status');
-export const adminAiChat = (messages) => adminRequest('/api/admin/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages }) });
+export const adminAiChat = (messages, images) => adminRequest('/api/admin/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages, images }) });
 export const adminAiDraftReply = (ticketId, instructions) => adminRequest('/api/admin/ai/draft-reply', { method: 'POST', quiet: true, body: JSON.stringify({ ticketId, instructions }) });
 export const testAiConnection = (model) => adminRequest('/api/admin/ai/test', { method: 'POST', body: JSON.stringify({ model }) });
 export const getAiUsage = () => adminRequest('/api/admin/ai/usage');
@@ -316,3 +316,11 @@ export const createAd = (data) => adminRequest('/api/admin/ads', { method: 'POST
 export const updateAd = (id, data) => adminRequest(`/api/admin/ads/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteAd = (id) => adminRequest(`/api/admin/ads/${id}`, { method: 'DELETE' });
 export const getContestFriends = (contestId, customerId) => adminRequest(`/api/admin/contests/${contestId}/friends/${customerId}`);
+export const adminDesignAd = (brief) => adminRequest('/api/admin/ai/design-ad', { method: 'POST', quiet: true, body: JSON.stringify({ brief }) });
+// Admin-only picture (needs the login token, so it can't be a plain <img src>).
+export async function adminImageUrl(path) {
+  const token = localStorage.getItem('zappipay_admin_token');
+  const res = await fetch(`${API_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!res.ok) throw new Error('Could not load the picture.');
+  return URL.createObjectURL(await res.blob());
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminAds, createAd, updateAd, deleteAd, adImageUrl } from '../../api';
 
@@ -152,7 +153,7 @@ export default function AdminAds() {
       <div className="page-header" style={{ padding: 0, marginBottom: 16, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div>
           <h1>In-app Ads</h1>
-          <p>Pictures and announcements on the customers' home screen — new services, Play Store launch, promos</p>
+          <p>Pictures and announcements on the customers' home screen — new services, Play Store launch, promos. No picture yet? Make one in <Link to="/admin/ad-studio" style={{ color: 'var(--purple)' }}>🎨 Ad Studio</Link>.</p>
         </div>
         {!editing && <button className="btn" style={{ width: 'auto' }} onClick={() => setEditing('new')}>+ New advert</button>}
       </div>

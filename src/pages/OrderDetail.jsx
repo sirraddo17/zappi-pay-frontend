@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getOrder, submitSupportTicket } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import RateExperience from '../components/RateExperience';
+import ImageAttach from '../components/ImageAttach';
 import { buyAgainLink } from '../lib/repeat';
 import { shareReceipt, downloadReceipt, extractToken } from '../lib/receipt';
 
@@ -28,6 +29,7 @@ export default function OrderDetail() {
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportMessage, setReportMessage] = useState('');
+  const [reportImages, setReportImages] = useState([]);
   const [reportError, setReportError] = useState('');
   const [reportSuccess, setReportSuccess] = useState('');
   const [submittingReport, setSubmittingReport] = useState(false);
@@ -82,8 +84,9 @@ export default function OrderDetail() {
     setReportSuccess('');
     setSubmittingReport(true);
     try {
-      await submitSupportTicket({ message: reportMessage.trim(), orderId: id });
+      await submitSupportTicket({ message: reportMessage.trim(), orderId: id, images: reportImages.length ? reportImages : undefined });
       setReportMessage('');
+      setReportImages([]);
       setReportOpen(false);
       setReportSuccess('Your report has been submitted. Our team will get back to you.');
     } catch (err) {
@@ -235,6 +238,7 @@ export default function OrderDetail() {
               required
               style={{ width: '100%', boxSizing: 'border-box' }}
             />
+            <ImageAttach value={reportImages} onChange={setReportImages} label="📎 Add a screenshot (e.g. bank alert)" />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn" type="submit" disabled={submittingReport}>

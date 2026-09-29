@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply } from '../../api';
+import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply, adminImageUrl } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { CATEGORIES, detectCategory, draftReply } from '../../assistant/replyTemplates';
 
@@ -148,6 +148,28 @@ function ReplyPanel({ ticket, onSent, onClose, aiOn }) {
   );
 }
 
+// Picture a customer attached (loaded with the admin login).
+function TicketImage({ id }) {
+  const [url, setUrl] = useState('');
+  const [big, setBig] = useState(false);
+  useEffect(() => {
+    let u = '';
+    adminImageUrl(`/api/admin/support/attachments/${id}`).then((x) => { u = x; setUrl(x); }).catch(() => {});
+    return () => { if (u) URL.revokeObjectURL(u); };
+  }, [id]);
+  if (!url) return <span style={{ display: 'inline-block', width: 56, height: 56, borderRadius: 8, background: 'var(--slate-700)' }} />;
+  return (
+    <>
+      <img src={url} alt="Customer attachment" onClick={() => setBig(true)} style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, cursor: 'zoom-in', border: '1px solid var(--slate-700)' }} />
+      {big && (
+        <div role="dialog" aria-label="Attachment" onClick={() => setBig(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, cursor: 'zoom-out' }}>
+          <img src={url} alt="Customer attachment, full size" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 10 }} />
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function AdminSupport() {
   const [tickets, setTickets] = useState(null);
   const [error, setError] = useState('');
@@ -239,6 +261,11 @@ export default function AdminSupport() {
                     </td>
                     <td style={{ maxWidth: 280 }}>
                       {t.message}
+                      {t.attachments?.length > 0 && (
+                        <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                          {t.attachments.map((a) => <TicketImage key={a.id} id={a.id} />)}
+                        </div>
+                      )}
                       {t.adminReply && (
                         <div style={{ marginTop: 6, fontSize: 12, color: 'var(--slate-400)' }}>
                           Replied {t.repliedAt ? fmtDate(t.repliedAt) : ''}

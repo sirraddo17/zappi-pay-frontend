@@ -24,6 +24,7 @@ const TABS = [
   { to: '/admin/promos', label: 'Promo Codes' },
   { to: '/admin/contests', label: '🏆 Referral Contests' },
   { to: '/admin/ads', label: '📣 In-app Ads' },
+  { to: '/admin/ad-studio', label: '🎨 Ad Studio' },
   { to: '/admin/feedback', label: '⭐ Feedback' },
   { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit-log', label: 'Audit Log' },

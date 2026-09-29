@@ -69,6 +69,7 @@ const AdminAssistant = lazy(() => import('./pages/admin/AdminAssistant'));
 const AdminNotices = lazy(() => import('./pages/admin/AdminNotices'));
 const AdminContests = lazy(() => import('./pages/admin/AdminContests'));
 const AdminAds = lazy(() => import('./pages/admin/AdminAds'));
+const AdminAdStudio = lazy(() => import('./pages/admin/AdminAdStudio'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 
 
@@ -152,6 +153,7 @@ export default function App() {
           <Route path="/admin/assistant" element={<RequireAdmin><AdminAssistant /></RequireAdmin>} />
           <Route path="/admin/contests" element={<RequireAdmin><AdminContests /></RequireAdmin>} />
           <Route path="/admin/ads" element={<RequireAdmin><AdminAds /></RequireAdmin>} />
+          <Route path="/admin/ad-studio" element={<RequireAdmin><AdminAdStudio /></RequireAdmin>} />
           <Route path="/admin/feedback" element={<RequireAdmin><AdminFeedback /></RequireAdmin>} />
           <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 

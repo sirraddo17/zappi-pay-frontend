@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { adminAiChat, getAdminAiStatus } from '../../api';
+import ImageAttach from '../../components/ImageAttach';
 
 const SUGGESTIONS = [
   'How did we do today?',
@@ -18,6 +19,7 @@ export default function AdminAssistant() {
   const [status, setStatus] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [images, setImages] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const endRef = useRef(null);
@@ -31,20 +33,23 @@ export default function AdminAssistant() {
   }, [messages, busy]);
 
   async function ask(text) {
-    const q = text.trim();
+    const q = text.trim() || (images.length ? 'What does this picture show? Check it against our records if relevant.' : '');
     if (!q || busy) return;
-    const next = [...messages, { role: 'user', content: q }];
+    const pics = images;
+    const next = [...messages, { role: 'user', content: q, pics }];
     setMessages(next);
     setInput('');
+    setImages([]);
     setBusy(true);
     setError('');
     try {
-      const res = await adminAiChat(next);
+      const res = await adminAiChat(next.map(({ role, content }) => ({ role, content })), pics.length ? pics : undefined);
       setMessages((m) => [...m, { role: 'assistant', content: res.reply }]);
     } catch (err) {
       setError(err.message || 'The assistant could not answer.');
       setMessages(messages);
       setInput(q);
+      setImages(pics);
     } finally {
       setBusy(false);
     }
@@ -103,6 +108,11 @@ export default function AdminAssistant() {
                   whiteSpace: 'pre-wrap',
                 }}
               >
+                {m.pics?.length > 0 && (
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
+                    {m.pics.map((src, j) => <img key={j} src={src} alt="" style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 8 }} />)}
+                  </div>
+                )}
                 {m.content}
               </div>
             </div>
@@ -125,10 +135,11 @@ export default function AdminAssistant() {
             aria-label="Question"
             disabled={off}
           />
-          <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 18px' }} disabled={off || busy || !input.trim()}>
+          <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 18px' }} disabled={off || busy || (!input.trim() && !images.length)}>
             Ask
           </button>
         </form>
+        {!off && <ImageAttach value={images} onChange={setImages} label="📷 Add a picture (e.g. a customer's screenshot)" />}
         <p style={{ color: 'var(--slate-400)', fontSize: 11, margin: '8px 0 0' }}>AI can make mistakes. Double-check numbers on the Overview and Orders pages before acting on them.</p>
       </div>
     </AdminLayout>

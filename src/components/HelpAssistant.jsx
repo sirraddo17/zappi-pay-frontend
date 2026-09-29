@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { submitSupportTicket, getOrders, getAiStatus, aiChat } from '../api';
 import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../assistant/knowledge';
 import { useAppInfo } from './ServiceNotices';
+import ImageAttach from './ImageAttach';
 
 // Floating "Help" chat for logged-in customers. Quick topics are
 // rule-based (assistant/knowledge.js). When the AI assistant is on in
@@ -27,6 +28,7 @@ export default function HelpAssistant() {
   const [misses, setMisses] = useState(0);
   const [ticketMode, setTicketMode] = useState(false);
   const [ticketText, setTicketText] = useState('');
+  const [ticketImages, setTicketImages] = useState([]);
   const [ticketOrderId, setTicketOrderId] = useState('');
   const [orders, setOrders] = useState([]);
   const [sending, setSending] = useState(false);
@@ -143,7 +145,8 @@ export default function HelpAssistant() {
     setSending(true);
     setTicketError('');
     try {
-      await submitSupportTicket({ message: ticketText.trim(), orderId: ticketOrderId || undefined });
+      await submitSupportTicket({ message: ticketText.trim(), orderId: ticketOrderId || undefined, images: ticketImages.length ? ticketImages : undefined });
+      setTicketImages([]);
       setTicketMode(false);
       setTicketText('');
       setTicketOrderId('');
@@ -282,6 +285,7 @@ export default function HelpAssistant() {
                 resize: 'vertical',
               }}
             />
+            <ImageAttach value={ticketImages} onChange={setTicketImages} />
             {orders.length > 0 && (
               <select value={ticketOrderId} onChange={(e) => setTicketOrderId(e.target.value)} style={{ marginTop: 6, fontSize: 13 }}>
                 <option value="">Not about a specific order</option>
