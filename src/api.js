@@ -345,6 +345,11 @@ export const rejectEscalation = (id, note) => adminRequest(`/api/admin/escalatio
 export const reportOrderToVtpass = (id, note) => adminRequest(`/api/admin/orders/${id}/vtpass-escalate`, { method: 'POST', body: JSON.stringify({ note }) });
 export const checkCustomerFunding = (id, reference) => adminRequest(`/api/admin/customers/${id}/check-funding`, { method: 'POST', body: JSON.stringify({ reference }) });
 export const setAdminRole = (id, role) => adminRequest(`/api/admin/admins/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
+export const getChallenges = () => request('/api/challenges');
+export const getAdminChallenges = () => adminRequest('/api/admin/challenges');
+export const previewChallenge = (data) => adminRequest('/api/admin/challenges/preview', { method: 'POST', body: JSON.stringify(data) });
+export const createChallenge = (data) => adminRequest('/api/admin/challenges', { method: 'POST', body: JSON.stringify(data) });
+export const updateChallenge = (id, data) => adminRequest(`/api/admin/challenges/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 export const getSavings = () => request('/api/savings');
 export const saveToSavings = (amount) => request('/api/savings/deposit', { method: 'POST', body: JSON.stringify({ amount }) });
 export const withdrawSavings = (amount) => request('/api/savings/withdraw', { method: 'POST', body: JSON.stringify({ amount }) });

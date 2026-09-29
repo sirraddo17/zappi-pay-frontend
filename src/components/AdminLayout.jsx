@@ -23,6 +23,7 @@ const TABS = [
   { to: '/admin/broadcasts', label: 'Broadcasts' },
   { to: '/admin/notices', label: 'Service Notices' },
   { to: '/admin/promos', label: 'Promo Codes' },
+  { to: '/admin/challenges', label: 'Challenges' },
   { to: '/admin/contests', label: '🏆 Referral Contests' },
   { to: '/admin/ads', label: '📣 In-app Ads' },
   { to: '/admin/ad-studio', label: '🎨 Ad Studio' },
