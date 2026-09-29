@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import TestModeBanner from '../components/TestModeBanner';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo } from '../api';
@@ -354,6 +355,7 @@ export default function Buy() {
         <p>Pay from your wallet balance</p>
       </div>
 
+      <TestModeBanner />
       <ServiceNotices service={config.backendService} />
 
       {discountPct > 0 && (

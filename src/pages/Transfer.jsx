@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import TestModeBanner from '../components/TestModeBanner';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { lookupRecipient, sendTransfer } from '../api';
@@ -106,6 +107,8 @@ export default function Transfer() {
         <h1>Send Money</h1>
         <p>Transfer to another ZappiPay user or a bank account</p>
       </div>
+
+      <TestModeBanner />
 
       <div style={{ display: 'flex', gap: 8, margin: '0 16px 16px' }}>
         <button

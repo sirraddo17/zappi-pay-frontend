@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import TestModeBanner from '../components/TestModeBanner';
 import { Link } from 'react-router-dom';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
@@ -304,6 +305,8 @@ export default function Wallet() {
         <h1>Wallet</h1>
         <p>Fund your wallet and track your transactions</p>
       </div>
+
+      <TestModeBanner />
 
       <div className="card stat-card">
         <div className="label">Wallet Balance</div>

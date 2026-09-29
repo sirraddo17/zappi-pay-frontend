@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import TestModeBanner from '../components/TestModeBanner';
 import NewPasswordFields from '../components/NewPasswordFields';
 import SecurityDetailsFields from '../components/SecurityDetailsFields';
 import { passwordIsStrong } from '../lib/passwordRules';
@@ -92,6 +93,8 @@ export default function Signup() {
         <h1>Create your account</h1>
         <p>Get started with ZAPPI PAY</p>
       </div>
+
+      <TestModeBanner />
 
       {error && <p className="error-text">{error}</p>}
 

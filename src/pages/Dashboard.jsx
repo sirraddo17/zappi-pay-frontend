@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import TestModeBanner from '../components/TestModeBanner';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { cached } from '../lib/cache';
@@ -200,6 +201,8 @@ export default function Dashboard() {
           Fund Wallet
         </Link>
       </div>
+
+      <TestModeBanner style={{ margin: '16px 16px' }} />
 
       <AdsCarousel />
       <AdPopup />

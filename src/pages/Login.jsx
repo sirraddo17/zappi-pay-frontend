@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import TestModeBanner from '../components/TestModeBanner';
 import PasswordField from '../components/PasswordField';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -176,6 +177,8 @@ export default function Login() {
         <h1>Welcome back</h1>
         <p>Log in to ZAPPI PAY</p>
       </div>
+
+      <TestModeBanner />
 
       {error && <p className="error-text">{error}</p>}
 
