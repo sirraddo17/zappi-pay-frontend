@@ -72,6 +72,7 @@ export default function AdminSettings() {
   const [vtpassSecretKey, setVtpassSecretKey] = useState('');
   const [vtpassPublicKey, setVtpassPublicKey] = useState('');
   const [markupByService, setMarkupByService] = useState(toServiceMap({}));
+  const [markupCapByService, setMarkupCapByService] = useState({});
   const [discountByService, setDiscountByService] = useState(toServiceMap({}));
   const [monnifyMode, setMonnifyMode] = useState('sandbox');
   const [monnifyApiKey, setMonnifyApiKey] = useState('');
@@ -147,6 +148,7 @@ export default function AdminSettings() {
         setVtpassSecretKey(s.vtpassSecretKey || '');
         setVtpassPublicKey(s.vtpassPublicKey || '');
         setMarkupByService(toServiceMap(s.markupPercentByService));
+        setMarkupCapByService(Object.fromEntries(Object.entries(s.markupCapByService || {}).map(([k, v]) => [k, String(v)])));
         setDiscountByService(toServiceMap(s.discountPercentByService));
         setMonnifyMode(s.monnifyMode || 'sandbox');
         setMonnifyApiKey(s.monnifyApiKey || '');
@@ -275,7 +277,8 @@ export default function AdminSettings() {
 
   function saveMarkup(e) {
     e.preventDefault();
-    save('markup', { markupPercentByService: toNumberMap(markupByService) }, 'Markup saved.');
+    const caps = Object.fromEntries(Object.entries(markupCapByService).map(([k, v]) => [k, Number(v || 0)]).filter(([, v]) => v > 0));
+    save('markup', { markupPercentByService: toNumberMap(markupByService), markupCapByService: caps }, 'Markup saved.');
   }
 
   function saveDiscount(e) {
@@ -616,21 +619,47 @@ export default function AdminSettings() {
 
       {!loading && !loadError && tab === 'markup' && (
         <form className="card" style={cardStyle} onSubmit={saveMarkup}>
-          <SectionHeader title="Markup per service (%)" hint="Added on top of VTpass's own price for that service." />
+          <SectionHeader title="Markup per service (%)" hint="Added on top of VTpass's own price for that service. Set a maximum so big bills (e.g. DStv Premium) don't get an expensive charge — e.g. 1% but never more than ₦100." />
           <Status state={status.markup} />
-          {SERVICES.map((service) => (
-            <div className="field" key={service}>
-              <label htmlFor={`markup-${service}`}>{serviceLabel(service)}</label>
-              <input
-                id={`markup-${service}`}
-                type="number"
-                step="0.1"
-                min="0"
-                value={markupByService[service]}
-                onChange={(e) => setMarkupByService((prev) => ({ ...prev, [service]: e.target.value }))}
-              />
-            </div>
-          ))}
+          {SERVICES.map((service) => {
+            const pct = Number(markupByService[service] || 0);
+            const cap = Number(markupCapByService[service] || 0);
+            const on = (amt) => Math.round(cap > 0 ? Math.min((amt * pct) / 100, cap) : (amt * pct) / 100);
+            return (
+              <div key={service} style={{ marginBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div className="field" style={{ flex: '1 1 160px', margin: 0 }}>
+                    <label htmlFor={`markup-${service}`}>{serviceLabel(service)} (%)</label>
+                    <input
+                      id={`markup-${service}`}
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={markupByService[service]}
+                      onChange={(e) => setMarkupByService((prev) => ({ ...prev, [service]: e.target.value }))}
+                    />
+                  </div>
+                  <div className="field" style={{ flex: '1 1 160px', margin: 0 }}>
+                    <label htmlFor={`markupcap-${service}`}>Max per purchase (₦)</label>
+                    <input
+                      id={`markupcap-${service}`}
+                      type="number"
+                      step="1"
+                      min="0"
+                      placeholder="No maximum"
+                      value={markupCapByService[service] || ''}
+                      onChange={(e) => setMarkupCapByService((prev) => ({ ...prev, [service]: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                {pct > 0 && (
+                  <small style={{ color: 'var(--slate-400)' }}>
+                    Customer pays extra: ₦{on(1000).toLocaleString()} on ₦1,000 · ₦{on(10000).toLocaleString()} on ₦10,000 · ₦{on(30000).toLocaleString()} on ₦30,000
+                  </small>
+                )}
+              </div>
+            );
+          })}
           {saveButton('markup', 'Save Markup')}
         </form>
       )}

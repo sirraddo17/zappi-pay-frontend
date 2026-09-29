@@ -94,7 +94,9 @@ const SERVICE_CONFIG = {
 function priceFor(base, service, pricing) {
   const markup = Number(pricing?.markupPercentByService?.[service] || 0);
   const discountPct = Math.min(100, Math.max(0, Number(pricing?.discountPercentByService?.[service] || 0)));
-  const markedUp = Math.round(Number(base || 0) * (1 + markup / 100));
+  const cap = Number(pricing?.markupCapByService?.[service] || 0);
+  const raw = (Number(base || 0) * markup) / 100;
+  const markedUp = Math.round(Number(base || 0) + (cap > 0 ? Math.min(raw, cap) : raw));
   const discount = Math.round(markedUp * (discountPct / 100));
   return { markedUp, discount, discountPct, total: Math.max(0, markedUp - discount) };
 }
