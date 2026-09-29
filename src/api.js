@@ -375,6 +375,7 @@ export const getAdminChallenges = () => adminRequest('/api/admin/challenges');
 export const previewChallenge = (data) => adminRequest('/api/admin/challenges/preview', { method: 'POST', body: JSON.stringify(data) });
 export const createChallenge = (data) => adminRequest('/api/admin/challenges', { method: 'POST', body: JSON.stringify(data) });
 export const updateChallenge = (id, data) => adminRequest(`/api/admin/challenges/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const getServiceStatus = () => fetch(`${API_URL}/api/status`).then((r) => r.json());
 export const getSessions = () => request('/api/security/sessions');
 export const endSession = (id) => request(`/api/security/sessions/${id}`, { method: 'DELETE' });
 export const endOtherSessions = () => request('/api/security/sessions/logout-others', { method: 'POST' });

@@ -273,6 +273,10 @@ export default function Profile() {
         >
           💬 Message support in the app
         </button>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', margin: '10px 0 4px', fontSize: 13 }}>
+          <Link to="/help" style={{ color: 'var(--purple)', textDecoration: 'none' }}>❓ Help Centre</Link>
+          <Link to="/status" style={{ color: 'var(--purple)', textDecoration: 'none' }}>🟢 Service status</Link>
+        </div>
         <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '-4px 0 10px' }}>Problems, account changes, suggestions — anything. You can add screenshots. We reply here and in your notifications.</p>
         <a
           href={`https://wa.me/${appInfo?.supportWhatsapp || WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello ZappiPay, I need help with')}`}

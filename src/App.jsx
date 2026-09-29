@@ -40,6 +40,8 @@ const Bulk = lazy(() => import('./pages/Bulk'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Legal = lazy(() => import('./pages/Legal'));
+const Help = lazy(() => import('./pages/Help'));
+const Status = lazy(() => import('./pages/Status'));
 const DeleteAccountInfo = lazy(() => import('./pages/DeleteAccountInfo'));
 const Transfer = lazy(() => import('./pages/Transfer'));
 const PayLink = lazy(() => import('./pages/PayLink'));
@@ -132,6 +134,8 @@ export default function App() {
           <Route path="/orders/:id" element={<RequireCustomer><OrderDetail /></RequireCustomer>} />
           <Route path="/notifications" element={<RequireCustomer><Notifications /></RequireCustomer>} />
           <Route path="/legal/:doc" element={<Legal />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/status" element={<Status />} />
           <Route path="/delete-account" element={<DeleteAccountInfo />} />
           <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
           <Route path="/pay/:username" element={<PayLink />} />

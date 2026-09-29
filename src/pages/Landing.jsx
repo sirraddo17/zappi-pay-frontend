@@ -287,6 +287,8 @@ export default function Landing() {
                     WhatsApp us
                   </a>
                 </li>
+                <li><Link to="/help">Help Centre</Link></li>
+                <li><Link to="/status">Service status</Link></li>
                 <li><Link to="/legal/contact">Contact page</Link></li>
               </ul>
             </div>

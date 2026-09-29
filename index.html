@@ -15,6 +15,11 @@
       // subdomain is what lets "ZP Admin" sit next to the customer app.
       // There, every page is an admin page ("/" → "/admin").
       (function () {
+        // status.zappipay.com.ng shows the public status page.
+        if (location.hostname.indexOf('status.') === 0 && location.pathname !== '/status') {
+          location.replace('/status');
+          return;
+        }
         var isAdminHost = location.hostname.indexOf('admin.') === 0;
         if (isAdminHost && location.pathname.indexOf('/admin') !== 0) {
           location.replace('/admin' + location.search);

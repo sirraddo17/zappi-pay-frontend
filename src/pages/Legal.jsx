@@ -31,26 +31,37 @@ const DOCS = {
     title: 'Terms & Conditions',
     body: (
       <>
-        <p>These Terms & Conditions ("Terms") govern your use of the ZappiPay mobile and web application ("the App"), operated by Sirraddo Venture ("we", "us", "our"). By creating an account or using the App, you agree to these Terms.</p>
+        <p style={{ color: 'var(--slate-400)' }}>Last updated: 30 September 2026</p>
+        <p>These Terms & Conditions ("Terms") govern your use of the ZAPPI PAY mobile and web application ("the App"), operated by Sirraddo Venture, a business registered with the Corporate Affairs Commission of Nigeria (BN 7524870) ("we", "us", "our"). By creating an account or using the App, you agree to these Terms and to our <Link to="/legal/privacy" style={{ color: 'var(--purple)' }}>Privacy Policy</Link>.</p>
         <h3>1. Eligibility</h3>
-        <p>You must be at least 18 years old, or the age of majority in your jurisdiction, and legally able to enter into a binding agreement to use ZappiPay.</p>
-        <h3>2. Your Account</h3>
-        <p>You are responsible for keeping your login details (password and, where applicable, username) confidential. You must provide accurate information when signing up and keep it up to date. You're responsible for all activity carried out from your account.</p>
-        <h3>3. Wallet Funding and Balance</h3>
-        <p>Your ZappiPay wallet balance is funded by you and used solely to pay for services within the App. Funds in your wallet are not interest-bearing and do not constitute a bank deposit.</p>
-        <h3>4. Service Purchases</h3>
-        <p>When you buy airtime, data, electricity, cable TV, education pins, internet, or bet funding through the App, we route the transaction to our licensed payment/billing partner for delivery. Once a service is successfully delivered (e.g. airtime credited, token generated), the transaction is final and non-refundable, except where the purchase fails to deliver, in which case the amount is refunded to your wallet.</p>
-        <h3>5. Prohibited Use</h3>
-        <p>You agree not to use ZappiPay for any unlawful purpose, to defraud us or any third party, or to attempt to gain unauthorized access to any part of the App or other users' accounts.</p>
-        <h3>6. Suspension and Termination</h3>
-        <p>We may suspend or close your account if we reasonably believe you have violated these Terms, engaged in fraud, or if required by law or regulation.</p>
-        <h3>7. Limitation of Liability</h3>
-        <p>ZappiPay is provided "as is". While we work to keep the service reliable, we are not liable for losses arising from service interruptions, third-party payment or network provider failures, or incorrect details entered by you when making a purchase.</p>
-        <h3>8. Changes to These Terms</h3>
-        <p>We may update these Terms from time to time. Continued use of the App after changes take effect means you accept the updated Terms.</p>
-        <h3>9. Governing Law</h3>
+        <p>You must be at least 18 years old and legally able to enter into a binding agreement. You must give accurate information when you sign up, including your name, phone number and date of birth, and keep it up to date.</p>
+        <h3>2. Your account and security</h3>
+        <p>You are responsible for keeping your password, transaction PIN, security answer and devices safe, and for all activity on your account. Never share your password, PIN or one-time codes — our staff will never ask for them. For your protection we may lock password login after repeated wrong attempts, log you out after a period of inactivity, ask for your PIN or fingerprint to confirm payments, and hold or review unusual transactions. You can see and log out the devices signed in to your account from the Security page. Tell us straight away if you think someone else has access to your account.</p>
+        <h3>3. Wallet funding and balance</h3>
+        <p>Your wallet is funded by bank transfer to the account numbers shown in the App (provided by our licensed payment partner) or by manual transfer to our business account for approval. A funding fee may apply; it is shown before you send money. Your wallet balance is used to pay for services in the App and to send money to other users or bank accounts. Wallet balances do not earn interest and are not a bank deposit. We may ask you to verify your identity (for example with your BVN or NIN) before you can use some features or higher limits, and daily limits may apply.</p>
+        <h3>4. Purchases</h3>
+        <p>When you buy airtime, data, electricity, cable TV, exam PINs, internet or bet funding, we pass the request to our licensed billing partner (VTpass) for delivery. Prices, including any service charge, are shown before you pay. Please check the phone number, meter number, smartcard or account ID before paying: once a service is delivered it cannot be reversed or refunded. If a purchase fails or is not delivered, the amount is refunded to your wallet. We may pause some or all services during maintenance or when a provider is unavailable.</p>
+        <h3>5. Sending money</h3>
+        <p>Transfers to other ZAPPI PAY users are instant and free. Transfers to bank accounts are processed through our licensed payment partner (Monnify); the fee is shown before you confirm. Always check the account name we display before confirming — once a transfer is completed it cannot be recalled by us. Transfers that fail are returned to your wallet. We may hold a transfer for review where we suspect fraud.</p>
+        <h3>6. Rewards, promotions and challenges</h3>
+        <p>We may offer cashback, loyalty points, referral bonuses, promo codes, wallet coupons, referral contests and challenges. Each has its own rules shown in the App (for example eligibility, minimum amounts, limits, budgets and end dates). Rewards have no cash value until credited to your wallet, may be reduced so they stay within our limits, and can be changed or ended at any time. Rewards obtained through fraud, fake or duplicate accounts, or abuse of a promotion may be cancelled or reversed, and the account suspended.</p>
+        <h3>7. Agents</h3>
+        <p>Approved agents may get agent prices to resell our services. Agent status can be removed if these Terms are broken or the account is misused.</p>
+        <h3>8. Support and staff access</h3>
+        <p>To help you, our support staff can view your account details and transaction history. Sensitive actions such as password resets, refunds and wallet adjustments need approval from an owner and are recorded. We may ask you to confirm your identity (for example your date of birth and security question) before helping.</p>
+        <h3>9. Prohibited use</h3>
+        <p>You must not use ZAPPI PAY for anything unlawful, including fraud, money laundering or financing terrorism; to deceive or harm other users; to create accounts in someone else’s name; or to interfere with or gain unauthorised access to the App.</p>
+        <h3>10. Suspension and closure</h3>
+        <p>We may freeze, restrict or close an account if we reasonably believe these Terms have been broken, to prevent fraud, or where required by law or a regulator. You can close your account from Profile at any time once your wallet balance has been spent or withdrawn.</p>
+        <h3>11. Liability</h3>
+        <p>We work to keep ZAPPI PAY available and accurate, but the App relies on network operators, billers, banks and payment partners. As far as the law allows, we are not liable for losses caused by their outages or delays, by incorrect details you enter, or by unauthorised use of your account resulting from you sharing your login details. Nothing in these Terms limits rights you have under Nigerian consumer protection law.</p>
+        <h3>12. Complaints</h3>
+        <p>If something goes wrong, report it from the purchase receipt ("Report Issue") or message support in the App. We aim to reply within 24 hours. If you’re not satisfied, email support@zappipay.com.ng.</p>
+        <h3>13. Changes</h3>
+        <p>We may update these Terms. We’ll tell you about important changes in the App before they take effect. Continuing to use the App after that means you accept the updated Terms.</p>
+        <h3>14. Governing law</h3>
         <p>These Terms are governed by the laws of the Federal Republic of Nigeria.</p>
-        <p>If you have questions about these Terms, contact us at support@zappipay.com.ng.</p>
+        <p>Questions about these Terms: support@zappipay.com.ng.</p>
       </>
     ),
   },
@@ -58,22 +69,48 @@ const DOCS = {
     title: 'Privacy Policy',
     body: (
       <>
-        <p>This Privacy Policy explains how Sirraddo Venture ("we", "us", "our") collects, uses, and protects your information when you use ZappiPay.</p>
-        <h3>1. Information We Collect</h3>
-        <p>We collect information you provide directly, such as your name, phone number, email address, and (if you choose to provide it) identity verification details like BVN or NIN. We also collect transaction data, such as the services you purchase, amounts, and timestamps, and basic device/usage information to keep the App secure and working properly.</p>
-        <h3>2. How We Use Your Information</h3>
-        <p>We use your information to create and manage your account, process wallet funding and purchases, verify your identity where required for certain features, send you transaction receipts and notifications, respond to support requests, and improve and secure the App.</p>
-        <h3>3. Sharing Your Information</h3>
-        <p>We share the minimum information necessary with our payment and billing partners (such as VTpass and our banking/payment providers) to process your transactions. We do not sell your personal information to third parties. We may disclose information where required by law or to protect the rights, safety, or property of ZappiPay, our users, or others.</p>
-        <h3>4. Data Security</h3>
-        <p>We use reasonable technical and organizational measures to protect your information, including encrypted connections and access controls. No system is completely secure, and we encourage you to keep your login details private.</p>
-        <h3>5. Data Retention</h3>
-        <p>We retain your information for as long as your account is active and for a reasonable period afterward, as needed to comply with legal, regulatory, and record-keeping obligations.</p>
-        <h3>6. Your Choices</h3>
-        <p>You can review and update your profile information in the App at any time. To request account closure or data deletion, contact us using the details below, subject to any records we are legally required to keep.</p>
-        <h3>7. Changes to This Policy</h3>
-        <p>We may update this Privacy Policy from time to time. We'll notify you of material changes through the App.</p>
-        <p>Questions about this Privacy Policy can be sent to support@zappipay.com.ng.</p>
+        <p style={{ color: 'var(--slate-400)' }}>Last updated: 30 September 2026</p>
+        <p>This Privacy Policy explains how Sirraddo Venture ("we", "us", "our"), the operator of ZAPPI PAY, collects, uses, shares and protects your personal data, and your rights under the Nigeria Data Protection Act 2023 (NDPA). We are the data controller for the personal data described here.</p>
+        <h3>1. Data we collect</h3>
+        <ul>
+          <li><b>Account details:</b> name, phone number, email, username, date of birth, profile photo (if you add one), and a security question with a scrambled (hashed) answer.</li>
+          <li><b>Login and security data:</b> scrambled password and PIN, fingerprint/Face ID keys (the fingerprint itself never leaves your phone), device names, login history and times, and scrambled network identifiers used to spot fraud.</li>
+          <li><b>Identity verification:</b> if you request a personal account number, your BVN or NIN is sent directly to our payment partner to verify you. We keep only which type was verified, not the number.</li>
+          <li><b>Transactions:</b> wallet funding, purchases (including phone, meter and smartcard numbers you pay for), transfers, bank account details you send money to, rewards and refunds.</li>
+          <li><b>Support:</b> messages and pictures you send us, and messages to the in-app assistant.</li>
+          <li><b>Notifications:</b> push notification tokens if you turn notifications on.</li>
+        </ul>
+        <h3>2. Why we use it (and our legal basis)</h3>
+        <ul>
+          <li>To provide the App: create your account, process funding, purchases and transfers, send receipts (<i>performance of our contract with you</i>).</li>
+          <li>To keep accounts and money safe: identity checks, fraud and abuse prevention, login protection (<i>legitimate interests and legal obligations</i>).</li>
+          <li>To meet legal, tax, accounting and anti-money-laundering requirements (<i>legal obligation</i>).</li>
+          <li>To give support and improve the App (<i>legitimate interests</i>).</li>
+          <li>To send promotions and push notifications, which you can switch off at any time (<i>consent</i>).</li>
+        </ul>
+        <p>We do not make decisions that have legal or similarly significant effects on you based solely on automated processing, except automatic fraud checks that can hold a transaction for human review.</p>
+        <h3>3. Who we share it with</h3>
+        <p>We share only what each partner needs:</p>
+        <ul>
+          <li><b>VTpass (Broadshift Technologies)</b> — to deliver airtime, data, bills and PINs.</li>
+          <li><b>Monnify (Moniepoint)</b> — personal account numbers, identity verification, bank transfers.</li>
+          <li><b>Service providers</b> that host and run the App for us: database and server hosting (Neon, Render, Vercel), email delivery (Resend), and, if you use the in-app assistant, our AI provider (Anthropic).</li>
+          <li><b>Authorities</b>, where the law requires it or to prevent fraud or protect users.</li>
+        </ul>
+        <p>We do not sell your personal data.</p>
+        <h3>4. Transfers outside Nigeria</h3>
+        <p>Some of our hosting, email and AI providers store or process data outside Nigeria (for example in the United States). Where this happens we rely on the safeguards the NDPA allows, such as contractual data protection commitments from those providers, and we transfer only what is needed.</p>
+        <h3>5. How long we keep it</h3>
+        <p>We keep your data while your account is open. When you close your account we remove or anonymise your personal details, but keep transaction records for as long as Nigerian law requires for financial and tax records. Login history and security logs are kept for a limited period.</p>
+        <h3>6. Security</h3>
+        <p>We use encrypted connections, scrambled (hashed) passwords, PINs and security answers, staff access controls with owner approval for sensitive actions, audit logs, login lockouts and automatic logout. No system is perfectly secure; if a breach puts your data at risk we will notify you and the Nigeria Data Protection Commission as the law requires.</p>
+        <h3>7. Your rights</h3>
+        <p>Under the NDPA you can ask to: see the data we hold about you; correct it; delete it (subject to records we must keep); restrict or object to how we use it; receive a copy in a portable format; and withdraw consent (for example to marketing) at any time. To use these rights, email support@zappipay.com.ng or message support in the App. We’ll confirm your identity and reply within the time the law requires. You can also complain to the Nigeria Data Protection Commission (NDPC).</p>
+        <h3>8. Children</h3>
+        <p>ZAPPI PAY is for people aged 18 and over. We don’t knowingly collect data from children.</p>
+        <h3>9. Changes</h3>
+        <p>We may update this Policy and will tell you about important changes in the App.</p>
+        <p>Contact for privacy questions: support@zappipay.com.ng · Sirraddo Venture, Ibadan, Nigeria.</p>
       </>
     ),
   },
