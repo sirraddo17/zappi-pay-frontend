@@ -11,7 +11,7 @@ const RESULT = {
 // Before helping someone who says they own this account (WhatsApp,
 // phone, email), ask them these and type what THEY say. The app only
 // answers match / no match — staff never see the real answers.
-export function IdentityCheck({ customer, orders, walletTransactions, onChanged, canReset = true }) {
+export function IdentityCheck({ customer, orders, walletTransactions, onChanged }) {
   const [dob, setDob] = useState('');
   const [answer, setAnswer] = useState('');
   const [result, setResult] = useState(null);
@@ -89,7 +89,7 @@ export function IdentityCheck({ customer, orders, walletTransactions, onChanged,
           <li>For money problems, ask for a screenshot of their bank alert.</li>
         </ul>
       </div>
-      {canReset && (customer.hasDob || customer.hasSecurityAnswer) && (
+      {(customer.hasDob || customer.hasSecurityAnswer) && (
         <button type="button" onClick={clearDetails} style={{ marginTop: 10, background: 'none', border: 'none', color: 'var(--red-500)', cursor: 'pointer', padding: 0, fontSize: 12 }}>
           Reset their date of birth & security question
         </button>

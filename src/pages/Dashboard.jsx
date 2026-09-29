@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import TestModeBanner from '../components/TestModeBanner';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { cached } from '../lib/cache';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import ContestCard from '../components/ContestCard';
-import ChallengesCard from '../components/ChallengesCard';
 import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
@@ -52,10 +50,6 @@ function txLabel(t) {
   if (t.type === 'COUPON') return t.note || 'Coupon';
   if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
   if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
-  if (t.type === 'SAVINGS_IN') return 'Moved to savings';
-  if (t.type === 'SAVINGS_OUT') return 'From savings';
-  if (t.type === 'INTEREST') return 'Savings interest';
-  if (t.type === 'CHALLENGE_REWARD') return t.note || 'Challenge reward';
   return t.note || 'Purchase';
 }
 
@@ -207,8 +201,6 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      <TestModeBanner style={{ margin: '16px 16px' }} />
-
       <AdsCarousel />
       <AdPopup />
       <PushToggle variant="nudge" />
@@ -326,7 +318,6 @@ export default function Dashboard() {
       )}
 
       <ContestCard compact />
-      <ChallengesCard />
 
       {referral?.enabled && referral.bonusAmount > 0 && (
         <Link
@@ -344,16 +335,14 @@ export default function Dashboard() {
       )}
 
       <div className="section-label">Recent Transactions</div>
-      {/* The bottom slider sits right under this list, so no big gap here;
-          the slider keeps the space above the bottom menu instead. */}
-      <div className="tx-list" style={{ marginBottom: 0 }}>
+      <div className="tx-list">
         {transactions === null ? (
           <p className="empty-state">Loading…</p>
         ) : transactions.length === 0 ? (
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>

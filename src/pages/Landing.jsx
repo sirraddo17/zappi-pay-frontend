@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import TestModeBanner from '../components/TestModeBanner';
 import SocialLinks from '../components/SocialLinks';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LogoIcon, Wordmark } from '../components/Logo';
@@ -126,7 +125,6 @@ export default function Landing() {
           </div>
         </div>
       </nav>
-      <div className="lp-wrap"><TestModeBanner style={{ margin: '12px 0 0' }} /></div>
 
       <header className="lp-wrap lp-hero">
         <div>
