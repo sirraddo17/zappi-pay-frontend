@@ -335,7 +335,9 @@ export default function Dashboard() {
       )}
 
       <div className="section-label">Recent Transactions</div>
-      <div className="tx-list">
+      {/* The bottom slider sits right under this list, so no big gap here;
+          the slider keeps the space above the bottom menu instead. */}
+      <div className="tx-list" style={{ marginBottom: 0 }}>
         {transactions === null ? (
           <p className="empty-state">Loading…</p>
         ) : transactions.length === 0 ? (

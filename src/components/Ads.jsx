@@ -85,7 +85,7 @@ export function AdsCarousel({ placement = 'HOME', fallback = [] }) {
 
   if (!ads.length) return null;
   return (
-    <div style={{ margin: placement === 'BOTTOM' ? '16px 16px 24px' : '16px 16px 0' }}>
+    <div style={{ margin: placement === 'BOTTOM' ? '14px 16px 90px' : '16px 16px 0' }}>
       <div
         ref={track}
         onScroll={(e) => setIndex(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
