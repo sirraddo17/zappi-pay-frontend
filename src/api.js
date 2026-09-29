@@ -343,4 +343,5 @@ export const createEscalation = (data) => adminRequest('/api/admin/escalations',
 export const approveEscalation = (id, note) => adminRequest(`/api/admin/escalations/${id}/approve`, { method: 'POST', body: JSON.stringify({ note }) });
 export const rejectEscalation = (id, note) => adminRequest(`/api/admin/escalations/${id}/reject`, { method: 'POST', body: JSON.stringify({ note }) });
 export const reportOrderToVtpass = (id, note) => adminRequest(`/api/admin/orders/${id}/vtpass-escalate`, { method: 'POST', body: JSON.stringify({ note }) });
+export const checkCustomerFunding = (id, reference) => adminRequest(`/api/admin/customers/${id}/check-funding`, { method: 'POST', body: JSON.stringify({ reference }) });
 export const setAdminRole = (id, role) => adminRequest(`/api/admin/admins/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });

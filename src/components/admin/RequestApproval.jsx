@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { createEscalation, setCustomerActive } from '../../api';
+import { createEscalation, setCustomerActive, checkCustomerFunding } from '../../api';
 
 const TYPES = [
   ['PASSWORD_RESET', 'Reset their password'],
   ['ORDER_REFUND', 'Refund a purchase that wasn’t delivered'],
   ['WALLET_CREDIT', 'Credit their wallet'],
   ['WALLET_DEBIT', 'Debit their wallet'],
+  ['FUNDING_MISSING', 'Bank transfer to their account number not credited'],
   ['SECURITY_RESET', 'Reset date of birth & security question'],
   ['REACTIVATE', 'Reactivate their account'],
   ['OTHER', 'Something else'],
@@ -28,7 +29,8 @@ export default function RequestApproval({ customer, orders, onDone }) {
 
   const pending = orders.filter((o) => o.status === 'PENDING');
   const needsOrder = type === 'ORDER_REFUND';
-  const needsAmount = type === 'WALLET_CREDIT' || type === 'WALLET_DEBIT';
+  const needsAmount = type === 'WALLET_CREDIT' || type === 'WALLET_DEBIT' || type === 'FUNDING_MISSING';
+  const [bankRef, setBankRef] = useState('');
 
   async function submit(e) {
     e.preventDefault();
@@ -36,7 +38,7 @@ export default function RequestApproval({ customer, orders, onDone }) {
     setErr('');
     setMsg('');
     try {
-      const r = await createEscalation({ type, customerId: customer.id, orderId: orderId || undefined, amount: needsAmount ? Number(amount) : undefined, reason, identityVerified: idOk, debitConfirmed: debitOk, checkNote });
+      const r = await createEscalation({ type, customerId: customer.id, orderId: orderId || undefined, amount: needsAmount ? Number(amount) : undefined, bankReference: type === 'FUNDING_MISSING' ? bankRef : undefined, reason, identityVerified: idOk, debitConfirmed: debitOk, checkNote });
       if (r.resolved) setMsg(r.message);
       else setMsg(`Sent for approval (${r.escalation.ref}). ${customer.name.split(' ')[0]} has been told it's with a senior admin.`);
       setReason('');
@@ -85,6 +87,13 @@ export default function RequestApproval({ customer, orders, onDone }) {
           {needsOrder && <small style={{ color: 'var(--slate-400)' }}>We ask VTpass first — if they confirm it failed, the customer is refunded automatically and no approval is needed. Delivered-but-not-received? Use “Report to VTpass” on the Orders page.</small>}
         </div>
       )}
+      {type === 'FUNDING_MISSING' && (
+        <div className="field">
+          <label htmlFor="ra-ref">Bank session ID / reference from their debit alert</label>
+          <input id="ra-ref" value={bankRef} onChange={(e) => setBankRef(e.target.value)} maxLength={80} placeholder="e.g. 100004260929091512345678901234" />
+          <small style={{ color: 'var(--slate-400)' }}>Try “Check for missing bank funding” below first — it credits anything Monnify has already received. Send this only if that finds nothing.</small>
+        </div>
+      )}
       {needsAmount && (
         <div className="field">
           <label htmlFor="ra-amt">Amount (₦)</label>
@@ -111,5 +120,41 @@ export default function RequestApproval({ customer, orders, onDone }) {
         {customer.active && <button type="button" className="btn btn-secondary" style={{ width: 'auto', color: 'var(--red-500)' }} onClick={freeze}>Freeze account now</button>}
       </div>
     </form>
+  );
+}
+
+// Customer says they sent money to their personal account number but
+// the wallet didn't go up. Asks Monnify and credits only what Monnify
+// confirms — safe for support staff.
+export function FundingCheck({ customer, onDone }) {
+  const [ref, setRef] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
+  async function run() {
+    setBusy(true);
+    setErr('');
+    setMsg('');
+    try {
+      const r = await checkCustomerFunding(customer.id, ref.trim() || undefined);
+      setMsg(r.message);
+      if (r.credited > 0) onDone?.();
+    } catch (error) {
+      setErr(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <details className="card" style={{ margin: '0 0 16px' }}>
+      <summary style={{ cursor: 'pointer', fontWeight: 700 }}>🏦 Funding not showing? Check with Monnify</summary>
+      <p style={{ color: 'var(--slate-400)', fontSize: 13 }}>For money sent to the customer’s personal account number (Wema / Sterling). Credits only payments Monnify confirms, never twice. Manual funding to the business account is approved by an owner under Pending Funding.</p>
+      {err && <p className="error-text" style={{ margin: '0 0 8px' }}>{err}</p>}
+      {msg && <p style={{ fontSize: 14, margin: '0 0 8px' }}>{msg}</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <input aria-label="Monnify transaction reference" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Monnify transaction reference (optional)" style={{ flex: '1 1 240px' }} />
+        <button type="button" className="btn" style={{ width: 'auto' }} disabled={busy} onClick={run}>{busy ? 'Checking…' : 'Check for missing bank funding'}</button>
+      </div>
+    </details>
   );
 }

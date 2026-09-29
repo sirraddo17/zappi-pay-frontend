@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
-import { getAdminBankTransfers, authorizeBankTransfer, resendBankTransferOtp, checkBankTransfer, cancelBankTransfer, releaseBankTransfer } from '../../api';
+import { getAdminBankTransfers, authorizeBankTransfer, resendBankTransferOtp, checkBankTransfer, cancelBankTransfer, releaseBankTransfer, createEscalation } from '../../api';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 function money(n) {
@@ -28,6 +29,7 @@ const COLORS = { SUCCESS: 'var(--green-500)', FAILED: 'var(--red-500)', REVERSED
 // each transfer unless 2FA is turned off for API transfers — those wait
 // here under "Needs OTP".
 export default function AdminBankTransfers() {
+  const { isOwner } = useAdminAuth();
   const [filter, setFilter] = useState('');
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
@@ -83,7 +85,7 @@ export default function AdminBankTransfers() {
         </div>
       )}
 
-      {data?.waiting > 0 && (
+      {isOwner && data?.waiting > 0 && (
         <div className="card" style={{ margin: '0 0 12px', border: '1px solid var(--orange, #f97316)' }}>
           <strong>{data.waiting} transfer{data.waiting === 1 ? '' : 's'} waiting for your OTP.</strong>
           <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: '4px 0 0' }}>
@@ -128,7 +130,27 @@ export default function AdminBankTransfers() {
                 </div>
               </div>
 
-              {t.status === 'PENDING_AUTHORIZATION' && (
+              {!isOwner && (t.status === 'PENDING_AUTHORIZATION' || t.status === 'HELD') && (
+                <p style={{ fontSize: 13, color: 'var(--gold)', margin: '10px 0 0' }}>
+                  {t.status === 'HELD' ? 'Held for a security review — an owner releases or cancels it.' : 'Waiting for an owner to enter the Monnify OTP.'} Tell the customer it’s being processed.
+                </p>
+              )}
+              {['PROCESSING', 'SUCCESS'].includes(t.status) && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ width: 'auto', marginTop: 12, marginRight: 8 }}
+                  disabled={busyId === t.id}
+                  onClick={() => {
+                    const reason = window.prompt(`What's the problem with this transfer? (e.g. "customer says ${t.accountName} didn't receive it after 2 hours")`);
+                    if (!reason) return;
+                    run(t.id, () => createEscalation({ type: 'TRANSFER_ISSUE', customerId: t.customer.id, transferId: t.id, reason }), (r) => (r.resolved ? r.message : `Sent to an owner (${r.escalation.ref}); the customer was told.`));
+                  }}
+                >
+                  Report a problem
+                </button>
+              )}
+              {isOwner && t.status === 'PENDING_AUTHORIZATION' && (
                 <div style={{ marginTop: 12 }}>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <input
@@ -162,7 +184,7 @@ export default function AdminBankTransfers() {
                 </div>
               )}
 
-              {t.status === 'HELD' && (
+              {isOwner && t.status === 'HELD' && (
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
                   <button className="btn" style={{ width: 'auto' }} disabled={busyId === t.id} onClick={() => window.confirm(`Send ${money(t.amount)} to ${t.accountName}?`) && run(t.id, () => releaseBankTransfer(t.id), (r) => `Released — status: ${r.status}.`)}>
                     Release & send

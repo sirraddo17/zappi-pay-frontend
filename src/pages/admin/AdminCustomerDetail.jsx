@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
 import { IdentityCheck, AgentPanel } from '../../components/admin/CustomerPanels';
-import RequestApproval from '../../components/admin/RequestApproval';
+import RequestApproval, { FundingCheck } from '../../components/admin/RequestApproval';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, adminSetUsername, testCustomerEmailAlert } from '../../api';
 
@@ -211,6 +211,8 @@ export default function AdminCustomerDetail() {
       </div>
 
       {!customer.deletedAt && <IdentityCheck customer={customer} orders={orders} walletTransactions={walletTransactions} onChanged={load} canReset={isOwner} />}
+
+      {!customer.deletedAt && <FundingCheck customer={customer} onDone={load} />}
 
       {!isOwner && !customer.deletedAt && <RequestApproval customer={customer} orders={orders} onDone={load} />}
 

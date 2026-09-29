@@ -29,6 +29,9 @@ function Checks({ c }) {
       )}
       {item(c.debitConfirmed, 'Staff confirmed the debit and no delivery')}
       {c.vtpassStatus && <li>VTpass status when requested: <b>{c.vtpassStatus}</b></li>}
+      {c.monnifyStatus && <li>Monnify status when requested: <b>{c.monnifyStatus}</b></li>}
+      {c.monnifySync && <li>{c.monnifySync}</li>}
+      {c.bankReference && <li>Bank session ID / reference: <b>{c.bankReference}</b> — check it in your Monnify dashboard before approving</li>}
       {c.staffNote && <li>Note: {c.staffNote}</li>}
     </ul>
   );
@@ -150,6 +153,11 @@ export default function AdminEscalations() {
                 {e.order && (
                   <div style={{ fontSize: 13, marginTop: 6 }}>
                     Purchase: {e.order.service.toLowerCase()} {naira(e.order.amount)} for {e.order.recipient} · {new Date(e.order.createdAt).toLocaleString('en-NG')} · now <b>{e.order.status}</b> · VTpass ref {e.order.vtpassRequestId}
+                  </div>
+                )}
+                {e.transfer && (
+                  <div style={{ fontSize: 13, marginTop: 6 }}>
+                    Transfer: {naira(e.transfer.amount)} to {e.transfer.accountName} ({e.transfer.bankName} {e.transfer.accountNumber}) · {new Date(e.transfer.createdAt).toLocaleString('en-NG')} · now <b>{e.transfer.status}</b> · ref {e.transfer.reference}
                   </div>
                 )}
                 <p style={{ fontSize: 14, margin: '6px 0 0', whiteSpace: 'pre-wrap' }}>{e.reason}</p>

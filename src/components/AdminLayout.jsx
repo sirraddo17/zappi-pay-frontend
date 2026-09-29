@@ -32,7 +32,7 @@ const TABS = [
 ];
 
 // What support staff (role SUPPORT) can open.
-const SUPPORT_TABS = ['/admin/customers', '/admin/orders', '/admin/support', '/admin/escalations'];
+const SUPPORT_TABS = ['/admin/customers', '/admin/orders', '/admin/bank-transfers', '/admin/support', '/admin/escalations'];
 
 export default function AdminLayout({ children }) {
   const { admin, logout, isOwner } = useAdminAuth();
