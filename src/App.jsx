@@ -42,6 +42,7 @@ const Notifications = lazy(() => import('./pages/Notifications'));
 const Legal = lazy(() => import('./pages/Legal'));
 const DeleteAccountInfo = lazy(() => import('./pages/DeleteAccountInfo'));
 const Transfer = lazy(() => import('./pages/Transfer'));
+const PayLink = lazy(() => import('./pages/PayLink'));
 const Profile = lazy(() => import('./pages/Profile'));
 const AirtimeCash = lazy(() => import('./pages/AirtimeCash'));
 const ChangePassword = lazy(() => import('./pages/ChangePassword'));
@@ -129,6 +130,7 @@ export default function App() {
           <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/delete-account" element={<DeleteAccountInfo />} />
           <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
+          <Route path="/pay/:username" element={<PayLink />} />
           <Route path="/profile" element={<RequireCustomer><Profile /></RequireCustomer>} />
           <Route path="/airtime-cash" element={<RequireCustomer><AirtimeCash /></RequireCustomer>} />
 

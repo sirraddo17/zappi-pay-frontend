@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { cached } from '../lib/cache';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import ContestCard from '../components/ContestCard';
-import { AdsCarousel, AdPopup } from '../components/Ads';
+import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
@@ -344,6 +344,8 @@ export default function Dashboard() {
           })
         )}
       </div>
+
+      <AdsCarousel placement="BOTTOM" fallback={DEFAULT_BOTTOM_SLIDES} />
 
       <BottomNav />
     </div>

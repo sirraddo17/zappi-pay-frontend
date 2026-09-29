@@ -4,6 +4,10 @@ import { getMyReferrals } from '../api';
 import BottomNav from '../components/BottomNav';
 import SetUsername from '../components/SetUsername';
 import ContestCard from '../components/ContestCard';
+import ShareHub from '../components/ShareHub';
+import MyQr from '../components/MyQr';
+import useAutoRefresh from '../lib/useAutoRefresh';
+import { useAuth } from '../context/AuthContext';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
 
@@ -12,16 +16,17 @@ export default function Refer() {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
 
-  useEffect(() => {
+  const { customer } = useAuth();
+  function load() {
     getMyReferrals()
-      .then(setData)
-      .catch((err) => setError(err.message));
-  }, []);
+      .then((d) => { setData(d); setError(''); })
+      .catch((err) => { if (!data) setError(err.message); });
+  }
+  useEffect(load, []);
+  // Rewards show up as soon as a friend qualifies (on return / push).
+  useAutoRefresh(load, false);
 
   const link = data?.code ? `${window.location.origin}/signup?ref=${data.code}` : '';
-  const shareText = data
-    ? `Join me on ZAPPI PAY — buy airtime, data, electricity, cable TV and more in seconds. Sign up with my code ${data.code}: ${link}`
-    : '';
 
   async function copy(text, what) {
     try {
@@ -33,18 +38,6 @@ export default function Refer() {
     }
   }
 
-  async function share() {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'ZAPPI PAY', text: shareText, url: link });
-        return;
-      } catch {
-        // cancelled — fall through to nothing
-        return;
-      }
-    }
-    copy(shareText, 'message');
-  }
 
   const rewarded = data?.referrals?.filter((r) => r.rewarded).length || 0;
 
@@ -72,7 +65,7 @@ export default function Refer() {
                 <div style={{ fontSize: 13, opacity: 0.85 }}>You earn</div>
                 <div style={{ fontSize: 30, fontWeight: 800, color: 'var(--gold)' }}>{naira(data.bonusAmount)}</div>
                 <p style={{ margin: '6px 0 0', fontSize: 14, lineHeight: 1.45 }}>
-                  for every friend who signs up with your code and makes their first purchase of {naira(data.minPurchase)} or more.
+                  for every friend who signs up with your code and makes their first purchase or bank transfer of {naira(data.minPurchase)} or more.
                 </p>
               </>
             ) : (
@@ -95,27 +88,13 @@ export default function Refer() {
               </div>
               <div style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 14 }}>Your invite link</div>
               <div style={{ fontSize: 13, wordBreak: 'break-all', margin: '4px 0 10px' }}>{link}</div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn" type="button" onClick={share}>
-                  {copied === 'message' ? 'Copied!' : 'Share'}
-                </button>
-                <a
-                  className="btn-secondary btn"
-                  href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textAlign: 'center', textDecoration: 'none' }}
-                >
-                  WhatsApp
-                </a>
-              </div>
-              <button type="button" onClick={() => copy(link, 'link')} style={{ background: 'none', border: 'none', color: 'var(--purple)', marginTop: 10, cursor: 'pointer', fontSize: 13, padding: 0 }}>
-                {copied === 'link' ? 'Link copied!' : 'Copy link only'}
-              </button>
+              <MyQr code={data.code} link={link} />
             </div>
           ) : (
             <SetUsername onDone={(username) => setData((d) => ({ ...d, code: username }))} />
           )}
+
+          {data.code && <ShareHub code={data.code} link={link} firstName={customer?.name?.split(' ')[0]} bonus={data.enabled ? data.bonusAmount : 0} minPurchase={data.minPurchase} />}
 
           <div className="card" style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
             <div>
@@ -153,7 +132,7 @@ export default function Refer() {
                       color: r.rewarded ? 'var(--green-500)' : 'var(--gold)',
                     }}
                   >
-                    {r.rewarded ? `+${naira(r.amount)}` : 'Awaiting first purchase'}
+                    {r.rewarded ? `+${naira(r.amount)}` : `Waiting: first ${naira(data.minPurchase)}+ purchase`}
                   </span>
                 </div>
               ))
@@ -165,7 +144,7 @@ export default function Refer() {
             <ol style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.6, color: 'var(--slate-100)' }}>
               <li>Share your code or invite link.</li>
               <li>Your friend signs up and enters your code (the link fills it in for them).</li>
-              <li>When they make their first purchase of {naira(data.minPurchase)} or more, your bonus lands in your wallet.</li>
+              <li>When they make their first purchase or bank transfer of {naira(data.minPurchase)} or more, your bonus lands in your wallet automatically.</li>
             </ol>
           </div>
         </>

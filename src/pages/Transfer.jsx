@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { lookupRecipient, sendTransfer } from '../api';
 import BottomNav from '../components/BottomNav';
 import PinConfirm from '../components/PinConfirm';
 import BankTransferForm from '../components/BankTransferForm';
+import QrScanner, { usernameFromQr } from '../components/QrScanner';
+import MyQr from '../components/MyQr';
 
 export default function Transfer() {
   const { refreshCustomer } = useAuth();
@@ -22,15 +24,44 @@ export default function Transfer() {
   const [sending, setSending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const [scanning, setScanning] = useState(false);
+  const [searchParams] = useSearchParams();
+  const { customer } = useAuth();
+
+  // Opened from a QR code / pay link: /transfer?to=<username>
+  useEffect(() => {
+    const to = searchParams.get('to');
+    if (to) {
+      setTab('user');
+      setIdentifier(to);
+      verify(to);
+    }
+  }, []);
+
+  function onScan(text) {
+    setScanning(false);
+    const who = usernameFromQr(text);
+    if (!who) {
+      setError("That QR code isn't a ZAPPI PAY code.");
+      return;
+    }
+    setIdentifier(who);
+    verify(who);
+  }
+
   async function handleVerify(e) {
     e.preventDefault();
+    verify(identifier);
+  }
+
+  async function verify(value) {
     setError('');
     setSuccess('');
     setRecipient(null);
-    if (!identifier.trim()) return;
+    if (!String(value || '').trim()) return;
     setVerifying(true);
     try {
-      const data = await lookupRecipient(identifier.trim());
+      const data = await lookupRecipient(String(value).trim());
       setRecipient(data.recipient);
     } catch (err) {
       setError(err.message || 'Could not find that user.');
@@ -116,6 +147,10 @@ export default function Transfer() {
               <button className="btn" type="submit" disabled={verifying}>
                 {verifying ? 'Checking…' : 'Continue'}
               </button>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '8px 12px' }} onClick={() => setScanning(true)}>📷 Scan QR to pay</button>
+                {customer?.username && <MyQr code={customer.username} compact />}
+              </div>
             </form>
           ) : (
             <form onSubmit={handleSend}>
@@ -169,6 +204,8 @@ export default function Transfer() {
       ) : (
         <BankTransferForm onDone={refreshCustomer} />
       )}
+
+      {scanning && <QrScanner onResult={onScan} onClose={() => setScanning(false)} />}
 
       <PinConfirm
         open={confirmOpen}

@@ -31,7 +31,7 @@ function useAds() {
 function useOpenAd() {
   const navigate = useNavigate();
   return (ad) => {
-    clickAd(ad.id);
+    if (!ad.builtIn) clickAd(ad.id);
     if (!ad.linkUrl) return;
     if (ad.linkUrl.startsWith('/')) navigate(ad.linkUrl);
     else window.open(ad.linkUrl, '_blank', 'noopener');
@@ -49,9 +49,10 @@ function AdSlide({ ad, onOpen }) {
       {ad.hasImage ? (
         <img src={adImageUrl(ad)} alt={ad.title} loading="lazy" style={{ display: 'block', width: '100%', aspectRatio: '2 / 1', objectFit: 'cover' }} />
       ) : (
-        <div style={{ padding: 16, background: 'linear-gradient(135deg, #863bff, #5b1fc4)', color: '#fff', minHeight: 110 }}>
-          <b style={{ fontSize: 16 }}>{ad.title}</b>
-          {ad.body && <div style={{ fontSize: 13, marginTop: 4, opacity: 0.95 }}>{ad.body}</div>}
+        <div style={{ padding: 16, background: ad.bg || 'linear-gradient(135deg, #863bff, #5b1fc4)', color: '#fff', minHeight: 110, position: 'relative', overflow: 'hidden' }}>
+          {ad.emoji && <span aria-hidden="true" style={{ position: 'absolute', right: 14, bottom: 6, fontSize: 64, opacity: 0.9 }}>{ad.emoji}</span>}
+          <b style={{ fontSize: 16, display: 'block', paddingRight: ad.emoji ? 70 : 0 }}>{ad.title}</b>
+          {ad.body && <div style={{ fontSize: 13, marginTop: 4, opacity: 0.95, paddingRight: ad.emoji ? 70 : 0 }}>{ad.body}</div>}
           {ad.buttonText && <div style={{ marginTop: 10, display: 'inline-block', background: '#FFB830', color: '#2a0b66', fontWeight: 700, fontSize: 13, padding: '6px 12px', borderRadius: 999 }}>{ad.buttonText}</div>}
         </div>
       )}
@@ -60,8 +61,13 @@ function AdSlide({ ad, onOpen }) {
 }
 
 // Home-screen slider of adverts/announcements (swipe, auto-advances).
-export function AdsCarousel() {
-  const ads = useAds().filter((a) => a.placement === 'HOME' || a.placement === 'BOTH');
+// placement "HOME" = top slider (HOME/BOTH ads); "BOTTOM" = the slider
+// at the bottom of the home screen, which falls back to built-in tips
+// when the admin hasn't added any.
+export function AdsCarousel({ placement = 'HOME', fallback = [] }) {
+  const all = useAds();
+  const mine = all.filter((a) => (placement === 'BOTTOM' ? a.placement === 'BOTTOM' : a.placement === 'HOME' || a.placement === 'BOTH'));
+  const ads = mine.length ? mine : fallback;
   const open = useOpenAd();
   const track = useRef(null);
   const [index, setIndex] = useState(0);
@@ -79,7 +85,7 @@ export function AdsCarousel() {
 
   if (!ads.length) return null;
   return (
-    <div style={{ margin: '16px 16px 0' }}>
+    <div style={{ margin: placement === 'BOTTOM' ? '16px 16px 24px' : '16px 16px 0' }}>
       <div
         ref={track}
         onScroll={(e) => setIndex(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
@@ -136,3 +142,11 @@ export function AdPopup() {
     </div>
   );
 }
+
+// Shown in the bottom slider until the admin adds BOTTOM adverts.
+export const DEFAULT_BOTTOM_SLIDES = [
+  { id: 'tip-refer', builtIn: true, title: 'Invite friends, earn cash', body: 'Share your code — you earn when they join and buy.', buttonText: 'Refer & Earn', linkUrl: '/refer', emoji: '🎁', bg: 'linear-gradient(135deg, #863bff, #5b1fc4)' },
+  { id: 'tip-a2c', builtIn: true, title: 'Airtime to Cash', body: 'Bought too much airtime? Turn it back into wallet money.', buttonText: 'Convert now', linkUrl: '/airtime-cash', emoji: '🔁', bg: 'linear-gradient(135deg, #0ea5a4, #0f766e)' },
+  { id: 'tip-bulk', builtIn: true, title: 'Bulk airtime & data', body: 'Top up up to 50 numbers at once — family, staff, customers.', buttonText: 'Try bulk', linkUrl: '/bulk', emoji: '📶', bg: 'linear-gradient(135deg, #f59e0b, #d97706)' },
+  { id: 'tip-qr', builtIn: true, title: 'Pay with a QR code', body: 'Scan a friend’s ZAPPI PAY QR to send money instantly.', buttonText: 'Scan to pay', linkUrl: '/transfer', emoji: '▦', bg: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },
+];

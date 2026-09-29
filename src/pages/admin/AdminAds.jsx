@@ -3,9 +3,10 @@ import AdminLayout from '../../components/AdminLayout';
 import { getAdminAds, createAd, updateAd, deleteAd, adImageUrl } from '../../api';
 
 const PLACEMENTS = [
-  { value: 'HOME', label: 'Home screen slider' },
+  { value: 'HOME', label: 'Home screen — top slider' },
+  { value: 'BOTTOM', label: 'Home screen — bottom slider' },
   { value: 'POPUP', label: 'Pop-up (once per customer)' },
-  { value: 'BOTH', label: 'Both' },
+  { value: 'BOTH', label: 'Top slider + pop-up' },
 ];
 
 // Shrinks a picture to at most 1200px wide as a JPEG so it loads fast
@@ -96,7 +97,7 @@ function AdForm({ initial, onSaved, onCancel }) {
         {preview && <img src={preview} alt="" style={{ display: 'block', width: '100%', aspectRatio: '2 / 1', objectFit: 'cover', borderRadius: 12, marginBottom: 8 }} />}
         <input id="adimg" type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} />
         {preview && <button type="button" onClick={() => { setImage(null); setPreview(null); }} style={{ background: 'none', border: 'none', color: 'var(--red-500)', cursor: 'pointer', padding: 0, fontSize: 13, marginTop: 4 }}>Remove picture</button>}
-        <small style={{ display: 'block', color: 'var(--slate-400)' }}>No picture? The title and text show on a purple card instead.</small>
+        <small style={{ display: 'block', color: 'var(--slate-400)' }}>No picture? The title and text show on a purple card instead. Until you add bottom-slider adverts, the bottom slider shows built-in tips (Refer & Earn, Airtime to Cash, Bulk, QR pay).</small>
       </div>
       <div className="field"><label htmlFor="adt">Title</label><input id="adt" maxLength={80} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. ZAPPI PAY is now on Play Store!" /></div>
       <div className="field"><label htmlFor="adb">Text (optional)</label><input id="adb" maxLength={300} value={body} onChange={(e) => setBody(e.target.value)} placeholder="e.g. Download the app for faster access" /></div>
