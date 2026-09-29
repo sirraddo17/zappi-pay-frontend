@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import TestModeBanner from '../components/TestModeBanner';
 import SavingsCard from '../components/SavingsCard';
+import SpendingCard from '../components/SpendingCard';
 import { Link } from 'react-router-dom';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
@@ -384,6 +385,8 @@ export default function Wallet() {
       )}
 
       <CouponBox onRedeemed={load} />
+
+      <SpendingCard />
 
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>

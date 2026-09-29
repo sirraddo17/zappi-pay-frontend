@@ -94,7 +94,7 @@ export default function Notifications() {
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--purple)', marginTop: 6, flexShrink: 0 }} />
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{n.title}</div>
+                <div style={{ color: 'var(--slate-100)', fontSize: 14, fontWeight: 600 }}>{n.title}</div>
                 <div style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 2 }}>{n.message}</div>
                 <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>{fmtDate(n.createdAt)}</div>
               </div>

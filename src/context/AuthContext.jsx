@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { login as apiLogin, signup as apiSignup, getMe } from '../api';
+import { login as apiLogin, signup as apiSignup, getMe, endThisSession } from '../api';
 import { getQuickLogin, isUnlocked, markUnlocked, clearUnlocked, saveQuickLogin } from '../lib/quickLogin';
 import { readCache, writeCache, clearCache } from '../lib/cache';
 import useIdleLogout from '../lib/useIdleLogout';
@@ -68,7 +68,10 @@ export function AuthProvider({ children }) {
   }
 
   function logout() {
-    // Quick-login details stay, so next time it's just PIN / fingerprint.
+    // Ends the session on the server too (it disappears from "Where
+    // you're logged in"). Quick-login details stay, so next time it's
+    // just PIN / fingerprint.
+    if (localStorage.getItem('zappipay_customer_token')) endThisSession();
     localStorage.removeItem('zappipay_customer_token');
     clearUnlocked();
     clearCache();

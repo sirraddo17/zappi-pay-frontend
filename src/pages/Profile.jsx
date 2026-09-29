@@ -12,6 +12,7 @@ import AgentCard from '../components/AgentCard';
 import NewPasswordFields from '../components/NewPasswordFields';
 import SecurityDetailsCard from '../components/SecurityDetailsCard';
 import SocialLinks from '../components/SocialLinks';
+import ThemeToggle from '../components/ThemeToggle';
 import { passwordIsStrong } from '../lib/passwordRules';
 
 const MAX_AVATAR_BYTES = 1_500_000;
@@ -110,7 +111,8 @@ export default function Profile() {
     if (newPassword !== confirmPassword) return setPasswordError("The two new passwords don't match.");
     setChangingPassword(true);
     try {
-      await changePassword({ currentPassword, newPassword });
+      const res = await changePassword({ currentPassword, newPassword });
+      if (res?.token) localStorage.setItem('zappipay_customer_token', res.token);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -258,6 +260,8 @@ export default function Profile() {
         <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -6 }}>Promos, new services and updates first.</p>
         <SocialLinks />
       </div>
+
+      <ThemeToggle style={{ margin: '0 0 16px' }} />
 
       <div className="card" style={{ margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Support</h2>

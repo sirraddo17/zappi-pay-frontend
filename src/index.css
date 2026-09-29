@@ -13,8 +13,27 @@
   --slate-100: #f1f5f9;
   --red-500: #ef4444;
   --green-500: #22c55e;
+  --slate-300: #cbd5e1;
+  --wordmark: #fff;
   --radius: 12px;
+  color-scheme: dark;
 }
+
+/* Light mode (Profile → Appearance). Same layout, light surfaces. The
+   purple header and buttons keep white text. */
+:root[data-theme="light"] {
+  --slate-900: #f4f5fb;
+  --slate-800: #ffffff;
+  --slate-700: #dfe3ee;
+  --slate-400: #5a6785;
+  --slate-300: #334155;
+  --slate-100: #0f1628;
+  --wordmark: #0f1628;
+  color-scheme: light;
+}
+:root[data-theme="light"] .card { box-shadow: 0 1px 3px rgba(15, 22, 40, 0.06); }
+:root[data-theme="light"] .dash-header,
+:root[data-theme="light"] .dash-header * { --wordmark: #fff; }
 
 * {
   box-sizing: border-box;
@@ -210,7 +229,7 @@ th {
 .wallet-card .value {
   font-size: 30px;
   font-weight: 700;
-  color: #fff;
+  color: var(--slate-100);
   margin: 6px 0 16px;
 }
 
@@ -250,7 +269,7 @@ th {
   border-radius: 16px;
   padding: 16px 8px;
   text-align: center;
-  color: #fff;
+  color: var(--slate-100);
   text-decoration: none;
   font-size: 13px;
   display: flex;
@@ -303,7 +322,7 @@ th {
 }
 
 .tx-name {
-  color: #fff;
+  color: var(--slate-100);
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;

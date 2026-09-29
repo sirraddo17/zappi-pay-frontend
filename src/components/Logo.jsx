@@ -20,7 +20,7 @@ export function LogoIcon({ size = 40 }) {
 export function Wordmark({ size = 20 }) {
   return (
     <span style={{ fontSize: size, fontWeight: 700, whiteSpace: 'nowrap' }}>
-      <span style={{ color: '#fff' }}>Zappi</span>
+      <span style={{ color: 'var(--wordmark, #fff)' }}>Zappi</span>
       <span style={{ color: '#FFB830', marginLeft: 4 }}>Pay</span>
     </span>
   );

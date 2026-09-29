@@ -27,6 +27,17 @@
         document.querySelector('meta[name="theme-color"]').content = '#0f1628';
       })();
     </script>
+    <script>
+      // Light / dark mode, applied before the app draws so there's no
+      // flash. Saved choice: 'light', 'dark' or 'system' (default dark).
+      (function () {
+        try {
+          var t = localStorage.getItem('zappipay_theme') || 'dark';
+          if (t === 'system') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) { /* private mode */ }
+      })();
+    </script>
     <title>ZAPPI PAY</title>
   </head>
   <body>

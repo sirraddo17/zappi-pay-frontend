@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import AudienceSelect, { audienceLabel } from '../../components/admin/AudienceSelect';
 import AdminLayout from '../../components/AdminLayout';
 import { useShowMore } from '../../components/ShowMore';
 import { getAdminPromos, createPromo, updatePromo } from '../../api';
@@ -7,7 +8,7 @@ const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTER
 const label = (s) => s.charAt(0) + s.slice(1).toLowerCase();
 const money = (n) => `₦${Number(n || 0).toLocaleString()}`;
 
-const EMPTY = { code: '', description: '', type: 'FLAT', value: '', maxDiscount: '', minAmount: '', services: [], usageLimit: '', perCustomerLimit: '1', newCustomersOnly: false, expiresAt: '' };
+const EMPTY = { code: '', description: '', type: 'FLAT', value: '', maxDiscount: '', minAmount: '', services: [], usageLimit: '', perCustomerLimit: '1', newCustomersOnly: false, audience: 'ALL', expiresAt: '' };
 
 // Promo codes customers type at checkout.
 export default function AdminPromos() {
@@ -132,6 +133,7 @@ export default function AdminPromos() {
             ))}
           </div>
         </div>}
+        <AudienceSelect id="pr-aud" label="Who can use it" value={form.audience} onChange={(v) => setForm((f) => ({ ...f, audience: v }))} />
         <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, marginBottom: 12 }}>
           <input type="checkbox" style={{ width: 'auto' }} checked={form.newCustomersOnly} onChange={set('newCustomersOnly')} />
           {form.type === 'CREDIT' ? 'New customers only (no purchase yet)' : 'First purchase only (new customers)'}
@@ -157,6 +159,7 @@ export default function AdminPromos() {
                   {p.type === 'CREDIT' ? 'Redeem on Wallet page' : p.services.length ? p.services.map(label).join(', ') : 'All services'}
                   {Number(p.minAmount) > 0 && ` · min ${money(p.minAmount)}`}
                   {p.newCustomersOnly && ' · first purchase'}
+                  {p.audience && p.audience !== 'ALL' && ` · ${audienceLabel(p.audience)}`}
                   {p.expiresAt && ` · until ${new Date(p.expiresAt).toLocaleDateString('en-NG')}`}
                 </td>
                 <td>{p.usedCount}{p.usageLimit ? ` / ${p.usageLimit}` : ''}</td>

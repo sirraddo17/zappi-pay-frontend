@@ -19,7 +19,7 @@ export default function SavingsCard({ onChanged }) {
     getSavings().then(setData).catch(() => setData(null));
   }, []);
 
-  if (!data || (!data.enabled && data.savingsBalance <= 0)) return null;
+  if (!data || (!data.enabled && !(data.savingsBalance > 0))) return null;
 
   async function move(kind) {
     const n = Number(amount);
@@ -81,7 +81,7 @@ export default function SavingsCard({ onChanged }) {
           Interest is worked out each night on the lowest amount you kept in savings that day{data.minBalance > 0 ? `, from ${naira(data.minBalance)}` : ''}{data.maxBalance ? ` up to ${naira(data.maxBalance)}` : ''}. Move money back to your wallet any time — no fees, no lock.
         </p>
       )}
-      {data.history.length > 0 && (
+      {data.history?.length > 0 && (
         <div style={{ marginTop: 10 }}>
           <button type="button" onClick={() => setShowHistory((v) => !v)} style={{ background: 'none', border: 'none', color: 'var(--purple)', padding: 0, cursor: 'pointer', fontSize: 13 }}>
             {showHistory ? 'Hide savings history' : 'Savings history'}

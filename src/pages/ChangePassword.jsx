@@ -31,7 +31,8 @@ export default function ChangePassword() {
     }
     setSaving(true);
     try {
-      await changePassword({ currentPassword, newPassword });
+      const res = await changePassword({ currentPassword, newPassword });
+      if (res?.token) localStorage.setItem('zappipay_customer_token', res.token);
       await refreshCustomer();
       navigate('/', { replace: true });
     } catch (err) {

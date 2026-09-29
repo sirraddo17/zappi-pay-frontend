@@ -15,7 +15,7 @@ const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTER
 // accepts partial updates, so saving discounts can never overwrite
 // the VTpass keys (or vice versa) with stale values from another tab.
 const TABS = [
-  { key: 'maintenance', label: '🛠️ Maintenance' },
+  { key: 'maintenance', label: '🛠️ Maintenance & alerts' },
   { key: 'vtpass', label: 'VTpass' },
   { key: 'monnify', label: 'Monnify' },
   { key: 'markup', label: 'Markup' },

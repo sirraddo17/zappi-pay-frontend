@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import AudienceSelect, { audienceLabel } from '../../components/admin/AudienceSelect';
 import AdminLayout from '../../components/AdminLayout';
 import { useShowMore } from '../../components/ShowMore';
 import { getAdminBroadcasts, createBroadcast, endBroadcast } from '../../api';
@@ -22,6 +23,7 @@ export default function AdminBroadcasts() {
   const [message, setMessage] = useState('');
   const [type, setType] = useState('INFO');
   const [showBanner, setShowBanner] = useState(true);
+  const [audience, setAudience] = useState('ALL');
   const [sending, setSending] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState('');
@@ -57,7 +59,7 @@ export default function AdminBroadcasts() {
     setSending(true);
     setError('');
     try {
-      const data = await createBroadcast({ title: title.trim(), message: message.trim(), type, showBanner });
+      const data = await createBroadcast({ title: title.trim(), message: message.trim(), type, showBanner, audience });
       setSuccess(`Sent to ${data.broadcast.recipientCount} customer${data.broadcast.recipientCount === 1 ? '' : 's'}.`);
       setTitle('');
       setMessage('');
@@ -102,6 +104,7 @@ export default function AdminBroadcasts() {
             {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
+        <AudienceSelect id="bc-aud" value={audience} onChange={(v) => { setAudience(v); setConfirming(false); }} />
         <div className="field">
           <label htmlFor="bc-title">Title</label>
           <input
@@ -147,7 +150,7 @@ export default function AdminBroadcasts() {
         ) : (
           <div>
             <p style={{ fontSize: 14, margin: '0 0 10px' }}>
-              This goes to <strong>every active customer</strong> and can't be unsent. Send it now?
+              This goes to <strong>{audience === 'ALL' ? 'every active customer' : audienceLabel(audience).toLowerCase()}</strong> and can't be unsent. Send it now?
             </p>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="btn" type="button" onClick={handleSend} disabled={sending}>

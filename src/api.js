@@ -69,6 +69,12 @@ export class ApiError extends Error {
 
 async function handleCustomerResponse(res) {
   const data = await res.json().catch(() => ({}));
+  // Logged out from another device (Security → Where you're logged in).
+  if (res.status === 401 && data.code === 'SESSION_ENDED' && localStorage.getItem('zappipay_customer_token')) {
+    localStorage.removeItem('zappipay_customer_token');
+    try { sessionStorage.setItem('zappipay_idle_customer', 'You were logged out on this device. Please log in again.'); } catch { /* ignore */ }
+    if (!window.location.pathname.startsWith('/login')) window.location.replace('/login');
+  }
   if (!res.ok) throw new ApiError(data.error || `Request failed (${res.status})`, data.code, res.status);
   return data;
 }
@@ -369,6 +375,12 @@ export const getAdminChallenges = () => adminRequest('/api/admin/challenges');
 export const previewChallenge = (data) => adminRequest('/api/admin/challenges/preview', { method: 'POST', body: JSON.stringify(data) });
 export const createChallenge = (data) => adminRequest('/api/admin/challenges', { method: 'POST', body: JSON.stringify(data) });
 export const updateChallenge = (id, data) => adminRequest(`/api/admin/challenges/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const getSessions = () => request('/api/security/sessions');
+export const endSession = (id) => request(`/api/security/sessions/${id}`, { method: 'DELETE' });
+export const endOtherSessions = () => request('/api/security/sessions/logout-others', { method: 'POST' });
+export const endThisSession = () => request('/api/security/sessions/logout', { method: 'POST' }).catch(() => {});
+export const getInsights = () => request('/api/insights');
+export const getAudiences = () => adminRequest('/api/admin/audiences');
 export const getSavings = () => request('/api/savings');
 export const saveToSavings = (amount) => request('/api/savings/deposit', { method: 'POST', body: JSON.stringify({ amount }) });
 export const withdrawSavings = (amount) => request('/api/savings/withdraw', { method: 'POST', body: JSON.stringify({ amount }) });
