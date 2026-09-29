@@ -171,6 +171,16 @@ export default function Dashboard() {
         <h1 className="dash-question">What would you like today?</h1>
       </div>
 
+
+      <div className="wallet-card">
+        <div className="label">Wallet Balance</div>
+        <div className="value">₦{Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+        <Link to="/wallet" className="fund-btn">
+          <FundIcon size={16} />
+          Fund Wallet
+        </Link>
+      </div>
+
       <ServiceNotices generalOnly />
 
       {banners.filter((b) => !dismissed.includes(b.id)).map((b) => {
@@ -197,16 +207,6 @@ export default function Dashboard() {
           </div>
         );
       })}
-
-      <div className="wallet-card">
-        <div className="label">Wallet Balance</div>
-        <div className="value">₦{Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-        <Link to="/wallet" className="fund-btn">
-          <FundIcon size={16} />
-          Fund Wallet
-        </Link>
-      </div>
-
       <TestModeBanner style={{ margin: '16px 16px' }} />
 
       <AdsCarousel />

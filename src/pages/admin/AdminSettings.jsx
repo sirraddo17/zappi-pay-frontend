@@ -5,6 +5,7 @@ import AiSettingsPanel from '../../components/AiSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
 import RewardGuardPanel from '../../components/admin/RewardGuardPanel';
 import SavingsPanel from '../../components/admin/SavingsPanel';
+import MaintenancePanel from '../../components/admin/MaintenancePanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -14,6 +15,7 @@ const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTER
 // accepts partial updates, so saving discounts can never overwrite
 // the VTpass keys (or vice versa) with stale values from another tab.
 const TABS = [
+  { key: 'maintenance', label: '🛠️ Maintenance' },
   { key: 'vtpass', label: 'VTpass' },
   { key: 'monnify', label: 'Monnify' },
   { key: 'markup', label: 'Markup' },
@@ -970,6 +972,7 @@ export default function AdminSettings() {
 
       {!loading && !loadError && tab === 'ai' && <AiSettingsPanel />}
       {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
+      {!loading && !loadError && tab === 'maintenance' && <MaintenancePanel />}
 
       {tab === 'password' && (
         <form className="card" style={cardStyle} onSubmit={savePassword}>

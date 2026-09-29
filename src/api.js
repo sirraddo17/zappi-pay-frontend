@@ -345,6 +345,25 @@ export const rejectEscalation = (id, note) => adminRequest(`/api/admin/escalatio
 export const reportOrderToVtpass = (id, note) => adminRequest(`/api/admin/orders/${id}/vtpass-escalate`, { method: 'POST', body: JSON.stringify({ note }) });
 export const checkCustomerFunding = (id, reference) => adminRequest(`/api/admin/customers/${id}/check-funding`, { method: 'POST', body: JSON.stringify({ reference }) });
 export const setAdminRole = (id, role) => adminRequest(`/api/admin/admins/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
+export const getReconciliation = (other) => adminRequest(`/api/admin/reconciliation${other ? `?other=${encodeURIComponent(other)}` : ''}`);
+// CSV download for the accountant (orders, transactions, bank-transfers, customers).
+export async function downloadExport(kind, from, to) {
+  const token = localStorage.getItem('zappipay_admin_token');
+  const r = await fetch(`${API_URL}/api/admin/export/${kind}?from=${from}&to=${to}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}));
+    throw new Error(body.error || 'Could not download the file.');
+  }
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zappipay-${kind}-${from}-to-${to}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
 export const getChallenges = () => request('/api/challenges');
 export const getAdminChallenges = () => adminRequest('/api/admin/challenges');
 export const previewChallenge = (data) => adminRequest('/api/admin/challenges/preview', { method: 'POST', body: JSON.stringify(data) });

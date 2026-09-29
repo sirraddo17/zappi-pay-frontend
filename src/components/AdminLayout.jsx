@@ -11,6 +11,7 @@ let monnifyModeCache = null;
 
 const TABS = [
   { to: '/admin', label: 'Overview', end: true },
+  { to: '/admin/money', label: '💰 Money check' },
   { to: '/admin/assistant', label: '✨ AI Assistant' },
   { to: '/admin/pending-funding', label: 'Pending Funding' },
   { to: '/admin/airtime-cash', label: 'Airtime to Cash' },

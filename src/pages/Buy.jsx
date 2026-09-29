@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo } from '../api';
 import { cached } from '../lib/cache';
 import PinConfirm from '../components/PinConfirm';
-import ServiceNotices, { useAppInfo } from '../components/ServiceNotices';
+import ServiceNotices, { useAppInfo, pausedFor } from '../components/ServiceNotices';
 
 // Maps the URL slug to what the backend Order.service enum expects, the
 // VTpass category identifier used to fetch that service's provider list,
@@ -553,8 +553,8 @@ export default function Buy() {
           )}
         </div>
 
-        <button className="btn" type="submit" disabled={submitting || !amount}>
-          {submitting ? 'Processing…' : `Pay ${naira(payTotal)}${repeatOn ? ' & schedule' : ''}`}
+        <button className="btn" type="submit" disabled={submitting || !amount || Boolean(pausedFor(appInfo, config.backendService))}>
+          {pausedFor(appInfo, config.backendService) ? 'Paused for maintenance' : submitting ? 'Processing…' : `Pay ${naira(payTotal)}${repeatOn ? ' & schedule' : ''}`}
         </button>
       </form>
 
