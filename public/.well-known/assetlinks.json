@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "ng.com.zappipay.www.twa",
+        "sha256_cert_fingerprints": ["8C:75:6D:3C:49:5E:14:E9:6F:30:B5:3A:8F:A1:F6:2A:63:55:6C:E6:FA:89:FA:FF:90:FC:A3:8A:11:C6:8B:0A"]
+      }
+    }]
