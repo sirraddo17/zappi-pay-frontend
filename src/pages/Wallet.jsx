@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLang } from '../lib/i18n';
 import TestModeBanner from '../components/TestModeBanner';
 import SavingsCard from '../components/SavingsCard';
 import SpendingCard from '../components/SpendingCard';
@@ -244,6 +245,7 @@ function fmtDate(d) {
 }
 
 export default function Wallet() {
+  const t = useLang();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState(null);
   const [amount, setAmount] = useState('');
@@ -351,14 +353,14 @@ export default function Wallet() {
   return (
     <div className="app-shell">
       <div className="page-header">
-        <h1>Wallet</h1>
-        <p>Fund your wallet and track your transactions</p>
+        <h1>{t('Wallet')}</h1>
+        <p>{t('Fund your wallet and track your transactions')}</p>
       </div>
 
       <TestModeBanner />
 
       <div className="card stat-card">
-        <div className="label">Wallet Balance</div>
+        <div className="label">{t('Wallet Balance')}</div>
         <div className="value">{fmtMoney(balance)}</div>
       </div>
 
@@ -390,7 +392,7 @@ export default function Wallet() {
 
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <h2 style={{ margin: 0, fontSize: 16 }}>Transaction History</h2>
+          <h2 style={{ margin: 0, fontSize: 16 }}>{t('Transaction History')}</h2>
           <Link to="/statement" style={{ color: 'var(--purple)', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>Statement (PDF) ›</Link>
         </div>
         <div style={{ height: 12 }} />

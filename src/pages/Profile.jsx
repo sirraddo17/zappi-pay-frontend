@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLang } from '../lib/i18n';
+import LanguagePicker from '../components/LanguagePicker';
 import { useShowMore } from '../components/ShowMore';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +11,7 @@ import { SUPPORT_EMAIL, WHATSAPP_NUMBER } from '../assistant/knowledge';
 import { useAppInfo } from '../components/ServiceNotices';
 import AccountExtras from '../components/AccountExtras';
 import AgentCard from '../components/AgentCard';
+import MyShopCard from '../components/MyShopCard';
 import NewPasswordFields from '../components/NewPasswordFields';
 import SecurityDetailsCard from '../components/SecurityDetailsCard';
 import SocialLinks from '../components/SocialLinks';
@@ -18,6 +21,7 @@ import { passwordIsStrong } from '../lib/passwordRules';
 const MAX_AVATAR_BYTES = 1_500_000;
 
 export default function Profile() {
+  const t = useLang();
   const { customer, logout, refreshCustomer } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -202,7 +206,7 @@ export default function Profile() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', color: 'var(--slate-100, #f1f5f9)', textDecoration: 'none', borderBottom: '1px solid var(--slate-700)' }}
         >
           <span>
-            <span style={{ display: 'block', fontWeight: 600 }}>Security</span>
+            <span style={{ display: 'block', fontWeight: 600 }}>{t('Security')}</span>
             <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 13 }}>PIN, quick login, fingerprint / Face ID</span>
           </span>
           <span style={{ color: 'var(--slate-400)' }}>›</span>
@@ -212,7 +216,7 @@ export default function Profile() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', color: 'var(--slate-100, #f1f5f9)', textDecoration: 'none', borderBottom: '1px solid var(--slate-700)' }}
         >
           <span>
-            <span style={{ display: 'block', fontWeight: 600 }}>Account Statement</span>
+            <span style={{ display: 'block', fontWeight: 600 }}>{t('Account Statement')}</span>
             <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 13 }}>Download your wallet history as PDF</span>
           </span>
           <span style={{ color: 'var(--slate-400)' }}>›</span>
@@ -232,7 +236,7 @@ export default function Profile() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', color: 'var(--slate-100, #f1f5f9)', textDecoration: 'none', borderBottom: 'none' }}
         >
           <span>
-            <span style={{ display: 'block', fontWeight: 600 }}>Refer & Earn</span>
+            <span style={{ display: 'block', fontWeight: 600 }}>{t('Refer & Earn')}</span>
             <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 13 }}>Invite friends and earn a bonus</span>
           </span>
           <span style={{ color: 'var(--slate-400)' }}>›</span>
@@ -240,7 +244,7 @@ export default function Profile() {
       </div>
 
       <form className="card" style={{ margin: '0 0 16px' }} onSubmit={handlePasswordChange}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Change Password</h2>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('Change Password')}</h2>
         {passwordError && <p className="error-text" style={{ margin: '0 0 12px' }}>{passwordError}</p>}
         {passwordSuccess && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 0 12px' }}>{passwordSuccess}</p>}
         <div className="field">
@@ -262,9 +266,10 @@ export default function Profile() {
       </div>
 
       <ThemeToggle style={{ margin: '0 0 16px' }} />
+      <LanguagePicker style={{ margin: '0 0 16px' }} />
 
       <div className="card" style={{ margin: '0 0 16px' }}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Support</h2>
+        <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('Support')}</h2>
         <button
           type="button"
           className="btn"
@@ -349,6 +354,16 @@ export default function Profile() {
       </div>
 
       <AgentCard />
+      {customer?.isAgent && (
+        <Link to="/profit-book" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
+          <span>
+            <strong style={{ fontSize: 15 }}>📒 Profit book</strong>
+            <span style={{ display: 'block', fontSize: 13, color: 'var(--slate-400)' }}>Your sales, profit and who owes you</span>
+          </span>
+          <span style={{ color: 'var(--purple)' }}>›</span>
+        </Link>
+      )}
+      <MyShopCard />
 
       <AccountExtras />
 

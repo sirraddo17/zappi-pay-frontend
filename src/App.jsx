@@ -43,6 +43,9 @@ const Legal = lazy(() => import('./pages/Legal'));
 const Help = lazy(() => import('./pages/Help'));
 const Status = lazy(() => import('./pages/Status'));
 const Gift = lazy(() => import('./pages/Gift'));
+const Deals = lazy(() => import('./pages/Deals'));
+const Shop = lazy(() => import('./pages/Shop'));
+const ProfitBook = lazy(() => import('./pages/ProfitBook'));
 const DeleteAccountInfo = lazy(() => import('./pages/DeleteAccountInfo'));
 const Transfer = lazy(() => import('./pages/Transfer'));
 const PayLink = lazy(() => import('./pages/PayLink'));
@@ -138,6 +141,9 @@ export default function App() {
           <Route path="/help" element={<Help />} />
           <Route path="/status" element={<Status />} />
           <Route path="/gift/:token" element={<Gift />} />
+          <Route path="/shop/:username" element={<Shop />} />
+          <Route path="/profit-book" element={<RequireCustomer><ProfitBook /></RequireCustomer>} />
+          <Route path="/deals" element={<RequireCustomer><Deals /></RequireCustomer>} />
           <Route path="/delete-account" element={<DeleteAccountInfo />} />
           <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
           <Route path="/pay/:username" element={<PayLink />} />

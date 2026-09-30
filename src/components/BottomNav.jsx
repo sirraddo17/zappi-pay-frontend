@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useLang } from '../lib/i18n';
 import { HomeIcon, WalletIcon, ReceiptIcon, ProfileIcon } from './Icons';
 
 const TABS = [
@@ -9,6 +10,7 @@ const TABS = [
 ];
 
 export default function BottomNav() {
+  const t = useLang();
   return (
     <nav className="bottom-nav">
       {TABS.map(({ to, end, label, Icon }) => (
@@ -17,7 +19,7 @@ export default function BottomNav() {
             <>
               {isActive && <span className="nav-dot" />}
               <Icon size={20} color={isActive ? 'var(--purple)' : 'var(--slate-400)'} />
-              {label}
+              {t(label)}
             </>
           )}
         </NavLink>

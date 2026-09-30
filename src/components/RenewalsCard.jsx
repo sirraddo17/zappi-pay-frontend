@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLang } from '../lib/i18n';
 import { Link } from 'react-router-dom';
 import { getReminders, stopReminder, setRemindersOff } from '../api';
 import { buyAgainLink } from '../lib/repeat';
@@ -8,6 +9,7 @@ const ICON = { CABLE: '📺', DATA: '📶', INTERNET: '🌐' };
 // Home page: "Your DStv expires in 3 days — Renew". Shows bills due in
 // the next two weeks; hidden when there are none.
 export default function RenewalsCard() {
+  const t = useLang();
   const [data, setData] = useState(null);
   const [msg, setMsg] = useState('');
 
@@ -32,7 +34,7 @@ export default function RenewalsCard() {
 
   return (
     <div className="card" style={{ border: '1px solid var(--gold)' }}>
-      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8 }}>⏰ Coming up for renewal</div>
+      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8 }}>{t('⏰ Coming up for renewal')}</div>
       <div style={{ display: 'grid', gap: 10 }}>
         {soon.map((r) => {
           const link = buyAgainLink({ service: r.service, provider: r.serviceID, recipient: r.billersCode, variationCode: r.variationCode });
@@ -46,7 +48,7 @@ export default function RenewalsCard() {
                   {r.service === 'CABLE' ? 'Expires' : 'Ends'} {r.when} · {new Date(r.dueDate).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}
                 </div>
               </div>
-              {link && <Link to={link} className="btn" style={{ width: 'auto', flexShrink: 0, padding: '6px 12px', fontSize: 13, textDecoration: 'none' }}>Renew</Link>}
+              {link && <Link to={link} className="btn" style={{ width: 'auto', flexShrink: 0, padding: '6px 12px', fontSize: 13, textDecoration: 'none' }}>{t('Renew')}</Link>}
               <button type="button" onClick={() => stop(r)} aria-label={`Stop reminding me about ${r.label}`} style={{ background: 'none', border: 'none', color: 'var(--slate-400)', fontSize: 18, cursor: 'pointer', padding: '0 2px' }}>×</button>
             </div>
           );

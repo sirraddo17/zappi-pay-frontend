@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLang } from '../lib/i18n';
 import TestModeBanner from '../components/TestModeBanner';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import GiftForm from '../components/GiftForm';
+import { currentShop, forgetShop } from '../lib/shopRef';
 import { useAuth } from '../context/AuthContext';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo } from '../api';
 import { cached } from '../lib/cache';
@@ -107,6 +109,7 @@ function naira(n) {
 }
 
 export default function Buy() {
+  const t = useLang();
   const { service: slug } = useParams();
   const navigate = useNavigate();
   const { customer, refreshCustomer } = useAuth();
@@ -146,6 +149,7 @@ export default function Buy() {
   const [nickname, setNickname] = useState('');
   const [repeatOn, setRepeatOn] = useState(false);
   const [giftOn, setGiftOn] = useState(false);
+  const [viaShop, setViaShop] = useState(() => currentShop());
   const [giftTheme, setGiftTheme] = useState('JUST_BECAUSE');
   const [giftMessage, setGiftMessage] = useState('');
   const [frequency, setFrequency] = useState('MONTHLY');
@@ -330,6 +334,7 @@ export default function Buy() {
         saveBeneficiary: saveIt && !alreadySaved ? { nickname: nickname.trim() || undefined } : undefined,
         repeat: repeatOn ? { frequency, nickname: nickname.trim() || undefined } : undefined,
         gift: sendGift ? { theme: giftTheme, message: giftMessage } : undefined,
+        shop: viaShop?.username || undefined,
         ...auth,
       });
       await refreshCustomer();
@@ -364,10 +369,11 @@ export default function Buy() {
     <div className="app-shell">
       <div className="page-header">
         <Link to="/" style={{ color: 'var(--purple, var(--orange))', textDecoration: 'none', fontSize: 14 }}>
-          &larr; Back
+          &larr; {t('Back')}
         </Link>
-        <h1>Buy {config.label}</h1>
-        <p>Pay from your wallet balance</p>
+        <h1>{t('Buy {service}', { service: config.label })}</h1>
+        <p>{t('Pay from your wallet balance')}</p>
+        {config.backendService === 'DATA' && <Link to="/deals" style={{ display: 'inline-block', marginTop: 4, marginRight: 8, fontSize: 13, color: 'var(--purple)', textDecoration: 'none' }}>🔎 Find the best deal for your budget ›</Link>}
         {appInfo?.deliveryPromise?.services?.includes(config.backendService) && (
           <span title={`If it takes longer than ${appInfo.deliveryPromise.seconds} seconds, we add ₦${appInfo.deliveryPromise.bonus} to your wallet (purchases from ₦${appInfo.deliveryPromise.minAmount}, once a day).`} style={{ display: 'inline-block', marginTop: 6, padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600, background: 'rgba(245,179,1,0.14)', color: 'var(--gold)', border: '1px solid rgba(245,179,1,0.4)' }}>
             ⚡ Delivered in {appInfo.deliveryPromise.seconds}s or ₦{appInfo.deliveryPromise.bonus} back
@@ -428,9 +434,9 @@ export default function Buy() {
 
       <form className="card" onSubmit={handleSubmit}>
         <div className="field">
-          <label htmlFor="provider">{config.label} provider</label>
+          <label htmlFor="provider">{t('{service} provider', { service: config.label })}</label>
           <select id="provider" value={providerId} onChange={(e) => setProviderId(e.target.value)} required>
-            <option value="">Select…</option>
+            <option value="">{t('Select…')}</option>
             {providers.map((p) => (
               <option key={p.serviceID} value={p.serviceID}>{p.name}</option>
             ))}
@@ -439,7 +445,7 @@ export default function Buy() {
 
         {config.needsType && (
           <div className="field">
-            <label htmlFor="billType">Meter type</label>
+            <label htmlFor="billType">{t('Meter type')}</label>
             <select id="billType" value={billType} onChange={(e) => setBillType(e.target.value)}>
               <option value="prepaid">Prepaid</option>
               <option value="postpaid">Postpaid</option>
@@ -448,7 +454,7 @@ export default function Buy() {
         )}
 
         <div className="field">
-          <label htmlFor="recipient">{config.recipientLabel}</label>
+          <label htmlFor="recipient">{t(config.recipientLabel)}</label>
           <input
             id="recipient"
             type="text"
@@ -473,9 +479,9 @@ export default function Buy() {
 
         {config.needsVariation ? (
           <div className="field">
-            <label htmlFor="variation">{slug === 'data' ? 'Data plan' : slug === 'cable' ? 'Package' : 'Exam type'}</label>
+            <label htmlFor="variation">{t(slug === 'data' ? 'Data plan' : slug === 'cable' ? 'Package' : 'Exam type')}</label>
             <select id="variation" value={variationCode} onChange={(e) => setVariationCode(e.target.value)} required>
-              <option value="">Select…</option>
+              <option value="">{t('Select…')}</option>
               {variations.map((v) => (
                 <option key={v.variation_code} value={v.variation_code}>
                   {v.name} — {naira(priceFor(v.variation_amount, config.backendService, pricing).total)}
@@ -485,7 +491,7 @@ export default function Buy() {
           </div>
         ) : (
           <div className="field">
-            <label htmlFor="amount">Amount (₦)</label>
+            <label htmlFor="amount">{t('Amount (₦)')}</label>
             <input id="amount" type="number" min="50" value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} required />
           </div>
         )}
@@ -512,7 +518,7 @@ export default function Buy() {
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 16 }}>
-              <span>Total</span>
+              <span>{t('Total')}</span>
               <span>{naira(payTotal)}</span>
             </div>
             {cashbackPct > 0 && payTotal > 0 && (
@@ -551,14 +557,14 @@ export default function Buy() {
             <div style={{ marginBottom: 10 }}>
               <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, cursor: 'pointer' }}>
                 <input type="checkbox" checked={giftOn} onChange={(e) => setGiftOn(e.target.checked)} style={{ width: 'auto' }} />
-                🎁 Send as a gift with a message
+                {t('🎁 Send as a gift with a message')}
               </label>
               {giftOn && <GiftForm theme={giftTheme} setTheme={setGiftTheme} message={giftMessage} setMessage={setGiftMessage} />}
             </div>
           )}
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, cursor: 'pointer' }}>
             <input type="checkbox" checked={repeatOn} onChange={(e) => setRepeatOn(e.target.checked)} style={{ width: 'auto' }} />
-            Repeat this purchase automatically
+            {t('Repeat this purchase automatically')}
           </label>
           {repeatOn && (
             <div className="field" style={{ marginTop: 10, marginBottom: 0 }}>
@@ -580,8 +586,14 @@ export default function Buy() {
           )}
         </div>
 
+        {viaShop && (
+          <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '0 0 10px' }}>
+            🏪 Buying through <b>{viaShop.name || viaShop.username}</b>’s shop — same price for you.{' '}
+            <button type="button" onClick={() => { forgetShop(); setViaShop(null); }} style={{ background: 'none', border: 'none', color: 'var(--purple)', fontSize: 12, padding: 0, cursor: 'pointer' }}>Remove</button>
+          </p>
+        )}
         <button className="btn" type="submit" disabled={submitting || !amount || Boolean(pausedFor(appInfo, config.backendService))}>
-          {pausedFor(appInfo, config.backendService) ? 'Paused for maintenance' : submitting ? 'Processing…' : `Pay ${naira(payTotal)}${repeatOn ? ' & schedule' : ''}`}
+          {pausedFor(appInfo, config.backendService) ? 'Paused for maintenance' : submitting ? t('Processing…') : `${t('Pay {amount}', { amount: naira(payTotal) })}${repeatOn ? ' & schedule' : ''}`}
         </button>
       </form>
 

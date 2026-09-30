@@ -402,3 +402,21 @@ export const makeOrderGift = (id, data) => request(`/api/orders/${id}/gift`, { m
 // Delivery promise (owner settings).
 export const getDeliveryPromise = () => adminRequest('/api/admin/delivery-promise');
 export const saveDeliveryPromise = (data) => adminRequest('/api/admin/delivery-promise', { method: 'PUT', body: JSON.stringify(data) });
+
+// Data deal finder.
+export const findDataDeals = (params) => {
+  const q = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== ''));
+  return request(`/api/deals/data?${q.toString()}`);
+};
+
+// Agent shop links.
+export const getShop = (username) => request(`/api/shop/${encodeURIComponent(username)}`);
+export const getMyShop = () => request('/api/my-shop');
+export const saveMyShop = (data) => request('/api/my-shop', { method: 'PUT', body: JSON.stringify(data) });
+export const getAdminShops = () => adminRequest('/api/admin/shops');
+export const saveAdminShops = (data) => adminRequest('/api/admin/shops', { method: 'PUT', body: JSON.stringify(data) });
+
+// Agent profit book.
+export const getProfitBook = ({ from, to }) => request(`/api/agent/book?from=${from}&to=${to}`);
+export const getOwing = () => request('/api/agent/book/owing');
+export const saveAgentSale = (orderId, data) => request(`/api/agent/book/${orderId}`, { method: 'PUT', body: JSON.stringify(data) });

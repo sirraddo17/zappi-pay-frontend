@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLang } from '../lib/i18n';
 import TestModeBanner from '../components/TestModeBanner';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -58,6 +59,7 @@ function txLabel(t) {
   if (t.type === 'INTEREST') return 'Savings interest';
   if (t.type === 'CHALLENGE_REWARD') return t.note || 'Challenge reward';
   if (t.type === 'DELIVERY_BONUS') return 'Delivery promise bonus';
+  if (t.type === 'SHOP_COMMISSION') return t.note || 'Shop commission';
   return t.note || 'Purchase';
 }
 
@@ -88,6 +90,7 @@ function writeDismissed(ids) {
 }
 
 export default function Dashboard() {
+  const t = useLang();
   const { customer } = useAuth();
   const [balance, setBalance] = useState(customer?.walletBalance ?? 0);
   const [transactions, setTransactions] = useState(null);
@@ -167,19 +170,19 @@ export default function Dashboard() {
           </Link>
         </div>
         <p className="dash-greeting">
-          Hi, {customer?.name?.split(' ')[0] || 'there'} 👋
+          {t('Hi, {name} 👋', { name: customer?.name?.split(' ')[0] || 'there' })}
           {customer?.isAgent && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,184,46,0.2)', color: 'var(--gold, #f5b82e)' }}>⭐ AGENT</span>}
         </p>
-        <h1 className="dash-question">What would you like today?</h1>
+        <h1 className="dash-question">{t('What would you like today?')}</h1>
       </div>
 
 
       <div className="wallet-card">
-        <div className="label">Wallet Balance</div>
+        <div className="label">{t('Wallet Balance')}</div>
         <div className="value">₦{Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
         <Link to="/wallet" className="fund-btn">
           <FundIcon size={16} />
-          Fund Wallet
+          {t('Fund Wallet')}
         </Link>
       </div>
 
@@ -216,10 +219,17 @@ export default function Dashboard() {
       <AdPopup />
       <PushToggle variant="nudge" />
       <LoyaltyCard />
+      <Link to="/deals" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '12px 16px' }}>
+        <span>
+          <strong style={{ fontSize: 14 }}>{t('🔎 Best data for your budget')}</strong>
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--slate-400)' }}>{t('Tell us how much — we find the most data on every network')}</span>
+        </span>
+        <span style={{ color: 'var(--purple)' }}>›</span>
+      </Link>
       <Link to="/bulk" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '12px 16px' }}>
         <span>
-          <strong style={{ fontSize: 14 }}>Bulk airtime &amp; data</strong>
-          <span style={{ display: 'block', fontSize: 12, color: 'var(--slate-400)' }}>Send to up to 50 numbers at once</span>
+          <strong style={{ fontSize: 14 }}>{t('Bulk airtime & data')}</strong>
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--slate-400)' }}>{t('Send to up to 50 numbers at once')}</span>
         </span>
         <span style={{ color: 'var(--purple)' }}>›</span>
       </Link>
@@ -227,7 +237,7 @@ export default function Dashboard() {
       {recent.length > 0 && (
         <>
           <div className="section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span>Buy again</span>
+            <span>{t('Buy again')}</span>
             <Link to="/saved" style={{ fontSize: 12, color: 'var(--purple)', textDecoration: 'none', textTransform: 'none', letterSpacing: 0 }}>Saved &amp; Scheduled</Link>
           </div>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '0 16px 4px' }}>
@@ -249,7 +259,7 @@ export default function Dashboard() {
         </>
       )}
 
-      <div className="section-label">Services</div>
+      <div className="section-label">{t('Services')}</div>
       <div className="service-grid">
         {SERVICES.map((s) => {
           const Icon = s.Icon;
@@ -277,7 +287,7 @@ export default function Dashboard() {
               <div className="service-icon" style={{ background: s.bg }}>
                 <Icon size={22} color="#fff" />
               </div>
-              {s.label}
+              {t(s.label)}
             </Link>
           );
         })}
@@ -346,7 +356,7 @@ export default function Dashboard() {
         </Link>
       )}
 
-      <div className="section-label">Recent Transactions</div>
+      <div className="section-label">{t('Recent Transactions')}</div>
       {/* The bottom slider sits right under this list, so no big gap here;
           the slider keeps the space above the bottom menu instead. */}
       <div className="tx-list" style={{ marginBottom: 0 }}>
@@ -356,7 +366,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD', 'DELIVERY_BONUS'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD', 'DELIVERY_BONUS', 'SHOP_COMMISSION'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>
