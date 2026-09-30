@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getOrder, submitSupportTicket } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import RateExperience from '../components/RateExperience';
+import GiftPanel from '../components/GiftPanel';
 import ImageAttach from '../components/ImageAttach';
 import { buyAgainLink } from '../lib/repeat';
 import { shareReceipt, downloadReceipt, extractToken } from '../lib/receipt';
@@ -24,6 +25,7 @@ function fmtDate(d) {
 
 export default function OrderDetail() {
   const { id } = useParams();
+  const [search] = useSearchParams();
   const [order, setOrder] = useState(null);
   const [error, setError] = useState('');
 
@@ -199,6 +201,8 @@ export default function OrderDetail() {
           {sharing ? 'Preparing…' : 'Share receipt'}
         </button>
       </div>
+
+      <GiftPanel order={order} autoOpen={search.get('gift') === 'new'} />
 
       {buyAgainLink(order) && (
         <Link

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import TestModeBanner from '../components/TestModeBanner';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
+import GiftForm from '../components/GiftForm';
 import { useAuth } from '../context/AuthContext';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo } from '../api';
 import { cached } from '../lib/cache';
@@ -128,6 +129,8 @@ export default function Buy() {
   const [recipient, setRecipient] = useState('');
   const [phone, setPhone] = useState(customer?.phone || '');
   const [verifiedName, setVerifiedName] = useState('');
+  // Cable only: current subscription expiry from the smartcard check.
+  const [verifiedDue, setVerifiedDue] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -142,6 +145,9 @@ export default function Buy() {
   const [saveIt, setSaveIt] = useState(false);
   const [nickname, setNickname] = useState('');
   const [repeatOn, setRepeatOn] = useState(false);
+  const [giftOn, setGiftOn] = useState(false);
+  const [giftTheme, setGiftTheme] = useState('JUST_BECAUSE');
+  const [giftMessage, setGiftMessage] = useState('');
   const [frequency, setFrequency] = useState('MONTHLY');
   const [promoInput, setPromoInput] = useState('');
   const [promo, setPromo] = useState(null);
@@ -227,6 +233,8 @@ export default function Buy() {
     try {
       const data = await verifyBillersCode(providerId, recipient, config.needsType ? billType : undefined);
       setVerifiedName(data.content?.Customer_Name || data.content?.customerName || 'Verified');
+      const due = String(data.content?.Due_Date || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+      setVerifiedDue(due ? new Date(Number(due[1]), Number(due[2]) - 1, Number(due[3])).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
     } catch (err) {
       if (!silent) setError('Could not verify this number — double-check it before continuing.');
     } finally {
@@ -254,6 +262,9 @@ export default function Buy() {
   const amount = config?.needsVariation ? Number(selectedVariation?.variation_amount || 0) : Number(customAmount || 0);
   // amount stays VTpass's own price (what the backend expects to
   // receive); price.total is what the wallet will actually be charged.
+  // Airtime / data for someone else can go with a gift card.
+  const canGift = ['AIRTIME', 'DATA'].includes(config?.backendService) && /^\d{10,}$/.test(recipient.replace(/\D/g, ''))
+    && recipient.replace(/\D/g, '').slice(-10) !== String(customer?.phone || '').replace(/\D/g, '').slice(-10);
   const price = priceFor(amount, config?.backendService, pricing);
   const discountPct = price.discountPct;
   const promoDiscount = promo ? Math.min(promo.discount, price.total) : 0;
@@ -306,7 +317,8 @@ export default function Buy() {
     setSlow(false);
     const slowTimer = setTimeout(() => setSlow(true), 6000);
     try {
-      await purchase({
+      const sendGift = canGift && giftOn;
+      const res = await purchase({
         service: config.backendService,
         serviceID: providerId,
         variationCode: config.needsVariation ? variationCode : undefined,
@@ -317,11 +329,12 @@ export default function Buy() {
         promoCode: promo ? promo.code : undefined,
         saveBeneficiary: saveIt && !alreadySaved ? { nickname: nickname.trim() || undefined } : undefined,
         repeat: repeatOn ? { frequency, nickname: nickname.trim() || undefined } : undefined,
+        gift: sendGift ? { theme: giftTheme, message: giftMessage } : undefined,
         ...auth,
       });
       await refreshCustomer();
       setConfirmOpen(false);
-      navigate('/orders');
+      navigate(sendGift && res?.order?.id ? `/orders/${res.order.id}?gift=new` : '/orders');
     } catch (err) {
       if (/refunded/i.test(err.message || '')) refreshCustomer().catch(() => {});
       throw err;
@@ -355,6 +368,11 @@ export default function Buy() {
         </Link>
         <h1>Buy {config.label}</h1>
         <p>Pay from your wallet balance</p>
+        {appInfo?.deliveryPromise?.services?.includes(config.backendService) && (
+          <span title={`If it takes longer than ${appInfo.deliveryPromise.seconds} seconds, we add ₦${appInfo.deliveryPromise.bonus} to your wallet (purchases from ₦${appInfo.deliveryPromise.minAmount}, once a day).`} style={{ display: 'inline-block', marginTop: 6, padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600, background: 'rgba(245,179,1,0.14)', color: 'var(--gold)', border: '1px solid rgba(245,179,1,0.4)' }}>
+            ⚡ Delivered in {appInfo.deliveryPromise.seconds}s or ₦{appInfo.deliveryPromise.bonus} back
+          </span>
+        )}
       </div>
 
       <TestModeBanner />
@@ -450,7 +468,7 @@ export default function Buy() {
               {verifying ? 'Verifying…' : 'Verify'}
             </button>
           )}
-          {verifiedName && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '6px 0 0' }}>{verifiedName}</p>}
+          {verifiedName && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '6px 0 0' }}>{verifiedName}{verifiedDue && <span style={{ color: 'var(--slate-400)' }}> · current plan ends {verifiedDue}</span>}</p>}
         </div>
 
         {config.needsVariation ? (
@@ -528,6 +546,15 @@ export default function Buy() {
               <input type="checkbox" checked={saveIt} onChange={(e) => setSaveIt(e.target.checked)} style={{ width: 'auto' }} />
               Save this {config.recipientLabel.toLowerCase().replace(/ \(.*\)/, '')} for next time
             </label>
+          )}
+          {canGift && (
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, cursor: 'pointer' }}>
+                <input type="checkbox" checked={giftOn} onChange={(e) => setGiftOn(e.target.checked)} style={{ width: 'auto' }} />
+                🎁 Send as a gift with a message
+              </label>
+              {giftOn && <GiftForm theme={giftTheme} setTheme={setGiftTheme} message={giftMessage} setMessage={setGiftMessage} />}
+            </div>
           )}
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, cursor: 'pointer' }}>
             <input type="checkbox" checked={repeatOn} onChange={(e) => setRepeatOn(e.target.checked)} style={{ width: 'auto' }} />

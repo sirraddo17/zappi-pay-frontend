@@ -28,6 +28,7 @@ const TYPE_LABEL = {
   SAVINGS_OUT: 'From savings',
   INTEREST: 'Savings interest',
   CHALLENGE_REWARD: 'Challenge reward',
+  DELIVERY_BONUS: 'Delivery promise bonus',
 };
 
 // Last 12 months as quick picks, plus a custom range.

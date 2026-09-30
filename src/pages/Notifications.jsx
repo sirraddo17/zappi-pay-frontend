@@ -1,13 +1,40 @@
 import { useEffect, useState } from 'react';
 import { useShowMore } from '../components/ShowMore';
 import { Link } from 'react-router-dom';
-import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../api';
+import { getNotifications, markNotificationRead, markAllNotificationsRead, getReminders, setRemindersOff } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { BellIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 
 function fmtDate(d) {
   return new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+// "Remind me before my DStv / data plan runs out" on/off.
+function RenewalReminderToggle() {
+  const [off, setOff] = useState(null);
+  useEffect(() => {
+    getReminders().then((d) => setOff(Boolean(d.off))).catch(() => {});
+  }, []);
+  if (off === null) return null;
+  async function flip() {
+    const next = !off;
+    setOff(next);
+    try {
+      await setRemindersOff(next);
+    } catch {
+      setOff(!next);
+    }
+  }
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 16px 0', padding: '12px 14px', borderRadius: 12, border: '1px solid var(--slate-700)', background: 'var(--slate-800)', cursor: 'pointer' }}>
+      <span style={{ flex: 1 }}>
+        <b style={{ display: 'block', fontSize: 14 }}>Renewal reminders</b>
+        <span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Tell me before my DStv, GOtv, Startimes or data plan runs out</span>
+      </span>
+      <input type="checkbox" checked={!off} onChange={flip} style={{ width: 20, height: 20, accentColor: 'var(--purple)' }} />
+    </label>
+  );
 }
 
 export default function Notifications() {
@@ -56,6 +83,8 @@ export default function Notifications() {
       </div>
 
       {error && <p className="error-text" style={{ margin: '16px 16px 0' }}>{error}</p>}
+
+      <RenewalReminderToggle />
 
       {hasUnread && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '16px 16px 0' }}>

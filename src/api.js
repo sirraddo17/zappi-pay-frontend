@@ -388,3 +388,17 @@ export const withdrawSavings = (amount) => request('/api/savings/withdraw', { me
 export const getSavingsOverview = () => adminRequest('/api/admin/savings');
 export const runSavingsInterest = () => adminRequest('/api/admin/savings/run', { method: 'POST' });
 export const customerAccountTool = (id, data) => adminRequest(`/api/admin/customers/${id}/account-tool`, { method: 'POST', body: JSON.stringify(data) });
+
+// Renewal reminders (DStv/GOtv/Startimes expiry, data plan end).
+export const getReminders = () => request('/api/reminders');
+export const stopReminder = (id) => request(`/api/reminders/${id}`, { method: 'DELETE' });
+export const setRemindersOff = (off) => request('/api/reminders/settings', { method: 'PUT', body: JSON.stringify({ off }) });
+
+// Gift cards (airtime / data for someone else).
+export const getGift = (token) => request(`/api/gifts/${encodeURIComponent(token)}`);
+export const getOrderGift = (id) => request(`/api/orders/${id}/gift`);
+export const makeOrderGift = (id, data) => request(`/api/orders/${id}/gift`, { method: 'POST', body: JSON.stringify(data) });
+
+// Delivery promise (owner settings).
+export const getDeliveryPromise = () => adminRequest('/api/admin/delivery-promise');
+export const saveDeliveryPromise = (data) => adminRequest('/api/admin/delivery-promise', { method: 'PUT', body: JSON.stringify(data) });

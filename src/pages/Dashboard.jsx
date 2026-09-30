@@ -6,6 +6,7 @@ import { cached } from '../lib/cache';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import ContestCard from '../components/ContestCard';
 import ChallengesCard from '../components/ChallengesCard';
+import RenewalsCard from '../components/RenewalsCard';
 import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
@@ -56,6 +57,7 @@ function txLabel(t) {
   if (t.type === 'SAVINGS_OUT') return 'From savings';
   if (t.type === 'INTEREST') return 'Savings interest';
   if (t.type === 'CHALLENGE_REWARD') return t.note || 'Challenge reward';
+  if (t.type === 'DELIVERY_BONUS') return 'Delivery promise bonus';
   return t.note || 'Purchase';
 }
 
@@ -182,6 +184,7 @@ export default function Dashboard() {
       </div>
 
       <ServiceNotices generalOnly />
+      <RenewalsCard />
 
       {banners.filter((b) => !dismissed.includes(b.id)).map((b) => {
         const st = BANNER_STYLES[b.type] || BANNER_STYLES.INFO;
@@ -353,7 +356,7 @@ export default function Dashboard() {
           <p className="empty-state">No transactions yet.</p>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD', 'DELIVERY_BONUS'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>

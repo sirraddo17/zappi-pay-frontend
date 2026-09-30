@@ -6,6 +6,7 @@ import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
 import RewardGuardPanel from '../../components/admin/RewardGuardPanel';
 import SavingsPanel from '../../components/admin/SavingsPanel';
 import MaintenancePanel from '../../components/admin/MaintenancePanel';
+import DeliveryPromisePanel from '../../components/admin/DeliveryPromisePanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -24,6 +25,7 @@ const TABS = [
   { key: 'airtimeCash', label: 'Airtime to Cash' },
   { key: 'referral', label: 'Referrals' },
   { key: 'cashback', label: 'Cashback' },
+  { key: 'promise', label: '⚡ Delivery promise' },
   { key: 'agents', label: 'Agents' },
   { key: 'loyalty', label: 'Loyalty Points' },
   { key: 'savings', label: 'Savings (interest)' },
@@ -973,6 +975,7 @@ export default function AdminSettings() {
       {!loading && !loadError && tab === 'ai' && <AiSettingsPanel />}
       {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
       {!loading && !loadError && tab === 'maintenance' && <MaintenancePanel />}
+      {!loading && !loadError && tab === 'promise' && <DeliveryPromisePanel />}
 
       {tab === 'password' && (
         <form className="card" style={cardStyle} onSubmit={savePassword}>
