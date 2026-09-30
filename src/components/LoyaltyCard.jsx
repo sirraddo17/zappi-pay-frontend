@@ -40,7 +40,7 @@ export default function LoyaltyCard() {
           ⭐ {info.points.toLocaleString()} <span style={{ fontSize: 13, color: 'var(--slate-400)', fontWeight: 400 }}>= ₦{Number(info.worth).toLocaleString()}</span>
         </div>
         <div style={{ fontSize: 12, color: msg ? 'var(--green-500)' : 'var(--slate-400)' }}>
-          {msg || (canRedeem ? 'Ready to redeem' : `Earn ${info.pointsPer100} per ₦100 spent · redeem from ${info.minRedeem} points`)}
+          {msg || (canRedeem ? 'Ready to redeem' : (info.pointsPer100 == null ? `Earn points on every purchase · redeem from ${info.minRedeem} points` : `Earn ${info.pointsPer100} per ₦100 spent · redeem from ${info.minRedeem} points`))}
         </div>
       </div>
       <button type="button" className={canRedeem ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '8px 14px' }} disabled={!canRedeem || busy} onClick={redeem}>

@@ -8,6 +8,7 @@ import SavingsPanel from '../../components/admin/SavingsPanel';
 import MaintenancePanel from '../../components/admin/MaintenancePanel';
 import DeliveryPromisePanel from '../../components/admin/DeliveryPromisePanel';
 import ShopsPanel from '../../components/admin/ShopsPanel';
+import RewardSplitPanel from '../../components/admin/RewardSplitPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
@@ -18,6 +19,7 @@ const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTER
 // the VTpass keys (or vice versa) with stale values from another tab.
 const TABS = [
   { key: 'maintenance', label: '🛠️ Maintenance & alerts' },
+  { key: 'split', label: '🎁 Rewards split' },
   { key: 'vtpass', label: 'VTpass' },
   { key: 'monnify', label: 'Monnify' },
   { key: 'markup', label: 'Markup' },
@@ -122,6 +124,7 @@ export default function AdminSettings() {
   const [agentOn, setAgentOn] = useState(false);
   const [agentByService, setAgentByService] = useState(toServiceMap({}));
   const [cbEnabled, setCbEnabled] = useState(false);
+  const [splitOn, setSplitOn] = useState(false);
   const [cbByService, setCbByService] = useState(toServiceMap({}));
   const [cbMax, setCbMax] = useState('500');
   const [alertsOn, setAlertsOn] = useState(false);
@@ -191,6 +194,7 @@ export default function AdminSettings() {
         setAgentOn(Boolean(s.agentPricingEnabled));
         setAgentByService(toServiceMap(s.agentDiscountPercentByService));
         setCbEnabled(Boolean(s.cashbackEnabled));
+        setSplitOn(Boolean(s.rewardSplitEnabled));
         setCbByService(toServiceMap(s.cashbackPercentByService));
         setCbMax(String(s.cashbackMaxPerOrder ?? 500));
         setAlertsOn(Boolean(s.emailAlertsEnabled));
@@ -783,6 +787,7 @@ export default function AdminSettings() {
         <form className="card" style={cardStyle} onSubmit={saveLoyalty}>
           <SectionHeader title="Loyalty points" hint="Customers earn points on every successful purchase and turn them into wallet credit. It's a cost to you, so keep the reward small." />
           <Status state={status.loyalty} />
+          {splitOn && <p style={{ fontSize: 13, background: 'rgba(34,197,94,0.1)', border: '1px solid var(--green-500)', borderRadius: 10, padding: '8px 12px', margin: '0 0 12px' }}>🎁 The Rewards split is on, so points earned come from your Rewards split share (points per ₦100 below is not used; point value still is). Keep this switched on to take part; change amounts under <b>🎁 Rewards split</b>.</p>}
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
             <input type="checkbox" checked={loyOn} onChange={(e) => setLoyOn(e.target.checked)} style={{ width: 'auto' }} />
             Give loyalty points
@@ -881,6 +886,7 @@ export default function AdminSettings() {
         <form className="card" style={cardStyle} onSubmit={saveCashback}>
           <SectionHeader title="Cashback" hint="After a successful purchase, this % of the price goes back into the customer's wallet. It comes out of your profit — keep it below your markup." />
           <Status state={status.cashback} />
+          {splitOn && <p style={{ fontSize: 13, background: 'rgba(34,197,94,0.1)', border: '1px solid var(--green-500)', borderRadius: 10, padding: '8px 12px', margin: '0 0 12px' }}>🎁 The Rewards split is on, so cashback amounts come from your Rewards split share (the % below is not used). Keep this switched on to take part; change amounts under <b>🎁 Rewards split</b>.</p>}
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
             <input type="checkbox" checked={cbEnabled} onChange={(e) => setCbEnabled(e.target.checked)} style={{ width: 'auto' }} />
             Give cashback
@@ -955,6 +961,7 @@ export default function AdminSettings() {
             hint="Each customer's username is their referral code. When someone signs up with a code and completes a first successful purchase of at least the minimum below, the referrer's wallet is credited the bonus — once per referred customer."
           />
           <Status state={status.referral} />
+          {splitOn && <p style={{ fontSize: 13, background: 'rgba(34,197,94,0.1)', border: '1px solid var(--green-500)', borderRadius: 10, padding: '8px 12px', margin: '0 0 12px' }}>🎁 The Rewards split is on, so referral bonuses are paid from the referral pool (a bonus waits if the pool is short). Keep this switched on to take part; change amounts under <b>🎁 Rewards split</b>.</p>}
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, marginBottom: 16, cursor: 'pointer' }}>
             <input type="checkbox" checked={refEnabled} onChange={(e) => setRefEnabled(e.target.checked)} style={{ width: 'auto' }} />
             Pay referral bonuses
@@ -979,6 +986,7 @@ export default function AdminSettings() {
       {!loading && !loadError && tab === 'maintenance' && <MaintenancePanel />}
       {!loading && !loadError && tab === 'promise' && <DeliveryPromisePanel />}
       {!loading && !loadError && tab === 'shops' && <ShopsPanel />}
+      {!loading && !loadError && tab === 'split' && <RewardSplitPanel />}
 
       {tab === 'password' && (
         <form className="card" style={cardStyle} onSubmit={savePassword}>

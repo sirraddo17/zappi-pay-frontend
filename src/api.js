@@ -429,3 +429,7 @@ export const leaveFamily = () => request('/api/family/leave', { method: 'POST' }
 export const updateFamily = (id, data) => request(`/api/family/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const familySendNow = (id) => request(`/api/family/${id}/send-now`, { method: 'POST' });
 export const removeFamily = (id) => request(`/api/family/${id}`, { method: 'DELETE' });
+
+// Rewards split (owner).
+export const getRewardSplit = () => adminRequest('/api/admin/reward-split');
+export const saveRewardSplit = (data) => adminRequest('/api/admin/reward-split', { method: 'PUT', body: JSON.stringify(data) });

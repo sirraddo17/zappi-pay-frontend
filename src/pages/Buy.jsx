@@ -521,6 +521,9 @@ export default function Buy() {
               <span>{t('Total')}</span>
               <span>{naira(payTotal)}</span>
             </div>
+            {appInfo?.rewardsSplit && payTotal > 0 && (
+              <div style={{ fontSize: 13, color: 'var(--green-500)', marginTop: 4 }}>🎁 This purchase earns you cashback and points</div>
+            )}
             {cashbackPct > 0 && payTotal > 0 && (
               <div style={{ fontSize: 13, color: 'var(--green-500)', marginTop: 4 }}>
                 + {cashbackPct}% cashback (about {naira(Math.floor(payTotal * cashbackPct) / 100)}) back to your wallet
