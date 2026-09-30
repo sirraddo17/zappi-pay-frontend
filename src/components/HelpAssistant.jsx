@@ -8,6 +8,7 @@ import ImageAttach from './ImageAttach';
 import ChatPurchaseCard from './ChatPurchaseCard';
 import ChatTransferCard from './ChatTransferCard';
 import ChatActionCard from './ChatActionCard';
+import VoiceButton from './VoiceButton';
 
 // Floating "Help" chat for logged-in customers. Quick topics are
 // rule-based (assistant/knowledge.js). When the AI assistant is on in
@@ -55,6 +56,7 @@ export default function HelpAssistant() {
   const [ai, setAi] = useState(null); // { enabled, remaining }
   const [thinking, setThinking] = useState(false);
   const [chatImages, setChatImages] = useState([]);
+  const [voiceNote, setVoiceNote] = useState('');
 
   const hidden = !customer || HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p));
 
@@ -376,11 +378,13 @@ export default function HelpAssistant() {
         }}
         style={{ display: 'flex', gap: 6, padding: 10, borderTop: '1px solid var(--slate-700)' }}
       >
+        <VoiceButton onText={(t) => { setVoiceNote(''); setInput(t.slice(0, 800)); }} onNote={setVoiceNote} disabled={thinking} />
         <input value={input} onChange={(e) => setInput(e.target.value)} maxLength={800} placeholder={ai?.enabled ? 'Ask anything about your account…' : 'Type your question…'} aria-label="Your question" style={{ fontSize: 14 }} />
         <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 14px' }} disabled={(!input.trim() && !chatImages.length) || thinking}>
           Send
         </button>
       </form>
+      {voiceNote && <div style={{ padding: '0 10px', fontSize: 12, color: 'var(--gold)' }}>{voiceNote}</div>}
       {ai?.enabled && (
         <div style={{ padding: '0 10px 10px' }}>
           <ImageAttach value={chatImages} onChange={setChatImages} max={2} label="📷 Add a screenshot (bank alert, error message…)" />

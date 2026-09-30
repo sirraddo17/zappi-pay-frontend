@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
+import VoiceSettingsPanel from '../../components/admin/VoiceSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
 import RewardGuardPanel from '../../components/admin/RewardGuardPanel';
 import SavingsPanel from '../../components/admin/SavingsPanel';
@@ -981,7 +982,7 @@ export default function AdminSettings() {
         </form>
       )}
 
-      {!loading && !loadError && tab === 'ai' && <AiSettingsPanel />}
+      {!loading && !loadError && tab === 'ai' && (<div style={{ display: 'grid', gap: 16 }}><AiSettingsPanel /><VoiceSettingsPanel /></div>)}
       {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
       {!loading && !loadError && tab === 'maintenance' && <MaintenancePanel />}
       {!loading && !loadError && tab === 'promise' && <DeliveryPromisePanel />}

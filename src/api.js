@@ -443,3 +443,8 @@ export const dismissAiAction = (id) => adminRequest(`/api/admin/ai/actions/${id}
 export const recordAdView = (id) => request(`/api/ads/${id}/view`, { method: 'POST', quiet: true });
 export const getExtraFaqs = () => request('/api/help/faqs', { quiet: true });
 export const getAiBriefing = () => adminRequest('/api/admin/ai/briefing');
+
+// Voice notes (better OpenAI voice when the owner turns it on).
+export const getVoiceStatus = () => request('/api/voice/status', { quiet: true });
+export const transcribeVoice = (data) => request('/api/ai/transcribe', { method: 'POST', quiet: true, body: JSON.stringify(data) });
+export const getAdminVoiceStatus = () => adminRequest('/api/admin/voice/status');

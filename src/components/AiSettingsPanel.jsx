@@ -176,7 +176,7 @@ export default function AiSettingsPanel() {
           )}
           {usage.byType && (
             <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 6 }}>
-              {Object.entries(usage.byType).map(([k, v]) => `${k === 'CUSTOMER' ? 'Customers' : k === 'ADMIN' ? 'Admin' : 'Tests'}: ${v.messages} ($${v.usd.toFixed(2)})`).join(' · ')}
+              {Object.entries(usage.byType).map(([k, v]) => `${k === 'CUSTOMER' ? 'Customers' : k === 'ADMIN' ? 'Admin' : k === 'VOICE' ? 'Voice' : 'Tests'}: ${v.messages} ($${v.usd.toFixed(2)})`).join(' · ')}
             </div>
           )}
           <div style={{ color: 'var(--slate-400)', fontSize: 11, marginTop: 4 }}>Estimate only; your Anthropic console shows the real bill.</div>
