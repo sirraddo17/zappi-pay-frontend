@@ -129,6 +129,14 @@ export default function EpinSettingsPanel() {
             <option value="VTPASS">VTpass</option>
             <option value="CLUBKONNECT">ClubKonnect (uses the same wallet as cards)</option>
           </select>
+          {d.bettingSupplier === 'CLUBKONNECT' && d.bettingList?.at && (
+            <div style={{ fontSize: 12, margin: '6px 0', color: d.bettingList.source === 'clubkonnect' ? 'var(--green-500)' : 'var(--gold)' }}>
+              {d.bettingList.source === 'clubkonnect' ? `✓ ${d.bettingList.count} betting companies loaded from ClubKonnect.` : `Using the built-in list of betting companies (ClubKonnect's list could not be read${d.bettingList.error ? `: ${d.bettingList.error}` : ''}). Account names are still checked before paying.`}
+              {d.bettingList.sample && d.bettingList.source !== 'clubkonnect' && (
+                <details style={{ marginTop: 4 }}><summary style={{ cursor: 'pointer' }}>What ClubKonnect sent (for support)</summary><code style={{ display: 'block', whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 11, color: 'var(--slate-300, #cbd5e1)' }}>{d.bettingList.sample}</code></details>
+              )}
+            </div>
+          )}
           <small style={{ color: 'var(--slate-400)' }}>Choose ClubKonnect if the Bet Funding page shows no betting companies with VTpass. Set a markup for Betting under Markup if ClubKonnect charges you a fee.</small>
         </div>
         <p style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 0 }}>Your profit per ₦100 card ≈ {naira(Number(supplier) - Number(cust))} (customers) / {naira(Number(supplier) - Number(agent))} (agents). Discounts can’t go above what ClubKonnect gives you.</p>
