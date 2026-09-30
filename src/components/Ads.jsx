@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAds, adImageUrl, clickAd, recordAdView } from '../api';
+import { getAds, adImageUrl, adVideoUrl, clickAd, recordAdView } from '../api';
+import { useLite } from '../lib/lite';
 import { cached } from '../lib/cache';
 
 const SEEN_KEY = 'zappipay_popup_ads_seen';
@@ -39,6 +40,7 @@ function useOpenAd() {
 }
 
 function AdSlide({ ad, onOpen }) {
+  const lite = useLite();
   return (
     <button
       type="button"
@@ -46,7 +48,9 @@ function AdSlide({ ad, onOpen }) {
       style={{ flex: '0 0 100%', scrollSnapAlign: 'center', border: 'none', padding: 0, background: 'var(--slate-800)', borderRadius: 16, overflow: 'hidden', cursor: ad.linkUrl ? 'pointer' : 'default', textAlign: 'left', color: 'inherit' }}
       aria-label={ad.title}
     >
-      {ad.hasImage ? (
+      {ad.hasVideo && !lite ? (
+        <video src={adVideoUrl(ad)} poster={ad.hasImage ? adImageUrl(ad) : undefined} autoPlay muted loop playsInline preload="metadata" aria-label={ad.title} style={{ display: 'block', width: '100%', aspectRatio: '2 / 1', objectFit: 'cover', background: '#000' }} />
+      ) : ad.hasImage ? (
         <img src={adImageUrl(ad)} alt={ad.title} loading="lazy" style={{ display: 'block', width: '100%', aspectRatio: '2 / 1', objectFit: 'cover' }} />
       ) : (
         <div style={{ padding: 16, background: ad.bg || 'linear-gradient(135deg, #863bff, #5b1fc4)', color: '#fff', minHeight: 110, position: 'relative', overflow: 'hidden' }}>
@@ -117,6 +121,7 @@ export function AdsCarousel({ placement = 'HOME', fallback = [] }) {
 // A one-time pop-up for a big announcement (shown once per advert).
 export function AdPopup() {
   const ads = useAds();
+  const lite = useLite();
   const open = useOpenAd();
   const [ad, setAd] = useState(null);
 
@@ -137,7 +142,9 @@ export function AdPopup() {
     <div role="dialog" aria-label={ad.title} onClick={(e) => e.target === e.currentTarget && close()} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ width: 'min(420px, 100%)', background: 'var(--slate-800)', borderRadius: 18, overflow: 'hidden', position: 'relative', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
         <button type="button" aria-label="Close" onClick={close} style={{ position: 'absolute', top: 8, right: 8, width: 34, height: 34, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: 20, cursor: 'pointer', zIndex: 1 }}>×</button>
-        {ad.hasImage && <img src={adImageUrl(ad)} alt="" style={{ display: 'block', width: '100%', maxHeight: '55vh', objectFit: 'cover' }} />}
+        {ad.hasVideo && !lite ? (
+          <video src={adVideoUrl(ad)} poster={ad.hasImage ? adImageUrl(ad) : undefined} autoPlay muted playsInline controls preload="metadata" style={{ display: 'block', width: '100%', maxHeight: '55vh', objectFit: 'contain', background: '#000' }} />
+        ) : ad.hasImage && <img src={adImageUrl(ad)} alt="" style={{ display: 'block', width: '100%', maxHeight: '55vh', objectFit: 'cover' }} />}
         <div style={{ padding: 16 }}>
           <b style={{ fontSize: 18 }}>{ad.title}</b>
           {ad.body && <p style={{ fontSize: 14, color: 'var(--slate-300, #cbd5e1)', margin: '6px 0 0' }}>{ad.body}</p>}

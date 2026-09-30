@@ -459,3 +459,11 @@ export const markEpinsSold = (id, cardIds, sold = true) => request(`/api/epins/$
 export const getAdminEpins = () => adminRequest('/api/admin/epins');
 export const updateAdminEpins = (data) => adminRequest('/api/admin/epins/settings', { method: 'PUT', body: JSON.stringify(data) });
 export const resolveAdminEpin = (id, action) => adminRequest(`/api/admin/epins/${id}/${action}`, { method: 'POST', body: '{}' });
+
+// Video adverts (optional) + AI video script for social media
+export const adVideoUrl = (ad) => `${API_URL}/api/ads/${ad.id}/video?v=${ad.imageVersion || ''}`;
+export const getVideoAdSettings = () => adminRequest('/api/admin/ads/video-settings');
+export const setVideoAdSettings = (enabled) => adminRequest('/api/admin/ads/video-settings', { method: 'PUT', body: JSON.stringify({ enabled }) });
+export const uploadAdVideo = (id, file) => adminRequest(`/api/admin/ads/${id}/video`, { method: 'PUT', body: file, headers: { 'Content-Type': file.type || 'video/mp4' } });
+export const deleteAdVideo = (id) => adminRequest(`/api/admin/ads/${id}/video`, { method: 'DELETE' });
+export const writeVideoScript = (data) => adminRequest('/api/admin/ai/video-script', { method: 'POST', body: JSON.stringify(data) });

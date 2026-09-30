@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { useShowMore } from '../../components/ShowMore';
-import { getAdminAds, createAd, updateAd, deleteAd, adImageUrl } from '../../api';
+import { getAdminAds, createAd, updateAd, deleteAd, adImageUrl, adVideoUrl, getVideoAdSettings, setVideoAdSettings, uploadAdVideo, deleteAdVideo } from '../../api';
 
 const PLACEMENTS = [
   { value: 'HOME', label: 'Home screen — top slider' },
@@ -133,6 +133,27 @@ export default function AdminAds() {
   const listPage = useShowMore(ads, []);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(null); // null | 'new' | ad
+  const [videoOn, setVideoOn] = useState(false);
+  const [uploading, setUploading] = useState('');
+  useEffect(() => { getVideoAdSettings().then((d) => setVideoOn(d.enabled)).catch(() => {}); }, []);
+
+  async function flipVideo() {
+    try { setVideoOn((await setVideoAdSettings(!videoOn)).enabled); } catch (err) { setError(err.message); }
+  }
+  async function pickVideo(ad, e) {
+    const f = e.target.files?.[0];
+    e.target.value = '';
+    if (!f) return;
+    if (f.size > 10 * 1024 * 1024) { setError('That video is over 10 MB. Export it shorter or at 720p.'); return; }
+    setUploading(ad.id);
+    setError('');
+    try { await uploadAdVideo(ad.id, f); load(); } catch (err) { setError(err.message); } finally { setUploading(''); }
+  }
+  async function dropVideo(ad) {
+    if (!window.confirm('Remove the video from this advert? The picture stays.')) return;
+    await deleteAdVideo(ad.id).catch((err) => setError(err.message));
+    load();
+  }
 
   function load() {
     getAdminAds().then((d) => setAds(d.ads)).catch((err) => setError(err.message));
@@ -159,6 +180,13 @@ export default function AdminAds() {
         </div>
         {!editing && <button className="btn" style={{ width: 'auto' }} onClick={() => setEditing('new')}>+ New advert</button>}
       </div>
+      <div className="card" style={{ margin: '0 0 16px', maxWidth: 560, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <input id="vidOn" type="checkbox" checked={videoOn} onChange={flipVideo} style={{ width: 'auto', marginTop: 3 }} />
+        <label htmlFor="vidOn" style={{ fontSize: 14 }}>
+          <b>Show video adverts in the app</b> (off = pictures only)
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--slate-400)' }}>You can attach a short video (MP4, max 10 MB) to any advert below. While this is off, customers only see the picture. Videos play silently in the slider and never in Lite mode, so they don’t eat customers’ data.</span>
+        </label>
+      </div>
       {error && <p className="error-text">{error}</p>}
       {editing && <AdForm initial={editing === 'new' ? null : editing} onSaved={() => { setEditing(null); load(); }} onCancel={() => setEditing(null)} />}
 
@@ -178,6 +206,16 @@ export default function AdminAds() {
                     <button className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} onClick={() => setEditing(ad)}>Edit</button>
                     <button className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} onClick={() => toggle(ad)}>{ad.active ? 'Turn off' : 'Turn on'}</button>
                     <button className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} onClick={() => remove(ad)}>Delete</button>
+                  </div>
+                  <div style={{ fontSize: 12, marginTop: 8, color: 'var(--slate-400)' }}>
+                    {ad.hasVideo ? (
+                      <>🎬 Video {(ad.videoSize / 1048576).toFixed(1)} MB{!videoOn && ' (hidden — video ads off)'} · {videoOn && <><a href={adVideoUrl(ad)} target="_blank" rel="noreferrer" style={{ color: 'var(--purple)' }}>Play</a> · </>}<button type="button" onClick={() => dropVideo(ad)} style={{ background: 'none', border: 'none', color: 'var(--red-500)', cursor: 'pointer', padding: 0, fontSize: 12 }}>Remove</button></>
+                    ) : (
+                      <label style={{ cursor: 'pointer', color: 'var(--purple)' }}>
+                        {uploading === ad.id ? 'Uploading video…' : '+ Add video (optional)'}
+                        <input type="file" accept="video/mp4,video/webm" onChange={(e) => pickVideo(ad, e)} style={{ display: 'none' }} disabled={Boolean(uploading)} />
+                      </label>
+                    )}
                   </div>
                 </div>
               </div>
