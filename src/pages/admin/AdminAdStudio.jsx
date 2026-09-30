@@ -6,6 +6,7 @@ import { adminDesignAd, getAdminAiStatus, createAd } from '../../api';
 import { FORMATS, THEMES, renderAd, recordAdVideo, videoSupported, loadPhoto } from '../../lib/adRender';
 import { shareFile } from '../../lib/shareCard';
 import VideoScriptPanel from '../../components/admin/VideoScriptPanel';
+import HeygenVideosPanel from '../../components/admin/HeygenVideosPanel';
 
 const BLANK = { headline: 'Data finish? No wahala', highlight: 'No wahala', subtext: 'Top up MTN, Airtel, Glo & 9mobile in seconds', cta: 'Buy data', badges: ['Instant', 'Auto refunds'], emoji: '📶', theme: 'purple', caption: 'Data finish? No wahala 😄 Top up any network in seconds with ZAPPI PAY. 👉 www.zappipay.com.ng #ZappiPay #BuyData', link: '/buy/data' };
 
@@ -44,6 +45,7 @@ export default function AdminAdStudio() {
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState(null);
   const [video, setVideo] = useState(null);
+  const [hgDraft, setHgDraft] = useState(null);
   const [placement, setPlacement] = useState('HOME');
 
   useEffect(() => { getAdminAiStatus().then(setAi).catch(() => setAi({ adminEnabled: false })); }, []);
@@ -198,7 +200,8 @@ export default function AdminAdStudio() {
         </div>
       </div>
 
-      <VideoScriptPanel />
+      <VideoScriptPanel onHeygen={setHgDraft} />
+      <HeygenVideosPanel draft={hgDraft} />
 
       {video && (
         <div role="dialog" aria-label="Video" onClick={(e) => e.target === e.currentTarget && setVideo(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>

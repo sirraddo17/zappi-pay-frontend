@@ -467,3 +467,13 @@ export const setVideoAdSettings = (enabled) => adminRequest('/api/admin/ads/vide
 export const uploadAdVideo = (id, file) => adminRequest(`/api/admin/ads/${id}/video`, { method: 'PUT', body: file, headers: { 'Content-Type': file.type || 'video/mp4' } });
 export const deleteAdVideo = (id) => adminRequest(`/api/admin/ads/${id}/video`, { method: 'DELETE' });
 export const writeVideoScript = (data) => adminRequest('/api/admin/ai/video-script', { method: 'POST', body: JSON.stringify(data) });
+
+// HeyGen AI presenter videos (optional)
+export const getHeygenStatus = () => adminRequest('/api/admin/heygen/status');
+export const updateHeygenSettings = (data) => adminRequest('/api/admin/heygen/settings', { method: 'PUT', body: JSON.stringify(data) });
+export const getHeygenAvatars = () => adminRequest('/api/admin/heygen/avatars');
+export const getHeygenVoices = () => adminRequest('/api/admin/heygen/voices');
+export const getHeygenVideos = () => adminRequest('/api/admin/heygen/videos');
+export const makeHeygenVideo = (data) => adminRequest('/api/admin/heygen/videos', { method: 'POST', body: JSON.stringify(data) });
+export const refreshHeygenVideo = (id) => adminRequest(`/api/admin/heygen/videos/${id}`);
+export const attachHeygenVideo = (id, adId) => adminRequest(`/api/admin/heygen/videos/${id}/attach`, { method: 'POST', body: JSON.stringify({ adId }) });

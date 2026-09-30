@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { applyAiAction, undoAiAction, dismissAiAction } from '../../api';
 
-const KIND_ICON = { SETTINGS: '⚙️', CHALLENGE: '🎯', PROMO: '🏷️', NOTICE: '📢', BROADCAST: '📣' };
+const KIND_ICON = { VIDEO: '🎥', SETTINGS: '⚙️', CHALLENGE: '🎯', PROMO: '🏷️', NOTICE: '📢', BROADCAST: '📣' };
 
 // A change the admin assistant proposed. Nothing happens until Apply.
 export default function AiActionCard({ action }) {
@@ -11,6 +11,7 @@ export default function AiActionCard({ action }) {
 
   async function run(kind) {
     if (kind === 'apply' && a.kind === 'BROADCAST' && !window.confirm('Send this notification to customers now? This cannot be undone.')) return;
+    if (kind === 'apply' && a.kind === 'VIDEO' && !window.confirm('Make this HeyGen video now? It uses your HeyGen credit and cannot be undone.')) return;
     setBusy(kind);
     setErr('');
     try {
@@ -52,7 +53,7 @@ export default function AiActionCard({ action }) {
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         {a.status === 'PENDING' && (
           <>
-            <button type="button" className="btn" style={{ width: 'auto', padding: '6px 16px' }} disabled={Boolean(busy)} onClick={() => run('apply')}>{busy === 'apply' ? 'Applying…' : a.kind === 'BROADCAST' ? 'Send now' : 'Apply'}</button>
+            <button type="button" className="btn" style={{ width: 'auto', padding: '6px 16px' }} disabled={Boolean(busy)} onClick={() => run('apply')}>{busy === 'apply' ? 'Applying…' : a.kind === 'BROADCAST' ? 'Send now' : a.kind === 'VIDEO' ? 'Make video' : 'Apply'}</button>
             <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 16px' }} disabled={Boolean(busy)} onClick={() => run('dismiss')}>Dismiss</button>
           </>
         )}

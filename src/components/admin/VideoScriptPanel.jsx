@@ -13,7 +13,7 @@ async function copy(text, set) {
 
 // Ad Studio → 🎬 Video script: the AI writes a script for an AI
 // presenter (HeyGen / D-ID / CapCut) or a real person, for social media.
-export default function VideoScriptPanel() {
+export default function VideoScriptPanel({ onHeygen }) {
   const [topic, setTopic] = useState('');
   const [seconds, setSeconds] = useState(30);
   const [language, setLanguage] = useState('pcm');
@@ -94,6 +94,7 @@ export default function VideoScriptPanel() {
             <button type="button" className="btn" style={{ width: 'auto' }} onClick={() => copy(s.presenterScript, setCopied)}>Copy presenter lines</button>
             <button type="button" className="btn btn-secondary" style={{ width: 'auto' }} onClick={() => copy(`${s.caption}\n\n${s.hashtags.join(' ')}`, setCopied)}>Copy caption</button>
             <button type="button" className="btn btn-secondary" style={{ width: 'auto' }} onClick={() => copy(all, setCopied)}>Copy everything</button>
+            {onHeygen && <button type="button" className="btn btn-secondary" style={{ width: 'auto' }} onClick={() => onHeygen({ script: s.presenterScript, title: s.title, at: Date.now() })}>🎥 Make with HeyGen</button>}
             {copied && <span style={{ fontSize: 13, alignSelf: 'center', color: 'var(--green-500)' }}>{copied}</span>}
           </div>
           <p style={{ fontSize: 11, color: 'var(--slate-400)', margin: '10px 0 0' }}>Check every fact and price before posting. Use a stock AI presenter or your own face — never a celebrity or someone without their permission.</p>
