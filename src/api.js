@@ -433,3 +433,8 @@ export const removeFamily = (id) => request(`/api/family/${id}`, { method: 'DELE
 // Rewards split (owner).
 export const getRewardSplit = () => adminRequest('/api/admin/reward-split');
 export const saveRewardSplit = (data) => adminRequest('/api/admin/reward-split', { method: 'PUT', body: JSON.stringify(data) });
+
+// Admin assistant proposals (nothing changes until Apply).
+export const applyAiAction = (id) => adminRequest(`/api/admin/ai/actions/${id}/apply`, { method: 'POST' });
+export const undoAiAction = (id) => adminRequest(`/api/admin/ai/actions/${id}/undo`, { method: 'POST' });
+export const dismissAiAction = (id) => adminRequest(`/api/admin/ai/actions/${id}/dismiss`, { method: 'POST' });

@@ -14,7 +14,7 @@ export const FAQ = [
       ['Is ZAPPI PAY safe?', 'Your password, PIN and security answer are stored scrambled, so not even our staff can see them. Payments need your transaction PIN or fingerprint, the account locks after 5 wrong passwords, you’re logged out after 10 minutes of no activity, and you can see and log out every device that’s logged in from Security. Purchases are delivered through VTpass and bank payments go through Monnify, both licensed Nigerian payment companies.'],
       ['Can I use ZAPPI PAY in Pidgin, Yoruba, Hausa or Igbo?', 'Yes. Go to Profile → Language and pick one. The main screens switch straight away; a few detailed pages are still in English.'],
       ['The app is slow on my network. What can I do?', 'Turn on Lite mode in Profile. It hides ads and promos, turns off animations and checks for updates less often, so it uses less data and loads faster.'],
-      ['Can I buy by typing in the Help chat?', 'Yes, when the AI assistant is on. Type something like “₦500 MTN airtime for 0803…” and it prepares a card for you to check. Nothing is bought until you tap Pay and enter your PIN.'],
+      ['Can I buy or send money by typing in the Help chat?', 'Yes, when the AI assistant is on. Type something like “₦500 MTN airtime for 0803…” or “send ₦2,000 to 0123456789 GTBank, John Okafor”. It checks the real name on the account, tells you if it doesn’t match, and shows a card for you to check. Nothing is bought or sent until you tap the button and enter your PIN.'],
       ['Do you have a mobile app?', 'Yes. Open zappipay.com.ng on your phone and tap “Install” (or “Add to Home screen”) to install it like an app. It works on Android and iPhone.'],
     ],
   },

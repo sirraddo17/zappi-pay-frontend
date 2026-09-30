@@ -106,7 +106,7 @@ export default function AiSettingsPanel() {
       {customerOn && (
         <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '0 0 8px 26px', fontSize: 14 }}>
           <input type="checkbox" checked={chatBuyOn} onChange={(e) => setChatBuyOn(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
-          <span>Buy by chat — the assistant can prepare airtime, data and electricity purchases (“send ₦500 MTN to Mum”). The customer checks a card and pays with their PIN; the AI never pays by itself.</span>
+          <span>Buy &amp; send by chat — the assistant can prepare airtime, data and electricity purchases (“₦500 MTN to Mum”) and transfers to ZAPPI PAY users or any bank (“send ₦2,000 to 0123456789 GTBank”), checking the real account name. The customer checks a card and confirms with their PIN; the AI never pays or sends by itself.</span>
         </label>
       )}
       <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>

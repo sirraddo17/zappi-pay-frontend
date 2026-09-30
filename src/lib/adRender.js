@@ -134,7 +134,7 @@ export function drawAd(ctx, design, formatKey, photo, p = {}) {
   const { w: W, h: H } = FORMATS[formatKey];
   const theme = THEMES[design.theme] || THEMES.purple;
   const a = (k) => clamp(p[k] ?? 1);
-  background(ctx, W, H, theme, photo, a('bg'));
+  if (!p.noBg) background(ctx, W, H, theme, photo, a('bg'));
   ctx.textBaseline = 'alphabetic';
 
   if (formatKey === 'slider') {
@@ -289,4 +289,54 @@ export async function recordAdVideo(design, formatKey, photo) {
   await done;
   const type = (mimeType || 'video/webm').split(';')[0];
   return { blob: new Blob(chunks, { type }), ext: type === 'video/mp4' ? 'mp4' : 'webm' };
+}
+
+// Thin banners (e.g. 728 × 90): logo, one-line headline and button in a row.
+function drawStrip(ctx, design, W, H) {
+  const theme = THEMES[design.theme] || THEMES.purple;
+  const pad = Math.round(H * 0.18);
+  const logo = Math.round(H * 0.6);
+  drawLogo(ctx, pad, (H - logo) / 2, logo);
+  let x = pad + logo + pad * 0.8;
+  ctx.textBaseline = 'alphabetic';
+  let ctaW = 0;
+  if (design.cta) {
+    ctx.font = font(700, Math.round(H * 0.3));
+    ctaW = ctx.measureText(`${design.cta} →`).width + H * 0.55;
+  }
+  const maxW = W - x - pad - (ctaW ? ctaW + pad : 0);
+  let px = Math.round(H * 0.42);
+  for (; px > 10; px -= 2) {
+    ctx.font = font(700, px);
+    if (ctx.measureText(design.headline).width <= maxW) break;
+  }
+  ctx.font = font(700, px);
+  fillLines(ctx, [layoutWords(ctx, design.headline, design.highlight, 1e9)[0] || []], x, H / 2 + px * 0.36, px, 'left', '#fff', theme.accent);
+  if (design.cta) pill(ctx, `${design.cta} →`, W - pad - ctaW, H * 0.2, H * 0.6, theme.accent, theme.ink, Math.round(H * 0.28));
+}
+
+// Any size: the nearest standard layout is drawn in the middle and the
+// background fills the whole picture, so nothing is stretched or cut.
+export async function renderAdSize(design, w, h, photo, type = 'image/png', quality) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext('2d');
+  const theme = THEMES[design.theme] || THEMES.purple;
+  const r = w / h;
+  background(ctx, w, h, theme, photo, 1);
+  if (r >= 3.2) {
+    drawStrip(ctx, design, w, h);
+  } else {
+    const key = r >= 1.45 ? 'slider' : r <= 0.75 ? 'story' : 'square';
+    const { w: bw, h: bh } = FORMATS[key];
+    const k = Math.min(w / bw, h / bh);
+    ctx.save();
+    ctx.translate((w - bw * k) / 2, (h - bh * k) / 2);
+    ctx.scale(k, k);
+    drawAd(ctx, design, key, null, { noBg: true });
+    ctx.restore();
+  }
+  if (type === 'dataurl') return c.toDataURL('image/jpeg', quality || 0.86);
+  return new Promise((resolve) => c.toBlob(resolve, type, quality));
 }

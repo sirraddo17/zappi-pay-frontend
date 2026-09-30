@@ -3,9 +3,16 @@ import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { adminAiChat, getAdminAiStatus } from '../../api';
 import ImageAttach from '../../components/ImageAttach';
+import AiActionCard from '../../components/admin/AiActionCard';
+import AiDesignCard from '../../components/admin/AiDesignCard';
 
 const SUGGESTIONS = [
   'How did we do today?',
+  'Check my discounts and rewards are safe for my margins',
+  'Set the rewards split to 30% and make the referral bonus ₦100',
+  'Create a challenge: buy data 5 times this month for ₦20',
+  'Design a Christmas data promo post and WhatsApp status',
+  'Make a 728×90 web banner for cheap data',
   'Anything that needs my attention?',
   'Compare this week with last week',
   'Which service made the most profit this month?',
@@ -15,8 +22,9 @@ const SUGGESTIONS = [
   'If customers spend ₦1,000 on each service, how much do I keep?',
 ];
 
-// Ask questions about the business in plain English. Read-only: it
-// looks things up but never changes anything.
+// Ask about the business in plain English. It can also propose reward,
+// pricing and promotion changes (applied only when the owner taps Apply)
+// and design adverts at any size.
 export default function AdminAssistant() {
   const [status, setStatus] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -46,7 +54,7 @@ export default function AdminAssistant() {
     setError('');
     try {
       const res = await adminAiChat(next.map(({ role, content }) => ({ role, content })), pics.length ? pics : undefined);
-      setMessages((m) => [...m, { role: 'assistant', content: res.reply }]);
+      setMessages((m) => [...m, { role: 'assistant', content: res.reply, actions: res.actions || [], designs: res.designs || [] }]);
     } catch (err) {
       setError(err.message || 'The assistant could not answer.');
       setMessages(messages);
@@ -64,7 +72,7 @@ export default function AdminAssistant() {
       <div className="page-header" style={{ padding: 0, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
         <div>
           <h1>AI Assistant</h1>
-          <p>Ask about sales, profit, customers, orders and anything waiting on you. It can look things up but never changes anything.</p>
+          <p>Ask about sales, profit and customers — or tell it to change rewards, discounts and promotions, or design an ad. Changes only happen when you tap Apply. It can't touch keys, bank accounts, payouts, security or customer wallets.</p>
         </div>
         {messages.length > 0 && (
           <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 14px' }} onClick={() => { setMessages([]); setError(''); }}>
@@ -117,6 +125,8 @@ export default function AdminAssistant() {
                 )}
                 {m.content}
               </div>
+              {m.actions?.map((a) => <AiActionCard key={a.id} action={a} />)}
+              {m.designs?.map((d, j) => <AiDesignCard key={j} design={d} />)}
             </div>
           ))}
           {busy && <div style={{ color: 'var(--slate-400)', fontSize: 14 }}>Looking it up…</div>}
@@ -133,7 +143,7 @@ export default function AdminAssistant() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             maxLength={2000}
-            placeholder="e.g. How much profit did MTN data make this week?"
+            placeholder="e.g. Raise the delivery promise bonus to ₦15, or design a data promo"
             aria-label="Question"
             disabled={off}
           />
