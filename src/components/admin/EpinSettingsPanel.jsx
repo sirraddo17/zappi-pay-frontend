@@ -132,8 +132,11 @@ export default function EpinSettingsPanel() {
           {d.bettingSupplier === 'CLUBKONNECT' && d.bettingList?.at && (
             <div style={{ fontSize: 12, margin: '6px 0', color: d.bettingList.source === 'clubkonnect' ? 'var(--green-500)' : 'var(--gold)' }}>
               {d.bettingList.source === 'clubkonnect' ? `✓ ${d.bettingList.count} betting companies loaded from ClubKonnect.` : `Using the built-in list of betting companies (ClubKonnect's list could not be read${d.bettingList.error ? `: ${d.bettingList.error}` : ''}). Account names are still checked before paying.`}
-              {d.bettingList.sample && d.bettingList.source !== 'clubkonnect' && (
-                <details style={{ marginTop: 4 }}><summary style={{ cursor: 'pointer' }}>What ClubKonnect sent (for support)</summary><code style={{ display: 'block', whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 11, color: 'var(--slate-300, #cbd5e1)' }}>{d.bettingList.sample}</code></details>
+              {d.bettingList.lastVerify && (
+                <details style={{ marginTop: 4 }}><summary style={{ cursor: 'pointer' }}>Last account check ({d.bettingList.lastVerify.company})</summary><code style={{ display: 'block', whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 11, color: 'var(--slate-300, #cbd5e1)' }}>{d.bettingList.lastVerify.reply}</code></details>
+              )}
+              {d.bettingList.sample && (
+                <details style={{ marginTop: 4 }}><summary style={{ cursor: 'pointer' }}>Company list ClubKonnect sent</summary><code style={{ display: 'block', whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 11, color: 'var(--slate-300, #cbd5e1)' }}>{d.bettingList.sample}</code></details>
               )}
             </div>
           )}

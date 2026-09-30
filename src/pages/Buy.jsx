@@ -240,7 +240,8 @@ export default function Buy() {
       const due = String(data.content?.Due_Date || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
       setVerifiedDue(due ? new Date(Number(due[1]), Number(due[2]) - 1, Number(due[3])).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
     } catch (err) {
-      if (!silent) setError('Could not verify this number — double-check it before continuing.');
+      // ClubKonnect betting gives a specific reason (wrong ID, unknown company…).
+      if (!silent) setError(String(providerId).startsWith('ck:') && err?.message ? `${err.message} You can still pay — if the ID is wrong you'll be refunded.` : 'Could not verify this number — double-check it before continuing.');
     } finally {
       setVerifying(false);
     }
