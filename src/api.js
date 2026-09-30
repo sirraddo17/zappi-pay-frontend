@@ -239,7 +239,7 @@ export const changeAdminPassword = (data) => adminRequest('/api/admin/password',
 // --- Admin: settings ---
 export const getSettings = () => adminRequest('/api/admin/settings');
 export const getAiStatus = () => request('/api/ai/status');
-export const aiChat = (messages) => request('/api/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages }) });
+export const aiChat = (messages, images) => request('/api/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages, images }) });
 export const getAdminAiStatus = () => adminRequest('/api/admin/ai/status');
 export const adminAiChat = (messages, images) => adminRequest('/api/admin/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages, images }) });
 export const adminAiDraftReply = (ticketId, instructions) => adminRequest('/api/admin/ai/draft-reply', { method: 'POST', quiet: true, body: JSON.stringify({ ticketId, instructions }) });
@@ -438,3 +438,8 @@ export const saveRewardSplit = (data) => adminRequest('/api/admin/reward-split',
 export const applyAiAction = (id) => adminRequest(`/api/admin/ai/actions/${id}/apply`, { method: 'POST' });
 export const undoAiAction = (id) => adminRequest(`/api/admin/ai/actions/${id}/undo`, { method: 'POST' });
 export const dismissAiAction = (id) => adminRequest(`/api/admin/ai/actions/${id}/dismiss`, { method: 'POST' });
+
+// Ad shown (tap rate), Help Centre answers added in admin, briefing.
+export const recordAdView = (id) => request(`/api/ads/${id}/view`, { method: 'POST', quiet: true });
+export const getExtraFaqs = () => request('/api/help/faqs', { quiet: true });
+export const getAiBriefing = () => adminRequest('/api/admin/ai/briefing');

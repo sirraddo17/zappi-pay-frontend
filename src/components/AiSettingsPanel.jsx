@@ -11,6 +11,8 @@ export default function AiSettingsPanel() {
   const [customerOn, setCustomerOn] = useState(false);
   const [chatBuyOn, setChatBuyOn] = useState(true);
   const [adminOn, setAdminOn] = useState(false);
+  const [briefOn, setBriefOn] = useState(true);
+  const [translateOn, setTranslateOn] = useState(true);
   const [customerModel, setCustomerModel] = useState('claude-haiku-4-5');
   const [adminModel, setAdminModel] = useState('claude-sonnet-5');
   const [dailyLimit, setDailyLimit] = useState('20');
@@ -26,6 +28,8 @@ export default function AiSettingsPanel() {
     setCustomerOn(Boolean(s.aiCustomerEnabled));
     setChatBuyOn(s.aiChatBuyEnabled !== false);
     setAdminOn(Boolean(s.aiAdminEnabled));
+    setBriefOn(s.aiBriefingEnabled !== false);
+    setTranslateOn(s.aiTranslateBroadcasts !== false);
     setCustomerModel(s.aiCustomerModel || 'claude-haiku-4-5');
     setAdminModel(s.aiAdminModel || 'claude-sonnet-5');
     setDailyLimit(String(s.aiCustomerDailyLimit ?? 20));
@@ -47,6 +51,8 @@ export default function AiSettingsPanel() {
         aiCustomerEnabled: customerOn,
         aiChatBuyEnabled: chatBuyOn,
         aiAdminEnabled: adminOn,
+        aiBriefingEnabled: briefOn,
+        aiTranslateBroadcasts: translateOn,
         aiCustomerModel: customerModel.trim(),
         aiAdminModel: adminModel.trim(),
         aiCustomerDailyLimit: Number(dailyLimit),
@@ -113,6 +119,18 @@ export default function AiSettingsPanel() {
         <input type="checkbox" checked={adminOn} onChange={(e) => setAdminOn(e.target.checked)} style={{ width: 'auto' }} />
         Admin assistant (AI Assistant page + “Draft with AI” on support tickets)
       </label>
+      {adminOn && (
+        <>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '0 0 8px 26px', fontSize: 14 }}>
+            <input type="checkbox" checked={briefOn} onChange={(e) => setBriefOn(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
+            <span>✨ Morning briefing — a short AI summary of what matters today at the top of the daily email, plus a push notification.</span>
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '0 0 12px 26px', fontSize: 14 }}>
+            <input type="checkbox" checked={translateOn} onChange={(e) => setTranslateOn(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
+            <span>🗣️ Translate broadcasts — customers who use Pidgin, Yorùbá, Hausa or Igbo get your messages in their language.</span>
+          </label>
+        </>
+      )}
 
       <div className="field">
         <label htmlFor="aiDaily">Messages per customer per day</label>

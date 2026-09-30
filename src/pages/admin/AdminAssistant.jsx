@@ -1,13 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { adminAiChat, getAdminAiStatus } from '../../api';
+import { adminAiChat, getAdminAiStatus, getAiBriefing } from '../../api';
 import ImageAttach from '../../components/ImageAttach';
 import AiActionCard from '../../components/admin/AiActionCard';
 import AiDesignCard from '../../components/admin/AiDesignCard';
 
 const SUGGESTIONS = [
   'How did we do today?',
+  'Any fraud or risk flags I should look at?',
+  'Summarise open support tickets and draft replies',
+  'How long will my VTpass balance last?',
+  'Explain my money check in simple words',
+  'Did VTpass change any prices or commissions?',
+  'Which in-app ads are working?',
+  'Plan a campaign to win back customers who stopped buying',
+  'What questions keep coming up in support? Add them to the Help Centre',
   'Check my discounts and rewards are safe for my margins',
   'Set the rewards split to 30% and make the referral bonus ₦100',
   'Create a challenge: buy data 5 times this month for ₦20',
@@ -74,6 +82,22 @@ export default function AdminAssistant() {
           <h1>AI Assistant</h1>
           <p>Ask about sales, profit and customers — or tell it to change rewards, discounts and promotions, or design an ad. Changes only happen when you tap Apply. It can't touch keys, bank accounts, payouts, security or customer wallets.</p>
         </div>
+        {!off && status && (
+          <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 14px' }} disabled={busy} onClick={async () => {
+            setBusy(true);
+            setError('');
+            try {
+              const r = await getAiBriefing();
+              setMessages((m) => [...m, { role: 'user', content: '✨ Today’s briefing' }, { role: 'assistant', content: r.briefing }]);
+            } catch (e) {
+              setError(e.message);
+            } finally {
+              setBusy(false);
+            }
+          }}>
+            ✨ Today’s briefing
+          </button>
+        )}
         {messages.length > 0 && (
           <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 14px' }} onClick={() => { setMessages([]); setError(''); }}>
             New chat

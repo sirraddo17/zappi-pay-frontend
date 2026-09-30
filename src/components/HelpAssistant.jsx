@@ -7,6 +7,7 @@ import { useAppInfo } from './ServiceNotices';
 import ImageAttach from './ImageAttach';
 import ChatPurchaseCard from './ChatPurchaseCard';
 import ChatTransferCard from './ChatTransferCard';
+import ChatActionCard from './ChatActionCard';
 
 // Floating "Help" chat for logged-in customers. Quick topics are
 // rule-based (assistant/knowledge.js). When the AI assistant is on in
@@ -53,6 +54,7 @@ export default function HelpAssistant() {
   const endRef = useRef(null);
   const [ai, setAi] = useState(null); // { enabled, remaining }
   const [thinking, setThinking] = useState(false);
+  const [chatImages, setChatImages] = useState([]);
 
   const hidden = !customer || HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p));
 
@@ -127,14 +129,16 @@ export default function HelpAssistant() {
   }
 
   async function send(text) {
-    const clean = text.trim();
+    const pics = ai?.enabled ? chatImages : [];
+    const clean = text.trim() || (pics.length ? 'Please look at this screenshot and check it against my account.' : '');
     if (!clean || thinking) return;
+    setChatImages([]);
     setInput('');
     if (!ai?.enabled) {
       setMessages((prev) => [...prev, { from: 'user', text: clean }, ...respond(clean)]);
       return;
     }
-    const next = [...messages, { from: 'user', text: clean }];
+    const next = [...messages, { from: 'user', text: clean, pics }];
     setMessages(next);
     setThinking(true);
     // Only real conversation text goes to the AI (not the greeting).
@@ -142,9 +146,9 @@ export default function HelpAssistant() {
       .filter((m, i) => i > 0 && m.text)
       .map((m) => ({ role: m.from === 'user' ? 'user' : 'assistant', content: m.text }));
     try {
-      const res = await aiChat(history);
+      const res = await aiChat(history, pics.length ? pics : undefined);
       setAi((a) => ({ ...a, remaining: res.remaining }));
-      setMessages((prev) => [...prev, botText(res.reply, { actions: res.actions, offerHuman: res.offerHuman, ai: true, purchase: res.purchase || null, transfer: res.transfer || null })]);
+      setMessages((prev) => [...prev, botText(res.reply, { actions: res.actions, offerHuman: res.offerHuman, ai: true, purchase: res.purchase || null, transfer: res.transfer || null, cards: res.cards || [], ticketSent: (res.notes || []).some((n) => n.type === 'TICKET') })]);
     } catch (err) {
       // Fall back to the built-in answers so the customer still gets help.
       if (err.code === 'AI_LIMIT' || err.code === 'AI_OFF' || err.code === 'AI_NO_KEY' || err.code === 'AI_BUDGET') setAi({ enabled: false });
@@ -262,10 +266,13 @@ export default function HelpAssistant() {
                 whiteSpace: 'pre-wrap',
               }}
             >
+              {m.pics?.length > 0 && <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>{m.pics.map((src, j) => <img key={j} src={src} alt="" style={{ width: 70, height: 70, objectFit: 'cover', borderRadius: 8 }} />)}</div>}
               {m.text}
             </div>
             {m.purchase && <ChatPurchaseCard draft={m.purchase} onClose={() => setOpen(false)} />}
             {m.transfer && <ChatTransferCard draft={m.transfer} onClose={() => setOpen(false)} />}
+            {m.cards?.map((c) => <ChatActionCard key={c.id} card={c} />)}
+            {m.ticketSent && <div style={{ marginTop: 6, fontSize: 12, color: 'var(--green-500)' }}>✓ Sent to our support team — the reply will come to your Notifications.</div>}
             {m.ai && <div style={{ fontSize: 10, color: 'var(--slate-500, #64748b)', marginTop: 2 }}>AI answer · check Orders for exact details</div>}
             {(m.actions?.length > 0 || m.offerHuman || m.quick) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
@@ -370,10 +377,15 @@ export default function HelpAssistant() {
         style={{ display: 'flex', gap: 6, padding: 10, borderTop: '1px solid var(--slate-700)' }}
       >
         <input value={input} onChange={(e) => setInput(e.target.value)} maxLength={800} placeholder={ai?.enabled ? 'Ask anything about your account…' : 'Type your question…'} aria-label="Your question" style={{ fontSize: 14 }} />
-        <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 14px' }} disabled={!input.trim() || thinking}>
+        <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 14px' }} disabled={(!input.trim() && !chatImages.length) || thinking}>
           Send
         </button>
       </form>
+      {ai?.enabled && (
+        <div style={{ padding: '0 10px 10px' }}>
+          <ImageAttach value={chatImages} onChange={setChatImages} max={2} label="📷 Add a screenshot (bank alert, error message…)" />
+        </div>
+      )}
     </div>
   );
 }

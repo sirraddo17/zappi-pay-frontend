@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
+import { getExtraFaqs } from '../api';
 
 // Help Centre — public, so people (and search engines) can find answers
 // without an account. Also published as FAQ structured data.
@@ -80,6 +81,19 @@ export default function Help() {
   const { customer } = useAuth();
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(null);
+  const [extra, setExtra] = useState([]);
+  useEffect(() => { getExtraFaqs().then((d) => setExtra(d.faqs || [])).catch(() => {}); }, []);
+  // Built-in answers plus any added from the admin (Help Centre from tickets).
+  const ALL = useMemo(() => {
+    if (!extra.length) return FAQ;
+    const list = FAQ.map((t) => ({ ...t, items: [...t.items] }));
+    for (const f of extra) {
+      const t = list.find((x) => x.topic.toLowerCase() === String(f.topic).toLowerCase());
+      if (t) t.items.push([f.question, f.answer]);
+      else list.push({ topic: f.topic, items: [[f.question, f.answer]] });
+    }
+    return list;
+  }, [extra]);
 
   useEffect(() => {
     document.title = 'Help Centre · ZAPPI PAY';
@@ -93,18 +107,18 @@ export default function Help() {
     ld.text = JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      mainEntity: FAQ.flatMap((t) => t.items).map(([name, text]) => ({ '@type': 'Question', name, acceptedAnswer: { '@type': 'Answer', text } })),
+      mainEntity: ALL.flatMap((t) => t.items).map(([name, text]) => ({ '@type': 'Question', name, acceptedAnswer: { '@type': 'Answer', text } })),
     });
     document.getElementById('faq-ld')?.remove();
     document.head.appendChild(ld);
     return () => { ld.remove(); document.title = 'ZAPPI PAY'; };
-  }, []);
+  }, [ALL]);
 
   const results = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return FAQ;
-    return FAQ.map((t) => ({ ...t, items: t.items.filter(([qq, a]) => `${qq} ${a}`.toLowerCase().includes(s)) })).filter((t) => t.items.length);
-  }, [q]);
+    if (!s) return ALL;
+    return ALL.map((t) => ({ ...t, items: t.items.filter(([qq, a]) => `${qq} ${a}`.toLowerCase().includes(s)) })).filter((t) => t.items.length);
+  }, [q, ALL]);
 
   return (
     <div className="app-shell" style={{ paddingBottom: 32 }}>

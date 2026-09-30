@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAds, adImageUrl, clickAd } from '../api';
+import { getAds, adImageUrl, clickAd, recordAdView } from '../api';
 import { cached } from '../lib/cache';
 
 const SEEN_KEY = 'zappipay_popup_ads_seen';
@@ -64,6 +64,14 @@ function AdSlide({ ad, onOpen }) {
 // placement "HOME" = top slider (HOME/BOTH ads); "BOTTOM" = the slider
 // at the bottom of the home screen, which falls back to built-in tips
 // when the admin hasn't added any.
+// Counts an advert as seen once per app open (for tap rate in admin).
+const viewed = new Set();
+function countView(ad) {
+  if (!ad?.id || ad.builtIn || viewed.has(ad.id) || String(ad.id).startsWith('tip')) return;
+  viewed.add(ad.id);
+  recordAdView(ad.id).catch(() => {});
+}
+
 export function AdsCarousel({ placement = 'HOME', fallback = [] }) {
   const all = useAds();
   const mine = all.filter((a) => (placement === 'BOTTOM' ? a.placement === 'BOTTOM' : a.placement === 'HOME' || a.placement === 'BOTH'));
@@ -82,6 +90,10 @@ export function AdsCarousel({ placement = 'HOME', fallback = [] }) {
     }, 5000);
     return () => clearInterval(t);
   }, [ads.length]);
+
+  useEffect(() => {
+    if (mine.length) countView(mine[index]);
+  }, [index, mine.length]);
 
   if (!ads.length) return null;
   return (
@@ -112,7 +124,7 @@ export function AdPopup() {
     const seen = new Set(seenList());
     const next = ads.find((a) => (a.placement === 'POPUP' || a.placement === 'BOTH') && !seen.has(a.id));
     if (!next) return undefined;
-    const t = setTimeout(() => setAd(next), 1200);
+    const t = setTimeout(() => { setAd(next); countView(next); }, 1200);
     return () => clearTimeout(t);
   }, [ads]);
 
