@@ -705,3 +705,15 @@ th {
   .statement-list { display: none !important; }
   .statement-doc .statement-table { display: table !important; }
 }
+
+/* Lite / data-saver mode (src/lib/lite.js): no motion, no heavy
+   effects. Ads and promo cards are left out by the components. */
+html[data-lite] *,
+html[data-lite] *::before,
+html[data-lite] *::after {
+  animation: none !important;
+  transition: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  scroll-behavior: auto !important;
+}

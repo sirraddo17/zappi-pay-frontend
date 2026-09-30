@@ -8,6 +8,8 @@ import useAutoRefresh from '../lib/useAutoRefresh';
 import ContestCard from '../components/ContestCard';
 import ChallengesCard from '../components/ChallengesCard';
 import RenewalsCard from '../components/RenewalsCard';
+import { LiteSuggestion } from '../components/LiteToggle';
+import { useLite } from '../lib/lite';
 import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
@@ -91,6 +93,7 @@ function writeDismissed(ids) {
 
 export default function Dashboard() {
   const t = useLang();
+  const lite = useLite();
   const { customer } = useAuth();
   const [balance, setBalance] = useState(customer?.walletBalance ?? 0);
   const [transactions, setTransactions] = useState(null);
@@ -215,8 +218,9 @@ export default function Dashboard() {
       })}
       <TestModeBanner style={{ margin: '16px 16px' }} />
 
-      <AdsCarousel />
-      <AdPopup />
+      {!lite && <AdsCarousel />}
+      {!lite && <AdPopup />}
+      <LiteSuggestion />
       <PushToggle variant="nudge" />
       <LoyaltyCard />
       <Link to="/deals" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '12px 16px' }}>
@@ -338,7 +342,7 @@ export default function Dashboard() {
         </Link>
       )}
 
-      <ContestCard compact />
+      {!lite && <ContestCard compact />}
       <ChallengesCard />
 
       {referral?.enabled && referral.bonusAmount > 0 && (
@@ -385,7 +389,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <AdsCarousel placement="BOTTOM" fallback={DEFAULT_BOTTOM_SLIDES} />
+      {!lite && <AdsCarousel placement="BOTTOM" fallback={DEFAULT_BOTTOM_SLIDES} />}
 
       <BottomNav />
     </div>

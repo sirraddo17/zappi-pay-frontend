@@ -12,6 +12,9 @@ export const FAQ = [
       ['What is ZAPPI PAY?', 'ZAPPI PAY is a wallet app for everyday payments in Nigeria. Fund your wallet once, then buy airtime and data, pay electricity (prepaid and postpaid), renew DStv, GOtv and Startimes, buy WAEC, NECO and JAMB PINs, fund betting wallets, send money to friends on ZAPPI PAY and send to any Nigerian bank. It is run by Sirraddo Venture, a registered Nigerian business (BN 7524870).'],
       ['How do I create an account?', 'Tap “Create free account”, enter your name, phone number, date of birth, a security question and a strong password. You can then choose a username so friends can send you money with it.'],
       ['Is ZAPPI PAY safe?', 'Your password, PIN and security answer are stored scrambled, so not even our staff can see them. Payments need your transaction PIN or fingerprint, the account locks after 5 wrong passwords, you’re logged out after 10 minutes of no activity, and you can see and log out every device that’s logged in from Security. Purchases are delivered through VTpass and bank payments go through Monnify, both licensed Nigerian payment companies.'],
+      ['Can I use ZAPPI PAY in Pidgin, Yoruba, Hausa or Igbo?', 'Yes. Go to Profile → Language and pick one. The main screens switch straight away; a few detailed pages are still in English.'],
+      ['The app is slow on my network. What can I do?', 'Turn on Lite mode in Profile. It hides ads and promos, turns off animations and checks for updates less often, so it uses less data and loads faster.'],
+      ['Can I buy by typing in the Help chat?', 'Yes, when the AI assistant is on. Type something like “₦500 MTN airtime for 0803…” and it prepares a card for you to check. Nothing is bought until you tap Pay and enter your PIN.'],
       ['Do you have a mobile app?', 'Yes. Open zappipay.com.ng on your phone and tap “Install” (or “Add to Home screen”) to install it like an app. It works on Android and iPhone.'],
     ],
   },
@@ -57,6 +60,7 @@ export const FAQ = [
   {
     topic: 'Account & security',
     items: [
+      ['How does Family work?', 'Go to Profile → Family and add a family member by their ZAPPI PAY username or phone number. Once they accept, you can send them a weekly or monthly allowance from your wallet and set a daily spending limit, which services they can buy, and whether they can send money out. They can always send money back to you, and either of you can end the link at any time.'],
       ['I forgot my password', 'Tap “Forgot password” on the login page to get a reset link by email. If you can’t use email, message support — we’ll confirm it’s you with your date of birth and security question before helping.'],
       ['I forgot my PIN', 'Message support in the app (Profile → Support). After we confirm it’s you, we reset your PIN and you create a new one.'],
       ['I lost my phone', 'Log in on another device, go to Security → Where you’re logged in and tap “Log out all other devices”, then change your password. Or contact support and we can remove quick login from your lost phone.'],

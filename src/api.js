@@ -420,3 +420,12 @@ export const saveAdminShops = (data) => adminRequest('/api/admin/shops', { metho
 export const getProfitBook = ({ from, to }) => request(`/api/agent/book?from=${from}&to=${to}`);
 export const getOwing = () => request('/api/agent/book/owing');
 export const saveAgentSale = (orderId, data) => request(`/api/agent/book/${orderId}`, { method: 'PUT', body: JSON.stringify(data) });
+
+// Family wallet.
+export const getFamily = () => request('/api/family');
+export const inviteFamily = (data) => request('/api/family/invite', { method: 'POST', body: JSON.stringify(data) });
+export const respondFamily = (accept) => request('/api/family/respond', { method: 'POST', body: JSON.stringify({ accept }) });
+export const leaveFamily = () => request('/api/family/leave', { method: 'POST' });
+export const updateFamily = (id, data) => request(`/api/family/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const familySendNow = (id) => request(`/api/family/${id}/send-now`, { method: 'POST' });
+export const removeFamily = (id) => request(`/api/family/${id}`, { method: 'DELETE' });

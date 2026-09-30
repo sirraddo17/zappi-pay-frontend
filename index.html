@@ -40,6 +40,8 @@
           var t = localStorage.getItem('zappipay_theme') || 'dark';
           if (t === 'system') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
           document.documentElement.setAttribute('data-theme', t);
+          // Lite / data-saver mode (src/lib/lite.js).
+          if (localStorage.getItem('zappipay_lite') === '1') document.documentElement.setAttribute('data-lite', '');
         } catch (e) { /* private mode */ }
       })();
     </script>

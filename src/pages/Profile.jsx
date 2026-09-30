@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLang } from '../lib/i18n';
 import LanguagePicker from '../components/LanguagePicker';
+import LiteToggle from '../components/LiteToggle';
 import { useShowMore } from '../components/ShowMore';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -267,6 +268,7 @@ export default function Profile() {
 
       <ThemeToggle style={{ margin: '0 0 16px' }} />
       <LanguagePicker style={{ margin: '0 0 16px' }} />
+      <LiteToggle style={{ margin: '0 0 16px' }} />
 
       <div className="card" style={{ margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('Support')}</h2>
@@ -353,6 +355,13 @@ export default function Profile() {
         ))}
       </div>
 
+      <Link to="/family" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
+        <span>
+          <strong style={{ fontSize: 15 }}>👨‍👩‍👧 Family</strong>
+          <span style={{ display: 'block', fontSize: 13, color: 'var(--slate-400)' }}>Allowances and spending limits for your family</span>
+        </span>
+        <span style={{ color: 'var(--purple)' }}>›</span>
+      </Link>
       <AgentCard />
       {customer?.isAgent && (
         <Link to="/profit-book" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>

@@ -9,6 +9,7 @@ export default function AiSettingsPanel() {
   const [keyHint, setKeyHint] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [customerOn, setCustomerOn] = useState(false);
+  const [chatBuyOn, setChatBuyOn] = useState(true);
   const [adminOn, setAdminOn] = useState(false);
   const [customerModel, setCustomerModel] = useState('claude-haiku-4-5');
   const [adminModel, setAdminModel] = useState('claude-sonnet-5');
@@ -23,6 +24,7 @@ export default function AiSettingsPanel() {
     setKeySet(Boolean(s.aiApiKeySet));
     setKeyHint(s.aiApiKeyHint || '');
     setCustomerOn(Boolean(s.aiCustomerEnabled));
+    setChatBuyOn(s.aiChatBuyEnabled !== false);
     setAdminOn(Boolean(s.aiAdminEnabled));
     setCustomerModel(s.aiCustomerModel || 'claude-haiku-4-5');
     setAdminModel(s.aiAdminModel || 'claude-sonnet-5');
@@ -43,6 +45,7 @@ export default function AiSettingsPanel() {
       const d = await updateSettings({
         ...(apiKey.trim() ? { aiApiKey: apiKey.trim() } : {}),
         aiCustomerEnabled: customerOn,
+        aiChatBuyEnabled: chatBuyOn,
         aiAdminEnabled: adminOn,
         aiCustomerModel: customerModel.trim(),
         aiAdminModel: adminModel.trim(),
@@ -100,6 +103,12 @@ export default function AiSettingsPanel() {
         <input type="checkbox" checked={customerOn} onChange={(e) => setCustomerOn(e.target.checked)} style={{ width: 'auto' }} />
         Customer assistant (Help chat in the app)
       </label>
+      {customerOn && (
+        <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '0 0 8px 26px', fontSize: 14 }}>
+          <input type="checkbox" checked={chatBuyOn} onChange={(e) => setChatBuyOn(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
+          <span>Buy by chat — the assistant can prepare airtime, data and electricity purchases (“send ₦500 MTN to Mum”). The customer checks a card and pays with their PIN; the AI never pays by itself.</span>
+        </label>
+      )}
       <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
         <input type="checkbox" checked={adminOn} onChange={(e) => setAdminOn(e.target.checked)} style={{ width: 'auto' }} />
         Admin assistant (AI Assistant page + “Draft with AI” on support tickets)

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { isLite } from './lite';
 
 // Keeps a screen up to date without the customer pulling to refresh:
 // - while `active` (e.g. an order is still pending) it reloads every
@@ -34,7 +35,7 @@ export default function useAutoRefresh(reload, active, { fastMs = 4000, slowMs =
       timer = setTimeout(() => {
         if (document.visibilityState === 'visible') reloadRef.current();
         tick();
-      }, age < 2 * 60 * 1000 ? fastMs : slowMs);
+      }, (age < 2 * 60 * 1000 ? fastMs : slowMs) * (isLite() ? 3 : 1)); // Lite mode: check less often
     };
     tick();
     return () => clearTimeout(timer);

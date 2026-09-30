@@ -5,6 +5,7 @@ import { submitSupportTicket, getOrders, getAiStatus, aiChat } from '../api';
 import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../assistant/knowledge';
 import { useAppInfo } from './ServiceNotices';
 import ImageAttach from './ImageAttach';
+import ChatPurchaseCard from './ChatPurchaseCard';
 
 // Floating "Help" chat for logged-in customers. Quick topics are
 // rule-based (assistant/knowledge.js). When the AI assistant is on in
@@ -142,7 +143,7 @@ export default function HelpAssistant() {
     try {
       const res = await aiChat(history);
       setAi((a) => ({ ...a, remaining: res.remaining }));
-      setMessages((prev) => [...prev, botText(res.reply, { actions: res.actions, offerHuman: res.offerHuman, ai: true })]);
+      setMessages((prev) => [...prev, botText(res.reply, { actions: res.actions, offerHuman: res.offerHuman, ai: true, purchase: res.purchase || null })]);
     } catch (err) {
       // Fall back to the built-in answers so the customer still gets help.
       if (err.code === 'AI_LIMIT' || err.code === 'AI_OFF' || err.code === 'AI_NO_KEY' || err.code === 'AI_BUDGET') setAi({ enabled: false });
@@ -262,6 +263,7 @@ export default function HelpAssistant() {
             >
               {m.text}
             </div>
+            {m.purchase && <ChatPurchaseCard draft={m.purchase} onClose={() => setOpen(false)} />}
             {m.ai && <div style={{ fontSize: 10, color: 'var(--slate-500, #64748b)', marginTop: 2 }}>AI answer · check Orders for exact details</div>}
             {(m.actions?.length > 0 || m.offerHuman || m.quick) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>

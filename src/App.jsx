@@ -46,6 +46,7 @@ const Gift = lazy(() => import('./pages/Gift'));
 const Deals = lazy(() => import('./pages/Deals'));
 const Shop = lazy(() => import('./pages/Shop'));
 const ProfitBook = lazy(() => import('./pages/ProfitBook'));
+const Family = lazy(() => import('./pages/Family'));
 const DeleteAccountInfo = lazy(() => import('./pages/DeleteAccountInfo'));
 const Transfer = lazy(() => import('./pages/Transfer'));
 const PayLink = lazy(() => import('./pages/PayLink'));
@@ -143,6 +144,7 @@ export default function App() {
           <Route path="/gift/:token" element={<Gift />} />
           <Route path="/shop/:username" element={<Shop />} />
           <Route path="/profit-book" element={<RequireCustomer><ProfitBook /></RequireCustomer>} />
+          <Route path="/family" element={<RequireCustomer><Family /></RequireCustomer>} />
           <Route path="/deals" element={<RequireCustomer><Deals /></RequireCustomer>} />
           <Route path="/delete-account" element={<DeleteAccountInfo />} />
           <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
