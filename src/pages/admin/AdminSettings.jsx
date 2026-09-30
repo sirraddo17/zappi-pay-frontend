@@ -32,7 +32,7 @@ const TABS = [
   { key: 'cashback', label: 'Cashback' },
   { key: 'promise', label: '⚡ Delivery promise' },
   { key: 'shops', label: '🏪 Agent shops' },
-  { key: 'epins', label: '🖨️ Recharge Cards' },
+  { key: 'epins', label: '🖨️ ClubKonnect' },
   { key: 'agents', label: 'Agents' },
   { key: 'loyalty', label: 'Loyalty Points' },
   { key: 'savings', label: 'Savings (interest)' },

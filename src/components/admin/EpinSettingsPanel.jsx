@@ -14,6 +14,7 @@ export default function EpinSettingsPanel() {
   const [agent, setAgent] = useState('2');
   const [supplier, setSupplier] = useState('5');
   const [daily, setDaily] = useState('300');
+  const [betSup, setBetSup] = useState('VTPASS');
   const [msg, setMsg] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -25,6 +26,7 @@ export default function EpinSettingsPanel() {
     setAgent(String(o.agentDiscountPct));
     setSupplier(String(o.supplierDiscountPct));
     setDaily(String(o.dailyCards));
+    setBetSup(o.bettingSupplier || 'VTPASS');
   }
   const load = () => getAdminEpins().then(apply).catch((e) => setMsg({ ok: false, text: e.message }));
   useEffect(() => { load(); }, []);
@@ -42,6 +44,7 @@ export default function EpinSettingsPanel() {
         epinCustomerDiscountPct: Number(cust),
         epinAgentDiscountPct: Number(agent),
         epinDailyCards: Number(daily),
+        bettingSupplier: betSup,
         ...extra,
       }));
       setApiKey('');
@@ -68,7 +71,7 @@ export default function EpinSettingsPanel() {
   return (
     <div style={{ display: 'grid', gap: 16, maxWidth: 560 }}>
       <form className="card" style={{ margin: 0 }} onSubmit={save}>
-        <h2 style={{ marginTop: 0, fontSize: 17 }}>🖨️ Recharge card printing (ClubKonnect)</h2>
+        <h2 style={{ marginTop: 0, fontSize: 17 }}>🖨️ ClubKonnect — recharge cards &amp; bet funding</h2>
         <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -4 }}>
           Customers and agents buy MTN, Glo, Airtel and T2mobile airtime PINs (₦100 / ₦200 / ₦500) from their wallet and print them as cards. Money is taken first and refunded automatically if ClubKonnect can’t deliver.
         </p>
@@ -119,6 +122,14 @@ export default function EpinSettingsPanel() {
             <input id="epAgent" type="number" min="0" max="50" step="0.1" value={agent} onChange={(e) => setAgent(e.target.value)} />
             <small style={{ color: 'var(--slate-400)' }}>₦100 card costs {example(100, agent)}</small>
           </div>
+        </div>
+        <div className="field">
+          <label htmlFor="betSup">Bet Funding goes through</label>
+          <select id="betSup" value={betSup} onChange={(e) => setBetSup(e.target.value)}>
+            <option value="VTPASS">VTpass</option>
+            <option value="CLUBKONNECT">ClubKonnect (uses the same wallet as cards)</option>
+          </select>
+          <small style={{ color: 'var(--slate-400)' }}>Choose ClubKonnect if the Bet Funding page shows no betting companies with VTpass. Set a markup for Betting under Markup if ClubKonnect charges you a fee.</small>
         </div>
         <p style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 0 }}>Your profit per ₦100 card ≈ {naira(Number(supplier) - Number(cust))} (customers) / {naira(Number(supplier) - Number(agent))} (agents). Discounts can’t go above what ClubKonnect gives you.</p>
         <button className="btn" type="submit" style={{ width: 'auto' }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>

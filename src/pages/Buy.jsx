@@ -80,8 +80,8 @@ const SERVICE_CONFIG = {
   betting: {
     label: 'Bet Funding',
     backendService: 'BETTING',
-    identifier: 'other-services',
-    filterServiceIds: ['bet9ja', 'betking', 'sportybet', 'bangbet', '1xbet', 'nairabet', 'merrybet'],
+    // The server picks VTpass or ClubKonnect (Settings → ClubKonnect).
+    identifier: 'betting',
     needsVariation: false,
     needsType: false,
     canVerify: true,

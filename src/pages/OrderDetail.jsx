@@ -52,7 +52,7 @@ export default function OrderDetail() {
   function receiptData() {
     const rows = [
       ['Service', order.service],
-      ['Provider', order.provider],
+      ['Provider', String(order.provider || '').replace(/^ck:/, '')],
       ['Recipient', order.recipient],
     ];
     if (order.recipientName) rows.push(['Name', order.recipientName]);
@@ -164,7 +164,7 @@ export default function OrderDetail() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--slate-400)' }}>Provider</span>
-            <span>{order.provider}</span>
+            <span>{String(order.provider || '').replace(/^ck:/, '')}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--slate-400)' }}>Recipient</span>
