@@ -43,6 +43,7 @@ const Legal = lazy(() => import('./pages/Legal'));
 const Help = lazy(() => import('./pages/Help'));
 const Status = lazy(() => import('./pages/Status'));
 const Gift = lazy(() => import('./pages/Gift'));
+const PrintCards = lazy(() => import('./pages/PrintCards'));
 const Deals = lazy(() => import('./pages/Deals'));
 const Shop = lazy(() => import('./pages/Shop'));
 const ProfitBook = lazy(() => import('./pages/ProfitBook'));
@@ -146,6 +147,8 @@ export default function App() {
           <Route path="/profit-book" element={<RequireCustomer><ProfitBook /></RequireCustomer>} />
           <Route path="/family" element={<RequireCustomer><Family /></RequireCustomer>} />
           <Route path="/deals" element={<RequireCustomer><Deals /></RequireCustomer>} />
+          <Route path="/print-cards" element={<RequireCustomer><PrintCards /></RequireCustomer>} />
+          <Route path="/print-cards/:id" element={<RequireCustomer><PrintCards /></RequireCustomer>} />
           <Route path="/delete-account" element={<DeleteAccountInfo />} />
           <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
           <Route path="/pay/:username" element={<PayLink />} />

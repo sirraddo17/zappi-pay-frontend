@@ -448,3 +448,14 @@ export const getAiBriefing = () => adminRequest('/api/admin/ai/briefing');
 export const getVoiceStatus = () => request('/api/voice/status', { quiet: true });
 export const transcribeVoice = (data) => request('/api/ai/transcribe', { method: 'POST', quiet: true, body: JSON.stringify(data) });
 export const getAdminVoiceStatus = () => adminRequest('/api/admin/voice/status');
+
+// Recharge card printing (ClubKonnect e-PINs)
+export const getEpinOptions = () => request('/api/epins/options');
+export const getEpinBatches = () => request('/api/epins');
+export const getEpinBatch = (id) => request(`/api/epins/${id}`);
+export const buyEpins = (data) => request('/api/epins', { method: 'POST', body: JSON.stringify(data) });
+export const markEpinsPrinted = (id) => request(`/api/epins/${id}/printed`, { method: 'POST', body: '{}' });
+export const markEpinsSold = (id, cardIds, sold = true) => request(`/api/epins/${id}/sold`, { method: 'POST', body: JSON.stringify({ cardIds, sold }) });
+export const getAdminEpins = () => adminRequest('/api/admin/epins');
+export const updateAdminEpins = (data) => adminRequest('/api/admin/epins/settings', { method: 'PUT', body: JSON.stringify(data) });
+export const resolveAdminEpin = (id, action) => adminRequest(`/api/admin/epins/${id}/${action}`, { method: 'POST', body: '{}' });

@@ -3,6 +3,7 @@ import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
 import VoiceSettingsPanel from '../../components/admin/VoiceSettingsPanel';
+import EpinSettingsPanel from '../../components/admin/EpinSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
 import RewardGuardPanel from '../../components/admin/RewardGuardPanel';
 import SavingsPanel from '../../components/admin/SavingsPanel';
@@ -31,6 +32,7 @@ const TABS = [
   { key: 'cashback', label: 'Cashback' },
   { key: 'promise', label: '⚡ Delivery promise' },
   { key: 'shops', label: '🏪 Agent shops' },
+  { key: 'epins', label: '🖨️ Recharge Cards' },
   { key: 'agents', label: 'Agents' },
   { key: 'loyalty', label: 'Loyalty Points' },
   { key: 'savings', label: 'Savings (interest)' },
@@ -982,6 +984,7 @@ export default function AdminSettings() {
         </form>
       )}
 
+      {!loading && !loadError && tab === 'epins' && <EpinSettingsPanel />}
       {!loading && !loadError && tab === 'ai' && (<div style={{ display: 'grid', gap: 16 }}><AiSettingsPanel /><VoiceSettingsPanel /></div>)}
       {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
       {!loading && !loadError && tab === 'maintenance' && <MaintenancePanel />}

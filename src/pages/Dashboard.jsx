@@ -18,7 +18,7 @@ import ServiceNotices from '../components/ServiceNotices';
 import LoyaltyCard from '../components/LoyaltyCard';
 import PushToggle from '../components/PushToggle';
 import { LogoIcon, Wordmark } from '../components/Logo';
-import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon } from '../components/Icons';
+import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon, PrinterIcon } from '../components/Icons';
 
 const SERVICES = [
   { slug: 'airtime', service: 'AIRTIME', label: 'Airtime', Icon: PhoneIcon, bg: '#863bff' },
@@ -30,6 +30,7 @@ const SERVICES = [
   { slug: 'internet', service: 'INTERNET', label: 'Internet', Icon: GlobeIcon, bg: '#c2540f' },
   { slug: 'betting', service: 'BETTING', label: 'Bet Funding', Icon: TrophyIcon, bg: '#a38a0a' },
   { slug: 'airtime-cash', to: '/airtime-cash', label: 'Airtime to Cash', Icon: FundIcon, bg: '#5b3fa8' },
+  { slug: 'print-cards', to: '/print-cards', label: 'Print Cards', Icon: PrinterIcon, bg: '#0f6d8c' },
 ];
 
 function fmtTxDate(d) {
