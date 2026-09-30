@@ -143,3 +143,14 @@ export function PrinterIcon({ size = 22, color = 'currentColor' }) {
     </svg>
   );
 }
+
+export function GridIcon({ size = 22, color = 'currentColor' }) {
+  return (
+    <svg {...base(size)}>
+      <rect x="4" y="4" width="6" height="6" rx="1.5" stroke={color} strokeWidth="2" />
+      <rect x="14" y="4" width="6" height="6" rx="1.5" stroke={color} strokeWidth="2" />
+      <rect x="4" y="14" width="6" height="6" rx="1.5" stroke={color} strokeWidth="2" />
+      <rect x="14" y="14" width="6" height="6" rx="1.5" stroke={color} strokeWidth="2" />
+    </svg>
+  );
+}

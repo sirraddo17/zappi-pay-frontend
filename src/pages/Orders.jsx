@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getOrders } from '../api';
+import { getOrders, getEpinBatches } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import RateExperience from '../components/RateExperience';
 import BottomNav from '../components/BottomNav';
@@ -26,9 +26,22 @@ export default function Orders() {
   const [error, setError] = useState('');
   const [shown, setShown] = useState(FIRST_COUNT);
 
+  // Recharge card batches show here too, next to normal purchases.
   function load() {
-    getOrders()
-      .then((data) => { setOrders(data.orders); setError(''); })
+    Promise.all([getOrders(), getEpinBatches().catch(() => ({ batches: [] }))])
+      .then(([data, cards]) => {
+        const batches = (cards.batches || []).map((b) => ({
+          id: b.id,
+          link: `/print-cards/${b.id}`,
+          service: 'RECHARGE CARDS',
+          recipient: `${b.status === 'SUCCESS' ? b.delivered : b.quantity} × ₦${Number(b.value).toLocaleString()} ${b.networkLabel}`,
+          amount: b.amount - (b.refunded || 0) || b.amount,
+          status: b.status === 'FAILED' ? 'REFUNDED' : b.status,
+          createdAt: b.createdAt,
+        }));
+        setOrders([...(data.orders || []), ...batches].sort((a, z) => new Date(z.createdAt) - new Date(a.createdAt)));
+        setError('');
+      })
       .catch((err) => { if (!orders) setError(err.message); });
   }
 
@@ -45,7 +58,7 @@ export default function Orders() {
 
       {error && <p className="error-text">{error}</p>}
 
-      {orders?.[0] && <RateExperience order={orders[0]} maxAgeMs={30 * 60 * 1000} />}
+      {orders?.[0] && !orders[0].link && <RateExperience order={orders[0]} maxAgeMs={30 * 60 * 1000} />}
 
       {orders === null ? (
         <p className="empty-state">Loading…</p>
@@ -54,7 +67,7 @@ export default function Orders() {
       ) : (
         <>
         {orders.slice(0, shown).map((o) => (
-          <Link to={`/orders/${o.id}`} className="card" key={o.id} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+          <Link to={o.link || `/orders/${o.id}`} className="card" key={o.id} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontWeight: 700 }}>{o.service}</div>
