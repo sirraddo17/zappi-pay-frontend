@@ -198,7 +198,8 @@ export default function Profile() {
       <form className="card" style={{ margin: '0 0 16px' }} onSubmit={handleSave}>
         <div className="field">
           <label htmlFor="name">Name</label>
-          <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required readOnly={Boolean(customer?.idVerified)} style={customer?.idVerified ? { opacity: 0.7 } : undefined} />
+          {customer?.idVerified && <small style={{ color: 'var(--green-500)' }}>✓ Confirmed with your BVN/NIN — contact support if it needs changing.</small>}
         </div>
         <div className="field">
           <label htmlFor="email">Email</label>

@@ -110,7 +110,18 @@ export function adminRequest(path, options = {}) {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
-  }).then(handleResponse);
+  }).then(async (res) => {
+    // Admin sessions last 12 hours — when one ends, go back to login.
+    if (res.status === 401 && token) {
+      const body = await res.clone().json().catch(() => ({}));
+      if (body.code === 'ADMIN_SESSION_EXPIRED') {
+        localStorage.removeItem('zappipay_admin_token');
+        localStorage.removeItem('zappipay_admin');
+        if (!window.location.pathname.startsWith('/admin/login')) window.location.assign('/admin/login?expired=1');
+      }
+    }
+    return handleResponse(res);
+  });
 }
 
 // --- Customer auth ---
@@ -508,3 +519,5 @@ export async function speakText(text, language) {
 export const getOpenAiExtras = () => adminRequest('/api/admin/openai-extras');
 export const setOpenAiExtras = (data) => adminRequest('/api/admin/openai-extras', { method: 'PUT', body: JSON.stringify(data) });
 export const makeAdImage = (data) => adminRequest('/api/admin/ai/ad-image', { method: 'POST', body: JSON.stringify(data) });
+export const getBackupCodes = () => adminRequest('/api/admin/security/backup-codes');
+export const makeBackupCodes = (password) => adminRequest('/api/admin/security/backup-codes', { method: 'POST', body: JSON.stringify({ password }) });

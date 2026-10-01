@@ -5,6 +5,7 @@ import AiSettingsPanel from '../../components/AiSettingsPanel';
 import VoiceSettingsPanel from '../../components/admin/VoiceSettingsPanel';
 import HeygenSettingsPanel from '../../components/admin/HeygenSettingsPanel';
 import OpenAiExtrasPanel from '../../components/admin/OpenAiExtrasPanel';
+import BackupCodesPanel from '../../components/admin/BackupCodesPanel';
 import ReceiptInvitePanel from '../../components/admin/ReceiptInvitePanel';
 import EpinSettingsPanel from '../../components/admin/EpinSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
@@ -125,6 +126,7 @@ export default function AdminSettings() {
   const [fraudAmount, setFraudAmount] = useState('20000');
   const [fraudHours, setFraudHours] = useState('24');
   const [twoFactor, setTwoFactor] = useState(false);
+  const [idMatch, setIdMatch] = useState(false);
   const [summaryOn, setSummaryOn] = useState(false);
   const [summaryTest, setSummaryTest] = useState(null);
   const [agentOn, setAgentOn] = useState(false);
@@ -199,6 +201,7 @@ export default function AdminSettings() {
         setFraudAmount(String(s.fraudHoldAmount ?? 20000));
         setFraudHours(String(s.fraudHoldHours ?? 24));
         setTwoFactor(Boolean(s.adminTwoFactorEnabled));
+        setIdMatch(Boolean(s.idMatchEnabled));
         setSummaryOn(Boolean(s.dailySummaryEnabled));
         setAgentOn(Boolean(s.agentPricingEnabled));
         setAgentByService(toServiceMap(s.agentDiscountPercentByService));
@@ -371,6 +374,7 @@ export default function AdminSettings() {
         fraudHoldAmount: Number(fraudAmount || 0),
         fraudHoldHours: Number(fraudHours || 24),
         adminTwoFactorEnabled: twoFactor,
+        idMatchEnabled: idMatch,
         dailySummaryEnabled: summaryOn,
       },
       'Security settings saved.'
@@ -854,7 +858,19 @@ export default function AdminSettings() {
               Email a 6-digit code on every admin login
             </label>
             <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: 0 }}>
-              Admins can tick “Trust this device for 30 days”. Test that your admin email receives messages (e.g. with the summary test below) before turning this on. Emergency: adding ADMIN_2FA_DISABLED = 1 on Render turns it off.
+              You can switch this off here at any time. Admins can tick “Trust this device for 30 days”. Test that your admin email receives messages (e.g. with the summary test below) before turning this on. If email stops working, log in with a backup code below; last resort: ADMIN_2FA_DISABLED = 1 on Render turns it off.
+            </p>
+            <BackupCodesPanel />
+          </div>
+
+          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '14px 0', paddingTop: 14 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Check name & date of birth with BVN/NIN</div>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+              <input type="checkbox" checked={idMatch} onChange={(e) => setIdMatch(e.target.checked)} style={{ width: 'auto' }} />
+              Before giving an account number, check the customer’s name and date of birth match their BVN/NIN
+            </label>
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: 0 }}>
+              Uses Monnify verification: about ₦10 per BVN check and ₦60 per NIN check (from your Monnify wallet). Up to 3 tries per customer a day. After a match, the customer can’t change their name or date of birth. Turn this on only with Monnify LIVE keys — test mode can’t check real IDs.
             </p>
           </div>
 

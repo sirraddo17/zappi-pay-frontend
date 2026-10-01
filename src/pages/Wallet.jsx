@@ -6,6 +6,7 @@ import SpendingCard from '../components/SpendingCard';
 import { Link } from 'react-router-dom';
 import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
+import { useAuth } from '../context/AuthContext';
 import BottomNav from '../components/BottomNav';
 import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
 import { useAppInfo } from '../components/ServiceNotices';
@@ -81,9 +82,11 @@ function FundingHelper({ info }) {
 
 // Personal account number(s): money sent here is added to the wallet
 // automatically. First time, the customer verifies with BVN or NIN.
-function BankFunding({ info, onCreated, onCredited }) {
+function BankFunding({ info, onCreated, onCredited, customerName }) {
   const [idType, setIdType] = useState('BVN');
   const [idNumber, setIdNumber] = useState('');
+  const [dob, setDob] = useState('');
+  const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -97,7 +100,7 @@ function BankFunding({ info, onCreated, onCredited }) {
     setError('');
     setBusy(true);
     try {
-      const res = await createBankAccount({ idType, idNumber });
+      const res = await createBankAccount({ idType, idNumber, ...(info.idMatch ? { consent, ...(info.hasDob ? {} : { dateOfBirth: dob }) } : {}) });
       setIdNumber('');
       onCreated(res);
     } catch (err) {
@@ -153,10 +156,27 @@ function BankFunding({ info, onCreated, onCredited }) {
             required
           />
         </div>
+        {info.idMatch && (
+          <>
+            {!info.hasDob && (
+              <div className="field">
+                <label htmlFor="idDob">Date of birth (as on your {idType})</label>
+                <input id="idDob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} max={new Date().toISOString().slice(0, 10)} required />
+              </div>
+            )}
+            <p style={{ fontSize: 13, margin: '0 0 8px', padding: '8px 10px', borderRadius: 8, background: 'rgba(134,59,255,0.08)' }}>
+              Your name <b>{customerName || 'on your profile'}</b> and date of birth must match your {idType} exactly. If your name is spelt differently, fix it in Profile first.
+            </p>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginBottom: 10 }}>
+              <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
+              I agree that ZAPPI PAY can check my name and date of birth with my {idType} through its licensed payment partner.
+            </label>
+          </>
+        )}
         <p style={{ color: 'var(--slate-400)', fontSize: 12 }}>
           Your {idType} is sent securely to our licensed payment partner only to create your account. ZappiPay does not store it.
         </p>
-        <button className="btn" type="submit" disabled={busy || idNumber.length !== 11}>
+        <button className="btn" type="submit" disabled={busy || idNumber.length !== 11 || (info.idMatch && (!consent || (!info.hasDob && !dob)))}>
           {busy ? 'Creating…' : 'Get My Account Number'}
         </button>
       </form>
@@ -246,6 +266,7 @@ function fmtDate(d) {
 
 export default function Wallet() {
   const t = useLang();
+  const { customer, refreshCustomer } = useAuth();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState(null);
   const [amount, setAmount] = useState('');
@@ -372,8 +393,9 @@ export default function Wallet() {
       {autoFunding && (
         <BankFunding
           info={bankInfo}
-          onCreated={(res) => setBankInfo((prev) => ({ ...prev, accounts: res.accounts, kycType: res.kycType }))}
+          onCreated={(res) => { setBankInfo((prev) => ({ ...prev, accounts: res.accounts, kycType: res.kycType })); if (res.verified) refreshCustomer?.(); }}
           onCredited={load}
+          customerName={customer?.name}
         />
       )}
 

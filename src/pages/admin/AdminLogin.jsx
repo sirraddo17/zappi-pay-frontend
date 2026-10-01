@@ -16,7 +16,8 @@ export default function AdminLogin() {
   const [challenge, setChallenge] = useState(null);
   const [code, setCode] = useState('');
   const [remember, setRemember] = useState(true);
-  const [idle] = useState(() => idleMessage('admin'));
+  const [idle] = useState(() => idleMessage('admin') || (new URLSearchParams(window.location.search).get('expired') ? 'Your admin session ended (12 hours). Please log in again.' : ''));
+  const [useBackup, setUseBackup] = useState(false);
 
   async function handleVerify(e) {
     e.preventDefault();
@@ -41,6 +42,7 @@ export default function AdminLogin() {
       if (step?.twoFactor) {
         setChallenge(step);
         setCode('');
+        setUseBackup(Boolean(step.emailFailed));
       } else {
         navigate('/admin');
       }
@@ -63,18 +65,33 @@ export default function AdminLogin() {
 
       {challenge ? (
         <form className="card" style={{ margin: 0 }} onSubmit={handleVerify}>
-          <p style={{ marginTop: 0, fontSize: 14 }}>
-            We emailed a 6-digit code to <strong>{challenge.emailHint}</strong>. Enter it to finish logging in.
-          </p>
+          {challenge.emailFailed ? (
+            <p style={{ marginTop: 0, fontSize: 14, color: 'var(--gold)' }}>
+              We couldn’t send the login email right now. Enter one of your <strong>backup codes</strong> instead.
+            </p>
+          ) : (
+            <p style={{ marginTop: 0, fontSize: 14 }}>
+              {useBackup ? 'Enter one of your backup codes (e.g. K7QM-3XPD).' : <>We emailed a 6-digit code to <strong>{challenge.emailHint}</strong>. Enter it to finish logging in.</>}
+            </p>
+          )}
           <div className="field">
-            <label htmlFor="code">Login code</label>
-            <input id="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} required autoFocus />
+            <label htmlFor="code">{useBackup ? 'Backup code' : 'Login code'}</label>
+            {useBackup ? (
+              <input id="code" autoComplete="off" autoCapitalize="characters" maxLength={9} value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ''))} required autoFocus style={{ letterSpacing: 2 }} />
+            ) : (
+              <input id="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} required autoFocus />
+            )}
           </div>
+          {!challenge.emailFailed && challenge.backupCodes > 0 && (
+            <button type="button" onClick={() => { setUseBackup((x) => !x); setCode(''); }} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, margin: '0 0 10px', fontSize: 13 }}>
+              {useBackup ? 'Use the email code instead' : 'Didn’t get the email? Use a backup code'}
+            </button>
+          )}
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, marginBottom: 12 }}>
             <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 'auto' }} />
             Trust this device for 30 days
           </label>
-          <button className="btn" type="submit" disabled={submitting || code.length !== 6}>
+          <button className="btn" type="submit" disabled={submitting || (useBackup ? code.replace(/-/g, '').length !== 8 : code.length !== 6)}>
             {submitting ? 'Checking…' : 'Verify & log in'}
           </button>
           <button type="button" onClick={() => { setChallenge(null); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--slate-400)', cursor: 'pointer', marginTop: 10, width: '100%' }}>
