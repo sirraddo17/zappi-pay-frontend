@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
 import { FundIcon, PrinterIcon, PhoneIcon, WifiIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
+import { useAppInfo } from '../components/ServiceNotices';
 
 // Home → More. New services go here so the home screen stays short.
 const ITEMS = [
@@ -18,6 +19,8 @@ const ITEMS = [
 
 export default function More() {
   const t = useLang();
+  const appInfo = useAppInfo();
+  const items = ITEMS.filter((s) => s.to !== '/international' || appInfo?.intlAirtime);
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
       <div className="page-header">
@@ -25,7 +28,7 @@ export default function More() {
         <h1>{t('More services')}</h1>
       </div>
       <div className="service-grid">
-        {ITEMS.map((s) => (
+        {items.map((s) => (
           <Link key={s.to} to={s.to} className="service-tile" title={s.note}>
             <div className="service-icon" style={{ background: s.bg }}>
               {s.Icon ? <s.Icon size={22} color="#fff" /> : <span style={{ fontSize: 20 }} aria-hidden="true">{s.emoji}</span>}

@@ -6,6 +6,7 @@ import VoiceSettingsPanel from '../../components/admin/VoiceSettingsPanel';
 import HeygenSettingsPanel from '../../components/admin/HeygenSettingsPanel';
 import OpenAiExtrasPanel from '../../components/admin/OpenAiExtrasPanel';
 import BackupCodesPanel from '../../components/admin/BackupCodesPanel';
+import IntlAirtimeToggle from '../../components/admin/IntlAirtimeToggle';
 import ReceiptInvitePanel from '../../components/admin/ReceiptInvitePanel';
 import EpinSettingsPanel from '../../components/admin/EpinSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
@@ -528,6 +529,7 @@ export default function AdminSettings() {
           {saveButton('vtpass', 'Save VTpass Settings')}
         </form>
       )}
+      {!loading && !loadError && tab === 'vtpass' && <IntlAirtimeToggle />}
 
       {!loading && !loadError && tab === 'monnify' && (
         <form className="card" style={cardStyle} onSubmit={saveMonnify}>

@@ -73,10 +73,11 @@ export default function International() {
         <h1>International airtime & data</h1>
         <p>Top up family and friends abroad — pay in naira from your wallet.</p>
       </div>
+      {appInfo && !appInfo.intlAirtime && <div className="card" style={{ textAlign: 'center' }}>🌍 International airtime & data is coming soon.</div>}
       {err && <p className="error-text" style={{ margin: '0 16px 12px' }}>{err}</p>}
       {paused && <p className="error-text" style={{ margin: '0 16px 12px' }}>{paused}</p>}
 
-      {!country ? (
+      {appInfo && !appInfo.intlAirtime ? null : !country ? (
         <div className="card">
           <div className="field"><label htmlFor="inQ">Which country?</label><input id="inQ" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search e.g. Ghana, UK, USA" /></div>
           {!countries ? <p className="empty-state">Loading countries…</p> : (
