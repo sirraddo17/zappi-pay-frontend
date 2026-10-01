@@ -12,18 +12,26 @@ const emojiFor = (name) => PLAN_EMOJI[Object.keys(PLAN_EMOJI).find((k) => String
 
 function Pick({ id, label, kind, parent, value, onChange, disabled }) {
   const [opts, setOpts] = useState(null);
+  const [info, setInfo] = useState(null);
   useEffect(() => {
     setOpts(null);
+    setInfo(null);
     if (disabled) return;
-    insuranceOptions(kind, parent).then((d) => setOpts(d.options)).catch(() => setOpts([]));
+    insuranceOptions(kind, parent).then((d) => { setOpts(d.options); if (!d.options.length) setInfo(d.raw || { note: 'empty list' }); }).catch((e) => { setOpts([]); setInfo({ error: e.message }); });
   }, [kind, parent, disabled]);
   return (
     <div className="field">
       <label htmlFor={id}>{label}</label>
       <select id={id} value={value} onChange={(e) => onChange(e.target.value)} required disabled={disabled}>
-        <option value="">{disabled ? 'Choose the one above first' : opts === null ? 'Loading…' : 'Choose'}</option>
+        <option value="">{disabled ? 'Choose the one above first' : opts === null ? 'Loading…' : opts.length ? 'Choose' : 'Nothing found'}</option>
         {(opts || []).map((o) => <option key={o.code} value={o.code}>{o.name}</option>)}
       </select>
+      {info && (
+        <details style={{ fontSize: 11, color: 'var(--slate-400)', marginTop: 4 }}>
+          <summary>{info.error ? `Could not load: ${info.error}` : 'Nothing came back — details for support'}</summary>
+          <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify({ list: kind, parent, ...info }, null, 1)}</pre>
+        </details>
+      )}
     </div>
   );
 }
