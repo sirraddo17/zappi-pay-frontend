@@ -117,11 +117,19 @@ export default function AdminDashboard() {
           <strong>{agentReqs.length} agent application{agentReqs.length === 1 ? '' : 's'}</strong>
           <div style={{ fontSize: 13, marginTop: 6 }}>
             {agentReqs.map((c) => (
-              <div key={c.id}>
+              <div key={c.id} style={{ marginBottom: 8 }}>
                 <Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--purple)' }}>{c.name}</Link> · {c.agentBusinessName}{c.agentShopAddress ? ` (${c.agentShopAddress})` : ''} · {c.phone}{c.kycType ? ' · ✓ verified' : ' · not verified'}
+                {c.signals && (
+                  <div style={{ fontSize: 12, marginTop: 2 }}>
+                    <span style={{ fontWeight: 600, color: { APPROVE: 'var(--green-500)', LIKELY_OK: 'var(--green-500)', CHECK: 'var(--gold)', DECLINE_OR_CHECK: 'var(--red-500)' }[c.signals.verdict] }}>{c.signals.verdictText}</span>
+                    {c.signals.good?.length > 0 && <span style={{ color: 'var(--slate-400)' }}> · ✓ {c.signals.good.join(' · ')}</span>}
+                    {c.signals.risk?.length > 0 && <span style={{ color: 'var(--gold)' }}> · ⚠ {c.signals.risk.join(' · ')}</span>}
+                  </div>
+                )}
               </div>
             ))}
           </div>
+          <div style={{ fontSize: 11, color: 'var(--slate-400)', marginTop: 4 }}>Automatic checks to help you decide — you approve or decline on the customer’s page.</div>
         </div>
       )}
 

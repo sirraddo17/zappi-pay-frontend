@@ -15,6 +15,13 @@ const SUGGESTIONS = [
   'Did VTpass change any prices or commissions?',
   'Which in-app ads are working?',
   'Plan a campaign to win back customers who stopped buying',
+  'Who are my regulars slipping away? Make a win-back campaign',
+  'What are customers complaining about in their ratings?',
+  'Check the agent applications for me',
+  'Review last week’s support replies — tone and accuracy',
+  'Any scam reports? Should I warn customers?',
+  'What if I give 2% off data — will I still make money?',
+  'Plan my social media posts for this week',
   'What questions keep coming up in support? Add them to the Help Centre',
   'Check my discounts and rewards are safe for my margins',
   'Set the rewards split to 30% and make the referral bonus ₦100',
@@ -36,7 +43,8 @@ const SUGGESTIONS = [
 export default function AdminAssistant() {
   const [status, setStatus] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
+  // /admin/assistant?ask=… (from other admin pages) prefills the question.
+  const [input, setInput] = useState(() => { try { return new URLSearchParams(window.location.search).get('ask')?.slice(0, 500) || ''; } catch { return ''; } });
   const [images, setImages] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');

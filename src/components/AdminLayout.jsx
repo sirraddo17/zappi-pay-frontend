@@ -29,6 +29,7 @@ const TABS = [
   { to: '/admin/ads', label: '📣 In-app Ads' },
   { to: '/admin/ad-studio', label: '🎨 Ad Studio' },
   { to: '/admin/feedback', label: '⭐ Feedback' },
+  { to: '/admin/radar', label: '🔭 Radar' },
   { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit-log', label: 'Audit Log' },
 ];

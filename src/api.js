@@ -485,3 +485,11 @@ export const setAdminReceiptInvite = (data) => adminRequest('/api/admin/receipt-
 
 // Self-freeze (lost / stolen phone): needs the account password.
 export const freezeMyAccount = (password) => request('/api/security/freeze', { method: 'POST', body: JSON.stringify({ password }) });
+
+// AI helpers & radar
+export const planSocialWeek = (data) => adminRequest('/api/admin/ai/week-plan', { method: 'POST', body: JSON.stringify(data) });
+export const checkSupportReply = (data) => adminRequest('/api/admin/ai/check-reply', { method: 'POST', body: JSON.stringify(data) });
+export const getWinBack = () => adminRequest('/api/admin/insights/winback');
+export const simulatePricing = (data) => adminRequest('/api/admin/insights/simulate-pricing', { method: 'POST', body: JSON.stringify(data) });
+export const getFeedbackDigest = (days = 30) => adminRequest(`/api/admin/insights/feedback-digest?days=${days}`);
+export const getScamReports = () => adminRequest('/api/admin/scam-reports');

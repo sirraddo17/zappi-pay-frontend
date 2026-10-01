@@ -8,6 +8,7 @@ import useAutoRefresh from '../lib/useAutoRefresh';
 import ContestCard from '../components/ContestCard';
 import ChallengesCard from '../components/ChallengesCard';
 import RenewalsCard from '../components/RenewalsCard';
+import GettingStarted, { hiddenBefore as gsHidden } from '../components/GettingStarted';
 import { LiteSuggestion } from '../components/LiteToggle';
 import { useLite } from '../lib/lite';
 import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
@@ -104,6 +105,8 @@ export default function Dashboard() {
   const [dismissed, setDismissed] = useState(readDismissed);
   const [referral, setReferral] = useState(null);
   const [recent, setRecent] = useState([]);
+  const [bought, setBought] = useState(null); // null = not loaded yet
+  const [gsOff, setGsOff] = useState(gsHidden);
 
   function dismissBanner(id) {
     const next = [...dismissed, id];
@@ -135,6 +138,7 @@ export default function Dashboard() {
     cached(k('recent'), () => getOrders().then((data) => {
       const seen = new Set();
       const list = [];
+      const any = (data.orders || []).some((o) => o.status === 'SUCCESS');
       for (const o of data.orders || []) {
         if (o.status !== 'SUCCESS') continue;
         const key = `${o.service}|${o.provider}|${o.recipient}|${o.variationCode || o.costAmount}`;
@@ -143,8 +147,8 @@ export default function Dashboard() {
         list.push(o);
         if (list.length >= 6) break;
       }
-      return list;
-    }), setRecent).catch(() => {});
+      return { list, any };
+    }), (v) => { const list = Array.isArray(v) ? v : (v?.list || []); setRecent(list); setBought(Array.isArray(v) ? list.length > 0 : Boolean(v?.any)); }).catch(() => {});
   }, []);
 
   return (
@@ -298,7 +302,9 @@ export default function Dashboard() {
         })}
       </div>
 
-      {customer && !customer.username && (
+      {customer && bought === false && !gsOff && <GettingStarted customer={customer} balance={balance} funded={(transactions || []).some((x) => x.type === 'FUND' && x.status === 'APPROVED')} onHide={() => setGsOff(true)} />}
+
+      {customer && (bought !== false || gsOff) && !customer.username && (
         <Link
           to="/refer"
           className="card"
@@ -313,7 +319,7 @@ export default function Dashboard() {
         </Link>
       )}
 
-      {customer && !customer.hasPin && (
+      {customer && (bought !== false || gsOff) && !customer.hasPin && (
         <Link
           to="/security"
           className="card"

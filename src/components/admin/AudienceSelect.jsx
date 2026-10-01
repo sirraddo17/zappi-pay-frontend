@@ -22,5 +22,5 @@ export default function AudienceSelect({ id = 'aud', value, onChange, label = 'S
 }
 
 export function audienceLabel(key) {
-  return (cache || []).find((g) => g.key === key)?.label || { ALL: 'Everyone', AGENTS: 'Agents only', NEW_7: 'Joined in the last 7 days', NEVER_BOUGHT: 'Never bought', ACTIVE_30: 'Bought in the last 30 days', INACTIVE_30: 'Not bought in 30 days' }[key] || key;
+  return (cache || []).find((g) => g.key === key)?.label || { ALL: 'Everyone', AGENTS: 'Agents only', NEW_7: 'Joined in the last 7 days', NEVER_BOUGHT: 'Never bought', ACTIVE_30: 'Bought in the last 30 days', INACTIVE_30: 'Not bought in 30 days', SLIPPING: 'Regulars slipping away' }[key] || key;
 }

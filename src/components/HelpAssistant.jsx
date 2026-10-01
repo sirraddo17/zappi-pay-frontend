@@ -9,6 +9,7 @@ import ChatPurchaseCard from './ChatPurchaseCard';
 import ChatTransferCard from './ChatTransferCard';
 import ChatActionCard from './ChatActionCard';
 import VoiceButton from './VoiceButton';
+import SpeakButton from './SpeakButton';
 
 // Floating "Help" chat for logged-in customers. Quick topics are
 // rule-based (assistant/knowledge.js). When the AI assistant is on in
@@ -57,6 +58,7 @@ export default function HelpAssistant() {
   const [thinking, setThinking] = useState(false);
   const [chatImages, setChatImages] = useState([]);
   const [voiceNote, setVoiceNote] = useState('');
+  const [pendingAsk, setPendingAsk] = useState('');
 
   const hidden = !customer || HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p));
 
@@ -88,6 +90,27 @@ export default function HelpAssistant() {
     window.addEventListener('zappipay:support', onOpen);
     return () => window.removeEventListener('zappipay:support', onOpen);
   });
+
+  // Other pages can open the chat with a question:
+  // window.dispatchEvent(new CustomEvent('zappipay:ask', { detail: { text } }))
+  useEffect(() => {
+    const onAsk = (e) => {
+      const t = String(e.detail?.text || '').slice(0, 300);
+      if (!t) return;
+      setTicketMode(false);
+      setOpen(true);
+      setPendingAsk(t);
+    };
+    window.addEventListener('zappipay:ask', onAsk);
+    return () => window.removeEventListener('zappipay:ask', onAsk);
+  });
+  useEffect(() => {
+    if (pendingAsk && open && ai !== null && messages.length > 0 && !thinking) {
+      const t = pendingAsk;
+      setPendingAsk('');
+      send(t);
+    }
+  }, [pendingAsk, open, ai, messages.length, thinking]);
 
   if (hidden) return null;
 
@@ -275,6 +298,7 @@ export default function HelpAssistant() {
             {m.transfer && <ChatTransferCard draft={m.transfer} onClose={() => setOpen(false)} />}
             {m.cards?.map((c) => <ChatActionCard key={c.id} card={c} />)}
             {m.ticketSent && <div style={{ marginTop: 6, fontSize: 12, color: 'var(--green-500)' }}>✓ Sent to our support team — the reply will come to your Notifications.</div>}
+            {m.from === 'bot' && m.text && <SpeakButton text={m.text} id={i} />}
             {m.ai && <div style={{ fontSize: 10, color: 'var(--slate-500, #64748b)', marginTop: 2 }}>AI answer · check Orders for exact details</div>}
             {(m.actions?.length > 0 || m.offerHuman || m.quick) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>

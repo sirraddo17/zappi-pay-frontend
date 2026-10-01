@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply, adminImageUrl } from '../../api';
+import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply, adminImageUrl, checkSupportReply } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { useShowMore } from '../../components/ShowMore';
 import { CATEGORIES, detectCategory, draftReply } from '../../assistant/replyTemplates';
@@ -27,6 +27,22 @@ function ReplyPanel({ ticket, onSent, onClose, aiOn }) {
   const [copied, setCopied] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiNote, setAiNote] = useState('');
+  const [check, setCheck] = useState(null);
+  const [checking, setChecking] = useState(false);
+
+  // AI checks the reply against the order/refund facts before sending.
+  async function checkWithAi() {
+    setChecking(true);
+    setError('');
+    setCheck(null);
+    try {
+      setCheck(await checkSupportReply({ ticketId: ticket.id, reply: text.trim() }));
+    } catch (err) {
+      setError(err.message || 'Could not check the reply.');
+    } finally {
+      setChecking(false);
+    }
+  }
 
   // Claude drafts from this customer's real orders, refunds and wallet.
   async function draftWithAi() {
@@ -134,10 +150,32 @@ function ReplyPanel({ ticket, onSent, onClose, aiOn }) {
         Mark ticket as resolved when sending
       </label>
       {error && <p className="error-text" style={{ margin: '0 0 8px' }}>{error}</p>}
+      {check && (
+        <div style={{ textAlign: 'left', background: 'var(--slate-800)', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 13, border: `1px solid ${check.ok ? 'var(--green-500)' : 'var(--gold)'}` }}>
+          {check.ok && !check.issues.length ? <b style={{ color: 'var(--green-500)' }}>✓ Looks good to send.</b> : (
+            <>
+              <b style={{ color: 'var(--gold)' }}>Things to fix:</b>
+              <ul style={{ margin: '4px 0 6px', paddingLeft: 18 }}>{check.issues.map((x) => <li key={x}>{x}</li>)}</ul>
+            </>
+          )}
+          {check.improved && (
+            <>
+              <div style={{ color: 'var(--slate-400)', marginTop: 4 }}>Suggested version:</div>
+              <div style={{ whiteSpace: 'pre-wrap', margin: '4px 0 8px' }}>{check.improved}</div>
+              <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} onClick={() => { setText(check.improved.slice(0, 2000)); setEdited(true); setCheck(null); }}>Use this version</button>
+            </>
+          )}
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button className="btn" type="button" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} disabled={sending || !text.trim() || hasPlaceholder} onClick={handleSend}>
           {sending ? 'Sending…' : 'Send to customer'}
         </button>
+        {aiOn && (
+          <button className="btn-secondary btn" type="button" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} disabled={checking || sending || text.trim().length < 5} onClick={checkWithAi}>
+            {checking ? 'Checking…' : '🔍 Check reply'}
+          </button>
+        )}
         <button className="btn-secondary btn" type="button" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }} onClick={handleCopy}>
           {copied ? 'Copied' : 'Copy'}
         </button>

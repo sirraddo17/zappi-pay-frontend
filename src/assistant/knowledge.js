@@ -12,6 +12,15 @@ export const SUPPORT_EMAIL = 'support@zappipay.com.ng';
 
 export const TOPICS = [
   {
+    id: 'scam',
+    title: 'Is this a scam?',
+    keywords: ['scam', 'scammer', 'fraudster', 'is this real', 'fake message', 'fake call', 'asked for my otp', 'asked for my pin', 'someone called me', 'suspicious', 'legit', 'genuine'],
+    answer:
+      'ZAPPI PAY will NEVER ask for your PIN, password, OTP, BVN or card details, never calls to "verify" or "unlock" your account, and never asks you to pay to receive a prize or refund. Our only website is zappipay.com.ng and support is here in the app or support@zappipay.com.ng. If someone asked for any of these, it is a scam — don\'t reply, block them. If you already shared something, change your password and PIN now (Profile → Security) and tell support.',
+    actions: [{ label: 'Security settings', to: '/security' }],
+    escalate: true,
+  },
+  {
     id: 'fund',
     title: 'Fund my wallet',
     keywords: ['fund', 'deposit', 'add money', 'top up wallet', 'topup', 'credit wallet', 'load wallet', 'pay in', 'transfer to wallet'],

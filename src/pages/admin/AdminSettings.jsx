@@ -136,6 +136,9 @@ export default function AdminSettings() {
   const [adminPushOn, setAdminPushOn] = useState(true);
   const [adminEmailOn, setAdminEmailOn] = useState(true);
   const [feedbackOn, setFeedbackOn] = useState(true);
+  const [spotterOn, setSpotterOn] = useState(true);
+  const [monthlyOn, setMonthlyOn] = useState(true);
+  const [agentWeeklyOn, setAgentWeeklyOn] = useState(true);
   const [limitsOn, setLimitsOn] = useState(false);
   const [limitUnverified, setLimitUnverified] = useState('50000');
   const [limitVerified, setLimitVerified] = useState('1000000');
@@ -206,6 +209,9 @@ export default function AdminSettings() {
         setAdminPushOn(s.adminAlertPush !== false);
         setAdminEmailOn(s.adminAlertEmail !== false);
         setFeedbackOn(s.feedbackPromptEnabled !== false);
+        setSpotterOn(s.problemSpotterEnabled !== false);
+        setMonthlyOn(s.monthlySummaryEnabled !== false);
+        setAgentWeeklyOn(s.agentWeeklyEnabled !== false);
         setLimitsOn(Boolean(s.kycLimitsEnabled));
         setLimitUnverified(String(s.dailyLimitUnverified ?? 50000));
         setLimitVerified(String(s.dailyLimitVerified ?? 1000000));
@@ -409,6 +415,9 @@ export default function AdminSettings() {
         adminAlertPush: adminPushOn,
         adminAlertEmail: adminEmailOn,
         feedbackPromptEnabled: feedbackOn,
+        problemSpotterEnabled: spotterOn,
+        monthlySummaryEnabled: monthlyOn,
+        agentWeeklyEnabled: agentWeeklyOn,
         kycLimitsEnabled: limitsOn,
         dailyLimitUnverified: Number(limitUnverified || 0),
         dailyLimitVerified: Number(limitVerified || 0),
@@ -936,6 +945,19 @@ export default function AdminSettings() {
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
             <input type="checkbox" checked={feedbackOn} onChange={(e) => setFeedbackOn(e.target.checked)} style={{ width: 'auto' }} />
             Ask customers to rate their purchase (and share their referral link when happy)
+          </label>
+          <div style={{ fontWeight: 600, margin: '4px 0 6px' }}>Automatic helpers (free — no AI cost)</div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+            <input type="checkbox" checked={spotterOn} onChange={(e) => setSpotterOn(e.target.checked)} style={{ width: 'auto' }} />
+            Problem spotter — alert me when a provider keeps failing (and prepare a notice + pause card)
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+            <input type="checkbox" checked={monthlyOn} onChange={(e) => setMonthlyOn(e.target.checked)} style={{ width: 'auto' }} />
+            Monthly money summary to customers (first days of the month)
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
+            <input type="checkbox" checked={agentWeeklyOn} onChange={(e) => setAgentWeeklyOn(e.target.checked)} style={{ width: 'auto' }} />
+            Weekly shop report to agents (Mondays)
           </label>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
             <input type="checkbox" checked={limitsOn} onChange={(e) => setLimitsOn(e.target.checked)} style={{ width: 'auto' }} />
