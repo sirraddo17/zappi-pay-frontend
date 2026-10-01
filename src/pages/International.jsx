@@ -22,6 +22,7 @@ export default function International() {
   const [ops, setOps] = useState([]);
   const [op, setOp] = useState('');
   const [vars, setVars] = useState(null);
+  const [raw, setRaw] = useState(null);
   const [vcode, setVcode] = useState('');
   const [local, setLocal] = useState('');
   const [quote, setQuote] = useState(null);
@@ -33,7 +34,7 @@ export default function International() {
   useEffect(() => { intlCountries().then((d) => setCountries(d.countries)).catch((e) => setErr(e.message)); }, []);
   useEffect(() => { if (country) { setTypes([]); setType(''); setOps([]); setOp(''); setVars(null); intlTypes(country.code).then((d) => { setTypes(d.types); if (d.types.length === 1) setType(d.types[0].id); }).catch((e) => setErr(e.message)); } }, [country]);
   useEffect(() => { if (country && type) { setOps([]); setOp(''); setVars(null); intlOperators(country.code, type).then((d) => { setOps(d.operators); if (d.operators.length === 1) setOp(d.operators[0].id); }).catch((e) => setErr(e.message)); } }, [type]);
-  useEffect(() => { if (op && type) { setVars(null); setVcode(''); intlVariations(op, type).then((d) => { setVars(d.variations); if (d.variations.length === 1) setVcode(d.variations[0].code); }).catch((e) => setErr(e.message)); } }, [op]);
+  useEffect(() => { if (op && type) { setVars(null); setVcode(''); intlVariations(op, type).then((d) => { setVars(d.variations); setRaw(d.raw || null); if (d.variations.length === 1) setVcode(d.variations[0].code); }).catch((e) => setErr(e.message)); } }, [op]);
 
   const v = vars?.find((x) => x.code === vcode);
   useEffect(() => {
@@ -118,6 +119,12 @@ export default function International() {
                 {(vars || []).map((x) => <option key={x.code} value={x.code}>{x.name}{x.fixed && x.price ? ` — ${naira(x.price)}` : ''}</option>)}
               </select>
             </div>
+          )}
+          {vars && vars.length === 0 && raw && (
+            <details style={{ fontSize: 11, color: 'var(--slate-400)', marginBottom: 10 }}>
+              <summary>Details for support</summary>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{JSON.stringify(raw, null, 1)}</pre>
+            </details>
           )}
           {v && !v.fixed && (
             <div className="field">
