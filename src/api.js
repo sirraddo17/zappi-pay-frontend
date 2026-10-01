@@ -477,3 +477,8 @@ export const getHeygenVideos = () => adminRequest('/api/admin/heygen/videos');
 export const makeHeygenVideo = (data) => adminRequest('/api/admin/heygen/videos', { method: 'POST', body: JSON.stringify(data) });
 export const refreshHeygenVideo = (id) => adminRequest(`/api/admin/heygen/videos/${id}`);
 export const attachHeygenVideo = (id, adId) => adminRequest(`/api/admin/heygen/videos/${id}/attach`, { method: 'POST', body: JSON.stringify({ adId }) });
+
+// Invite on receipts (sender's referral link + QR)
+export const getReceiptInvite = () => request('/api/receipt-invite', { quiet: true });
+export const getAdminReceiptInvite = () => adminRequest('/api/admin/receipt-invite');
+export const setAdminReceiptInvite = (data) => adminRequest('/api/admin/receipt-invite', { method: 'PUT', body: JSON.stringify(data) });

@@ -4,6 +4,7 @@ import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
 import VoiceSettingsPanel from '../../components/admin/VoiceSettingsPanel';
 import HeygenSettingsPanel from '../../components/admin/HeygenSettingsPanel';
+import ReceiptInvitePanel from '../../components/admin/ReceiptInvitePanel';
 import EpinSettingsPanel from '../../components/admin/EpinSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
 import RewardGuardPanel from '../../components/admin/RewardGuardPanel';
@@ -958,6 +959,7 @@ export default function AdminSettings() {
         </form>
       )}
 
+      {!loading && !loadError && tab === 'referral' && <ReceiptInvitePanel />}
       {!loading && !loadError && tab === 'referral' && (
         <form className="card" style={cardStyle} onSubmit={saveReferral}>
           <SectionHeader

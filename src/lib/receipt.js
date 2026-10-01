@@ -1,6 +1,9 @@
 // Branded receipt image (PNG) drawn on a canvas, so customers can share
 // real "proof of payment" to WhatsApp etc. — not just plain text.
 
+import QRCode from 'qrcode';
+import { getReceiptInvite } from '../api';
+
 const W = 720;
 const PAD = 48;
 const PURPLE = '#7c3aed';
@@ -51,7 +54,7 @@ function wrap(ctx, text, maxWidth) {
  * @param {{title: string, amount: number, status: string, rows: [string, string][], highlight?: {label: string, value: string}}} r
  * @returns {Promise<Blob>}
  */
-export async function drawReceipt({ title, amount, status, rows, highlight }) {
+export async function drawReceipt({ title, amount, status, rows, highlight, invite }) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   const font = (w, s) => `${w} ${s}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
@@ -63,7 +66,9 @@ export async function drawReceipt({ title, amount, status, rows, highlight }) {
   const rowLines = rows.map(([, v]) => wrap(ctx, v ?? '', valueW));
   ctx.font = font(700, 30);
   const hlLines = highlight ? wrap(ctx, highlight.value, W - PAD * 2 - 40) : [];
-  const height = 250 + 150 + rowLines.reduce((s, l) => s + 22 + l.length * 30, 0) + (highlight ? 70 + hlLines.length * 40 : 0) + 130;
+  const INVITE_H = 230;
+  const height = 250 + 150 + rowLines.reduce((s, l) => s + 22 + l.length * 30, 0) + (highlight ? 70 + hlLines.length * 40 : 0) + 130 + (invite ? INVITE_H + 20 : 0);
+  const qrImg = invite ? await loadImage(await QRCode.toDataURL(invite.link, { margin: 1, width: 300, color: { dark: '#2a0b66', light: '#ffffff' }, errorCorrectionLevel: 'M' })).catch(() => null) : null;
 
   const scale = 2;
   canvas.width = W * scale;
@@ -141,6 +146,37 @@ export async function drawReceipt({ title, amount, status, rows, highlight }) {
     y += (rowLines[i].length - 1) * 30 + 16;
   });
 
+  // Invite box: the sender's referral link + QR code.
+  if (invite) {
+    const top = height - 130 - INVITE_H;
+    ctx.fillStyle = '#f5f3ff';
+    ctx.strokeStyle = PURPLE;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(PAD, top, W - PAD * 2, INVITE_H, 16);
+    ctx.fill();
+    ctx.stroke();
+    const qr = 180;
+    if (qrImg) ctx.drawImage(qrImg, W - PAD - 20 - qr, top + (INVITE_H - qr) / 2, qr, qr);
+    const textW = W - PAD * 2 - qr - 60;
+    ctx.fillStyle = PURPLE;
+    ctx.font = font(800, 22);
+    ctx.fillText(invite.code ? `🎁 Invited by @${invite.code}` : '🎁 Try ZAPPI PAY', PAD + 20, top + 40);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = font(500, 19);
+    const msg = wrap(ctx, invite.message, textW).slice(0, 3);
+    msg.forEach((l, i) => ctx.fillText(l, PAD + 20, top + 74 + i * 26));
+    ctx.fillStyle = PURPLE;
+    ctx.font = font(700, 17);
+    ctx.font = font(700, 16);
+    wrap(ctx, invite.link.replace(/^https?:\/\/(www\.)?/, ''), textW).slice(0, 1).forEach((l) => ctx.fillText(l, PAD + 20, top + 84 + Math.min(msg.length, 3) * 26 + 6));
+    if (invite.code) {
+      ctx.fillStyle = '#6b7280';
+      ctx.font = font(500, 16);
+      ctx.fillText(`Referral code: ${invite.code}`, PAD + 20, top + INVITE_H - 22);
+    }
+  }
+
   // Footer.
   y = height - 60;
   ctx.fillStyle = '#6b7280';
@@ -151,13 +187,35 @@ export async function drawReceipt({ title, amount, status, rows, highlight }) {
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 }
 
+const SITE = 'https://www.zappipay.com.ng';
+function loadImage(src) {
+  return new Promise((resolve, reject) => { const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src; });
+}
+
+// The sender's invite (admin can switch it off in Settings → Referrals).
+let invitePromise = null;
+export function receiptInvite() {
+  if (!invitePromise) {
+    invitePromise = getReceiptInvite()
+      .then((d) => (d?.enabled ? { code: d.code || null, message: d.message, link: d.code ? `${SITE}/signup?ref=${encodeURIComponent(d.code)}` : SITE } : null))
+      .catch(() => null);
+    setTimeout(() => { invitePromise = null; }, 10 * 60 * 1000);
+  }
+  return invitePromise;
+}
+async function withInvite(receipt) {
+  if (receipt.invite !== undefined) return receipt;
+  return { ...receipt, invite: await receiptInvite() };
+}
+
 // Share the image (WhatsApp etc. on phones); falls back to downloading it.
 export async function shareReceipt(receipt, fileName = 'zappipay-receipt.png') {
-  const blob = await drawReceipt(receipt);
+  const r = await withInvite(receipt);
+  const blob = await drawReceipt(r);
   const file = new File([blob], fileName, { type: 'image/png' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: 'ZAPPI PAY receipt' });
+      await navigator.share({ files: [file], title: 'ZAPPI PAY receipt', ...(r.invite ? { text: `${r.invite.message} ${r.invite.link}` } : {}) });
       return 'shared';
     } catch (err) {
       if (err?.name === 'AbortError') return 'cancelled';
@@ -168,7 +226,7 @@ export async function shareReceipt(receipt, fileName = 'zappipay-receipt.png') {
 }
 
 export async function downloadReceipt(receipt, fileName = 'zappipay-receipt.png') {
-  downloadBlob(await drawReceipt(receipt), fileName);
+  downloadBlob(await drawReceipt(await withInvite(receipt)), fileName);
 }
 
 function downloadBlob(blob, fileName) {
