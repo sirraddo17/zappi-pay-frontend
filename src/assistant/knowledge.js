@@ -12,6 +12,35 @@ export const SUPPORT_EMAIL = 'support@zappipay.com.ng';
 
 export const TOPICS = [
   {
+    id: 'services',
+    title: 'What can ZAPPI PAY do?',
+    keywords: ['services', 'service you offer', 'what do you offer', 'what can i do', 'what can zappi', 'what does zappi', 'what is zappi', 'features', 'what you do', 'offers', 'what una dey do', 'wetin una dey do', 'wetin i fit do'],
+    answer:
+      'With ZAPPI PAY you can:\n• Buy airtime and data (all networks), pay electricity (prepaid & postpaid tokens), cable TV (DStv, GOtv, Startimes, Showmax), internet, exam PINs (WAEC, JAMB) and fund betting wallets.\n• Send money to other ZAPPI PAY users free, or to any bank account.\n• Fund your wallet by bank transfer to your own account number.\n• More: Request money (Pay me links, split a bill, group gift), Car insurance, Exam PINs in bulk, Print recharge cards, Bulk airtime & data, Best data deals, Airtime to Cash, Family wallet and Refer & Earn.\n• Extras: cashback and rewards, gifts, repeat/scheduled top-ups, renewal reminders, and an agent account with cheaper prices for resellers.',
+    actions: [{ label: 'Open More', to: '/more' }, { label: 'Fund wallet', to: '/wallet' }],
+  },
+  {
+    id: 'request-money',
+    title: 'Request money / split a bill',
+    keywords: ['request money', 'pay me', 'split bill', 'split a bill', 'group gift', 'contribution', 'collect money', 'chip in', 'owe me'],
+    answer: 'Go to More → Request money. Make a “Pay me” link, split a bill between friends, or start a group gift. Share the link on WhatsApp — people pay from their ZAPPI PAY wallet with their PIN, and the money comes straight to you.',
+    actions: [{ label: 'Request money', to: '/requests' }],
+  },
+  {
+    id: 'insurance',
+    title: 'Car insurance',
+    keywords: ['insurance', 'third party', 'car papers', 'vehicle insurance', 'keke insurance', 'okada insurance'],
+    answer: 'More → Car insurance: third-party motor insurance (private car, commercial, keke, motorcycle). Enter the vehicle details, pay, and download the certificate from Orders right away.',
+    actions: [{ label: 'Car insurance', to: '/insurance' }],
+  },
+  {
+    id: 'exam-bulk',
+    title: 'Exam PINs in bulk',
+    keywords: ['waec pin', 'result checker', 'bulk waec', 'many pins', 'exam pins', 'school pins', 'scratch card'],
+    answer: 'One PIN: Home → Education. Many PINs (schools, cyber cafés): More → Exam PINs (bulk) — buy up to 50 WAEC result checkers at once and print them on a sheet with your school or shop name.',
+    actions: [{ label: 'Exam PINs (bulk)', to: '/exam-pins' }],
+  },
+  {
     id: 'scam',
     title: 'Is this a scam?',
     keywords: ['scam', 'scammer', 'fraudster', 'is this real', 'fake message', 'fake call', 'asked for my otp', 'asked for my pin', 'someone called me', 'suspicious', 'legit', 'genuine'],
@@ -274,7 +303,7 @@ export const HUMAN_KEYWORDS = ['human', 'agent', 'customer care', 'customer serv
 
 export const GREETING_KEYWORDS = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'howfa', 'how far'];
 
-export const QUICK_TOPICS = ['fund', 'failed', 'a2c', 'transfer', 'electricity', 'password'];
+export const QUICK_TOPICS = ['services', 'fund', 'failed', 'a2c', 'transfer', 'electricity', 'password'];
 
 function normalize(text) {
   return ` ${String(text || '').toLowerCase().replace(/[^a-z0-9%'\s]/g, ' ').replace(/\s+/g, ' ')} `;
