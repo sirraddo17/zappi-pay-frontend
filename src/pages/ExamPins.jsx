@@ -30,9 +30,13 @@ export function examCards(order) {
   const p = order?.responsePayload || {};
   const list = p.cards || p.content?.cards || p.content?.transactions?.cards;
   if (Array.isArray(list) && list.length) return list.map((c) => ({ pin: String(c.Pin ?? c.pin ?? ''), serial: String(c.Serial ?? c.serial ?? '') })).filter((c) => c.pin);
+  // "Serial No:WRN1, pin: 111||Serial No:WRN2, pin: 222"
   const code = String(p.purchased_code || p.content?.transactions?.purchased_code || '');
-  const m = /serial\s*no\s*:?\s*([^,|]+).*?pin\s*:?\s*([^,|\s]+)/i.exec(code);
-  return m ? [{ serial: m[1].trim(), pin: m[2].trim() }] : [];
+  return code.split(/\|\||\n|;/).map((part) => {
+    const serial = /serial\s*(?:no)?\s*:?\s*([A-Za-z0-9-]+)/i.exec(part);
+    const pin = /pin\s*:?\s*([0-9A-Za-z-]+)/i.exec(part);
+    return pin ? { serial: serial ? serial[1] : '', pin: pin[1] } : null;
+  }).filter(Boolean);
 }
 
 function Buy() {
@@ -174,6 +178,9 @@ function Sheet({ id }) {
         {order.status === 'PENDING' && <div className="card"><b>⏳ Getting your PINs…</b><p style={{ fontSize: 14, color: 'var(--slate-400)', margin: '6px 0 0' }}>Usually a few seconds. You can leave this page — you’ll be notified, and refunded automatically if they can’t be delivered.</p></div>}
         {order.status === 'FAILED' && <div className="card"><b>These PINs could not be delivered.</b> {naira(order.amount)} was refunded to your wallet.</div>}
         {order.status === 'SUCCESS' && cards.length === 0 && <div className="card">The PINs are being prepared. Open this page again in a minute, or check <Link to={`/orders/${order.id}`} style={{ color: 'var(--purple)' }}>the order</Link>.</div>}
+        {order.status === 'SUCCESS' && cards.length > 0 && cards.length < (order.quantity || 1) && (
+          <div className="card" style={{ border: '1px solid var(--gold)', fontSize: 14 }}>Only {cards.length} of {order.quantity} PINs were delivered. {naira(Math.floor((Number(order.amount) * (order.quantity - cards.length) / order.quantity) * 100) / 100)} for the missing ones is refunded to your wallet automatically.</div>
+        )}
         {order.status === 'SUCCESS' && cards.length > 0 && (
           <div className="card">
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
