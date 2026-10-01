@@ -15,6 +15,7 @@ import PinPad from '../components/PinPad';
 import PasswordField from '../components/PasswordField';
 import BottomNav from '../components/BottomNav';
 import SessionsCard from '../components/SessionsCard';
+import FreezeCard from '../components/FreezeCard';
 import {
   getQuickLogin,
   saveQuickLogin,
@@ -367,6 +368,7 @@ export default function Security() {
       )}
 
       <SessionsCard />
+      <FreezeCard />
 
       <BottomNav />
     </div>

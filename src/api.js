@@ -482,3 +482,6 @@ export const attachHeygenVideo = (id, adId) => adminRequest(`/api/admin/heygen/v
 export const getReceiptInvite = () => request('/api/receipt-invite', { quiet: true });
 export const getAdminReceiptInvite = () => adminRequest('/api/admin/receipt-invite');
 export const setAdminReceiptInvite = (data) => adminRequest('/api/admin/receipt-invite', { method: 'PUT', body: JSON.stringify(data) });
+
+// Self-freeze (lost / stolen phone): needs the account password.
+export const freezeMyAccount = (password) => request('/api/security/freeze', { method: 'POST', body: JSON.stringify({ password }) });

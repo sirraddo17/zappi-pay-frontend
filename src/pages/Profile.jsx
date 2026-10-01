@@ -29,6 +29,8 @@ export default function Profile() {
 
   const [name, setName] = useState(customer?.name || '');
   const [email, setEmail] = useState(customer?.email || '');
+  const [emailPassword, setEmailPassword] = useState('');
+  const emailChanging = email.trim().toLowerCase() !== String(customer?.email || '').toLowerCase();
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [saving, setSaving] = useState(false);
@@ -63,9 +65,14 @@ export default function Profile() {
     setSuccessMessage('');
     setSaving(true);
     try {
-      await updateMe({ name: name.trim(), email: email.trim() });
+      if (emailChanging && !emailPassword) {
+        setError('Enter your current password to change your email.');
+        return;
+      }
+      await updateMe({ name: name.trim(), email: email.trim(), ...(emailChanging ? { password: emailPassword } : {}) });
       await refreshCustomer();
-      setSuccessMessage('Profile updated.');
+      setEmailPassword('');
+      setSuccessMessage(emailChanging ? 'Profile updated. Your email has been changed.' : 'Profile updated.');
     } catch (err) {
       setError(err.message || 'Could not update profile.');
     } finally {
@@ -196,6 +203,13 @@ export default function Profile() {
           <label htmlFor="email">Email</label>
           <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Optional" />
         </div>
+        {emailChanging && (
+          <div className="field">
+            <label htmlFor="emailPw">Current password (needed to change your email)</label>
+            <input id="emailPw" type="password" autoComplete="current-password" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} />
+            <small style={{ color: 'var(--slate-400)' }}>For your safety — your email can be used to reset your password.</small>
+          </div>
+        )}
         <button className="btn" type="submit" disabled={saving}>
           {saving ? 'Saving…' : 'Save Changes'}
         </button>

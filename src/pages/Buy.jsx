@@ -306,7 +306,13 @@ export default function Buy() {
     // parameter is just a contact/notification number, and using
     // the account's own number for that is correct, not a guess.
     const phoneToSend = isPhoneService ? recipient : (customer?.phone || phone);
-    if (!providerId || !recipient || !phoneToSend || !amount) {
+    // Exam PINs: the Profile ID is optional except for JAMB.
+    const recipientOptional = slug === 'education' && !String(providerId).startsWith('jamb');
+    if (slug === 'education' && String(providerId).startsWith('jamb') && !recipient.trim()) {
+      setError('Enter your JAMB Profile ID.');
+      return;
+    }
+    if (!providerId || (!recipient.trim() && !recipientOptional) || !phoneToSend || !amount) {
       setError('Please fill in every field.');
       return;
     }
@@ -327,7 +333,7 @@ export default function Buy() {
         service: config.backendService,
         serviceID: providerId,
         variationCode: config.needsVariation ? variationCode : undefined,
-        billersCode: recipient.trim(),
+        billersCode: recipient.trim() || (slug === 'education' ? phoneToSend.trim() : ''),
         phone: phoneToSend.trim(),
         amount,
         meterType: config.needsType ? billType : undefined,
@@ -461,8 +467,8 @@ export default function Buy() {
             type="text"
             value={recipient}
             onChange={(e) => { setRecipient(e.target.value); setVerifiedName(''); }}
-            placeholder={config.recipientPlaceholder}
-            required={slug !== 'education'}
+            placeholder={slug === 'education' && String(providerId).startsWith('jamb') ? 'Your JAMB Profile ID (required)' : config.recipientPlaceholder}
+            required={slug !== 'education' || String(providerId).startsWith('jamb')}
           />
           {config.canVerify && (
             <button
@@ -603,7 +609,7 @@ export default function Buy() {
 
       <PinConfirm
         open={confirmOpen}
-        summary={`Pay ${naira(payTotal)} · ${config.label} for ${recipient.trim()}`}
+        summary={`Pay ${naira(payTotal)} · ${config.label}${recipient.trim() ? ` for ${recipient.trim()}` : ''}`}
         notice={slow && (
           <div style={{ background: 'rgba(255,184,48,0.1)', border: '1px solid var(--gold)', borderRadius: 10, padding: '10px 12px', fontSize: 13 }}>
             ⏳ The network is taking a little longer than usual. You can leave this page. Your order keeps processing, and if it fails you're refunded automatically.
