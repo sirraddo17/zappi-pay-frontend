@@ -10,6 +10,7 @@ import ChatTransferCard from './ChatTransferCard';
 import ChatActionCard from './ChatActionCard';
 import VoiceButton from './VoiceButton';
 import SpeakButton from './SpeakButton';
+import { supportWaLink } from '../lib/whatsapp';
 
 // Floating "Help" chat for logged-in customers. Quick topics are
 // rule-based (assistant/knowledge.js). When the AI assistant is on in
@@ -374,7 +375,7 @@ export default function HelpAssistant() {
                 Cancel
               </button>
               <a
-                href={`https://wa.me/${appInfo?.supportWhatsapp || WHATSAPP_NUMBER}?text=${encodeURIComponent(ticketText || 'Hello ZappiPay, I need help with')}`}
+                href={supportWaLink({ number: appInfo?.supportWhatsapp, customer, topic: ticketTopic, order: orders.find((o) => o.id === ticketOrderId), message: ticketText })}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary btn"

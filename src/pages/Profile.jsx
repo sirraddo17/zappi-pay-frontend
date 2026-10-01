@@ -10,6 +10,7 @@ import PasswordField from '../components/PasswordField';
 import BottomNav from '../components/BottomNav';
 import { SUPPORT_EMAIL, WHATSAPP_NUMBER } from '../assistant/knowledge';
 import { useAppInfo } from '../components/ServiceNotices';
+import { supportWaLink } from '../lib/whatsapp';
 import AccountExtras from '../components/AccountExtras';
 import AgentCard from '../components/AgentCard';
 import MyShopCard from '../components/MyShopCard';
@@ -300,7 +301,7 @@ export default function Profile() {
         </div>
         <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '-4px 0 10px' }}>Problems, account changes, suggestions — anything. You can add screenshots. We reply here and in your notifications.</p>
         <a
-          href={`https://wa.me/${appInfo?.supportWhatsapp || WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello ZappiPay, I need help with')}`}
+          href={supportWaLink({ number: appInfo?.supportWhatsapp, customer })}
           target="_blank"
           rel="noopener noreferrer"
           className="btn-secondary btn"

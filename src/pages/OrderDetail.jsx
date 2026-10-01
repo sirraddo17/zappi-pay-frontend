@@ -6,6 +6,9 @@ import RateExperience from '../components/RateExperience';
 import GiftPanel from '../components/GiftPanel';
 import ImageAttach from '../components/ImageAttach';
 import { buyAgainLink } from '../lib/repeat';
+import { supportWaLink } from '../lib/whatsapp';
+import { useAuth } from '../context/AuthContext';
+import { useAppInfo } from '../components/ServiceNotices';
 import { shareReceipt, downloadReceipt, extractToken } from '../lib/receipt';
 
 const STATUS_COLORS = {
@@ -30,6 +33,8 @@ export default function OrderDetail() {
   const [error, setError] = useState('');
 
   const [reportOpen, setReportOpen] = useState(false);
+  const { customer } = useAuth();
+  const appInfo = useAppInfo();
   const [reportMessage, setReportMessage] = useState('');
   const [reportImages, setReportImages] = useState([]);
   const [reportError, setReportError] = useState('');
@@ -252,6 +257,9 @@ export default function OrderDetail() {
               Cancel
             </button>
           </div>
+          <a href={supportWaLink({ number: appInfo?.supportWhatsapp, customer, order, message: reportMessage })} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 10, fontSize: 13, color: 'var(--purple)' }}>
+            Or send it on WhatsApp — your order details are filled in ›
+          </a>
         </form>
       )}
     </div>
