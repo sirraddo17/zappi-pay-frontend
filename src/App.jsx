@@ -45,6 +45,7 @@ const Status = lazy(() => import('./pages/Status'));
 const Gift = lazy(() => import('./pages/Gift'));
 const PrintCards = lazy(() => import('./pages/PrintCards'));
 const International = lazy(() => import('./pages/International'));
+const ExamPins = lazy(() => import('./pages/ExamPins'));
 const Insurance = lazy(() => import('./pages/Insurance'));
 const Requests = lazy(() => import('./pages/Requests'));
 const RequestLink = lazy(() => import('./pages/RequestLink'));
@@ -158,6 +159,8 @@ export default function App() {
           <Route path="/more" element={<RequireCustomer><More /></RequireCustomer>} />
           <Route path="/print-cards" element={<RequireCustomer><PrintCards /></RequireCustomer>} />
           <Route path="/international" element={<RequireCustomer><International /></RequireCustomer>} />
+          <Route path="/exam-pins" element={<RequireCustomer><ExamPins /></RequireCustomer>} />
+          <Route path="/exam-pins/:id" element={<RequireCustomer><ExamPins /></RequireCustomer>} />
           <Route path="/insurance" element={<RequireCustomer><Insurance /></RequireCustomer>} />
           <Route path="/requests" element={<RequireCustomer><Requests /></RequireCustomer>} />
           <Route path="/print-cards/:id" element={<RequireCustomer><PrintCards /></RequireCustomer>} />
