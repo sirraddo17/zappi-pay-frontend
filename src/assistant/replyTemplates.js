@@ -62,7 +62,7 @@ export const CATEGORIES = [
     label: 'Bank transfer / withdrawal / BVN',
     keywords: ['withdraw', 'bank account', 'cash out', 'bvn', 'nin', 'to my bank'],
     template: (c) =>
-      `Hello ${c.name},\n\nThank you for your interest. Sending money to bank accounts and BVN/NIN verification are coming soon — we're completing approval with our payment partner. We'll announce it in the app as soon as it's live.\n\nIn the meantime, you can send money instantly to any ZappiPay user from Send Money.\n\nKind regards,\nZappiPay Support`,
+      `Hello ${c.name},\n\nThank you for reaching out. To send money to a bank account: Home → Send Money → "Bank Account", choose the bank, enter the account number (the name shows automatically), enter the amount and confirm with your PIN. Any fee is shown before you send.\n\nTo verify your account (BVN/NIN): Wallet → "Get your personal account number" and enter your BVN or NIN. This also gives you a personal account number for funding.\n\nKind regards,\nZAPPI PAY Support`,
   },
   {
     id: 'general',

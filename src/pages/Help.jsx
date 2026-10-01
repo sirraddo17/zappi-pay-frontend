@@ -63,9 +63,9 @@ export const FAQ = [
     items: [
       ['How does Family work?', 'Go to Profile → Family and add a family member by their ZAPPI PAY username or phone number. Once they accept, you can send them a weekly or monthly allowance from your wallet and set a daily spending limit, which services they can buy, and whether they can send money out. They can always send money back to you, and either of you can end the link at any time.'],
       ['I forgot my password', 'Tap “Forgot password” on the login page to get a reset link by email. If you can’t use email, message support — we’ll confirm it’s you with your date of birth and security question before helping.'],
-      ['I forgot my PIN', 'Message support in the app (Profile → Support). After we confirm it’s you, we reset your PIN and you create a new one.'],
+      ['I forgot my PIN', 'Reset it yourself: Profile → Security → Change, and confirm with your account password, then create a new PIN. If you’ve also forgotten your password, message support (Profile → Support) — we confirm it’s you and help you reset it.'],
       ['I lost my phone', 'Log in on another device, go to Security → Where you’re logged in and tap “Log out all other devices”, then change your password. Or contact support and we can remove quick login from your lost phone.'],
-      ['How do I change my phone number or email?', 'Message support in the app. For your safety we confirm it’s really you before changing contact details.'],
+      ['How do I change my phone number or email?', 'Email: go to Profile, edit your email and tap Save Changes. Phone number: message support in the app — for your safety we confirm it’s really you before changing it.'],
       ['How do I delete my account?', 'Go to Profile → “Delete my account”. Spend or withdraw any wallet balance first. We keep transaction records for as long as the law requires, but remove your personal details.'],
     ],
   },

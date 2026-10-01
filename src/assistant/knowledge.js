@@ -110,8 +110,56 @@ export const TOPICS = [
     id: 'bank',
     title: 'Withdraw / send to bank',
     keywords: ['withdraw', 'bank account', 'cash out', 'to my bank', 'opay', 'palmpay', 'moniepoint', 'kuda', 'gtb', 'access bank'],
-    answer: 'Sending to bank accounts is coming soon — it is waiting on our payment partner\'s approval. For now you can send to any ZappiPay user.',
+    answer: 'Home → Send Money → tab "Bank Account": choose the bank, enter the 10-digit account number (the account name shows automatically), enter the amount, then confirm with your PIN. Any transfer fee is shown before you send and is added on top. If you don\'t see the Bank Account tab, sending to banks isn\'t switched on yet.',
     actions: [{ label: 'Send Money', to: '/transfer' }],
+  },
+  {
+    id: 'family',
+    title: 'Family wallet',
+    keywords: ['family', 'family wallet', 'pocket money', 'allowance', 'my child', 'my children', 'my kids', 'my son', 'my daughter', 'my wife', 'my husband', 'parent'],
+    answer:
+      'Family wallet lets you link a family member\'s ZAPPI PAY account, send them automatic pocket money (weekly or monthly) and set a daily spending limit, which services they can buy, and whether they can send money out. To start: Home → More → "Family wallet" → enter their username or phone number → "Send invite". When they accept, tap "Limits & allowance" on their card, set it up and tap "Save settings". Either of you can end it any time.',
+    actions: [{ label: 'Family wallet', to: '/family' }],
+  },
+  {
+    id: 'print-cards',
+    title: 'Print recharge cards',
+    keywords: ['print card', 'print cards', 'recharge card', 'printing', 'epin', 'e-pin', 'sell recharge card', 'card pin'],
+    answer:
+      'Print Cards lets you buy MTN, Glo, Airtel or 9mobile airtime PINs (₦100, ₦200 or ₦500) to print and sell. Home → More → "Print Cards" → choose network, card value and how many → "Buy & print" → enter your PIN. Then open the batch to print (A4, small or 58mm POS printer), copy the PINs or download them, and tap a PIN to mark it sold. If cards can\'t be delivered, your money comes back automatically.',
+    actions: [{ label: 'Print Cards', to: '/print-cards' }],
+  },
+  {
+    id: 'gift',
+    title: 'Send a gift',
+    keywords: ['gift', 'gift card', 'surprise', 'birthday', 'send as gift'],
+    answer:
+      'You can send airtime or data as a gift with a card and message. On the Airtime or Data screen, enter their number, tick "🎁 Send as a gift with a message", pick a theme, write your message and pay. Then share it on WhatsApp or copy the link. You can also turn a past purchase into a gift from its receipt.',
+    actions: [{ label: 'Buy Data', to: '/buy/data' }],
+  },
+  {
+    id: 'reminders',
+    title: 'Renewal reminders',
+    keywords: ['reminder', 'remind me', 'renewal', 'expire', 'expiry', 'due date'],
+    answer:
+      'After you pay for cable TV, data or internet, we remind you before it runs out (cable 3 days before, internet 2 days, data 1 day). The Home screen shows a renewals card with a "Renew" button. Tap "×" to stop one reminder, or turn them back on under Notifications → "Renewal reminders".',
+    actions: [{ label: 'Home', to: '/' }],
+  },
+  {
+    id: 'agent',
+    title: 'Become an agent',
+    keywords: ['become agent', 'become an agent', 'agent price', 'agent account', 'reseller', 'resell', 'shop link', 'profit book'],
+    answer:
+      'If you sell airtime or data, you can apply to be a ZAPPI PAY agent: Profile → "Become a ZappiPay agent" → "Apply to be an agent" → enter your shop name and address. Once approved you get cheaper agent prices, a Profit book to track sales and who owes you, and a shop link you can share. (If you don\'t see the agent card, agent pricing isn\'t open yet.)',
+    actions: [{ label: 'Profile', to: '/profile' }],
+  },
+  {
+    id: 'deals',
+    title: 'Best data for my budget',
+    keywords: ['cheap data', 'cheapest data', 'best data', 'data deal', 'budget', 'most data'],
+    answer:
+      'Use "Best data for your budget": Home → More → "Best data deals". Enter how much you want to spend and it shows the most data on every network. Tap a plan to buy it.',
+    actions: [{ label: 'Best data deals', to: '/deals' }],
   },
   {
     id: 'a2c',
@@ -184,7 +232,7 @@ export const TOPICS = [
     id: 'verification',
     title: 'BVN / NIN',
     keywords: ['bvn', 'nin', 'kyc', 'verify identity', 'verification'],
-    answer: 'BVN/NIN verification is coming soon. You do not need it to buy services or send money to other ZappiPay users today.',
+    answer: 'You verify by getting your personal account number: Wallet → "Get your personal account number" → choose BVN or NIN → enter the 11 digits → "Get My Account Number". Profile then shows "✓ Verified". Verified accounts can get a higher daily limit.',
   },
   {
     id: 'contact',
