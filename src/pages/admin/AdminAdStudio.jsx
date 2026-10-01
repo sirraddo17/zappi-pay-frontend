@@ -8,6 +8,7 @@ import { shareFile } from '../../lib/shareCard';
 import VideoScriptPanel from '../../components/admin/VideoScriptPanel';
 import HeygenVideosPanel from '../../components/admin/HeygenVideosPanel';
 import WeekPlanPanel from '../../components/admin/WeekPlanPanel';
+import AiPictureBox from '../../components/admin/AiPictureBox';
 
 const BLANK = { headline: 'Data finish? No wahala', highlight: 'No wahala', subtext: 'Top up MTN, Airtel, Glo & 9mobile in seconds', cta: 'Buy data', badges: ['Instant', 'Auto refunds'], emoji: '📶', theme: 'purple', caption: 'Data finish? No wahala 😄 Top up any network in seconds with ZAPPI PAY. 👉 www.zappipay.com.ng #ZappiPay #BuyData', link: '/buy/data' };
 
@@ -132,6 +133,7 @@ export default function AdminAdStudio() {
           )}
         </div>
         <ImageAttach value={photoData} onChange={setPhotoData} max={1} label="🖼️ Optional: add your own background photo" />
+        <AiPictureBox onPicture={(img) => setPhotoData([img])} />
       </div>
 
       {msg && <p style={{ color: msg.ok ? 'var(--green-500)' : 'var(--red-500)', margin: '0 0 12px' }}>{msg.text}</p>}

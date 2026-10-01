@@ -4,6 +4,7 @@ import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
 import VoiceSettingsPanel from '../../components/admin/VoiceSettingsPanel';
 import HeygenSettingsPanel from '../../components/admin/HeygenSettingsPanel';
+import OpenAiExtrasPanel from '../../components/admin/OpenAiExtrasPanel';
 import ReceiptInvitePanel from '../../components/admin/ReceiptInvitePanel';
 import EpinSettingsPanel from '../../components/admin/EpinSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
@@ -1010,7 +1011,7 @@ export default function AdminSettings() {
       )}
 
       {!loading && !loadError && tab === 'epins' && <EpinSettingsPanel />}
-      {!loading && !loadError && tab === 'ai' && (<div style={{ display: 'grid', gap: 16 }}><AiSettingsPanel /><VoiceSettingsPanel /><HeygenSettingsPanel /></div>)}
+      {!loading && !loadError && tab === 'ai' && (<div style={{ display: 'grid', gap: 16 }}><AiSettingsPanel /><VoiceSettingsPanel /><OpenAiExtrasPanel /><HeygenSettingsPanel /></div>)}
       {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
       {!loading && !loadError && tab === 'maintenance' && <MaintenancePanel />}
       {!loading && !loadError && tab === 'promise' && <DeliveryPromisePanel />}

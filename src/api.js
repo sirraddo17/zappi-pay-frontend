@@ -493,3 +493,18 @@ export const getWinBack = () => adminRequest('/api/admin/insights/winback');
 export const simulatePricing = (data) => adminRequest('/api/admin/insights/simulate-pricing', { method: 'POST', body: JSON.stringify(data) });
 export const getFeedbackDigest = (days = 30) => adminRequest(`/api/admin/insights/feedback-digest?days=${days}`);
 export const getScamReports = () => adminRequest('/api/admin/scam-reports');
+
+// Natural voice (mp3) for a Help chat reply; throws when not available.
+export async function speakText(text, language) {
+  const token = localStorage.getItem('zappipay_customer_token');
+  const res = await fetch(`${API_URL}/api/ai/speak`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify({ text, language }),
+  });
+  if (!res.ok || !String(res.headers.get('content-type') || '').includes('audio')) throw new Error('natural voice unavailable');
+  return res.blob();
+}
+export const getOpenAiExtras = () => adminRequest('/api/admin/openai-extras');
+export const setOpenAiExtras = (data) => adminRequest('/api/admin/openai-extras', { method: 'PUT', body: JSON.stringify(data) });
+export const makeAdImage = (data) => adminRequest('/api/admin/ai/ad-image', { method: 'POST', body: JSON.stringify(data) });
