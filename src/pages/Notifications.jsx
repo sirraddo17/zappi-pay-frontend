@@ -6,6 +6,13 @@ import useAutoRefresh from '../lib/useAutoRefresh';
 import { BellIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 
+// Tabs, like a bank app: money, your account, and news/offers.
+const TABS = [
+  { key: 'TRANSACTION', label: 'Transactions', icon: '💸' },
+  { key: 'ACCOUNT', label: 'Account', icon: '🔐' },
+  { key: 'UPDATE', label: 'Updates', icon: '📣' },
+];
+
 function fmtDate(d) {
   return new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
@@ -39,12 +46,18 @@ function RenewalReminderToggle() {
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState(null);
-  const listPage = useShowMore(notifications, [], 10);
+  const [tab, setTab] = useState(null);
+  const shown = notifications ? notifications.filter((n) => (n.category || 'UPDATE') === (tab || 'TRANSACTION')) : null;
+  const listPage = useShowMore(shown, [tab], 10);
   const [error, setError] = useState('');
 
   function load() {
     getNotifications()
-      .then((data) => setNotifications(data.notifications))
+      .then((data) => {
+        setNotifications(data.notifications);
+        // Open on the tab with the newest unread message.
+        setTab((t) => t || (data.notifications.find((n) => !n.read)?.category) || 'TRANSACTION');
+      })
       .catch((err) => setError(err.message));
   }
 
@@ -84,7 +97,27 @@ export default function Notifications() {
 
       {error && <p className="error-text" style={{ margin: '16px 16px 0' }}>{error}</p>}
 
-      <RenewalReminderToggle />
+      <div role="tablist" style={{ display: 'flex', gap: 8, margin: '16px 16px 0', overflowX: 'auto' }}>
+        {TABS.map((t) => {
+          const unread = notifications ? notifications.filter((n) => n.category === t.key && !n.read).length : 0;
+          const on = (tab || 'TRANSACTION') === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => setTab(t.key)}
+              style={{ position: 'relative', flex: '1 0 auto', padding: '9px 14px', borderRadius: 999, fontSize: 14, fontWeight: on ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(134,59,255,0.22)' : 'var(--slate-800)', color: on ? '#fff' : 'var(--slate-300, #cbd5e1)' }}
+            >
+              {t.label}
+              {unread > 0 && <span style={{ marginLeft: 6, minWidth: 18, padding: '0 5px', height: 18, lineHeight: '18px', display: 'inline-block', borderRadius: 9, background: 'var(--red-500, #ef4444)', color: '#fff', fontSize: 11, fontWeight: 700 }}>{unread > 99 ? '99+' : unread}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {(tab || 'TRANSACTION') === 'UPDATE' && <RenewalReminderToggle />}
 
       {hasUnread && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '16px 16px 0' }}>
@@ -102,8 +135,8 @@ export default function Notifications() {
       <div className="tx-list" style={{ margin: '16px 16px 90px' }}>
         {notifications === null ? (
           <p className="empty-state">Loading…</p>
-        ) : notifications.length === 0 ? (
-          <p className="empty-state">No notifications yet.</p>
+        ) : shown.length === 0 ? (
+          <p className="empty-state">{notifications.length === 0 ? 'No notifications yet.' : `No ${TABS.find((t) => t.key === (tab || 'TRANSACTION')).label.toLowerCase()} notifications yet.`}</p>
         ) : (
           listPage.visible.map((n) => (
             <div
@@ -119,9 +152,10 @@ export default function Notifications() {
                 background: n.read ? 'transparent' : 'rgba(134,59,255,0.08)',
               }}
             >
-              {!n.read && (
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--purple)', marginTop: 6, flexShrink: 0 }} />
-              )}
+              <span aria-hidden="true" style={{ position: 'relative', width: 36, height: 36, borderRadius: '50%', background: 'rgba(134,59,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>
+                {TABS.find((t) => t.key === n.category)?.icon || '🔔'}
+                {!n.read && <span style={{ position: 'absolute', top: 0, right: 0, width: 9, height: 9, borderRadius: '50%', background: 'var(--red-500, #ef4444)', border: '2px solid var(--slate-900, #0f172a)' }} />}
+              </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ color: 'var(--slate-100)', fontSize: 14, fontWeight: 600 }}>{n.title}</div>
                 <div style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 2 }}>{n.message}</div>
