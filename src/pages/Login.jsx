@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { takeAfterLogin } from '../lib/afterLogin';
 import TestModeBanner from '../components/TestModeBanner';
 import PasswordField from '../components/PasswordField';
 import { Link, useNavigate } from 'react-router-dom';
@@ -37,7 +38,7 @@ function QuickLogin({ quick, onUsePassword, onSwitchAccount }) {
     try {
       const data = await quickLoginPin({ deviceToken: quick.deviceToken, pin });
       startSession(data);
-      navigate('/', { replace: true });
+      navigate(takeAfterLogin(), { replace: true });
     } catch (err) {
       handleFailure(err);
     } finally {
@@ -59,7 +60,7 @@ function QuickLogin({ quick, onUsePassword, onSwitchAccount }) {
       }
       const data = await quickLoginBiometric({ deviceToken: quick.deviceToken, response });
       startSession(data);
-      navigate('/', { replace: true });
+      navigate(takeAfterLogin(), { replace: true });
     } catch (err) {
       if (err.code === 'NO_BIOMETRIC') saveQuickLogin({ biometric: false });
       handleFailure(err);
@@ -135,7 +136,7 @@ export default function Login() {
   const idleNote = idle && <p style={{ margin: '12px 16px 0', padding: '10px 12px', borderRadius: 10, fontSize: 13, background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)' }}>🔒 {idle}</p>;
 
   useEffect(() => {
-    if (customer) navigate('/', { replace: true });
+    if (customer) navigate(takeAfterLogin(), { replace: true });
   }, [customer]);
 
   async function handleSubmit(e) {
@@ -144,7 +145,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       await login(identifier.trim(), password);
-      navigate('/');
+      navigate(takeAfterLogin());
     } catch (err) {
       setError(err.message || 'Could not log in.');
     } finally {

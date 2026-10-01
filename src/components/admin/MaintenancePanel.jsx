@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSettings, updateSettings } from '../../api';
 
-const SERVICES = [['AIRTIME', 'Airtime'], ['DATA', 'Data'], ['ELECTRICITY', 'Electricity'], ['CABLE', 'Cable TV'], ['EDUCATION', 'Exam PINs'], ['INTERNET', 'Internet'], ['BETTING', 'Betting']];
+const SERVICES = [['AIRTIME', 'Airtime'], ['DATA', 'Data'], ['ELECTRICITY', 'Electricity'], ['CABLE', 'Cable TV'], ['EDUCATION', 'Exam PINs'], ['INTERNET', 'Internet'], ['BETTING', 'Betting'], ['INTERNATIONAL', 'International airtime'], ['INSURANCE', 'Car insurance']];
 
 // Settings → Maintenance: pause purchases during a VTpass outage.
 export default function MaintenancePanel() {

@@ -18,6 +18,8 @@ export const SERVICE_LABEL = {
   EDUCATION: 'Education',
   INTERNET: 'Internet',
   BETTING: 'Bet Funding',
+  INTERNATIONAL: 'International airtime',
+  INSURANCE: 'Car insurance',
 };
 
 export function buyAgainLink(order) {

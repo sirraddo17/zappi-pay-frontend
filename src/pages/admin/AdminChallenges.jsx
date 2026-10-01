@@ -5,7 +5,7 @@ import { useShowMore } from '../../components/ShowMore';
 import { getAdminChallenges, previewChallenge, createChallenge, updateChallenge } from '../../api';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
-const SERVICES = [['', 'Any service'], ['AIRTIME', 'Airtime'], ['DATA', 'Data'], ['ELECTRICITY', 'Electricity'], ['CABLE', 'Cable TV'], ['EDUCATION', 'Exam PINs'], ['INTERNET', 'Internet'], ['BETTING', 'Betting']];
+const SERVICES = [['', 'Any service'], ['AIRTIME', 'Airtime'], ['DATA', 'Data'], ['ELECTRICITY', 'Electricity'], ['CABLE', 'Cable TV'], ['EDUCATION', 'Exam PINs'], ['INTERNET', 'Internet'], ['BETTING', 'Betting'], ['INTERNATIONAL', 'International airtime'], ['INSURANCE', 'Car insurance']];
 const KINDS = [['COUNT', 'Buy a number of times'], ['SPEND', 'Spend a total amount'], ['STREAK', 'Buy on days in a row']];
 const PERIODS = [['MONTHLY', 'Every month (resets on the 1st)'], ['WEEKLY', 'Every week (resets on Monday)'], ['ONCE', 'One time only (between dates)']];
 

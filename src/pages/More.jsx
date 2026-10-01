@@ -5,6 +5,9 @@ import BottomNav from '../components/BottomNav';
 
 // Home → More. New services go here so the home screen stays short.
 const ITEMS = [
+  { to: '/requests', label: 'Request money', note: 'Pay me links, split bills, group gifts', emoji: '💸', bg: '#1f6b4a' },
+  { to: '/international', label: 'International airtime', note: 'Top up phones abroad, pay in naira', emoji: '🌍', bg: '#0f4c8c' },
+  { to: '/insurance', label: 'Car insurance', note: 'Third-party motor insurance in minutes', emoji: '🚗', bg: '#8c3b0f' },
   { to: '/airtime-cash', label: 'Airtime to Cash', note: 'Turn extra airtime into wallet money', Icon: FundIcon, bg: '#5b3fa8' },
   { to: '/print-cards', label: 'Print Cards', note: 'Buy recharge card PINs to print and sell', Icon: PrinterIcon, bg: '#0f6d8c' },
   { to: '/bulk', label: 'Bulk airtime & data', note: 'Top up up to 50 numbers at once', Icon: PhoneIcon, bg: '#863bff' },

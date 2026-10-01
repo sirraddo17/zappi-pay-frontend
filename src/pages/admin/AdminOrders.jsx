@@ -29,6 +29,8 @@ const SERVICE_FILTERS = [
   { value: 'EDUCATION', label: 'Education' },
   { value: 'INTERNET', label: 'Internet' },
   { value: 'BETTING', label: 'Bet Funding' },
+  { value: 'INTERNATIONAL', label: 'International airtime' },
+  { value: 'INSURANCE', label: 'Car insurance' },
 ];
 
 export default function AdminOrders() {

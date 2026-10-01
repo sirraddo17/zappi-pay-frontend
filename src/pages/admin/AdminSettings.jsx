@@ -17,7 +17,7 @@ import ShopsPanel from '../../components/admin/ShopsPanel';
 import RewardSplitPanel from '../../components/admin/RewardSplitPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
-const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
+const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING', 'INTERNATIONAL', 'INSURANCE'];
 
 // Each tab is its own form with its own Save button, and only sends
 // the fields that belong to it — PATCH /admin/settings already

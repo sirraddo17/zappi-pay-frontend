@@ -524,3 +524,21 @@ export const makeBackupCodes = (password) => adminRequest('/api/admin/security/b
 export const getSecurityOverview = (hours = 24) => adminRequest(`/api/admin/security/overview?hours=${hours}`);
 export const unblockAddress = (id) => adminRequest(`/api/admin/security/blocks/${id}/unblock`, { method: 'POST' });
 export const blockAddress = (data) => adminRequest('/api/admin/security/blocks', { method: 'POST', body: JSON.stringify(data) });
+
+// International airtime / data and motor insurance
+const qs = (o) => Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+export const intlCountries = () => request('/api/vtpass/intl/countries');
+export const intlTypes = (code) => request(`/api/vtpass/intl/types?${qs({ code })}`);
+export const intlOperators = (code, type) => request(`/api/vtpass/intl/operators?${qs({ code, type })}`);
+export const intlVariations = (operator, type) => request(`/api/vtpass/intl/variations?${qs({ operator, type })}`);
+export const intlQuote = (p) => request(`/api/vtpass/intl/quote?${qs(p)}`, { quiet: true });
+export const insurancePlans = () => request('/api/vtpass/insurance/plans');
+export const insuranceOptions = (kind, parent) => request(`/api/vtpass/insurance/options/${kind}${parent ? `?${qs({ parent })}` : ''}`);
+
+// Pay me links, split bills, group gifts
+export const createPayRequest = (data) => request('/api/pay-requests', { method: 'POST', body: JSON.stringify(data) });
+export const getPayRequests = () => request('/api/pay-requests');
+export const viewPayRequest = (token) => request(`/api/pay-requests/public/${encodeURIComponent(token)}`);
+export const payPayRequest = (token, data) => request(`/api/pay-requests/${encodeURIComponent(token)}/pay`, { method: 'POST', quiet: true, body: JSON.stringify(data) });
+export const closePayRequest = (id) => request(`/api/pay-requests/${id}/close`, { method: 'POST' });
+export const remindPayRequest = (id) => request(`/api/pay-requests/${id}/remind`, { method: 'POST' });

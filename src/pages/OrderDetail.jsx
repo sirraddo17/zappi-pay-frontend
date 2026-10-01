@@ -26,6 +26,17 @@ function fmtDate(d) {
   return new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+// The insurance certificate link from VTpass's reply.
+function findCert(o, depth = 0) {
+  if (!o || typeof o !== 'object' || depth > 5) return null;
+  for (const [k, v] of Object.entries(o)) {
+    if (/^cert(ificate)?_?url$/i.test(k) && typeof v === 'string' && /^https:\/\//.test(v)) return v;
+    const r = findCert(v, depth + 1);
+    if (r) return r;
+  }
+  return null;
+}
+
 export default function OrderDetail() {
   const { id } = useParams();
   const [search] = useSearchParams();
@@ -51,6 +62,7 @@ export default function OrderDetail() {
   useAutoRefresh(load, order?.status === 'PENDING');
 
   const token = order ? extractToken(order) : null;
+  const certUrl = order?.service === 'INSURANCE' && order.status === 'SUCCESS' ? findCert(order.responsePayload) : null;
   const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
 
@@ -147,7 +159,19 @@ export default function OrderDetail() {
           </p>
         )}
 
-        {token && (
+        {order.service === 'INSURANCE' && order.status === 'SUCCESS' && (
+          <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid var(--green-500)', borderRadius: 12, padding: 14, marginBottom: 18, textAlign: 'left' }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>🛡️ Insurance active for {order.recipient}</div>
+            {certUrl ? (
+              <a href={certUrl} target="_blank" rel="noopener noreferrer" className="btn no-print" style={{ display: 'inline-block', width: 'auto', padding: '8px 14px', fontSize: 14, textDecoration: 'none' }}>📄 Download certificate</a>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>The certificate was sent to your email. Contact support if you can’t find it.</div>
+            )}
+            <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 6 }}>Keep a copy (printed or on your phone) in the vehicle. Police and VIO can check it.</div>
+          </div>
+        )}
+
+        {token && order.service !== 'INSURANCE' && (
           <div style={{ background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)', borderRadius: 12, padding: 14, marginBottom: 18, textAlign: 'left' }}>
             <div style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 4 }}>{order.service === 'ELECTRICITY' ? 'Your token' : 'PIN / code'}</div>
             <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1, wordBreak: 'break-word' }}>{token}</div>
@@ -165,7 +189,7 @@ export default function OrderDetail() {
         <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--slate-400)' }}>Service</span>
-            <span>{order.service}</span>
+            <span>{{ INTERNATIONAL: 'International airtime', INSURANCE: 'Car insurance' }[order.service] || order.service}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--slate-400)' }}>Provider</span>

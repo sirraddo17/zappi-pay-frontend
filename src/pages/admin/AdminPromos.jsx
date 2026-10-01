@@ -4,7 +4,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { useShowMore } from '../../components/ShowMore';
 import { getAdminPromos, createPromo, updatePromo } from '../../api';
 
-const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
+const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING', 'INTERNATIONAL', 'INSURANCE'];
 const label = (s) => s.charAt(0) + s.slice(1).toLowerCase();
 const money = (n) => `₦${Number(n || 0).toLocaleString()}`;
 

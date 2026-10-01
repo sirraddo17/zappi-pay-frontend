@@ -4,7 +4,7 @@ import { useShowMore } from '../../components/ShowMore';
 import AudienceSelect from '../../components/admin/AudienceSelect';
 import { getAdminNotices, createNotice, setNoticeActive, sendPushBroadcast, getPushStats } from '../../api';
 
-const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING'];
+const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING', 'INTERNATIONAL', 'INSURANCE'];
 
 // Short service-status notices shown on the home screen (general) or on
 // a service's Buy page, e.g. "MTN data is delayed — we're on it."

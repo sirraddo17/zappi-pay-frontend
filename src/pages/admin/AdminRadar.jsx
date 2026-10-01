@@ -4,7 +4,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { getWinBack, simulatePricing, getScamReports, getFeedbackDigest } from '../../api';
 
 const TABS = [['winback', '💔 Win-back'], ['whatif', '🧮 What-if pricing'], ['feedback', '⭐ Feedback themes'], ['scams', '🚨 Scam reports']];
-const SERVICES = [['DATA', 'Data'], ['AIRTIME', 'Airtime'], ['ELECTRICITY', 'Electricity'], ['CABLE', 'Cable TV'], ['EDUCATION', 'Education'], ['INTERNET', 'Internet'], ['BETTING', 'Bet funding']];
+const SERVICES = [['DATA', 'Data'], ['AIRTIME', 'Airtime'], ['ELECTRICITY', 'Electricity'], ['CABLE', 'Cable TV'], ['EDUCATION', 'Education'], ['INTERNET', 'Internet'], ['BETTING', 'Bet funding'], ['INTERNATIONAL', 'International airtime'], ['INSURANCE', 'Car insurance']];
 const ask = (q) => `/admin/assistant?ask=${encodeURIComponent(q)}`;
 const fmt = (d) => new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 

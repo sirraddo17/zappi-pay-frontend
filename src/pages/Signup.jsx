@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { takeAfterLogin } from '../lib/afterLogin';
 import TestModeBanner from '../components/TestModeBanner';
 import NewPasswordFields from '../components/NewPasswordFields';
 import SecurityDetailsFields from '../components/SecurityDetailsFields';
@@ -76,7 +77,7 @@ export default function Signup() {
       } catch {
         // ignore
       }
-      navigate('/');
+      navigate(takeAfterLogin());
     } catch (err) {
       setError(err.message || 'Could not create account.');
     } finally {
