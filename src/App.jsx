@@ -84,6 +84,7 @@ const AdminAds = lazy(() => import('./pages/admin/AdminAds'));
 const AdminAdStudio = lazy(() => import('./pages/admin/AdminAdStudio'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
 const AdminRadar = lazy(() => import('./pages/admin/AdminRadar'));
+const AdminSecurity = lazy(() => import('./pages/admin/AdminSecurity'));
 
 
 function RequireCustomer({ children }) {
@@ -182,6 +183,7 @@ export default function App() {
           <Route path="/admin/ad-studio" element={<RequireAdmin><AdminAdStudio /></RequireAdmin>} />
           <Route path="/admin/feedback" element={<RequireAdmin><AdminFeedback /></RequireAdmin>} />
           <Route path="/admin/radar" element={<RequireAdmin><AdminRadar /></RequireAdmin>} />
+          <Route path="/admin/security" element={<RequireAdmin><AdminSecurity /></RequireAdmin>} />
           <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

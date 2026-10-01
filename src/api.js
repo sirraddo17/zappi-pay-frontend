@@ -521,3 +521,6 @@ export const setOpenAiExtras = (data) => adminRequest('/api/admin/openai-extras'
 export const makeAdImage = (data) => adminRequest('/api/admin/ai/ad-image', { method: 'POST', body: JSON.stringify(data) });
 export const getBackupCodes = () => adminRequest('/api/admin/security/backup-codes');
 export const makeBackupCodes = (password) => adminRequest('/api/admin/security/backup-codes', { method: 'POST', body: JSON.stringify({ password }) });
+export const getSecurityOverview = (hours = 24) => adminRequest(`/api/admin/security/overview?hours=${hours}`);
+export const unblockAddress = (id) => adminRequest(`/api/admin/security/blocks/${id}/unblock`, { method: 'POST' });
+export const blockAddress = (data) => adminRequest('/api/admin/security/blocks', { method: 'POST', body: JSON.stringify(data) });

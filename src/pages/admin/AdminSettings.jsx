@@ -127,6 +127,7 @@ export default function AdminSettings() {
   const [fraudHours, setFraudHours] = useState('24');
   const [twoFactor, setTwoFactor] = useState(false);
   const [idMatch, setIdMatch] = useState(false);
+  const [attackOn, setAttackOn] = useState(true);
   const [summaryOn, setSummaryOn] = useState(false);
   const [summaryTest, setSummaryTest] = useState(null);
   const [agentOn, setAgentOn] = useState(false);
@@ -202,6 +203,7 @@ export default function AdminSettings() {
         setFraudHours(String(s.fraudHoldHours ?? 24));
         setTwoFactor(Boolean(s.adminTwoFactorEnabled));
         setIdMatch(Boolean(s.idMatchEnabled));
+        setAttackOn(s.attackWatchEnabled !== false);
         setSummaryOn(Boolean(s.dailySummaryEnabled));
         setAgentOn(Boolean(s.agentPricingEnabled));
         setAgentByService(toServiceMap(s.agentDiscountPercentByService));
@@ -375,6 +377,7 @@ export default function AdminSettings() {
         fraudHoldHours: Number(fraudHours || 24),
         adminTwoFactorEnabled: twoFactor,
         idMatchEnabled: idMatch,
+        attackWatchEnabled: attackOn,
         dailySummaryEnabled: summaryOn,
       },
       'Security settings saved.'
@@ -864,6 +867,14 @@ export default function AdminSettings() {
           </div>
 
           <div style={{ borderTop: '1px solid var(--slate-700)', margin: '14px 0', paddingTop: 14 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Attack watch</div>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+              <input type="checkbox" checked={attackOn} onChange={(e) => setAttackOn(e.target.checked)} style={{ width: 'auto' }} />
+              Automatically block addresses that scan for weak spots, guess passwords or forge logins
+            </label>
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
+              Blocks are short (15 minutes to a day) and you're alerted. Warning signs are always recorded — see 🛡️ Security. When off, you're only alerted. Addresses in SECURITY_ALLOW_IPS on Render are never blocked.
+            </p>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Check name & date of birth with BVN/NIN</div>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
               <input type="checkbox" checked={idMatch} onChange={(e) => setIdMatch(e.target.checked)} style={{ width: 'auto' }} />

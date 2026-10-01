@@ -30,6 +30,7 @@ const TABS = [
   { to: '/admin/ad-studio', label: '🎨 Ad Studio' },
   { to: '/admin/feedback', label: '⭐ Feedback' },
   { to: '/admin/radar', label: '🔭 Radar' },
+  { to: '/admin/security', label: '🛡️ Security' },
   { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit-log', label: 'Audit Log' },
 ];

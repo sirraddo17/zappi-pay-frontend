@@ -20,6 +20,7 @@ const SUGGESTIONS = [
   'Check the agent applications for me',
   'Review last week’s support replies — tone and accuracy',
   'Any scam reports? Should I warn customers?',
+  'Is anyone trying to hack us?',
   'What if I give 2% off data — will I still make money?',
   'Plan my social media posts for this week',
   'What questions keep coming up in support? Add them to the Help Centre',
