@@ -30,6 +30,7 @@ const SERVICE_CONFIG = {
     label: 'Data',
     backendService: 'DATA',
     identifier: 'data',
+    excludeServiceIds: ['spectranet', 'smile-direct', 'swift-4g', 'ipnx'],
     needsVariation: true,
     needsType: false,
     canVerify: false,
@@ -69,7 +70,8 @@ const SERVICE_CONFIG = {
   internet: {
     label: 'Internet',
     backendService: 'INTERNET',
-    identifier: 'other-services',
+    // Smile / Spectranet sit under VTpass's "data" category.
+    identifier: 'data',
     filterServiceIds: ['spectranet', 'smile-direct', 'swift-4g', 'ipnx'],
     needsVariation: true,
     needsType: false,
@@ -197,10 +199,10 @@ export default function Buy() {
     if (!config) return;
     // Networks/billers show instantly from the last visit, then refresh.
     let shown = false;
-    cached(`services:${config.identifier}`, () => getVtpassServices(config.identifier), (data) => {
+    cached(`services:${slug}:${config.identifier}`, () => getVtpassServices(config.identifier), (data) => {
       shown = true;
       const list = Array.isArray(data.content) ? data.content : [];
-      setProviders(config.filterServiceIds ? list.filter((p) => config.filterServiceIds.includes(p.serviceID)) : list);
+      setProviders(config.filterServiceIds ? list.filter((p) => config.filterServiceIds.includes(p.serviceID)) : config.excludeServiceIds ? list.filter((p) => !config.excludeServiceIds.includes(p.serviceID)) : list);
     }, 24 * 60 * 60 * 1000).catch((err) => { if (!shown) setError(err.message); });
   }, [slug]);
 
@@ -232,6 +234,8 @@ export default function Buy() {
   // JAMB checks the Profile ID against the chosen PIN type.
   const isJamb = slug === 'education' && String(providerId).startsWith('jamb');
   const canVerify = Boolean(config?.canVerify || (isJamb && variationCode));
+  // Meter, smartcard and JAMB numbers must check out before paying.
+  const mustVerify = canVerify && slug !== 'betting' && !String(providerId).startsWith('ck:') && providerId !== 'showmax';
   async function handleVerify(silent = false) {
     if (!canVerify || !providerId || !recipient) return;
     setVerifying(true);
@@ -317,6 +321,10 @@ export default function Buy() {
     }
     if (!providerId || (!recipient.trim() && !recipientOptional) || !phoneToSend || !amount) {
       setError('Please fill in every field.');
+      return;
+    }
+    if (mustVerify && !verifiedName) {
+      setError(verifying ? 'Checking the number — one moment.' : `Tap “Verify” first — the ${String(config.recipientLabel || 'number').toLowerCase()} must show the customer’s name before you can pay.`);
       return;
     }
     setConfirmOpen(true);
@@ -489,7 +497,7 @@ export default function Buy() {
 
         {config.needsVariation ? (
           <div className="field">
-            <label htmlFor="variation">{t(slug === 'data' ? 'Data plan' : slug === 'cable' ? 'Package' : 'Exam type')}</label>
+            <label htmlFor="variation">{t(slug === 'data' || slug === 'internet' ? 'Data plan' : slug === 'cable' ? 'Package' : 'Exam type')}</label>
             <select id="variation" value={variationCode} onChange={(e) => setVariationCode(e.target.value)} required>
               <option value="">{t('Select…')}</option>
               {variations.map((v) => (

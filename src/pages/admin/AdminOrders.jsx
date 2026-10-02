@@ -159,6 +159,7 @@ export default function AdminOrders() {
                   <td>{fmtMoney(o.amount)}</td>
                   <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}><div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, textAlign: 'right', maxWidth: 230, marginLeft: 'auto' }}>
                     <span style={{ whiteSpace: 'nowrap' }}>{o.status}</span>
+                    {o.status === 'FAILED' && o.vtpassReason && <div style={{ fontSize: 11, color: 'var(--slate-400)', marginTop: 2 }}>VTpass: {o.vtpassReason}</div>}
                     {o.status === 'PENDING' && o.held && <div style={{ fontSize: 11, color: 'var(--red-500)', marginTop: 2 }}>⚠ Held: VTpass gave PINs, then said failed. Not refunded — ask VTpass support first.</div>}
                     {o.status === 'PENDING' && !o.held && o.pinsGiven && <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>PINs/token already given</div>}
                     {o.status === 'SUCCESS' && (

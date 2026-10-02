@@ -279,6 +279,7 @@ export const approveFunding = (id) => adminRequest(`/api/admin/wallet/${id}/appr
 export const rejectFunding = (id) => adminRequest(`/api/admin/wallet/${id}/reject`, { method: 'POST' });
 
 // --- Admin: orders & audit log ---
+export const vtpassSelfTest = () => adminRequest('/api/admin/vtpass/selftest');
 export const getAdminOrders = (opts = {}) => adminRequest(`/api/admin/orders${opts.status ? `?status=${encodeURIComponent(opts.status)}` : ''}`);
 export const getAuditLog = () => adminRequest('/api/admin/audit-log');
 
