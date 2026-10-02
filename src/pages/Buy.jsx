@@ -229,19 +229,22 @@ export default function Buy() {
     return () => { active = false; };
   }, [providerId]);
 
+  // JAMB checks the Profile ID against the chosen PIN type.
+  const isJamb = slug === 'education' && String(providerId).startsWith('jamb');
+  const canVerify = Boolean(config?.canVerify || (isJamb && variationCode));
   async function handleVerify(silent = false) {
-    if (!config.canVerify || !providerId || !recipient) return;
+    if (!canVerify || !providerId || !recipient) return;
     setVerifying(true);
     setVerifiedName('');
     setError('');
     try {
-      const data = await verifyBillersCode(providerId, recipient, config.needsType ? billType : undefined);
+      const data = await verifyBillersCode(providerId, recipient.trim(), isJamb ? variationCode : config.needsType ? billType : undefined);
       setVerifiedName(data.content?.Customer_Name || data.content?.customerName || 'Verified');
       const due = String(data.content?.Due_Date || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
       setVerifiedDue(due ? new Date(Number(due[1]), Number(due[2]) - 1, Number(due[3])).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
     } catch (err) {
       // ClubKonnect betting gives a specific reason (wrong ID, unknown company…).
-      if (!silent) setError(String(providerId).startsWith('ck:') && err?.message ? `${err.message} You can still pay — if the ID is wrong you'll be refunded.` : 'Could not verify this number — double-check it before continuing.');
+      if (!silent) setError(String(providerId).startsWith('ck:') && err?.message ? `${err.message} You can still pay — if the ID is wrong you'll be refunded.` : `Could not verify this number${err?.message && !/failed \(/.test(err.message) ? ` (${err.message})` : ''} — double-check it before continuing.`);
     } finally {
       setVerifying(false);
     }
@@ -251,17 +254,17 @@ export default function Buy() {
   // looks complete, instead of waiting for the customer to tap Verify.
   const autoVerified = useRef('');
   useEffect(() => {
-    if (!config?.canVerify || !providerId || verifying || verifiedName) return undefined;
+    if (!canVerify || !providerId || verifying || verifiedName) return undefined;
     const code = recipient.trim();
     if (!/^\d{10,13}$/.test(code)) return undefined;
-    const key = `${providerId}|${code}|${billType}`;
+    const key = `${providerId}|${code}|${billType}|${isJamb ? variationCode : ''}`;
     if (autoVerified.current === key) return undefined;
     const t = setTimeout(() => {
       autoVerified.current = key;
       handleVerify(true);
     }, 700);
     return () => clearTimeout(t);
-  }, [recipient, providerId, billType, verifiedName]);
+  }, [recipient, providerId, billType, verifiedName, variationCode]);
 
   const selectedVariation = variations.find((v) => v.variation_code === variationCode);
   const amount = config?.needsVariation ? Number(selectedVariation?.variation_amount || 0) : Number(customAmount || 0);
@@ -470,7 +473,7 @@ export default function Buy() {
             placeholder={slug === 'education' && String(providerId).startsWith('jamb') ? 'Your JAMB Profile ID (required)' : config.recipientPlaceholder}
             required={slug !== 'education' || String(providerId).startsWith('jamb')}
           />
-          {config.canVerify && (
+          {canVerify && (
             <button
               type="button"
               className="btn-secondary btn"
