@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import FestivalPanel from '../../components/admin/FestivalPanel';
 import AdminLayout from '../../components/AdminLayout';
 import ImageAttach from '../../components/ImageAttach';
 import { adminDesignAd, getAdminAiStatus, createAd } from '../../api';
@@ -49,6 +50,14 @@ export default function AdminAdStudio() {
   const [video, setVideo] = useState(null);
   const [hgDraft, setHgDraft] = useState(null);
   const [placement, setPlacement] = useState('HOME');
+  const [params] = useSearchParams();
+  const [openId, setOpenId] = useState(params.get('festival') || '');
+  function openDesign(x, id) {
+    setDesigns([{ ...BLANK, ...x, badges: x.badges || [], link: x.link || '' }]);
+    setPick(0);
+    if (id) setOpenId(id);
+    setMsg(null);
+  }
 
   useEffect(() => { getAdminAiStatus().then(setAi).catch(() => setAi({ adminEnabled: false })); }, []);
   useEffect(() => { loadPhoto(photoData[0]).then(setPhoto).catch(() => setPhoto(null)); }, [photoData[0]]);
@@ -135,6 +144,8 @@ export default function AdminAdStudio() {
         <ImageAttach value={photoData} onChange={setPhotoData} max={1} label="🖼️ Optional: add your own background photo" />
         <AiPictureBox onPicture={(img) => setPhotoData([img])} />
       </div>
+
+      <FestivalPanel onOpen={openDesign} openId={openId} />
 
       {msg && <p style={{ color: msg.ok ? 'var(--green-500)' : 'var(--red-500)', margin: '0 0 12px' }}>{msg.text}</p>}
 

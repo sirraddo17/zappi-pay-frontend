@@ -179,7 +179,7 @@ export function drawAd(ctx, design, formatKey, photo, p = {}) {
   ctx.textAlign = 'left';
   ctx.fillText('ZAPPI', pad + ls + 22, top + ls * 0.64);
   const zw = ctx.measureText('ZAPPI ').width;
-  ctx.fillStyle = '#FFB830';
+  ctx.fillStyle = design.theme === 'gold' ? theme.ink : '#FFB830'; // gold on gold can't be read
   ctx.fillText('PAY', pad + ls + 22 + zw, top + ls * 0.64);
   ctx.globalAlpha = 1;
 
@@ -192,7 +192,7 @@ export function drawAd(ctx, design, formatKey, photo, p = {}) {
   }
 
   const hy = top + (story ? 360 : 230);
-  const h = fitHeadline(ctx, design.headline, design.highlight, W - pad * 2 - (design.emoji ? 120 : 0), story ? 4 : 3, story ? 132 : 104, 60);
+  const h = fitHeadline(ctx, design.headline, design.highlight, W - pad * 2 - (design.emoji ? (story ? 250 : 120) : 0), story ? 4 : 3, story ? 132 : 104, 60);
   const lift = (1 - ease(a('head'))) * 40;
   ctx.globalAlpha = ease(a('head'));
   ctx.font = font(700, h.px);
@@ -205,6 +205,8 @@ export function drawAd(ctx, design, formatKey, photo, p = {}) {
   fillLines(ctx, sub, pad, y, story ? 66 : 54, 'left', 'rgba(255,255,255,0.92)', '#fff');
   y += sub.length * (story ? 66 : 54) + (story ? 50 : 34);
 
+  const ctaH = story ? 110 : 88;
+  const ctaY = H - bottomSafe - ctaH - (story ? 90 : 70);
   ctx.globalAlpha = ease(a('badges'));
   let bx = pad;
   for (const b of design.badges || []) {
@@ -212,6 +214,8 @@ export function drawAd(ctx, design, formatKey, photo, p = {}) {
     ctx.font = font(600, story ? 34 : 28);
     const bw = ctx.measureText(b).width + bh;
     if (bx + bw > W - pad) { bx = pad; y += bh + 16; }
+    // Long words: leave out tags that would run into the button.
+    if (y + bh > ctaY - 18) break;
     roundRect(ctx, bx, y, bw, bh, bh / 2);
     ctx.fillStyle = 'rgba(255,255,255,0.16)';
     ctx.fill();
@@ -225,8 +229,6 @@ export function drawAd(ctx, design, formatKey, photo, p = {}) {
   }
   ctx.globalAlpha = 1;
 
-  const ctaH = story ? 110 : 88;
-  const ctaY = H - bottomSafe - ctaH - (story ? 90 : 70);
   ctx.globalAlpha = ease(a('cta'));
   if (design.cta) pill(ctx, `${design.cta} →`, pad, ctaY, ctaH, theme.accent, theme.ink, story ? 46 : 38);
   ctx.fillStyle = 'rgba(255,255,255,0.9)';

@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { getAds, adImageUrl, adVideoUrl, clickAd, recordAdView } from '../api';
 import { useLite } from '../lib/lite';
 import { cached } from '../lib/cache';
+import { useAppInfo } from './ServiceNotices';
+
+const FEST_BG = { green: 'linear-gradient(135deg, #10b981, #047857)', red: 'linear-gradient(135deg, #ef4444, #991b1b)', gold: 'linear-gradient(135deg, #f59e0b, #b45309)', dark: 'linear-gradient(135deg, #334155, #0f172a)', blue: 'linear-gradient(135deg, #2563eb, #1e40af)', purple: 'linear-gradient(135deg, #863bff, #5b1fc4)' };
 
 const SEEN_KEY = 'zappipay_popup_ads_seen';
 
@@ -71,15 +74,18 @@ function AdSlide({ ad, onOpen }) {
 // Counts an advert as seen once per app open (for tap rate in admin).
 const viewed = new Set();
 function countView(ad) {
-  if (!ad?.id || ad.builtIn || viewed.has(ad.id) || String(ad.id).startsWith('tip')) return;
+  if (!ad?.id || ad.builtIn || viewed.has(ad.id) || /^(tip|fest)/.test(String(ad.id))) return;
   viewed.add(ad.id);
   recordAdView(ad.id).catch(() => {});
 }
 
 export function AdsCarousel({ placement = 'HOME', fallback = [] }) {
   const all = useAds();
+  const info = useAppInfo();
   const mine = all.filter((a) => (placement === 'BOTTOM' ? a.placement === 'BOTTOM' : a.placement === 'HOME' || a.placement === 'BOTH'));
-  const ads = mine.length ? mine : fallback;
+  // Festival greeting (Christmas, Eid, New Year…) leads the top slider on the day.
+  const fest = placement !== 'BOTTOM' && info?.festival ? [{ id: `fest-${info.festival.id}`, builtIn: true, title: info.festival.title, body: info.festival.body, emoji: info.festival.emoji, bg: FEST_BG[info.festival.theme] || FEST_BG.purple }] : [];
+  const ads = [...fest, ...(mine.length ? mine : fallback)];
   const open = useOpenAd();
   const track = useRef(null);
   const [index, setIndex] = useState(0);
@@ -96,8 +102,8 @@ export function AdsCarousel({ placement = 'HOME', fallback = [] }) {
   }, [ads.length]);
 
   useEffect(() => {
-    if (mine.length) countView(mine[index]);
-  }, [index, mine.length]);
+    countView(ads[index]);
+  }, [index, ads.length]);
 
   if (!ads.length) return null;
   return (
