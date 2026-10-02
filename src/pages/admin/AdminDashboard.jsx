@@ -17,15 +17,16 @@ export default function AdminDashboard() {
   function loadAll() {
     Promise.all([getCustomerList({ view: 'active' }), getPendingFunding(), getAdminOrders()])
       .then(([c, f, o]) => {
+        const n = o.counts || {};
+        const ok = o.orders.filter((x) => x.status === 'SUCCESS');
         setStats({
           customers: c.counts.active,
           pendingFunding: f.transactions.length,
-          orders: o.orders.length,
-          successfulOrders: o.orders.filter((x) => x.status === 'SUCCESS').length,
-          failedOrders: o.orders.filter((x) => x.status === 'FAILED').length,
-          totalRevenue: o.orders
-            .filter((x) => x.status === 'SUCCESS')
-            .reduce((sum, x) => sum + Number(x.amount), 0),
+          orders: n.total ?? o.orders.length,
+          pendingOrders: n.PENDING ?? o.orders.filter((x) => x.status === 'PENDING').length,
+          successfulOrders: n.SUCCESS ?? ok.length,
+          failedOrders: n.FAILED ?? o.orders.filter((x) => x.status === 'FAILED').length,
+          totalRevenue: n.revenue ?? ok.reduce((sum, x) => sum + Number(x.amount), 0),
         });
       })
       .catch((err) => setError(err.message));
@@ -45,12 +46,32 @@ export default function AdminDashboard() {
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16 }}>
         <h1>Overview</h1>
-        <p>A quick look at ZAPPI PAY</p>
+        <p>A quick look at ZAPPI PAY — tap a box to open that list.</p>
       </div>
 
       <AdminAlertsToggle card />
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
+
+      {stats && (
+        <div className="grid" style={{ marginBottom: 16 }}>
+          {[
+            ['Customers', stats.customers, '/admin/customers'],
+            ['Pending Funding', stats.pendingFunding, '/admin/pending-funding'],
+            ['Pending Orders', stats.pendingOrders, '/admin/orders?status=PENDING', stats.pendingOrders > 0 ? 'var(--orange, #f97316)' : null],
+            ['Total Orders', stats.orders, '/admin/orders'],
+            ['Successful Orders', stats.successfulOrders, '/admin/orders?status=SUCCESS'],
+            ['Failed Orders', stats.failedOrders, '/admin/orders?status=FAILED'],
+            ['Total Revenue', `₦${stats.totalRevenue.toLocaleString()}`, '/admin/money'],
+          ].map(([label, value, to, edge]) => (
+            <Link key={label} to={to} className="card stat-card" style={{ margin: 0, textDecoration: 'none', color: 'inherit', border: edge ? `1px solid ${edge}` : undefined }}>
+              <div className="label">{label}</div>
+              <div className="value">{value}</div>
+              <div style={{ fontSize: 11, color: 'var(--purple)', marginTop: 4 }}>Open →</div>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {vtpass && (
         <div className="card" style={{ margin: '0 0 16px', border: vtpass.balance != null && vtpass.balance < 20000 ? '1px solid var(--red-500)' : undefined }}>
@@ -135,34 +156,6 @@ export default function AdminDashboard() {
 
       <ProfitPanel />
 
-      {stats && (
-        <div className="grid">
-          <div className="card stat-card" style={{ margin: 0 }}>
-            <div className="label">Customers</div>
-            <div className="value">{stats.customers}</div>
-          </div>
-          <div className="card stat-card" style={{ margin: 0 }}>
-            <div className="label">Pending Funding</div>
-            <div className="value">{stats.pendingFunding}</div>
-          </div>
-          <div className="card stat-card" style={{ margin: 0 }}>
-            <div className="label">Total Orders</div>
-            <div className="value">{stats.orders}</div>
-          </div>
-          <div className="card stat-card" style={{ margin: 0 }}>
-            <div className="label">Successful Orders</div>
-            <div className="value">{stats.successfulOrders}</div>
-          </div>
-          <div className="card stat-card" style={{ margin: 0 }}>
-            <div className="label">Failed Orders</div>
-            <div className="value">{stats.failedOrders}</div>
-          </div>
-          <div className="card stat-card" style={{ margin: 0 }}>
-            <div className="label">Total Revenue</div>
-            <div className="value">₦{stats.totalRevenue.toLocaleString()}</div>
-          </div>
-        </div>
-      )}
     </AdminLayout>
   );
 }

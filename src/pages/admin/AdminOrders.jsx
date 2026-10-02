@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminOrders, recheckAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
 import { useAdminAuth } from '../../context/AdminAuthContext';
@@ -20,6 +21,13 @@ const STATUS_COLORS = {
   REFUNDED: 'var(--orange)',
 };
 
+const STATUS_TABS = [
+  { value: '', label: 'All' },
+  { value: 'PENDING', label: '⏳ Pending' },
+  { value: 'SUCCESS', label: '✓ Successful' },
+  { value: 'FAILED', label: '✕ Failed' },
+];
+
 const SERVICE_FILTERS = [
   { value: 'ALL', label: 'All' },
   { value: 'AIRTIME', label: 'Airtime' },
@@ -38,16 +46,19 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('ALL');
+  const [params, setParams] = useSearchParams();
+  const status = STATUS_TABS.some((t) => t.value === params.get('status')) ? params.get('status') : '';
+  const [counts, setCounts] = useState(null);
 
   const [busy, setBusy] = useState(null);
   const [message, setMessage] = useState('');
 
   function load() {
-    getAdminOrders()
-      .then((data) => setOrders(data.orders))
+    getAdminOrders({ status })
+      .then((data) => { setOrders(data.orders); setCounts(data.counts || null); })
       .catch((err) => setError(err.message));
   }
-  useEffect(load, []);
+  useEffect(() => { setOrders(null); load(); }, [status]);
   useAutoRefresh(load, true, ADMIN_REFRESH);
 
   async function reportVtpass(o) {
@@ -78,18 +89,19 @@ export default function AdminOrders() {
     }
   }
 
-  const pendingCount = (orders || []).filter((o) => o.status === 'PENDING').length;
+  const pendingCount = counts?.PENDING ?? (orders || []).filter((o) => o.status === 'PENDING').length;
+  const tabCount = (v) => (counts ? (v ? counts[v] : counts.total) : null);
 
   const filtered = orders === null ? null : filter === 'ALL' ? orders : orders.filter((o) => o.service === filter);
   // Last 5 of the chosen service (or all), the rest behind "Show more".
-  const page = useShowMore(filtered, [filter]);
+  const page = useShowMore(filtered, [filter, status]);
   const countFor = (v) => (orders || []).filter((o) => v === 'ALL' || o.service === v).length;
 
   return (
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16 }}>
         <h1>Orders</h1>
-        <p>Every purchase across all customers — the newest 5 show first; tap “Show more” for older ones.</p>
+        <p>Every purchase across all customers — pick a status, then a service. The newest 5 show first; tap “Show more” for older ones.</p>
       </div>
 
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
@@ -100,14 +112,21 @@ export default function AdminOrders() {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+        {STATUS_TABS.map((t) => (
+          <button key={t.label} type="button" onClick={() => setParams(t.value ? { status: t.value } : {})} className={t.value === status ? 'btn' : 'btn-secondary btn'} style={{ width: 'auto', padding: '6px 14px', fontSize: 13 }}>
+            {t.label}{tabCount(t.value) != null ? ` (${tabCount(t.value)})` : ''}
+          </button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
         {SERVICE_FILTERS.map((f) => (
           <button
             key={f.value}
             type="button"
             onClick={() => setFilter(f.value)}
             className={f.value === filter ? 'btn' : 'btn-secondary btn'}
-            style={{ width: 'auto', padding: '6px 14px', fontSize: 13 }}
+            style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }}
           >
             {f.label}{orders ? ` (${countFor(f.value)})` : ''}
           </button>
@@ -138,8 +157,10 @@ export default function AdminOrders() {
                   <td>{o.service}</td>
                   <td>{o.recipient}</td>
                   <td>{fmtMoney(o.amount)}</td>
-                  <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}>
-                    {o.status}
+                  <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}><div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, textAlign: 'right', maxWidth: 230, marginLeft: 'auto' }}>
+                    <span style={{ whiteSpace: 'nowrap' }}>{o.status}</span>
+                    {o.status === 'PENDING' && o.held && <div style={{ fontSize: 11, color: 'var(--red-500)', marginTop: 2 }}>⚠ Held: VTpass gave PINs, then said failed. Not refunded — ask VTpass support first.</div>}
+                    {o.status === 'PENDING' && !o.held && o.pinsGiven && <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>PINs/token already given</div>}
                     {o.status === 'SUCCESS' && (
                       <div style={{ marginTop: 4 }}>
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>
@@ -162,7 +183,7 @@ export default function AdminOrders() {
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => window.confirm('Mark as DELIVERED? Only do this if VTpass confirmed it was delivered.') && act(o, () => settleAdminOrder(o.id, 'SUCCESS'), (r) => `marked ${r.status}`)}>
                           Delivered
                         </button>
-                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => window.confirm('Mark as FAILED and refund the customer? Only do this if VTpass confirmed it was NOT delivered.') && act(o, () => settleAdminOrder(o.id, 'FAILED'), (r) => `marked ${r.status}, customer refunded`)}>
+                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => window.confirm(o.pinsGiven ? 'WARNING: VTpass already gave PINs/token for this order. Refund ONLY if VTpass support confirmed in writing that they do not work. Mark as FAILED and refund?' : 'Mark as FAILED and refund the customer? Only do this if VTpass confirmed it was NOT delivered.') && act(o, () => settleAdminOrder(o.id, 'FAILED'), (r) => `marked ${r.status}, customer refunded`)}>
                           Failed + refund
                         </button>
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>
@@ -170,7 +191,7 @@ export default function AdminOrders() {
                         </button>
                       </div>
                     )}
-                  </td>
+                  </div></td>
                   <td>{fmtDate(o.createdAt)}</td>
                 </tr>
               ))}

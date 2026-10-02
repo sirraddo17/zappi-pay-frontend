@@ -242,6 +242,8 @@ function downloadBlob(blob, fileName) {
 
 // Electricity token / exam PINs from the VTpass response, if any.
 export function extractToken(order) {
+  // Tokens/PINs only once the order is confirmed (the server hides them too).
+  if (order?.status !== 'SUCCESS') return null;
   const p = order?.responsePayload || {};
   const token = p.purchased_code || p.mainToken || p.token || p.Token || p.content?.transactions?.purchased_code;
   if (token) return String(token).replace(/^Token\s*:\s*/i, '').trim();

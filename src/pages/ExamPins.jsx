@@ -147,7 +147,8 @@ function Sheet({ id }) {
     return () => clearTimeout(t);
   }, [id]);
 
-  const cards = order ? examCards(order) : [];
+  // PINs only show once the order is confirmed (the server hides them too).
+  const cards = order?.status === 'SUCCESS' ? examCards(order) : [];
   const exam = EXAMS[order?.provider] || EXAMS.waec;
 
   async function copyAll() {
