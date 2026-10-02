@@ -279,6 +279,10 @@ export const approveFunding = (id) => adminRequest(`/api/admin/wallet/${id}/appr
 export const rejectFunding = (id) => adminRequest(`/api/admin/wallet/${id}/reject`, { method: 'POST' });
 
 // --- Admin: orders & audit log ---
+export const startCardPayment = (amount) => request('/api/wallet/card/start', { method: 'POST', body: JSON.stringify({ amount }) });
+export const verifyCardPayment = (txRef) => request('/api/wallet/card/verify', { method: 'POST', quiet: true, body: JSON.stringify({ txRef }) });
+export const getFundingMethods = () => adminRequest('/api/admin/funding-methods');
+export const saveFundingMethods = (data) => adminRequest('/api/admin/funding-methods', { method: 'PUT', body: JSON.stringify(data) });
 export const getFestivals = () => adminRequest('/api/admin/festivals');
 export const vtpassSelfTest = () => adminRequest('/api/admin/vtpass/selftest');
 export const getAdminOrders = (opts = {}) => adminRequest(`/api/admin/orders${opts.status ? `?status=${encodeURIComponent(opts.status)}` : ''}`);

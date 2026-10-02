@@ -3,8 +3,8 @@ import { useLang } from '../lib/i18n';
 import TestModeBanner from '../components/TestModeBanner';
 import SavingsCard from '../components/SavingsCard';
 import SpendingCard from '../components/SpendingCard';
-import { Link } from 'react-router-dom';
-import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon } from '../api';
+import { Link, useSearchParams } from 'react-router-dom';
+import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon, startCardPayment, verifyCardPayment } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { useAuth } from '../context/AuthContext';
 import BottomNav from '../components/BottomNav';
@@ -77,6 +77,52 @@ function FundingHelper({ info }) {
         </div>
       )}
     </div>
+  );
+}
+
+// Card / USSD top-up: the customer pays on Flutterwave's secure page and
+// comes back here; the server confirms with Flutterwave before crediting.
+function cardFee(amount, f) {
+  let fee = Math.round(amount * f.cardFeePercent) / 100;
+  if (f.cardFeeCap > 0) fee = Math.min(fee, f.cardFeeCap);
+  return Math.max(0, Math.round(fee * 100) / 100);
+}
+function CardFunding({ funding }) {
+  const [amount, setAmount] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const a = Number(amount);
+  const fee = a > 0 ? cardFee(a, funding) : 0;
+  const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  async function pay(e) {
+    e.preventDefault();
+    setErr('');
+    setBusy(true);
+    try {
+      const r = await startCardPayment(a);
+      window.location.assign(r.link);
+    } catch (e2) {
+      setErr(e2.message);
+      setBusy(false);
+    }
+  }
+  return (
+    <form className="card" onSubmit={pay}>
+      <h2 style={{ marginTop: 0, fontSize: 16 }}>💳 Pay with card or USSD</h2>
+      <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>Debit card (Verve, Mastercard, Visa) or your bank’s USSD code. You pay on Flutterwave’s secure page — ZAPPI PAY never sees your card details. Added to your wallet instantly.</p>
+      {err && <p className="error-text" style={{ margin: '0 0 10px' }}>{err}</p>}
+      <div className="field">
+        <label htmlFor="cardAmt">Amount to add (₦)</label>
+        <input id="cardAmt" type="number" inputMode="numeric" min={funding.minAmount} max={500000} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={`At least ₦${Number(funding.minAmount).toLocaleString()}`} required />
+      </div>
+      {a > 0 && fee > 0 && (
+        <div style={{ fontSize: 13, margin: '-4px 0 10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--slate-400)' }}><span>Card processing fee</span><span>+ {naira(fee)}</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}><b>You pay</b><b>{naira(a + fee)}</b></div>
+        </div>
+      )}
+      <button className="btn" type="submit" disabled={busy || !(a >= funding.minAmount)}>{busy ? 'Opening secure page…' : a > 0 ? `Pay ${naira(a + fee)}` : 'Pay'}</button>
+    </form>
   );
 }
 
@@ -298,6 +344,36 @@ export default function Wallet() {
 
   const autoFunding = Boolean(bankInfo?.available);
   const appInfo = useAppInfo();
+  const funding = appInfo?.funding || null;
+  const [params, setParams] = useSearchParams();
+  // Back from the card payment page: confirm it (a few tries, it can take a moment).
+  useEffect(() => {
+    const txRef = params.get('card');
+    if (!txRef) return undefined;
+    let tries = 0;
+    let stop = false;
+    setSuccessMessage('Confirming your card payment…');
+    const check = () => verifyCardPayment(txRef).then((r) => {
+      if (stop) return;
+      if (r.status === 'PAID') {
+        setSuccessMessage(`✅ ₦${Number(r.amount).toLocaleString()} added to your wallet.`);
+        load();
+        refreshCustomer?.();
+        setParams({}, { replace: true });
+      } else if (r.status === 'FAILED') {
+        setSuccessMessage('');
+        setError('The card payment was not completed. No money was added — you can try again.');
+        setParams({}, { replace: true });
+      } else if (tries++ < 6) {
+        setTimeout(check, 5000);
+      } else {
+        setSuccessMessage('Still confirming with the bank. If you paid, it will be added automatically within a few minutes — you’ll get a notification.');
+        setParams({}, { replace: true });
+      }
+    }).catch((e) => { if (!stop) { setSuccessMessage(''); setError(e.message); } });
+    check();
+    return () => { stop = true; };
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -389,6 +465,12 @@ export default function Wallet() {
 
       {error && <p className="error-text">{error}</p>}
       {successMessage && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{successMessage}</p>}
+
+      {funding?.card && <CardFunding funding={funding} />}
+
+      {bankInfo && !autoFunding && !funding?.card && !manual && (
+        <div className="card" style={{ fontSize: 14 }}>Wallet funding is paused for a short while. Please check back soon.</div>
+      )}
 
       {autoFunding && (
         <BankFunding

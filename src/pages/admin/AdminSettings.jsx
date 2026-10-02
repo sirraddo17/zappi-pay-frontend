@@ -8,6 +8,7 @@ import OpenAiExtrasPanel from '../../components/admin/OpenAiExtrasPanel';
 import BackupCodesPanel from '../../components/admin/BackupCodesPanel';
 import IntlAirtimeToggle from '../../components/admin/IntlAirtimeToggle';
 import VtpassSelfTest from '../../components/admin/VtpassSelfTest';
+import FundingMethodsPanel from '../../components/admin/FundingMethodsPanel';
 import ReceiptInvitePanel from '../../components/admin/ReceiptInvitePanel';
 import EpinSettingsPanel from '../../components/admin/EpinSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
@@ -29,7 +30,7 @@ const TABS = [
   { key: 'maintenance', label: '🛠️ Maintenance & alerts' },
   { key: 'split', label: '🎁 Rewards split' },
   { key: 'vtpass', label: 'VTpass' },
-  { key: 'monnify', label: 'Monnify' },
+  { key: 'monnify', label: 'Wallet funding (Monnify & Flutterwave)' },
   { key: 'markup', label: 'Markup' },
   { key: 'discount', label: 'Discounts' },
   { key: 'limits', label: 'Limits' },
@@ -532,6 +533,7 @@ export default function AdminSettings() {
       )}
       {!loading && !loadError && tab === 'vtpass' && <><VtpassSelfTest /><IntlAirtimeToggle /></>}
 
+      {!loading && !loadError && tab === 'monnify' && <FundingMethodsPanel />}
       {!loading && !loadError && tab === 'monnify' && (
         <form className="card" style={cardStyle} onSubmit={saveMonnify}>
           <SectionHeader
