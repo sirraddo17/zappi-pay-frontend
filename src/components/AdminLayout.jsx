@@ -30,6 +30,7 @@ const TABS = [
   { to: '/admin/ad-studio', label: '🎨 Ad Studio' },
   { to: '/admin/circles', label: '🔄 Ajo Circles' },
   { to: '/admin/features', label: '🧩 New features' },
+  { to: '/admin/extra-services', label: '📩 SMS, Tickets & Bills' },
   { to: '/admin/feedback', label: '⭐ Feedback' },
   { to: '/admin/radar', label: '🔭 Radar' },
   { to: '/admin/security', label: '🛡️ Security' },

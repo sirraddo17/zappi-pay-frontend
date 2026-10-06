@@ -328,6 +328,32 @@ export const switchAdminFeature = (key, d) => adminRequest(`/api/admin/features/
 export const saveFeaturesConfig = (d) => adminRequest('/api/admin/features-config', { method: 'PUT', body: JSON.stringify(d) });
 export const resolveSafeDeal = (code, d) => adminRequest(`/api/admin/safebuy/${encodeURIComponent(code)}/resolve`, { method: 'POST', body: JSON.stringify(d) });
 export const getBankList = () => request('/api/banks');
+// --- Bulk SMS, Event tickets, More bills ---
+export const getSms = () => request('/api/sms');
+export const quoteSms = (d) => post('/api/sms/quote', d);
+export const sendSms = (d) => post('/api/sms/send', d);
+export const requestSmsSender = (d) => post('/api/sms/senders', d);
+export const getTicketsHome = () => request('/api/tickets');
+export const getMyTickets = () => request('/api/tickets/mine');
+export const createTicketEvent = (d) => post('/api/tickets/events', d);
+export const getTicketEvent = (id) => request(`/api/tickets/events/${encodeURIComponent(id)}`);
+export const checkInTicket = (id, code) => post(`/api/tickets/events/${encodeURIComponent(id)}/checkin`, { code });
+export const setTicketEventStatus = (id, status) => post(`/api/tickets/events/${encodeURIComponent(id)}/status`, { status });
+export const viewEventPage = (code) => request(`/api/tickets/e/${encodeURIComponent(code)}`);
+export const ticketCheckout = (code, d) => post(`/api/tickets/e/${encodeURIComponent(code)}/checkout`, d);
+export const getTicketOrder = (ref) => request(`/api/tickets/order/${encodeURIComponent(ref)}`);
+export const getBillCategories = () => request('/api/bills/categories');
+export const getBillers = (code) => request(`/api/bills/categories/${encodeURIComponent(code)}`);
+export const getBillItems = (code) => request(`/api/bills/billers/${encodeURIComponent(code)}/items`);
+export const validateBill = (d) => post('/api/bills/validate', d);
+export const payBill = (d) => post('/api/bills/pay', d);
+export const getBillHistory = () => request('/api/bills/history');
+export const getBill = (ref) => request(`/api/bills/${encodeURIComponent(ref)}`);
+export const getAdminExtraServices = () => adminRequest('/api/admin/extra-services');
+export const saveExtraServicesConfig = (d) => adminRequest('/api/admin/extra-services/config', { method: 'PUT', body: JSON.stringify(d) });
+export const reviewSmsSender = (id, d) => adminRequest(`/api/admin/sms/senders/${encodeURIComponent(id)}`, { method: 'POST', body: JSON.stringify(d) });
+export const adminStopTicketEvent = (id) => adminRequest(`/api/admin/tickets/events/${encodeURIComponent(id)}/stop`, { method: 'POST' });
+export const resolveBill = (ref, outcome) => adminRequest(`/api/admin/bills/${encodeURIComponent(ref)}/resolve`, { method: 'POST', body: JSON.stringify({ outcome }) });
 
 // --- Ajo Circle ---
 export const getCircles = () => request('/api/circles');

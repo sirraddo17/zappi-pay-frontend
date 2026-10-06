@@ -7,6 +7,9 @@ import { useAppInfo, useFeatures } from '../components/ServiceNotices';
 // Home → More. New services go here so the home screen stays short.
 const ITEMS = [
   { to: '/circles', label: 'Ajo Circle', note: 'Save together: ajo, esusu, adashe — paid in turn', emoji: '🔄', bg: '#4c1d95', circles: true },
+  { to: '/bills', label: 'More bills', note: 'Tax, waste, water, tolls, school & professional fees', emoji: '🧾', bg: '#0e7490', feature: 'moreBills' },
+  { to: '/tickets', label: 'Event tickets', note: 'Sell or buy tickets — QR check-in at the door', emoji: '🎟️', bg: '#7c2d12', feature: 'tickets' },
+  { to: '/sms', label: 'Bulk SMS', note: 'Send alerts to your customers or members', emoji: '📩', bg: '#1e3a8a', feature: 'bulkSms' },
   { to: '/spray', label: 'Owambe Spray', note: 'Guests spray money from their phones at your party', emoji: '💃', bg: '#9d174d', feature: 'spray' },
   { to: '/dues', label: 'Association Dues', note: 'Estate, church, alumni & club dues with reminders', emoji: '🏘️', bg: '#155e75', feature: 'dues' },
   { to: '/pay-for-me', label: 'Pay It For Me', note: 'Ask someone to pay your light, data or TV', emoji: '🙏', bg: '#6d28d9', feature: 'payForMe' },

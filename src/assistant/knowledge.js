@@ -27,6 +27,27 @@ export const TOPICS = [
     actions: [{ label: 'Request money', to: '/requests' }],
   },
   {
+    id: 'bulk-sms',
+    title: 'Bulk SMS',
+    keywords: ['bulk sms', 'send sms', 'text message', 'sms to customers', 'sender id', 'sender name', 'broadcast sms'],
+    answer: 'More → Bulk SMS: paste your customers’ or members’ numbers, type the message, check the cost and send with your PIN. You pay per SMS page; numbers that fail are refunded. Want your own business name as the sender? Tap “Use my own business name” and we’ll approve it.',
+    actions: [{ label: 'Bulk SMS', to: '/sms' }],
+  },
+  {
+    id: 'event-tickets',
+    title: 'Event tickets',
+    keywords: ['ticket', 'tickets', 'sell tickets', 'event', 'concert', 'owambe ticket', 'check in', 'qr ticket'],
+    answer: 'More → Event tickets: organisers create an event with ticket types and share the link; buyers pay by card or transfer and the money goes straight to the organiser’s bank account. Your tickets (with QR codes) are under My tickets — show the QR at the door.',
+    actions: [{ label: 'Event tickets', to: '/tickets' }],
+  },
+  {
+    id: 'more-bills',
+    title: 'More bills (tax, waste, school fees…)',
+    keywords: ['tax', 'land use', 'lawma', 'waste bill', 'water bill', 'toll', 'school fees', 'professional body', 'offering', 'tithe', 'more bills'],
+    answer: 'More → More bills: choose the category (tax, utility, schools & professional bodies, religious institutions, transport…), pick the biller, verify your ID or account number and pay from your wallet. You get a receipt; if a payment fails, the money comes back automatically.',
+    actions: [{ label: 'More bills', to: '/bills' }],
+  },
+  {
     id: 'owambe-spray',
     title: 'Owambe Spray (spray money at a party)',
     keywords: ['spray', 'owambe', 'party', 'wedding', 'celebrant', 'spray money', 'naming ceremony', 'big screen'],

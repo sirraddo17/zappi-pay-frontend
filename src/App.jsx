@@ -58,6 +58,14 @@ const SafeBuy = lazy(() => import('./pages/features/SafeBuy'));
 const SafeBuyDeal = lazy(() => import('./pages/features/SafeBuy').then((m) => ({ default: m.SafeBuyDeal })));
 const Payroll = lazy(() => import('./pages/features/Payroll'));
 const DailyRewards = lazy(() => import('./pages/features/DailyRewards'));
+const Sms = lazy(() => import('./pages/features/Sms'));
+const Tickets = lazy(() => import('./pages/features/Tickets'));
+const TicketEventDashboard = lazy(() => import('./pages/features/Tickets').then((m) => ({ default: m.TicketEventDashboard })));
+const EventPage = lazy(() => import('./pages/features/Tickets').then((m) => ({ default: m.EventPage })));
+const TicketOrder = lazy(() => import('./pages/features/Tickets').then((m) => ({ default: m.TicketOrder })));
+const Bills = lazy(() => import('./pages/features/Bills'));
+const BillReceipt = lazy(() => import('./pages/features/Bills').then((m) => ({ default: m.BillReceipt })));
+const AdminExtraServices = lazy(() => import('./pages/admin/AdminExtraServices'));
 const Bulk = lazy(() => import('./pages/Bulk'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const Notifications = lazy(() => import('./pages/Notifications'));
@@ -192,6 +200,13 @@ export default function App() {
           <Route path="/safebuy/:code" element={<RequireCustomer><SafeBuyDeal /></RequireCustomer>} />
           <Route path="/payroll" element={<RequireCustomer><Payroll /></RequireCustomer>} />
           <Route path="/rewards" element={<RequireCustomer><DailyRewards /></RequireCustomer>} />
+          <Route path="/sms" element={<RequireCustomer><Sms /></RequireCustomer>} />
+          <Route path="/tickets" element={<RequireCustomer><Tickets /></RequireCustomer>} />
+          <Route path="/tickets/events/:id" element={<RequireCustomer><TicketEventDashboard /></RequireCustomer>} />
+          <Route path="/tickets/order/:ref" element={<RequireCustomer><TicketOrder /></RequireCustomer>} />
+          <Route path="/t/:code" element={<RequireCustomer><EventPage /></RequireCustomer>} />
+          <Route path="/bills" element={<RequireCustomer><Bills /></RequireCustomer>} />
+          <Route path="/bills/:ref" element={<RequireCustomer><BillReceipt /></RequireCustomer>} />
           <Route path="/circles/:id" element={<RequireCustomer><CircleDetail /></RequireCustomer>} />
           <Route path="/shop/:username" element={<Shop />} />
           <Route path="/profit-book" element={<RequireCustomer><ProfitBook /></RequireCustomer>} />
@@ -238,6 +253,7 @@ export default function App() {
           <Route path="/admin/security" element={<RequireAdmin><AdminSecurity /></RequireAdmin>} />
           <Route path="/admin/circles" element={<RequireAdmin><AdminCircles /></RequireAdmin>} />
           <Route path="/admin/features" element={<RequireAdmin><AdminFeatures /></RequireAdmin>} />
+          <Route path="/admin/extra-services" element={<RequireAdmin><AdminExtraServices /></RequireAdmin>} />
           <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
