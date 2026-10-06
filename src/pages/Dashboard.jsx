@@ -15,7 +15,7 @@ import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
-import ServiceNotices, { useAppInfo } from '../components/ServiceNotices';
+import ServiceNotices, { useFeatures } from '../components/ServiceNotices';
 import LoyaltyCard from '../components/LoyaltyCard';
 import PushToggle from '../components/PushToggle';
 import { LogoIcon, Wordmark } from '../components/Logo';
@@ -405,8 +405,8 @@ export default function Dashboard() {
 }
 
 function DailyRewardsHome() {
-  const appInfo = useAppInfo();
-  if (!appInfo?.features?.dailyRewards) return null;
+  const features = useFeatures();
+  if (!features.dailyRewards) return null;
   return (
     <Link to="/rewards" className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit' }}>
       <span style={{ fontSize: 28 }}>🎁</span>

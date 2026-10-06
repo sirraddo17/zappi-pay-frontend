@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAppInfo } from '../api';
+import { getAppInfo, getMyFeatures } from '../api';
 
 // Admin-posted notices, e.g. "MTN data is slow right now".
 // service: show only notices for that service (plus general ones).
@@ -19,6 +19,20 @@ export function useAppInfo() {
       .catch(() => {});
   }, []);
   return info;
+}
+
+// Which new features THIS customer can use: on-for-everyone ones, plus
+// "testers only" ones when they're on the testers list.
+let fCache = null;
+let fAt = 0;
+export function useFeatures() {
+  const appInfo = useAppInfo();
+  const [mine, setMine] = useState(fCache);
+  useEffect(() => {
+    if (fCache && Date.now() - fAt < 60 * 1000) return;
+    getMyFeatures().then((r) => { fCache = r.features || {}; fAt = Date.now(); setMine(fCache); }).catch(() => {});
+  }, []);
+  return { ...(appInfo?.features || {}), ...(mine || {}) };
 }
 
 // True (with the message) when this service can't be bought right now.

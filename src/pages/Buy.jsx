@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo, createPayForMe } from '../api';
 import { cached } from '../lib/cache';
 import PinConfirm from '../components/PinConfirm';
-import ServiceNotices, { useAppInfo, pausedFor } from '../components/ServiceNotices';
+import ServiceNotices, { useAppInfo, useFeatures, pausedFor } from '../components/ServiceNotices';
 
 // Maps the URL slug to what the backend Order.service enum expects, the
 // VTpass category identifier used to fetch that service's provider list,
@@ -160,6 +160,7 @@ export default function Buy() {
   const [promoMsg, setPromoMsg] = useState('');
   const [promoOpen, setPromoOpen] = useState(false);
   const appInfo = useAppInfo();
+  const features = useFeatures();
   const [askLink, setAskLink] = useState(null);
   const [asking, setAsking] = useState(false);
 
@@ -649,7 +650,7 @@ export default function Buy() {
         <button className="btn" type="submit" disabled={submitting || !amount || Boolean(pausedFor(appInfo, config.backendService))}>
           {pausedFor(appInfo, config.backendService) ? 'Paused for maintenance' : submitting ? t('Processing…') : `${t('Pay {amount}', { amount: naira(payTotal) })}${repeatOn ? ' & schedule' : ''}`}
         </button>
-        {appInfo?.features?.payForMe && ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'INTERNET', 'EDUCATION'].includes(config.backendService) && (
+        {features.payForMe && ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'INTERNET', 'EDUCATION'].includes(config.backendService) && (
           <button type="button" className="btn btn-secondary" style={{ marginTop: 8 }} disabled={asking || !amount} onClick={askSomeone}>{asking ? 'Creating link…' : '🙏 Ask someone to pay'}</button>
         )}
         {askLink && (
