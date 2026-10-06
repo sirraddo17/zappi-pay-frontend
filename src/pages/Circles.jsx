@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCircles, createCircle, circleAgreementPreview, appealCircleBan } from '../api';
@@ -126,7 +127,7 @@ export default function Circles() {
         <p>Save together with people you trust — ajo, esusu, adashe — paid automatically and in turn.</p>
       </div>
       {err && <p className="error-text" style={{ margin: '0 16px 12px' }}>{err}</p>}
-      {!d ? <p className="empty-state">Loading…</p> : !d.enabled ? (
+      {!d ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : !d.enabled ? (
         <div className="card"><b>Coming soon</b><p style={{ fontSize: 14, color: 'var(--slate-400)' }}>Ajo Circle is almost ready. Here’s how it will work:</p><HowItWorks /></div>
       ) : (
         <>

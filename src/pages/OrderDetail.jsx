@@ -10,6 +10,8 @@ import { supportWaLink } from '../lib/whatsapp';
 import { useAuth } from '../context/AuthContext';
 import { useAppInfo } from '../components/ServiceNotices';
 import { shareReceipt, downloadReceipt, extractToken } from '../lib/receipt';
+import Celebrate, { ResultBadge } from '../components/Celebrate';
+import { Skeleton } from '../components/Skeleton';
 
 const STATUS_COLORS = {
   DELIVERED: 'var(--green-500)',
@@ -128,11 +130,12 @@ export default function OrderDetail() {
   if (!order) {
     return (
       <div style={{ maxWidth: 420, margin: '0 auto', padding: '24px 16px' }}>
-        <p className="empty-state">Loading…</p>
+        <Skeleton h={300} />
       </div>
     );
   }
 
+  const justBought = search.get('new') === '1';
   return (
     <div className="receipt" style={{ maxWidth: 420, margin: '0 auto', padding: '24px 16px 90px' }}>
       <Link to="/orders" className="no-print" style={{ display: 'inline-block', marginBottom: 16, color: 'var(--slate-400)', fontSize: 14 }}>
@@ -145,7 +148,10 @@ export default function OrderDetail() {
 
       <div className="no-print"><RateExperience order={order} flush /></div>
 
-      <div className="card" style={{ margin: '0 0 16px', textAlign: 'center' }}>
+      {justBought && order.status === 'SUCCESS' && <Celebrate />}
+      <div className="card pop-in" style={{ margin: '0 0 16px', textAlign: 'center' }}>
+        <div className="no-print"><ResultBadge status={order.status} /></div>
+        {justBought && <p className="no-print" style={{ margin: '0 0 10px', fontWeight: 700, fontSize: 16 }}>{order.status === 'SUCCESS' ? 'Payment successful 🎉' : order.status === 'FAILED' ? 'That didn’t go through' : 'Processing your payment…'}</p>}
         <h1 style={{ margin: '0 0 4px', fontSize: 18 }}>ZAPPI PAY</h1>
         <p style={{ margin: '0 0 20px', color: 'var(--slate-400)', fontSize: 13 }}>Payment Receipt</p>
 

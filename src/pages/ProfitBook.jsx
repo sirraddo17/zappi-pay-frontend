@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getProfitBook, getOwing, saveAgentSale } from '../api';
@@ -130,7 +131,7 @@ export default function ProfitBook() {
         ))}
       </div>
       {err && <p className="error-text" style={{ margin: '0 16px 8px' }}>{err}</p>}
-      {!data && !err && <p className="empty-state">Loading…</p>}
+      {!data && !err && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}
       {s && (
         <>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '0 16px 12px' }}>

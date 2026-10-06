@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -115,7 +116,7 @@ export default function AirtimeCash() {
 
       {error && <p className="error-text">{error}</p>}
 
-      {!config && !error && <p className="empty-state">Loading…</p>}
+      {!config && !error && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}
 
       {unavailable && (
         <div className="card">

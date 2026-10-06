@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCircle, inviteToCircle, leaveCircle, orderCircle, startCircle, cancelCircle, requestCircleRelease } from '../api';
@@ -35,7 +36,7 @@ export default function CircleDetail() {
     setErr(''); setMsg('');
     try { await fn(); if (ok) setMsg(ok); await load(); } catch (e) { setErr(e.message); }
   }
-  if (!d) return <div className="app-shell"><div className="page-header"><Link to="/circles" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Ajo Circle</Link></div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell"><div className="page-header"><Link to="/circles" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Ajo Circle</Link></div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
 
   const c = d.circle;
   const link = `${window.location.origin}/circle/${c.code}`;

@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getSafeDeals, createSafeDeal, viewSafeDeal, safeDealAction } from '../../api';
@@ -43,7 +44,7 @@ export default function SafeBuy() {
       )}
       <div className="card">
         <b>My deals</b>
-        {!list ? <p className="empty-state">Loading…</p> : list.length === 0 ? <p style={{ fontSize: 14, color: 'var(--slate-400)' }}>No deals yet. A buyer? Ask the seller to send you a SafeBuy link.</p> : list.map((d) => <Link key={d.code} to={`/safebuy/${d.code}`} style={{ display: 'block', padding: '8px 0', borderTop: '1px solid var(--slate-800)', textDecoration: 'none', color: 'inherit', fontSize: 14 }}><div style={{ display: 'flex', justifyContent: 'space-between' }}><b>{d.title}</b><span>{naira(d.amount)}</span></div><small style={{ color: (STATUS[d.status] || [])[1] }}>{d.role === 'SELLER' ? 'Selling' : 'Buying'} · {(STATUS[d.status] || [d.status])[0]}</small></Link>)}
+        {!list ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : list.length === 0 ? <p style={{ fontSize: 14, color: 'var(--slate-400)' }}>No deals yet. A buyer? Ask the seller to send you a SafeBuy link.</p> : list.map((d) => <Link key={d.code} to={`/safebuy/${d.code}`} style={{ display: 'block', padding: '8px 0', borderTop: '1px solid var(--slate-800)', textDecoration: 'none', color: 'inherit', fontSize: 14 }}><div style={{ display: 'flex', justifyContent: 'space-between' }}><b>{d.title}</b><span>{naira(d.amount)}</span></div><small style={{ color: (STATUS[d.status] || [])[1] }}>{d.role === 'SELLER' ? 'Selling' : 'Buying'} · {(STATUS[d.status] || [d.status])[0]}</small></Link>)}
       </div>
       <BottomNav />
     </div>
@@ -61,7 +62,7 @@ export function SafeBuyDeal() {
   const [problem, setProblem] = useState(false);
   const load = () => viewSafeDeal(code).then(setD).catch((e) => setErr(e.message));
   useEffect(() => { clearAfterLogin(); load(); }, [code]);
-  if (!d) return <div className="app-shell"><div className="page-header">{back('/safebuy', 'SafeBuy')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell"><div className="page-header">{back('/safebuy', 'SafeBuy')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const x = d.deal;
   const [st, col] = STATUS[x.status] || [x.status, 'inherit'];
   const link = `${window.location.origin}/safebuy/${x.code}`;

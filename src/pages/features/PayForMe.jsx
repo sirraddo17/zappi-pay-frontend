@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getPayForMes, viewPayForMe, payPayForMe, cancelPayForMe } from '../../api';
@@ -30,7 +31,7 @@ export default function PayForMe() {
       </div>
       <div className="card">
         <b>My requests</b>
-        {!list ? <p className="empty-state">Loading…</p> : list.length === 0 ? <p style={{ fontSize: 14, color: 'var(--slate-400)' }}>No requests yet.</p> : list.map((r) => {
+        {!list ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : list.length === 0 ? <p style={{ fontSize: 14, color: 'var(--slate-400)' }}>No requests yet.</p> : list.map((r) => {
           const [t, c] = STATUS[r.status] || [r.status, 'inherit'];
           return <Link key={r.token} to={`/p/${r.token}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderTop: '1px solid var(--slate-800)', textDecoration: 'none', color: 'inherit', fontSize: 14 }}><span><b>{r.label}</b><br /><small style={{ color: 'var(--slate-400)' }}>{r.recipient} · {new Date(r.createdAt).toLocaleDateString('en-NG')}</small></span><span style={{ color: c, fontSize: 13 }}>{t}</span></Link>;
         })}
@@ -49,7 +50,7 @@ export function PayForMeLink() {
   const [pin, setPin] = useState(false);
   const load = () => viewPayForMe(token).then(setD).catch((e) => setErr(e.message));
   useEffect(() => { clearAfterLogin(); load(); }, [token]);
-  if (!d) return <div className="app-shell"><div className="page-header">{back('/', 'Home')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell"><div className="page-header">{back('/', 'Home')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const r = d.request;
   const [t, c] = STATUS[r.status] || [r.status, 'inherit'];
   const link = `${window.location.origin}/p/${r.token}`;

@@ -78,8 +78,28 @@ export async function drawReceipt({ title, amount, status, rows, highlight, invi
   // Background + header band.
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, height);
-  ctx.fillStyle = PURPLE;
+  const g = ctx.createLinearGradient(0, 0, W, 150);
+  g.addColorStop(0, '#9b5cff');
+  g.addColorStop(0.6, '#6d2fd6');
+  g.addColorStop(1, '#4b1aa8');
+  ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, 150);
+  // Soft decorative circles.
+  ctx.fillStyle = 'rgba(255,184,48,0.28)';
+  ctx.beginPath(); ctx.arc(W - 40, 10, 120, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.10)';
+  ctx.beginPath(); ctx.arc(W - 170, 150, 70, 0, Math.PI * 2); ctx.fill();
+  // Status icon in the header.
+  const ok = /success|deliver|paid/i.test(String(status || ''));
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(W - PAD - 34, 75, 34, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = ok ? '#16a34a' : statusColor(status);
+  ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  if (ok) { ctx.moveTo(W - PAD - 50, 76); ctx.lineTo(W - PAD - 38, 88); ctx.lineTo(W - PAD - 16, 63); }
+  else { ctx.moveTo(W - PAD - 34, 58); ctx.lineTo(W - PAD - 34, 80); ctx.moveTo(W - PAD - 34, 92); ctx.lineTo(W - PAD - 34, 93); }
+  ctx.stroke();
+  ctx.lineCap = 'butt';
   ctx.fillStyle = '#ffffff';
   ctx.font = font(800, 40);
   ctx.fillText('ZAPPI PAY', PAD, 72);
@@ -177,7 +197,14 @@ export async function drawReceipt({ title, amount, status, rows, highlight, invi
     }
   }
 
-  // Footer.
+  // Footer with a ticket-style tear line.
+  ctx.strokeStyle = '#d1d5db';
+  ctx.setLineDash([10, 8]);
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(PAD, height - 100); ctx.lineTo(W - PAD, height - 100); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = PURPLE;
+  ctx.fillRect(0, height - 8, W, 8);
   y = height - 60;
   ctx.fillStyle = '#6b7280';
   ctx.font = font(500, 18);

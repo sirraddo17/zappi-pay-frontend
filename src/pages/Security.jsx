@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -238,7 +239,7 @@ export default function Security() {
       {error && <p className="error-text">{error}</p>}
 
       {!status ? (
-        <p className="empty-state">Loading…</p>
+        <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>
       ) : (
         <>
           <div className="card">

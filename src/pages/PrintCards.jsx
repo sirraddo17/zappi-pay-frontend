@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getEpinOptions, getEpinBatches, getEpinBatch, buyEpins, markEpinsPrinted, markEpinsSold } from '../api';
@@ -69,7 +70,7 @@ function BuyCards() {
         <p>Buy airtime PINs and print them to sell in your shop</p>
       </div>
 
-      {!opts && !error && <p className="empty-state">Loading…</p>}
+      {!opts && !error && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}
       {opts && !opts.enabled && (
         <div className="card"><strong>Coming soon</strong><p style={{ color: 'var(--slate-400)', fontSize: 14, margin: '6px 0 0' }}>Recharge card printing isn’t open yet. Check back shortly.</p></div>
       )}
@@ -221,7 +222,7 @@ function BatchView({ id }) {
   }
 
   if (error) return <div className="app-shell"><div className="page-header"><Link to="/print-cards" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link><h1>Recharge cards</h1></div><p style={{ color: 'var(--red-500)', margin: 16 }}>{error}</p></div>;
-  if (!batch) return <div className="app-shell"><p className="empty-state">Loading…</p></div>;
+  if (!batch) return <div className="app-shell"><div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div></div>;
 
   const sold = (batch.cards || []).filter((c) => c.soldAt).length;
   return (

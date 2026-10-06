@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getSms, sendSms, requestSmsSender } from '../../api';
@@ -39,7 +40,7 @@ export default function Sms() {
   useEffect(() => { load(); }, []);
   const p = useMemo(() => pagesFor(f.message), [f.message]);
   const n = useMemo(() => countNumbers(f.recipients), [f.recipients]);
-  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const price = f.dnd ? d.dndPricePerPage : d.pricePerPage;
   const cost = n * p.pages * price;
   const approved = d.senders.filter((s) => s.status === 'APPROVED');

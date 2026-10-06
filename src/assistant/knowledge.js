@@ -27,6 +27,13 @@ export const TOPICS = [
     actions: [{ label: 'Request money', to: '/requests' }],
   },
   {
+    id: 'card-checkout',
+    title: 'Pay by card at checkout',
+    keywords: ['pay with card', 'pay by card', 'card payment', 'ussd', 'not enough balance', 'insufficient balance', 'wallet is short'],
+    answer: 'If your wallet doesn’t cover a purchase, tap “💳 Pay by card / transfer / USSD” on the Buy screen. Pay on the secure page and your purchase goes through straight away. If the purchase fails after you paid, the money stays safely in your wallet.',
+    actions: [{ label: 'Buy airtime', to: '/buy/airtime' }],
+  },
+  {
     id: 'bulk-sms',
     title: 'Bulk SMS',
     keywords: ['bulk sms', 'send sms', 'text message', 'sms to customers', 'sender id', 'sender name', 'broadcast sms'],
@@ -392,7 +399,7 @@ export const QUICK_TOPICS = ['services', 'fund', 'failed', 'a2c', 'transfer', 'e
 // Topics for services that can be switched off (Admin → New features /
 // Settings). When one is off, the help answers "not available yet"
 // instead of explaining how to use it.
-export const TOPIC_FEATURE = { 'request-money': 'requests', 'bulk-sms': 'bulkSms', 'event-tickets': 'tickets', 'more-bills': 'moreBills', 'owambe-spray': 'spray', 'association-dues': 'dues', 'pay-for-me': 'payForMe', 'shared-light': 'sharedLight', safebuy: 'safeBuy', payroll: 'payroll', 'daily-rewards': 'dailyRewards', 'ajo-circle': 'circles', transfer: 'sendMoney', bank: 'bankTransfer', family: 'family' };
+export const TOPIC_FEATURE = { 'card-checkout': 'cardCheckout', 'request-money': 'requests', 'bulk-sms': 'bulkSms', 'event-tickets': 'tickets', 'more-bills': 'moreBills', 'owambe-spray': 'spray', 'association-dues': 'dues', 'pay-for-me': 'payForMe', 'shared-light': 'sharedLight', safebuy: 'safeBuy', payroll: 'payroll', 'daily-rewards': 'dailyRewards', 'ajo-circle': 'circles', transfer: 'sendMoney', bank: 'bankTransfer', family: 'family' };
 export function availableTopic(topic, isOn) {
   const key = topic && TOPIC_FEATURE[topic.id];
   if (!key || !isOn || isOn(key)) return topic;

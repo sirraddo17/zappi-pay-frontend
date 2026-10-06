@@ -59,6 +59,7 @@ const SafeBuyDeal = lazy(() => import('./pages/features/SafeBuy').then((m) => ({
 const Payroll = lazy(() => import('./pages/features/Payroll'));
 const DailyRewards = lazy(() => import('./pages/features/DailyRewards'));
 const Sms = lazy(() => import('./pages/features/Sms'));
+const CheckoutReturn = lazy(() => import('./pages/CheckoutReturn'));
 const Tickets = lazy(() => import('./pages/features/Tickets'));
 const TicketEventDashboard = lazy(() => import('./pages/features/Tickets').then((m) => ({ default: m.TicketEventDashboard })));
 const EventPage = lazy(() => import('./pages/features/Tickets').then((m) => ({ default: m.EventPage })));
@@ -201,6 +202,7 @@ export default function App() {
           <Route path="/payroll" element={<RequireCustomer><Payroll /></RequireCustomer>} />
           <Route path="/rewards" element={<RequireCustomer><DailyRewards /></RequireCustomer>} />
           <Route path="/sms" element={<RequireCustomer><Sms /></RequireCustomer>} />
+          <Route path="/checkout/:ref" element={<RequireCustomer><CheckoutReturn /></RequireCustomer>} />
           <Route path="/tickets" element={<RequireCustomer><Tickets /></RequireCustomer>} />
           <Route path="/tickets/events/:id" element={<RequireCustomer><TicketEventDashboard /></RequireCustomer>} />
           <Route path="/tickets/order/:ref" element={<RequireCustomer><TicketOrder /></RequireCustomer>} />

@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getTicketsHome, createTicketEvent, getTicketEvent, checkInTicket, setTicketEventStatus, viewEventPage, ticketCheckout, getTicketOrder, getBankList } from '../../api';
@@ -38,7 +39,7 @@ export default function Tickets() {
       navigate(`/tickets/events/${r.event.id}`);
     } catch (e2) { setErr(e2.message); } finally { setBusy(false); }
   }
-  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const upcoming = d.tickets.filter((t) => new Date(t.startsAt) > new Date(Date.now() - 12 * 3600 * 1000));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
@@ -103,7 +104,7 @@ export function TicketEventDashboard() {
     setErr(''); setResult(null);
     try { const r = await checkInTicket(id, c); setResult(r); setCode(''); load(); } catch (e) { setErr(e.message); }
   }
-  if (!d) return <div className="app-shell"><div className="page-header">{back('/tickets', 'Tickets')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell"><div className="page-header">{back('/tickets', 'Tickets')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const e = d.event;
   const link = `${window.location.origin}/t/${e.code}`;
   function csv() {
@@ -164,7 +165,7 @@ export function EventPage() {
   const [err, setErr] = useState('');
   const navigate = useNavigate();
   useEffect(() => { clearAfterLogin(); viewEventPage(code).then((x) => { setD(x); const first = x.types.find((t) => !t.soldOut); if (first) setTypeId(first.id); }).catch((e) => setErr(e.message)); }, [code]);
-  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const e = d.event;
   const t = d.types.find((x) => x.id === typeId);
   const total = t ? t.price * qty + (t.price > 0 ? t.fee * qty : 0) : 0;

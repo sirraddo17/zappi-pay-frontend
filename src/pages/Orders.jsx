@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getOrders, getEpinBatches } from '../api';
@@ -61,7 +62,7 @@ export default function Orders() {
       {orders?.[0] && !orders[0].link && <RateExperience order={orders[0]} maxAgeMs={30 * 60 * 1000} />}
 
       {orders === null ? (
-        <p className="empty-state">Loading…</p>
+        <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>
       ) : orders.length === 0 ? (
         <p className="empty-state">No orders yet.</p>
       ) : (

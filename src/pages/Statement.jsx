@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getStatement } from '../api';
@@ -111,7 +112,7 @@ export default function Statement() {
       </div>
 
       {error && <p className="error-text" style={{ margin: '0 16px 12px' }}>{error}</p>}
-      {loading && <p className="empty-state">Loading…</p>}
+      {loading && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}
 
       {data && !loading && (
         <div className="statement-doc">

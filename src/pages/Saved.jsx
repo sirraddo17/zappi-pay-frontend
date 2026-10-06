@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getBeneficiaries, deleteBeneficiary, renameBeneficiary, getSchedules, updateSchedule, deleteSchedule } from '../api';
@@ -56,7 +57,7 @@ export default function Saved() {
       <div className="card">
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Scheduled top-ups</h2>
         {schedules === null ? (
-          <p className="empty-state">Loading…</p>
+          <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>
         ) : schedules.length === 0 ? (
           <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: 0 }}>
             None yet. When buying, tick <b>Repeat this purchase automatically</b> — great for monthly DStv/GOtv or weekly data.
@@ -111,7 +112,7 @@ export default function Saved() {
       <div className="card">
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Saved numbers</h2>
         {beneficiaries === null ? (
-          <p className="empty-state">Loading…</p>
+          <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>
         ) : beneficiaries.length === 0 ? (
           <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: 0 }}>
             None yet. When buying, tick <b>Save this number for next time</b>.

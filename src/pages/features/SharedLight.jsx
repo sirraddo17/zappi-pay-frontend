@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getVtpassServices, getLightPots, createLightPot, previewLightPot, joinLightPot, getLightPot, payLightPot, buyLightNow, closeLightPot } from '../../api';
@@ -80,7 +81,7 @@ export function SharedLightDetail() {
   const [msg, setMsg] = useState('');
   const load = () => getLightPot(id).then((x) => { setD(x); setAmt((a) => a || String(Math.ceil(x.pot.suggestedShare))); }).catch((e) => setErr(e.message));
   useEffect(() => { load(); }, [id]);
-  if (!d) return <div className="app-shell"><div className="page-header">{back('/shared-light', 'Shared Light')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell"><div className="page-header">{back('/shared-light', 'Shared Light')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const p = d.pot;
   const link = `${window.location.origin}/shared-light/join/${p.code}`;
   const left = Math.max(0, p.target - p.collected);

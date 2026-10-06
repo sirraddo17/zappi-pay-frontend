@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getDuesGroups, createDuesGroup, previewDues, joinDues, getDuesGroup, payDues, setDuesAutoPay, remindDues, leaveDues } from '../../api';
@@ -80,7 +81,7 @@ export function DuesDetail() {
   const [pin, setPin] = useState(null);
   const load = () => getDuesGroup(id, period).then(setD).catch((e) => setErr(e.message));
   useEffect(() => { load(); }, [id, period]);
-  if (!d) return <div className="app-shell"><div className="page-header">{back('/dues', 'Dues')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell"><div className="page-header">{back('/dues', 'Dues')}</div>{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const g = d.group;
   const link = `${window.location.origin}/dues/join/${g.code}`;
   const unpaid = d.me.periods.filter((p) => !p.paid);

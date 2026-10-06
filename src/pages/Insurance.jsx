@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -71,7 +72,7 @@ export default function Insurance() {
         <div className="field">
           <label>Vehicle type</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {plans === null ? <p className="empty-state">Loading…</p> : plans.map((x) => (
+            {plans === null ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : plans.map((x) => (
               <button key={x.code} type="button" className={plan === x.code ? 'btn' : 'btn btn-secondary'} style={{ padding: '10px 8px', fontSize: 13 }} onClick={() => setPlan(x.code)}>
                 {emojiFor(x.name)} {x.name}<br /><b>{x.price ? naira(x.price) : ''}</b>
               </button>

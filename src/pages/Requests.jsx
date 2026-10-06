@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPayRequest, getPayRequests, closePayRequest, remindPayRequest } from '../api';
@@ -164,8 +165,8 @@ export default function Requests() {
 
       {['REQUEST', 'SPLIT', 'POOL'].includes(tab) && <CreateForm kind={tab} onMade={(r) => { setMade(r); load(); }} />}
 
-      {tab === 'forme' && (!d ? <p className="empty-state">Loading…</p> : d.forMe.length === 0 ? <p className="empty-state">Nobody has asked you to pay anything.</p> : d.forMe.map((r) => <Card key={r.id} r={r} />))}
-      {tab === 'mine' && (!d ? <p className="empty-state">Loading…</p> : d.mine.length === 0 ? <p className="empty-state">You haven’t made any links yet.</p> : d.mine.map((r) => <Card key={r.id} r={r} onChange={load} />))}
+      {tab === 'forme' && (!d ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : d.forMe.length === 0 ? <p className="empty-state">Nobody has asked you to pay anything.</p> : d.forMe.map((r) => <Card key={r.id} r={r} />))}
+      {tab === 'mine' && (!d ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : d.mine.length === 0 ? <p className="empty-state">You haven’t made any links yet.</p> : d.mine.map((r) => <Card key={r.id} r={r} onChange={load} />))}
       {['REQUEST', 'SPLIT', 'POOL'].includes(tab) && d?.mine?.filter((r) => r.kind === tab && r.status === 'OPEN').length > 0 && (
         <>
           <h2 style={{ fontSize: 15, margin: '8px 16px' }}>Open {tab === 'POOL' ? 'group gifts' : tab === 'SPLIT' ? 'split bills' : 'requests'}</h2>

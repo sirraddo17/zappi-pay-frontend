@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getBillCategories, getBillers, getBillItems, validateBill, payBill, getBillHistory, getBill } from '../../api';
@@ -54,7 +55,7 @@ export default function Bills() {
       <div className="page-header">{cat ? <button type="button" onClick={() => (biller ? setBiller(null) : setCat(null))} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 14 }}>← Back</button> : back('/more', 'Back')}<h1>🧾 {cat ? cat.name : 'More bills'}</h1><p>{biller ? biller.name : 'Tax, waste, water, tolls, school & professional fees, offerings and more — paid from your wallet.'}</p></div>
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       {!cat && (
-        !cats ? <p className="empty-state">Loading…</p> : (
+        !cats ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10, margin: '0 16px 16px' }}>
             {cats.map((c) => <button key={c.code} type="button" className="card" onClick={() => pickCat(c)} style={{ margin: 0, cursor: 'pointer', textAlign: 'left', color: 'inherit', border: '1px solid var(--slate-800)' }}><div style={{ fontSize: 26 }}>{iconFor(c)}</div><b style={{ fontSize: 14 }}>{c.name}</b></button>)}
           </div>
@@ -62,12 +63,12 @@ export default function Bills() {
       )}
       {cat && !biller && (
         <div className="card">
-          {!billers ? <p className="empty-state">Loading…</p> : billers.length === 0 ? <p style={{ fontSize: 14 }}>No billers here yet.</p> : billers.map((b) => <button key={b.code} type="button" onClick={() => pickBiller(b)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', borderTop: '1px solid var(--slate-800)', color: 'inherit', padding: '10px 0', cursor: 'pointer', fontSize: 14 }}><b>{b.name}</b>{b.description && b.description !== b.name ? <><br /><small style={{ color: 'var(--slate-400)' }}>{b.description}</small></> : null}</button>)}
+          {!billers ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : billers.length === 0 ? <p style={{ fontSize: 14 }}>No billers here yet.</p> : billers.map((b) => <button key={b.code} type="button" onClick={() => pickBiller(b)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', borderTop: '1px solid var(--slate-800)', color: 'inherit', padding: '10px 0', cursor: 'pointer', fontSize: 14 }}><b>{b.name}</b>{b.description && b.description !== b.name ? <><br /><small style={{ color: 'var(--slate-400)' }}>{b.description}</small></> : null}</button>)}
         </div>
       )}
       {biller && (
         <form className="card" onSubmit={(e) => { e.preventDefault(); setErr(''); setPin(true); }}>
-          {!items ? <p className="empty-state">Loading…</p> : (
+          {!items ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : (
             <>
               {items.length > 1 && <div className="field"><label htmlFor="bI">What are you paying for?</label><select id="bI" value={item?.code || ''} onChange={(e) => pickItem(items.find((i) => i.code === e.target.value))} required><option value="">Choose…</option>{items.map((i) => <option key={i.code} value={i.code}>{i.name}{i.fixed ? ` — ${naira(i.amount)}` : ''}</option>)}</select></div>}
               {item && (
@@ -106,7 +107,7 @@ export function BillReceipt() {
   const [d, setD] = useState(null);
   const [err, setErr] = useState('');
   useEffect(() => { getBill(ref).then(setD).catch((e) => setErr(e.message)); }, [ref]);
-  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const [t, c] = STATUS[d.status] || [d.status, 'inherit'];
   const rows = [['Biller', d.biller], ['For', d.item], ['Customer', d.customer], ['Amount', naira(d.amount)], ['Service fee', naira(d.fee)], ['Total', naira(d.amount + d.fee)], ['Date', new Date(d.createdAt).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })], ['Reference', d.reference]];
   return (

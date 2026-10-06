@@ -5,8 +5,10 @@ import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import GiftForm from '../components/GiftForm';
 import { currentShop, forgetShop } from '../lib/shopRef';
 import { useAuth } from '../context/AuthContext';
-import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo, createPayForMe } from '../api';
+import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo, createPayForMe, getOrders, request as apiRequest } from '../api';
+import { extractToken } from '../lib/receipt';
 import { cached } from '../lib/cache';
+import { detectNetwork, networkOf, NETWORK_STYLE, canPickContact, pickContactNumber } from '../lib/network';
 import PinConfirm from '../components/PinConfirm';
 import ServiceNotices, { useAppInfo, useFeatures, pausedFor } from '../components/ServiceNotices';
 
@@ -162,6 +164,13 @@ export default function Buy() {
   const appInfo = useAppInfo();
   const features = useFeatures();
   const [askLink, setAskLink] = useState(null);
+  const manualProvider = useRef(false);
+  const [pastLight, setPastLight] = useState([]);
+  useEffect(() => {
+    if (slug !== 'electricity') return;
+    getOrders().then((d) => setPastLight((d.orders || []).filter((o) => o.service === 'ELECTRICITY' && o.status === 'SUCCESS'))).catch(() => {});
+  }, [slug]);
+  const [autoNet, setAutoNet] = useState('');
   const [asking, setAsking] = useState(false);
 
   useEffect(() => {
@@ -174,7 +183,7 @@ export default function Buy() {
     const r = searchParams.get('recipient');
     const a = searchParams.get('amount');
     const m = searchParams.get('meterType');
-    if (p) setProviderId(p);
+    if (p) { manualProvider.current = true; setProviderId(p); }
     if (r) setRecipient(r);
     if (a) setCustomAmount(a);
     if (m === 'prepaid' || m === 'postpaid') setBillType(m);
@@ -189,6 +198,7 @@ export default function Buy() {
   }, [slug]);
 
   function useSaved(b) {
+    manualProvider.current = true;
     setProviderId(b.serviceID);
     setRecipient(b.billersCode);
     if (b.meterType) setBillType(b.meterType);
@@ -273,6 +283,17 @@ export default function Buy() {
     return () => clearTimeout(t);
   }, [recipient, providerId, billType, verifiedName, variationCode]);
 
+  // Airtime / data: pick the network from the number (0803 → MTN) unless
+  // the customer chose one themselves.
+  useEffect(() => {
+    if (!isPhoneService || manualProvider.current || !providers.length) return;
+    const net = detectNetwork(recipient);
+    if (!net) { setAutoNet(''); return; }
+    const match = providers.find((p) => networkOf(p.serviceID) === net && !/sme|gift|corporate/i.test(p.serviceID)) || providers.find((p) => networkOf(p.serviceID) === net);
+    if (match && match.serviceID !== providerId) setProviderId(match.serviceID);
+    setAutoNet(match ? net : '');
+  }, [recipient, providers]);
+
   const selectedVariation = variations.find((v) => v.variation_code === variationCode);
   const amount = config?.needsVariation ? Number(selectedVariation?.variation_amount || 0) : Number(customAmount || 0);
   // amount stays VTpass's own price (what the backend expects to
@@ -339,6 +360,33 @@ export default function Buy() {
     setConfirmOpen(true);
   }
 
+  // Pay by card / transfer for the part the wallet can't cover.
+  const balanceNow = Number(customer?.walletBalance || 0);
+  const shortfall = Math.max(0, Math.ceil(payTotal - balanceNow));
+  const cardNeeded = shortfall > 0 ? Math.max(100, shortfall) : 0;
+  const [cardQuote, setCardQuote] = useState(null);
+  const [cardBusy, setCardBusy] = useState(false);
+  useEffect(() => {
+    if (!features.cardCheckout || !cardNeeded) { setCardQuote(null); return undefined; }
+    const tmr = setTimeout(() => apiRequest(`/api/checkout/quote?needed=${cardNeeded}`).then(setCardQuote).catch(() => setCardQuote(null)), 300);
+    return () => clearTimeout(tmr);
+  }, [cardNeeded, features.cardCheckout]);
+  async function payByCard() {
+    setError('');
+    const phoneToSend = isPhoneService ? recipient : (customer?.phone || phone);
+    if (!providerId || (!recipient.trim() && slug !== 'education') || !amount) { setError('Please fill in every field.'); return; }
+    if (mustVerify && !verifiedName) { setError('Tap “Verify” first so the right name shows.'); return; }
+    setCardBusy(true);
+    try {
+      const r = await apiRequest('/api/checkout/start', { method: 'POST', body: JSON.stringify({
+        needed: cardNeeded,
+        label: `${config.label}${recipient.trim() ? ` for ${recipient.trim()}` : ''}`,
+        purchase: { service: config.backendService, serviceID: providerId, variationCode: config.needsVariation ? variationCode : undefined, billersCode: recipient.trim() || (slug === 'education' ? phoneToSend.trim() : ''), phone: phoneToSend.trim(), amount, meterType: config.needsType ? billType : undefined, promoCode: promo ? promo.code : undefined, useCashback: cbUse > 0 },
+      }) });
+      window.location.href = r.checkoutUrl;
+    } catch (e) { setError(e.message); setCardBusy(false); }
+  }
+
   // Pay It For Me: same details, but someone else pays from their wallet.
   async function askSomeone() {
     setError('');
@@ -379,7 +427,7 @@ export default function Buy() {
       });
       await refreshCustomer();
       setConfirmOpen(false);
-      navigate(sendGift && res?.order?.id ? `/orders/${res.order.id}?gift=new` : '/orders');
+      navigate(res?.order?.id ? `/orders/${res.order.id}?${sendGift ? 'gift=new' : 'new=1'}` : '/orders');
     } catch (err) {
       if (/refunded/i.test(err.message || '')) refreshCustomer().catch(() => {});
       throw err;
@@ -473,9 +521,24 @@ export default function Buy() {
       )}
 
       <form className="card" onSubmit={handleSubmit}>
-        <div className="field">
+        {isPhoneService && providers.length > 0 && providers.length <= 8 && (
+          <div className="net-pills" role="radiogroup" aria-label={t('{service} provider', { service: config.label })}>
+            {providers.map((p) => {
+              const st = NETWORK_STYLE[networkOf(p.serviceID)] || { bg: 'var(--slate-700)', fg: '#fff' };
+              const on = providerId === p.serviceID;
+              return (
+                <button key={p.serviceID} type="button" role="radio" aria-checked={on} className={`net-pill${on ? ' on' : ''}`}
+                  style={on ? { background: st.bg, color: st.fg, borderColor: st.bg } : { borderColor: st.bg }}
+                  onClick={() => { manualProvider.current = true; setAutoNet(''); setProviderId(p.serviceID); }}>
+                  <span className="net-dot" style={{ background: st.bg }} />{p.name.replace(/\s*\b(Airtime|VTU|Data)\b/gi, '').trim() || p.name}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <div className="field" style={isPhoneService && providers.length > 0 && providers.length <= 8 ? { display: 'none' } : undefined}>
           <label htmlFor="provider">{t('{service} provider', { service: config.label })}</label>
-          <select id="provider" value={providerId} onChange={(e) => setProviderId(e.target.value)} required>
+          <select id="provider" value={providerId} onChange={(e) => { manualProvider.current = true; setProviderId(e.target.value); }} required>
             <option value="">{t('Select…')}</option>
             {providers.map((p) => (
               <option key={p.serviceID} value={p.serviceID}>{p.name}</option>
@@ -500,9 +563,37 @@ export default function Buy() {
             type="text"
             value={recipient}
             onChange={(e) => { setRecipient(e.target.value); setVerifiedName(''); }}
+            inputMode={isPhoneService ? 'tel' : undefined}
             placeholder={slug === 'education' && String(providerId).startsWith('jamb') ? 'Your JAMB Profile ID (required)' : config.recipientPlaceholder}
             required={slug !== 'education' || String(providerId).startsWith('jamb')}
           />
+          {isPhoneService && (autoNet || canPickContact()) && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6, fontSize: 12, gap: 8 }}>
+              <span style={{ color: 'var(--slate-400)' }}>{autoNet ? `✓ ${NETWORK_STYLE[autoNet]?.name} detected — tap another network if the number was ported` : ''}</span>
+              {canPickContact() && <button type="button" onClick={() => pickContactNumber().then((c) => { if (c) { setRecipient(c.number); setVerifiedName(''); } }).catch(() => {})} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 13, whiteSpace: 'nowrap' }}>📇 Contacts</button>}
+            </div>
+          )}
+          {slug === 'electricity' && (() => {
+            const mine = pastLight.filter((o) => String(o.recipient) === recipient.trim());
+            if (!mine.length) return null;
+            const last = mine[0];
+            const tok = extractToken(last);
+            const days = Math.max(0, Math.round((Date.now() - new Date(last.createdAt)) / 86400000));
+            return (
+              <div className="light-helper">
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                  <b style={{ fontSize: 13 }}>💡 Last token for this meter</b>
+                  <small style={{ color: 'var(--slate-400)' }}>{days === 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`} · ₦{Number(last.amount).toLocaleString()}</small>
+                </div>
+                {tok && <div className="light-token">{tok}</div>}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
+                  {tok && <button type="button" className="mini-btn" onClick={() => navigator.clipboard?.writeText(tok)}>Copy token</button>}
+                  {!config.needsVariation && <button type="button" className="mini-btn" onClick={() => setCustomAmount(String(Math.round(Number(last.costAmount || last.amount))))}>Same amount again</button>}
+                  {mine.length > 1 && <small style={{ color: 'var(--slate-400)', alignSelf: 'center' }}>{mine.length} tokens bought for this meter</small>}
+                </div>
+              </div>
+            );
+          })()}
           {canVerify && (
             <button
               type="button"
@@ -650,6 +741,13 @@ export default function Buy() {
         <button className="btn" type="submit" disabled={submitting || !amount || Boolean(pausedFor(appInfo, config.backendService))}>
           {pausedFor(appInfo, config.backendService) ? 'Paused for maintenance' : submitting ? t('Processing…') : `${t('Pay {amount}', { amount: naira(payTotal) })}${repeatOn ? ' & schedule' : ''}`}
         </button>
+        {features.cardCheckout && cardNeeded > 0 && amount > 0 && !pausedFor(appInfo, config.backendService) && (
+          <div className="card-pay">
+            <div style={{ fontSize: 13, marginBottom: 8 }}>Wallet short by <b>{naira(shortfall)}</b>? Pay the rest now — no need to fund first.</div>
+            <button type="button" className="btn" disabled={cardBusy} onClick={payByCard}>{cardBusy ? 'Opening payment…' : `💳 Pay ${naira(cardQuote?.total ?? cardNeeded)} by card / transfer / USSD`}</button>
+            {cardQuote?.fee > 0 && <small style={{ display: 'block', marginTop: 6, color: 'var(--slate-400)' }}>Includes {naira(cardQuote.fee)} card fee.{balanceNow > 0 ? ` ${naira(Math.min(balanceNow, payTotal))} comes from your wallet.` : ''}</small>}
+          </div>
+        )}
         {features.payForMe && ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'INTERNET', 'EDUCATION'].includes(config.backendService) && (
           <button type="button" className="btn btn-secondary" style={{ marginTop: 8 }} disabled={asking || !amount} onClick={askSomeone}>{asking ? 'Creating link…' : '🙏 Ask someone to pay'}</button>
         )}

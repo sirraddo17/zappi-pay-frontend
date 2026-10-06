@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useRef, useState } from 'react';
 import { useLang } from '../lib/i18n';
 import LanguagePicker from '../components/LanguagePicker';
@@ -320,7 +321,7 @@ export default function Profile() {
           Email {SUPPORT_EMAIL}
         </a>
         {tickets === null ? (
-          <p className="empty-state">Loading…</p>
+          <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>
         ) : tickets.length === 0 ? (
           <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: 0 }}>No support requests yet.</p>
         ) : (

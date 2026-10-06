@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getPayroll, addPayrollStaff, updatePayrollStaff, runPayroll, getBankList } from '../../api';
@@ -30,7 +31,7 @@ export default function Payroll() {
       <div className="page-header"><Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link><h1>💼 Payroll</h1><p>Pay your shop staff, workers or helpers in one tap — to their ZAPPI PAY wallet (free, instant) or any bank account.</p></div>
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       {msg && <p style={{ color: 'var(--green-500)', margin: '0 16px', fontSize: 14 }}>{msg}</p>}
-      {!d ? <p className="empty-state">Loading…</p> : (
+      {!d ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : (
         <>
           <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><b>Staff ({d.staff.length})</b><span style={{ fontWeight: 700 }}>{naira(d.total)}</span></div>

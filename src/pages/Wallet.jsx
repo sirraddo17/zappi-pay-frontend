@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { useLang } from '../lib/i18n';
 import TestModeBanner from '../components/TestModeBanner';
@@ -530,7 +531,7 @@ export default function Wallet() {
         </div>
         <div style={{ height: 12 }} />
         {transactions === null ? (
-          <p className="empty-state">Loading…</p>
+          <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>
         ) : transactions.length === 0 ? (
           <p className="empty-state">No transactions yet.</p>
         ) : (

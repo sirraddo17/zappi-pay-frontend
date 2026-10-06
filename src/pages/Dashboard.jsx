@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { SkeletonRows } from '../components/Skeleton';
+import { useEffect, useRef, useState } from 'react';
 import { useLang } from '../lib/i18n';
 import TestModeBanner from '../components/TestModeBanner';
 import { Link } from 'react-router-dom';
@@ -12,9 +13,10 @@ import GettingStarted, { hiddenBefore as gsHidden } from '../components/GettingS
 import { LiteSuggestion } from '../components/LiteToggle';
 import { useLite } from '../lib/lite';
 import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
-import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
+import { getCashback, getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
+import { networkOf, NETWORK_STYLE } from '../lib/network';
 import ServiceNotices, { useFeatures, useAppInfo } from '../components/ServiceNotices';
 import LoyaltyCard from '../components/LoyaltyCard';
 import PushToggle from '../components/PushToggle';
@@ -111,6 +113,10 @@ export default function Dashboard() {
   const [recent, setRecent] = useState([]);
   const [bought, setBought] = useState(null); // null = not loaded yet
   const [gsOff, setGsOff] = useState(gsHidden);
+  const [cashback, setCashback] = useState(customer?.cashbackBalance ?? 0);
+  const [monthCashback, setMonthCashback] = useState(0);
+  const [hide, setHide] = useState(() => { try { return localStorage.getItem('zp_hide_balance') === '1'; } catch { return false; } });
+  function toggleHide() { setHide((h) => { try { localStorage.setItem('zp_hide_balance', h ? '0' : '1'); } catch { /* private mode */ } return !h; }); }
 
   function dismissBanner(id) {
     const next = [...dismissed, id];
@@ -121,7 +127,7 @@ export default function Dashboard() {
   // Balance and recent activity update when the app comes back to the
   // front or a push notification arrives.
   useAutoRefresh(() => {
-    getWalletBalance().then((d) => setBalance(d.walletBalance)).catch(() => {});
+    getWalletBalance().then((d) => { setBalance(d.walletBalance); setCashback(Number(d.cashbackBalance || 0)); }).catch(() => {});
     getWalletTransactions().then((d) => setTransactions((d.transactions || []).slice(0, 5))).catch(() => {});
     getNotifications().then((d) => setUnreadCount(d.unreadCount || 0)).catch(() => {});
   }, false);
@@ -129,7 +135,11 @@ export default function Dashboard() {
   useEffect(() => {
     // Last known values show instantly; fresh ones replace them.
     const k = (name) => `${customer?.id || 'me'}:${name}`;
-    cached(k('balance'), getWalletBalance, (data) => setBalance(data.walletBalance)).catch(() => {});
+    cached(k('balance'), getWalletBalance, (data) => { setBalance(data.walletBalance); setCashback(Number(data.cashbackBalance || 0)); }).catch(() => {});
+    getCashback().then((d) => {
+      const m = new Date(); const from = new Date(m.getFullYear(), m.getMonth(), 1);
+      setMonthCashback(Math.round((d.entries || []).filter((e) => e.amount > 0 && new Date(e.createdAt) >= from).reduce((t, e) => t + e.amount, 0) * 100) / 100);
+    }).catch(() => {});
     cached(k('tx'), getWalletTransactions, (data) => setTransactions((data.transactions || []).slice(0, 5)))
       .catch(() => setTransactions((t) => t || []));
     getNotifications()
@@ -157,46 +167,78 @@ export default function Dashboard() {
 
   return (
     <div className="app-shell">
-      <div className="dash-header">
+      <div className="dash-hero">
         <div className="dash-header-top">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <LogoIcon size={30} />
             <Wordmark size={17} />
           </div>
-          <Link to="/notifications" style={{ position: 'relative', display: 'inline-flex' }}>
-            <BellIcon size={22} color="#fff" />
-            {unreadCount > 0 && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: -2,
-                  right: -2,
-                  width: 9,
-                  height: 9,
-                  borderRadius: '50%',
-                  background: 'var(--gold)',
-                  border: '1.5px solid var(--purple)',
-                }}
-              />
-            )}
+          <Link to="/notifications" aria-label="Notifications" className="hero-bell">
+            <BellIcon size={20} color="#fff" />
+            {unreadCount > 0 && <span className="hero-bell-dot">{unreadCount > 9 ? '9+' : unreadCount}</span>}
           </Link>
         </div>
         <p className="dash-greeting">
-          {t('Hi, {name} 👋', { name: customer?.name?.split(' ')[0] || 'there' })}
+          {greeting()}, {customer?.name?.split(' ')[0] || 'there'} {greetEmoji()}
           {customer?.isAgent && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,184,46,0.2)', color: 'var(--gold, #f5b82e)' }}>⭐ AGENT</span>}
         </p>
-        <h1 className="dash-question">{t('What would you like today?')}</h1>
+        <div className="glass-wallet">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span className="label">{t('Wallet Balance')}</span>
+            <button type="button" className="eye-btn" onClick={toggleHide} aria-label={hide ? 'Show balance' : 'Hide balance'}>{hide ? '🙈' : '👁️'}</button>
+          </div>
+          <div className="value">{hide ? '₦ ••••••' : <CountUp value={Number(balance)} />}</div>
+          {(cashback > 0 || monthCashback > 0) && !hide && (
+            <Link to="/wallet" className="cb-chip">🎁 {cashback > 0 ? `₦${Number(cashback).toLocaleString()} cashback to spend` : ''}{cashback > 0 && monthCashback > 0 ? ' · ' : ''}{monthCashback > 0 ? `₦${Number(monthCashback).toLocaleString()} earned this month` : ''}</Link>
+          )}
+          <div className="hero-actions">
+            <Link to="/wallet" className="hero-action primary"><FundIcon size={18} color="#1a0b3d" /><span>Add money</span></Link>
+            <Link to="/buy/airtime" className="hero-action"><PhoneIcon size={18} color="#fff" /><span>{t('Airtime')}</span></Link>
+            <Link to="/buy/data" className="hero-action"><WifiIcon size={18} color="#fff" /><span>{t('Data')}</span></Link>
+            <Link to="/orders" className="hero-action"><GridIcon size={18} color="#fff" /><span>History</span></Link>
+          </div>
+        </div>
       </div>
 
-
-      <div className="wallet-card">
-        <div className="label">{t('Wallet Balance')}</div>
-        <div className="value">₦{Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-        <Link to="/wallet" className="fund-btn">
-          <FundIcon size={16} />
-          {t('Fund Wallet')}
-        </Link>
+      <div className="service-grid four">
+        {services.slice(0, 8).map((s) => {
+          const Icon = s.Icon;
+          const off = s.service ? Number(discounts[s.service] || 0) : 0;
+          return (
+            <Link key={s.slug} to={s.to || (s.slug === 'transfer' ? '/transfer' : s.comingSoon ? '#' : `/buy/${s.slug}`)} className="service-tile" style={{ position: 'relative' }}>
+              {off > 0 && <span className="off-badge">{off}% OFF</span>}
+              <div className="service-icon" style={{ background: s.bg }}>
+                <Icon size={22} color="#fff" />
+              </div>
+              <span className="service-label">{t(s.label)}</span>
+            </Link>
+          );
+        })}
       </div>
+
+      {recent.length > 0 && (
+        <>
+          <div className="section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <span>{t('Buy again')}</span>
+            <Link to="/saved" style={{ fontSize: 12, color: 'var(--purple)', textDecoration: 'none', textTransform: 'none', letterSpacing: 0 }}>Saved &amp; Scheduled</Link>
+          </div>
+          <div className="chip-scroll">
+            {recent.map((o) => {
+              const net = networkOf(o.provider);
+              const st = NETWORK_STYLE[net];
+              return (
+                <Link key={o.id} to={buyAgainLink(o)} className="again-chip">
+                  <span className="again-dot" style={{ background: st?.bg || 'var(--purple)', color: st?.fg || '#fff' }}>{st ? st.name[0] : (SERVICE_LABEL[o.service] || '?')[0]}</span>
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: 'block', fontWeight: 700, fontSize: 13 }}>{SERVICE_LABEL[o.service]} · ₦{Number(o.amount).toLocaleString()}</span>
+                    <span style={{ display: 'block', fontSize: 11, color: 'var(--slate-400)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{o.recipient || o.provider}</span>
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <ServiceNotices generalOnly />
       <RenewalsCard />
@@ -233,78 +275,9 @@ export default function Dashboard() {
       <LiteSuggestion />
       <PushToggle variant="nudge" />
       <LoyaltyCard />
-      <Link to="/deals" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '12px 16px' }}>
-        <span>
-          <strong style={{ fontSize: 14 }}>{t('🔎 Best data for your budget')}</strong>
-          <span style={{ display: 'block', fontSize: 12, color: 'var(--slate-400)' }}>{t('Tell us how much — we find the most data on every network')}</span>
-        </span>
-        <span style={{ color: 'var(--purple)' }}>›</span>
-      </Link>
-      <Link to="/bulk" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '12px 16px' }}>
-        <span>
-          <strong style={{ fontSize: 14 }}>{t('Bulk airtime & data')}</strong>
-          <span style={{ display: 'block', fontSize: 12, color: 'var(--slate-400)' }}>{t('Send to up to 50 numbers at once')}</span>
-        </span>
-        <span style={{ color: 'var(--purple)' }}>›</span>
-      </Link>
-
-      {recent.length > 0 && (
-        <>
-          <div className="section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span>{t('Buy again')}</span>
-            <Link to="/saved" style={{ fontSize: 12, color: 'var(--purple)', textDecoration: 'none', textTransform: 'none', letterSpacing: 0 }}>Saved &amp; Scheduled</Link>
-          </div>
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '0 16px 4px' }}>
-            {recent.map((o) => (
-              <Link
-                key={o.id}
-                to={buyAgainLink(o)}
-                style={{ flexShrink: 0, padding: '8px 12px', borderRadius: 12, border: '1px solid var(--slate-700)', background: 'var(--slate-800)', color: 'var(--slate-100)', textDecoration: 'none', maxWidth: 170 }}
-              >
-                <span style={{ display: 'block', fontWeight: 600, fontSize: 13 }}>
-                  {SERVICE_LABEL[o.service]} · ₦{Number(o.amount).toLocaleString()}
-                </span>
-                <span style={{ display: 'block', fontSize: 11, color: 'var(--slate-400)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {o.recipient || o.provider}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
-
-      <div className="section-label">{t('Services')}</div>
-      <div className="service-grid">
-        {services.map((s) => {
-          const Icon = s.Icon;
-          const off = s.service ? Number(discounts[s.service] || 0) : 0;
-          return (
-            <Link key={s.slug} to={s.to || (s.slug === 'transfer' ? '/transfer' : s.comingSoon ? '#' : `/buy/${s.slug}`)} className="service-tile" style={{ position: 'relative' }}>
-              {off > 0 && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: 4,
-                    right: 4,
-                    background: 'var(--gold)',
-                    color: '#1a0b3d',
-                    fontSize: 9,
-                    fontWeight: 800,
-                    padding: '2px 5px',
-                    borderRadius: 6,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {off}% OFF
-                </span>
-              )}
-              <div className="service-icon" style={{ background: s.bg }}>
-                <Icon size={22} color="#fff" />
-              </div>
-              {t(s.label)}
-            </Link>
-          );
-        })}
+      <div className="tools-row">
+        <Link to="/deals" className="tool-card"><span className="tool-emoji">🔎</span><b>{t('Best data deals')}</b><small>Most data for your budget</small></Link>
+        <Link to="/bulk" className="tool-card"><span className="tool-emoji">📶</span><b>{t('Bulk airtime & data')}</b><small>Up to 50 numbers at once</small></Link>
       </div>
 
       {customer && bought === false && !gsOff && <GettingStarted customer={customer} balance={balance} funded={(transactions || []).some((x) => x.type === 'FUND' && x.status === 'APPROVED')} onHide={() => setGsOff(true)} />}
@@ -377,9 +350,9 @@ export default function Dashboard() {
           the slider keeps the space above the bottom menu instead. */}
       <div className="tx-list" style={{ marginBottom: 0 }}>
         {transactions === null ? (
-          <p className="empty-state">Loading…</p>
+          <div style={{ padding: 12 }}><SkeletonRows rows={3} h={44} /></div>
         ) : transactions.length === 0 ? (
-          <p className="empty-state">No transactions yet.</p>
+          <div className="empty-hero"><div style={{ fontSize: 34 }}>🧾</div><b>No transactions yet</b><small>Fund your wallet and make your first purchase — it shows up here.</small></div>
         ) : (
           transactions.map((t) => {
             const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD', 'DELIVERY_BONUS', 'SHOP_COMMISSION'].includes(t.type);
@@ -418,4 +391,32 @@ function DailyRewardsHome() {
       <span style={{ color: 'var(--purple)' }}>→</span>
     </Link>
   );
+}
+
+function greeting() {
+  const h = Number(new Date().toLocaleString('en-NG', { hour: 'numeric', hour12: false, timeZone: 'Africa/Lagos' }));
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+function greetEmoji() {
+  const h = Number(new Date().toLocaleString('en-NG', { hour: 'numeric', hour12: false, timeZone: 'Africa/Lagos' }));
+  return h < 12 ? '☀️' : h < 17 ? '👋' : '🌙';
+}
+
+// Balance counts up when it changes (skipped for "reduce motion").
+function CountUp({ value }) {
+  const [shown, setShown] = useState(value);
+  const from = useRef(value);
+  useEffect(() => {
+    const start = from.current;
+    if (start === value || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setShown(value); from.current = value; return undefined; }
+    let raf; const t0 = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / 700);
+      setShown(start + (value - start) * (1 - (1 - p) ** 3));
+      if (p < 1) raf = requestAnimationFrame(step); else from.current = value;
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <>₦{Number(shown).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
 }

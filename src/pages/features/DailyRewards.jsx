@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getDailyRewards, dailyCheckin, dailyQuiz } from '../../api';
@@ -11,7 +12,7 @@ export default function DailyRewards() {
   const [quiz, setQuiz] = useState(null);
   const load = () => getDailyRewards().then(setD).catch((e) => setErr(e.message));
   useEffect(() => { load(); }, []);
-  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <p className="empty-state">Loading…</p>}</div>;
+  if (!d) return <div className="app-shell">{err ? <p className="error-text" style={{ margin: 16 }}>{err}</p> : <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}</div>;
   const inWeek = d.checkedIn ? ((d.streak - 1) % 7) + 1 : d.streak % 7;
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>

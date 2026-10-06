@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getMyReferrals } from '../api';
@@ -54,7 +55,7 @@ export default function Refer() {
       </div>
 
       {error && <p className="error-text">{error}</p>}
-      {!data && !error && <p className="empty-state">Loading…</p>}
+      {!data && !error && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}
 
       {data && (
         <>

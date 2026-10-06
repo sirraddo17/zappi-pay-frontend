@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { useShowMore } from '../components/ShowMore';
 import { Link } from 'react-router-dom';
@@ -134,7 +135,7 @@ export default function Notifications() {
 
       <div className="tx-list" style={{ margin: '16px 16px 90px' }}>
         {notifications === null ? (
-          <p className="empty-state">Loading…</p>
+          <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>
         ) : shown.length === 0 ? (
           <p className="empty-state">{notifications.length === 0 ? 'No notifications yet.' : `No ${TABS.find((t) => t.key === (tab || 'TRANSACTION')).label.toLowerCase()} notifications yet.`}</p>
         ) : (

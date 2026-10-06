@@ -1,3 +1,4 @@
+import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getFamily, inviteFamily, respondFamily, leaveFamily, updateFamily, familySendNow, removeFamily } from '../api';
@@ -105,7 +106,7 @@ export default function Family() {
       </div>
       {err && <p className="error-text" style={{ margin: '0 16px 8px' }}>{err}</p>}
       {msg && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '0 16px 8px' }}>{msg}</p>}
-      {!d && !err && <p className="empty-state">Loading…</p>}
+      {!d && !err && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}
 
       {mb && (
         <div className="card" style={{ border: '1px solid var(--purple)' }}>
