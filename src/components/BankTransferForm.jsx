@@ -98,7 +98,7 @@ export default function BankTransferForm({ onDone }) {
     return (
       <div className="card" style={{ margin: '0 16px 90px', textAlign: 'center' }}>
         <p style={{ color: 'var(--slate-400)', fontSize: 14 }}>
-          Sending to other banks is coming soon. For now, you can send money instantly to any ZappiPay user.
+          Sending money to bank accounts isn’t available on ZAPPI PAY yet. We’ll let you know in the app when it is.
         </p>
       </div>
     );

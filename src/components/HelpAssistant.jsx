@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { submitSupportTicket, getOrders, getAiStatus, aiChat } from '../api';
-import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../assistant/knowledge';
-import { useAppInfo } from './ServiceNotices';
+import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL, availableTopic, TOPIC_FEATURE } from '../assistant/knowledge';
+import { useAppInfo, useFeatures } from './ServiceNotices';
 import ImageAttach from './ImageAttach';
 import ChatPurchaseCard from './ChatPurchaseCard';
 import ChatTransferCard from './ChatTransferCard';
@@ -40,6 +40,9 @@ export const SUPPORT_TOPICS = [
 
 export default function HelpAssistant() {
   const appInfo = useAppInfo();
+  const features = useFeatures();
+  // Is a switchable service on for this customer? (circles / bank use their own switches)
+  const isOn = (key) => (key === 'circles' ? appInfo?.circles !== false : key === 'bankTransfer' ? Boolean(appInfo?.bankTransfer) : Boolean(features[key]));
   const { customer } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -132,7 +135,7 @@ export default function HelpAssistant() {
   }
 
   function respond(userText) {
-    const result = matchMessage(userText);
+    const result = matchMessage(userText, isOn);
     if (result.type === 'topic') {
       setMisses(0);
       const t = result.topic;
@@ -186,7 +189,7 @@ export default function HelpAssistant() {
   }
 
   function pickTopic(id) {
-    const t = topicById(id);
+    const t = availableTopic(topicById(id), isOn);
     if (!t) return;
     setMessages((prev) => [
       ...prev,
@@ -309,7 +312,7 @@ export default function HelpAssistant() {
                   </Link>
                 ))}
                 {m.quick &&
-                  QUICK_TOPICS.map((id) => (
+                  QUICK_TOPICS.filter((id) => !TOPIC_FEATURE[id] || isOn(TOPIC_FEATURE[id])).map((id) => (
                     <button key={id} type="button" className="btn-secondary btn" style={chip} onClick={() => pickTopic(id)}>
                       {topicById(id)?.title}
                     </button>

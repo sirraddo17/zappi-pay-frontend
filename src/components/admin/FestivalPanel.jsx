@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getFestivals, updateSettings } from '../../api';
+import { getFestivals, updateSettings, getAdminFeatures, getSettings } from '../../api';
 import { READY_ADS, CORE_ADS, FEATURE_ADS } from '../../lib/readyAds';
 
 const GROUP = { christian: '✝️', muslim: '🌙', national: '🇳🇬', zappi: '💜' };
@@ -12,6 +12,20 @@ export default function FestivalPanel({ onOpen, openId, onAi }) {
   const [all, setAll] = useState(false);
   const [msg, setMsg] = useState('');
   useEffect(() => { getFestivals().then(setData).catch(() => setData({ festivals: [] })); }, []);
+  // Ads for services that are switched off are hidden, so nobody posts
+  // an advert for something customers can't use yet.
+  const [onMap, setOnMap] = useState(null);
+  useEffect(() => {
+    Promise.all([getAdminFeatures().catch(() => null), getSettings().catch(() => null)]).then(([f, st]) => {
+      const set = st?.settings || st || {};
+      const m = Object.fromEntries((f?.features || []).map((x) => [x.key, x.mode === 'ON']));
+      m.circles = Boolean(set.circlesEnabled);
+      setOnMap(m);
+    });
+  }, []);
+  const LINK_FEATURE = { '/transfer': 'sendMoney', '/requests': 'requests', '/family': 'family', '/circles': 'circles', '/spray': 'spray', '/dues': 'dues', '/pay-for-me': 'payForMe', '/shared-light': 'sharedLight', '/safebuy': 'safeBuy', '/payroll': 'payroll', '/rewards': 'dailyRewards', '/sms': 'bulkSms', '/tickets': 'tickets', '/bills': 'moreBills' };
+  const live = (a) => !onMap || !LINK_FEATURE[a.link] || onMap[LINK_FEATURE[a.link]];
+  const hiddenCount = onMap ? [...READY_ADS, ...FEATURE_ADS, ...CORE_ADS].filter((a) => !live(a)).length : 0;
   useEffect(() => {
     const m = data?.milestones;
     const f = openId && (data?.festivals?.find((x) => x.id === openId) || m?.celebrated?.find((x) => x.id === openId) || (m?.preview?.id === openId ? m.preview : null));
@@ -73,16 +87,17 @@ export default function FestivalPanel({ onOpen, openId, onAi }) {
         <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '4px 0 8px' }}>Open one, then download the pictures, copy the caption, or tap “Use in the app”.</p>
         <div style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 4px' }}>🆕 New</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {READY_ADS.map((a) => <button key={a.key} type="button" className={openId === a.key ? 'btn' : 'btn btn-secondary'} style={btn} onClick={() => onOpen(a, a.key)}>{a.emoji} {a.name}</button>)}
+          {READY_ADS.filter(live).map((a) => <button key={a.key} type="button" className={openId === a.key ? 'btn' : 'btn btn-secondary'} style={btn} onClick={() => onOpen(a, a.key)}>{a.emoji} {a.name}</button>)}
         </div>
-        <div style={{ fontSize: 12, color: 'var(--slate-400)', margin: '10px 0 4px' }}>🧩 New features — post only once switched on in Admin → New features</div>
+        <div style={{ fontSize: 12, color: 'var(--slate-400)', margin: '10px 0 4px' }}>🧩 New features</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {FEATURE_ADS.map((a) => <button key={a.key} type="button" className={openId === a.key ? 'btn' : 'btn btn-secondary'} style={btn} onClick={() => onOpen(a, a.key)}>{a.emoji} {a.name}</button>)}
+          {FEATURE_ADS.filter(live).map((a) => <button key={a.key} type="button" className={openId === a.key ? 'btn' : 'btn btn-secondary'} style={btn} onClick={() => onOpen(a, a.key)}>{a.emoji} {a.name}</button>)}
         </div>
         <div style={{ fontSize: 12, color: 'var(--slate-400)', margin: '10px 0 4px' }}>Everyday services</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {CORE_ADS.map((a) => <button key={a.key} type="button" className={openId === a.key ? 'btn' : 'btn btn-secondary'} style={btn} onClick={() => onOpen(a, a.key)}>{a.emoji} {a.name}</button>)}
+          {CORE_ADS.filter(live).map((a) => <button key={a.key} type="button" className={openId === a.key ? 'btn' : 'btn btn-secondary'} style={btn} onClick={() => onOpen(a, a.key)}>{a.emoji} {a.name}</button>)}
         </div>
+        {hiddenCount > 0 && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '10px 0 0' }}>{hiddenCount} ad{hiddenCount === 1 ? ' is' : 's are'} hidden because {hiddenCount === 1 ? 'its service is' : 'their services are'} switched off. They appear here when you switch the service On for everyone.</p>}
       </div>
     </div>
   );

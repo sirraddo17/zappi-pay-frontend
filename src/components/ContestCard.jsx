@@ -124,7 +124,7 @@ export default function ContestCard({ compact = false }) {
         <ul style={{ fontSize: 13, color: 'var(--slate-300, #cbd5e1)', paddingLeft: 18, margin: '8px 0 0', lineHeight: 1.5 }}>
           <li>Runs from {fmt(c.startsAt)} to {fmt(c.endsAt)}.</li>
           <li>Only friends who <b>sign up with your code during the contest</b> count.</li>
-          <li>A friend counts only after they <b>buy something or send money to a bank</b> in the app{c.minQualifyingAmount > 0 ? ` (at least ${naira(c.minQualifyingAmount)})` : ''}{c.requireVerified ? <> and <b>verify their BVN or NIN</b> (by getting their personal account number on the Wallet page)</> : ''} before the contest ends.</li>
+          <li>A friend counts only after they <b>buy something</b> in the app{c.minQualifyingAmount > 0 ? ` (at least ${naira(c.minQualifyingAmount)})` : ''}{c.requireVerified ? <> and <b>verify their BVN or NIN</b> (by getting their personal account number on the Wallet page)</> : ''} before the contest ends.</li>
           {c.requireVerified && <li>One BVN/NIN can only be used on one ZAPPI PAY account, so every friend must be a real, different person.</li>}
           <li>The top {c.prizes.length} win{c.minReferrals > 1 ? `, with at least ${c.minReferrals} counted friends` : ''}. A tie goes to whoever reached it first.</li>
           <li>Prizes go straight into the winners' ZAPPI PAY wallets.</li>

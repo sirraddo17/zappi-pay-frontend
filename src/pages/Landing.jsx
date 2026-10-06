@@ -3,7 +3,7 @@ import TestModeBanner from '../components/TestModeBanner';
 import SocialLinks from '../components/SocialLinks';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LogoIcon, Wordmark } from '../components/Logo';
-import { PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon, FundIcon } from '../components/Icons';
+import { PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon, FundIcon, PrinterIcon } from '../components/Icons';
 import { getReferralInfo } from '../api';
 import { SUPPORT_EMAIL, WHATSAPP_NUMBER } from '../assistant/knowledge';
 import './landing.css';
@@ -16,7 +16,7 @@ const SERVICES = [
   { label: 'Education', desc: 'WAEC & JAMB PINs', Icon: CapIcon, bg: '#8c2f4a' },
   { label: 'Internet', desc: 'Smile, Spectranet & more', Icon: GlobeIcon, bg: '#c2540f' },
   { label: 'Bet Funding', desc: 'Fund your betting wallets', Icon: TrophyIcon, bg: '#a38a0a' },
-  { label: 'Send Money', desc: 'Free transfers to ZappiPay users', Icon: BuildingIcon, bg: '#1a7a72' },
+  { label: 'Print Cards', desc: 'Recharge card PINs to print & sell', Icon: PrinterIcon, bg: '#1a7a72' },
 ];
 
 const FEATURES = [
@@ -43,7 +43,7 @@ function PhoneMockup() {
     ['Power', BoltIcon, '#1f6b4a'],
     ['Cable', TvIcon, '#2955a3'],
     ['Exams', CapIcon, '#8c2f4a'],
-    ['Send', BuildingIcon, '#1a7a72'],
+    ['Bets', TrophyIcon, '#a38a0a'],
     ['Internet', GlobeIcon, '#c2540f'],
     ['A2Cash', FundIcon, '#5b3fa8'],
   ];
@@ -140,7 +140,7 @@ export default function Landing() {
           </h1>
           <p className="lead">
             ZappiPay is one wallet for everyday payments. Top up airtime and data, buy electricity tokens, renew cable TV, get exam PINs and
-            send money to friends — fast, secure and with automatic refunds if anything fails.
+            more — fast, secure and with automatic refunds if anything fails.
           </p>
           <div className="lp-cta">
             <Link to={signupTo} className="lp-btn lp-btn-primary">Create free account</Link>

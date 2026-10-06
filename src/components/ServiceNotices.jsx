@@ -30,6 +30,9 @@ export function useFeatures() {
   const [mine, setMine] = useState(fCache);
   useEffect(() => {
     if (fCache && Date.now() - fAt < 60 * 1000) return;
+    let loggedIn = false;
+    try { loggedIn = Boolean(localStorage.getItem('zappipay_customer_token')); } catch { /* private mode */ }
+    if (!loggedIn) return;
     getMyFeatures().then((r) => { fCache = r.features || {}; fAt = Date.now(); setMine(fCache); }).catch(() => {});
   }, []);
   return { ...(appInfo?.features || {}), ...(mine || {}) };

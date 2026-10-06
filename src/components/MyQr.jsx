@@ -1,3 +1,4 @@
+import { useFeatures } from './ServiceNotices';
 import { useEffect, useState } from 'react';
 import { qrDataUrl, shareFile } from '../lib/shareCard';
 
@@ -11,6 +12,7 @@ export function payLink(username) {
 }
 
 export default function MyQr({ code, compact = false }) {
+  const canPay = Boolean(useFeatures().sendMoney);
   const [open, setOpen] = useState(false);
   const [img, setImg] = useState('');
   const link = payLink(code);
@@ -21,7 +23,7 @@ export default function MyQr({ code, compact = false }) {
 
   async function save() {
     const blob = await (await fetch(img)).blob();
-    await shareFile(blob, `zappipay-qr-${code}.png`, `Pay me or join ZAPPI PAY with my code ${code}: ${link}`);
+    await shareFile(blob, `zappipay-qr-${code}.png`, canPay ? `Pay me or join ZAPPI PAY with my code ${code}: ${link}` : `Join ZAPPI PAY with my code ${code}: ${link}`);
   }
 
   return (
