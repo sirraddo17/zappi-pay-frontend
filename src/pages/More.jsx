@@ -6,7 +6,7 @@ import { useAppInfo, useFeatures } from '../components/ServiceNotices';
 
 // Home → More. New services go here so the home screen stays short.
 const ITEMS = [
-  { to: '/circles', label: 'Ajo Circle', note: 'Save together: ajo, esusu, adashe — paid in turn', emoji: '🔄', bg: '#4c1d95', circles: true },
+  { to: '/circles', label: 'Ajo Circle', note: 'Save together: ajo, esusu, adashe — paid in turn', emoji: '🔄', bg: '#4c1d95', feature: 'circles' },
   { to: '/bills', label: 'More bills', note: 'Tax, waste, water, tolls, school & professional fees', emoji: '🧾', bg: '#0e7490', feature: 'moreBills' },
   { to: '/tickets', label: 'Event tickets', note: 'Sell or buy tickets — QR check-in at the door', emoji: '🎟️', bg: '#7c2d12', feature: 'tickets' },
   { to: '/sms', label: 'Bulk SMS', note: 'Send alerts to your customers or members', emoji: '📩', bg: '#1e3a8a', feature: 'bulkSms' },
@@ -33,7 +33,7 @@ export default function More() {
   const t = useLang();
   const appInfo = useAppInfo();
   const features = useFeatures();
-  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime) && (!s.feature || features[s.feature]) && (!s.circles || appInfo?.circles !== false));
+  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime) && (!s.feature || features[s.feature]));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
       <div className="page-header">

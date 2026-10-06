@@ -41,8 +41,8 @@ export const SUPPORT_TOPICS = [
 export default function HelpAssistant() {
   const appInfo = useAppInfo();
   const features = useFeatures();
-  // Is a switchable service on for this customer? (circles / bank use their own switches)
-  const isOn = (key) => (key === 'circles' ? appInfo?.circles !== false : key === 'bankTransfer' ? Boolean(appInfo?.bankTransfer) : Boolean(features[key]));
+  // Is a switchable service on for this customer? (Send to Bank uses its own switch)
+  const isOn = (key) => (key === 'bankTransfer' ? Boolean(appInfo?.bankTransfer) : Boolean(features[key]));
   const { customer } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);

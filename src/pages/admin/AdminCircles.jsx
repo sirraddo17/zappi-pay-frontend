@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminCircles, getAdminCircle, reviewCircleRelease, reviewCircleAppeal, unbanCircleMember, stopCircle, getSettings, updateSettings } from '../../api';
+import { getAdminFeatures, getAdminCircles, getAdminCircle, reviewCircleRelease, reviewCircleAppeal, unbanCircleMember, stopCircle, getSettings, updateSettings } from '../../api';
 import { useShowMore } from '../../components/ShowMore';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { naira, OFTEN, STATUS, fmtDay, RulesSummary } from '../../components/circles/shared';
@@ -10,18 +11,20 @@ const btn = { width: 'auto', padding: '5px 12px', fontSize: 13 };
 function Switch() {
   const [s, setS] = useState(null);
   const [msg, setMsg] = useState('');
+  const [mode, setMode] = useState('OFF');
   useEffect(() => { getSettings().then((d) => setS(d.settings || d)).catch(() => {}); }, []);
+  useEffect(() => { getAdminFeatures().then((d) => setMode(d.features.find((f) => f.key === 'circles')?.mode || 'OFF')).catch(() => {}); }, []);
   if (!s) return null;
   async function save(patch, ok) {
     setMsg('');
     try { await updateSettings(patch); setS((x) => ({ ...x, ...patch })); setMsg(ok); } catch (e) { setMsg(e.message); }
   }
   return (
-    <div className="card" style={{ margin: '0 0 16px', border: s.circlesEnabled ? undefined : '1px solid var(--gold)' }}>
-      <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 600 }}>
-        <input type="checkbox" checked={Boolean(s.circlesEnabled)} onChange={(e) => window.confirm(e.target.checked ? 'Turn Ajo Circle ON for customers? Make sure a lawyer has reviewed the agreement first.' : 'Turn Ajo Circle OFF? Running circles keep running; nobody can create or join new ones.') && save({ circlesEnabled: e.target.checked }, e.target.checked ? 'Ajo Circle is ON.' : 'Ajo Circle is OFF for new circles.')} style={{ width: 'auto' }} />
-        🔄 Ajo Circle is {s.circlesEnabled ? 'ON' : 'OFF'} for customers
-      </label>
+    <div className="card" style={{ margin: '0 0 16px', border: mode === 'ON' ? undefined : '1px solid var(--gold)' }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 600, flexWrap: 'wrap' }}>
+        🔄 Ajo Circle: {mode === 'ON' ? 'ON for everyone' : mode === 'TESTERS' ? '🧪 Testers only' : 'OFF'}
+        <Link to="/admin/features" style={{ color: 'var(--purple)', fontSize: 13, fontWeight: 500 }}>Change in 🧩 New features →</Link>
+      </div>
       <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 8px' }}>Before turning it on, have a Nigerian lawyer review the member agreement and your terms (rotating savings, automatic debits, fees, spending limits on defaulters).</p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 13 }}>
         {[['circleMaxAmount', 'Max contribution (₦)'], ['circleMaxMembers', 'Max members'], ['circleBanStrikes', 'Missed payments before block']].map(([k, l]) => (
