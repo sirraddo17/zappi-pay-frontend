@@ -21,6 +21,7 @@ import SocialLinks from '../components/SocialLinks';
 import ThemeToggle from '../components/ThemeToggle';
 import { passwordIsStrong } from '../lib/passwordRules';
 import { useFeatures } from '../components/ServiceNotices';
+import PayoutAccount from '../components/PayoutAccount';
 
 const MAX_AVATAR_BYTES = 1_500_000;
 
@@ -374,6 +375,7 @@ export default function Profile() {
         ))}
       </div>
 
+      <PayoutAccount purpose="payments" compact />
       {features.family && (
       <Link to="/family" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
         <span>

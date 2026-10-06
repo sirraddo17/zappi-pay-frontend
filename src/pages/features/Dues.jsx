@@ -6,6 +6,7 @@ import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { naira } from '../../components/circles/shared';
+import PayoutAccount, { goToCheckout } from '../../components/PayoutAccount';
 
 const OFTEN = { WEEKLY: 'weekly', MONTHLY: 'monthly', YEARLY: 'yearly' };
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -36,7 +37,7 @@ export default function Dues() {
             {f.frequency === 'WEEKLY' ? <select id="dD" value={f.dueDay} onChange={set('dueDay')}>{DAYS.map((d, i) => <option key={d} value={i + 1}>{d}</option>)}</select> : <input id="dD" type="number" min="1" max="28" value={f.dueDay} onChange={set('dueDay')} />}
           </div>
           <div className="field"><label htmlFor="dX">What the dues are for (members see this)</label><textarea id="dX" rows={2} maxLength={500} value={f.description} onChange={set('description')} style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }} /></div>
-          <p style={{ fontSize: 12, color: 'var(--slate-400)' }}>You are the treasurer: dues go straight into your wallet. You’ll see who has paid each period.</p>
+          <p style={{ fontSize: 12, color: 'var(--slate-400)' }}>You are the treasurer: dues come straight to you. You’ll see who has paid each period.</p>
           <button className="btn" type="submit">Create group</button>
         </form>
       )}
@@ -63,7 +64,7 @@ export function DuesJoin() {
     <div className="app-shell">
       <div className="page-header"><h1>🏘️ {d.group.name}</h1><p>Treasurer: {d.treasurer} · {d.members} members</p></div>
       <div className="card"><div style={{ fontSize: 24, fontWeight: 800 }}>{naira(d.group.amount)} <span style={{ fontSize: 14, fontWeight: 500 }}>{OFTEN[d.group.frequency]}, due {dueText(d.group)}</span></div>{d.group.description && <p style={{ fontSize: 14 }}>{d.group.description}</p>}
-        <p style={{ fontSize: 12, color: 'var(--slate-400)' }}>Dues go to the treasurer’s ZAPPI PAY wallet. You choose when to pay (or switch on auto-pay).</p>
+        <p style={{ fontSize: 12, color: 'var(--slate-400)' }}>Dues go straight to the treasurer. You choose when to pay.</p>
         {err && <p className="error-text">{err}</p>}
         <button type="button" className="btn" onClick={() => joinDues(code).then((r) => navigate(`/dues/${r.assocId}`)).catch((e) => setErr(e.message))}>Join group</button>
       </div>
@@ -123,6 +124,7 @@ export function DuesDetail() {
           </>
         )}
       </div>
+      {d.isOwner && <PayoutAccount purpose="dues" />}
       {d.isOwner && (
         <div className="card">
           <b>Invite members</b>
@@ -134,7 +136,7 @@ export function DuesDetail() {
         </div>
       )}
       <PinConfirm open={Boolean(pin)} summary={pin?.type === 'pay' ? `Pay ${naira(g.amount)} dues to “${g.name}” for ${pin.label}` : `${pin?.on ? 'Turn on' : 'Turn off'} auto-pay for “${g.name}”`}
-        onSubmit={async (auth) => { if (pin.type === 'pay') { await payDues(id, { period: pin.period, ...auth }); setMsg('Paid ✓'); } else { await setDuesAutoPay(id, { on: pin.on, ...auth }); setMsg(pin.on ? 'Auto-pay is on ✓' : 'Auto-pay is off'); } setPin(null); load(); }}
+        onSubmit={async (auth) => { if (pin.type === 'pay') { const r = await payDues(id, { period: pin.period, ...auth }); if (goToCheckout(r)) return; setMsg('Paid ✓'); } else { await setDuesAutoPay(id, { on: pin.on, ...auth }); setMsg(pin.on ? 'Auto-pay is on ✓' : 'Auto-pay is off'); } setPin(null); load(); }}
         onError={(e) => setErr(e.message)} onClose={() => setPin(null)} />
       <BottomNav />
     </div>

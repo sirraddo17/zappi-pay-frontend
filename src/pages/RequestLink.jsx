@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { viewPayRequest, payPayRequest } from '../api';
 import PinConfirm from '../components/PinConfirm';
+import { goToCheckout } from '../components/PayoutAccount';
 import { setAfterLogin, clearAfterLogin } from '../lib/afterLogin';
 import { shareRequest } from './Requests';
 
@@ -33,6 +34,7 @@ export default function RequestLink() {
 
   async function pay(auth) {
     const res = await payPayRequest(token, { amount: r.kind === 'POOL' ? Number(amount) : undefined, message: message.trim() || undefined, hideAmount: hide, ...auth });
+    if (goToCheckout(res)) return;
     setConfirm(false);
     setDone(res.amount);
     setR(res.request);
@@ -92,12 +94,12 @@ export default function RequestLink() {
         {!open && <p style={{ marginTop: 12, fontWeight: 600, color: r.status === 'DONE' ? 'var(--green-500)' : 'var(--slate-400)' }}>{r.status === 'DONE' ? '✓ Paid in full' : r.status === 'EXPIRED' ? 'This link has expired.' : 'This link is closed.'}</p>}
       </div>
 
-      {done && <div className="card" style={{ textAlign: 'center', border: '1px solid var(--green-500)' }}>✅ You paid <b>{naira(done)}</b> to {r.owner.name}. It’s in their wallet now.</div>}
+      {done && <div className="card" style={{ textAlign: 'center', border: '1px solid var(--green-500)' }}>✅ You paid <b>{naira(done)}</b> to {r.owner.name}. It’s with them now.</div>}
       {payErr && <p className="error-text" style={{ margin: '0 16px 12px' }}>{payErr}</p>}
 
       {r.isOwner && (
         <div className="card">
-          <b>This is your link.</b> Share it — people pay from their ZAPPI PAY wallet and the money comes straight to you.
+          <b>This is your link.</b> Share it — people pay on ZAPPI PAY and the money comes straight to you.
           <button type="button" className="btn" style={{ marginTop: 10 }} onClick={() => shareRequest(r)}>Share link</button>
           <Link to="/requests" style={{ display: 'block', textAlign: 'center', marginTop: 10, color: 'var(--purple)', fontSize: 14 }}>See all my links ›</Link>
         </div>
@@ -105,7 +107,7 @@ export default function RequestLink() {
 
       {!customer && open && (
         <div className="card">
-          <p style={{ marginTop: 0 }}>Log in to pay from your ZAPPI PAY wallet. New here? Sign up free — it takes a minute.</p>
+          <p style={{ marginTop: 0 }}>Log in to pay. New here? Sign up free — it takes a minute.</p>
           <button type="button" className="btn" onClick={() => goLogin('login')}>Log in to pay</button>
           <button type="button" className="btn btn-secondary" style={{ marginTop: 8 }} onClick={() => goLogin('signup')}>Sign up</button>
         </div>

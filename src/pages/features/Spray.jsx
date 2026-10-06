@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getSprayEvents, createSprayEvent, getSprayLive, startSpraySession, sprayMoney, closeSprayEvent } from '../../api';
+import { getSprayEvents, createSprayEvent, getSprayLive, startSpraySession, sprayMoney, closeSprayEvent, getMySpraySession } from '../../api';
+import PayoutAccount, { goToCheckout } from '../../components/PayoutAccount';
 import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { useAuth } from '../../context/AuthContext';
@@ -90,7 +91,7 @@ export function SprayEvent() {
   const [err, setErr] = useState('');
   const [pin, setPin] = useState(false);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { clearAfterLogin(); }, []);
+  useEffect(() => { clearAfterLogin(); getMySpraySession(code).then((r) => { if (r.session) setSession(r.session); }).catch(() => {}); }, [code]);
 
   async function spray() {
     setErr(''); setBusy(true);
@@ -136,7 +137,7 @@ export function SprayEvent() {
         {d.top.length ? d.top.map((t, i) => <div key={t.name + i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '5px 0', borderTop: '1px solid var(--slate-800)' }}><span>{['🥇', '🥈', '🥉'][i] || `${i + 1}.`} {t.name}</span><b>{naira(t.amount)}</b></div>) : <p className="empty-state">Be the first to spray!</p>}
       </div>
       <Notes notes={notes} />
-      <PinConfirm open={pin} summary={`Spray budget ${naira(budget)} for “${d.event.title}”`} onSubmit={async (auth) => { const s = await startSpraySession(code, { budget: Number(budget), ...auth }); setSession(s); setPin(false); refreshCustomer?.(); }} onError={(e) => setErr(e.message)} onClose={() => setPin(false)} />
+      <PinConfirm open={pin} summary={`Spray budget ${naira(budget)} for “${d.event.title}”`} onSubmit={async (auth) => { const s = await startSpraySession(code, { budget: Number(budget), ...auth }); if (goToCheckout(s)) return; setSession(s); setPin(false); refreshCustomer?.(); }} onError={(e) => setErr(e.message)} onClose={() => setPin(false)} />
       <BottomNav />
     </div>
   );
@@ -156,7 +157,7 @@ export default function Spray() {
       <div className="page-header">
         <Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
         <h1>💃 Owambe Spray</h1>
-        <p>Guests scan your QR and spray money from their phones — it lands in your wallet, live on screen.</p>
+        <p>Guests scan your QR and spray money from their phones — it comes straight to you, live on screen.</p>
       </div>
       <form className="card" onSubmit={async (e) => { e.preventDefault(); setErr(''); try { const r = await createSprayEvent({ title, celebrant }); navigate(`/spray/${r.event.code}/host`); } catch (e2) { setErr(e2.message); } }}>
         <b>Start a spray event</b>
@@ -165,6 +166,7 @@ export default function Spray() {
         {err && <p className="error-text">{err}</p>}
         <button className="btn" type="submit">Create & get my QR</button>
       </form>
+      <PayoutAccount purpose="sprays" />
       {list?.length > 0 && (
         <div className="card">
           <b>My events</b>
@@ -188,7 +190,7 @@ export function SprayHost() {
       <style>{SPRAY_CSS}</style>
       <div className="page-header"><Link to="/spray" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← My events</Link><h1>{d.event.title}</h1><p>{d.event.status === 'OPEN' ? '🟢 Live' : 'Ended'} · {d.event.count} sprays</p></div>
       <div className="card" style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>Sprayed so far (already in your wallet)</div>
+        <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>Sprayed so far</div>
         <div style={{ fontSize: 34, fontWeight: 800, color: 'var(--green-500)' }}>{naira(d.event.total)}</div>
         <Qr link={link} size={480} style={{ width: 200, height: 200, background: '#fff', padding: 8, borderRadius: 12, margin: '10px auto', display: 'block' }} />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>

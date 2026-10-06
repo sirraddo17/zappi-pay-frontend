@@ -73,6 +73,15 @@ export default function AdminExtraServices() {
           </div>
 
           <div className="card" style={{ margin: '0 0 16px' }}>
+            <b>🏦 Pay straight to their bank (Dues, Spray, Request money)</b>
+            <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 8px' }}>When “Pay straight to their bank” is on in 🧩 New features, these are paid by card / transfer / USSD through Monnify and split straight into the receiver’s bank (they add it in the app). The payer pays the fee below on top; it must cover Monnify’s fee. Needs Monnify sub-accounts enabled.</p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              {num('Fee per payment (₦)', 'directPayFeeFlat', d.direct?.feeFlat, 150)}
+              {num('+ % of amount', 'directPayFeePercent', d.direct?.feePercent)}
+            </div>
+          </div>
+
+          <div className="card" style={{ margin: '0 0 16px' }}>
             <b>🧾 More bills (Flutterwave Bills)</b>
             <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 8px' }}>Paid from your Flutterwave balance — keep it funded, and whitelist your server’s IP in Flutterwave if asked. Uses the Flutterwave keys in Admin → Settings → Wallet funding (Monnify & Flutterwave).</p>
             {num('Service fee per bill (₦)', 'billsFee', d.bills.config.fee)}

@@ -328,6 +328,10 @@ export const switchAdminFeature = (key, d) => adminRequest(`/api/admin/features/
 export const saveFeaturesConfig = (d) => adminRequest('/api/admin/features-config', { method: 'PUT', body: JSON.stringify(d) });
 export const resolveSafeDeal = (code, d) => adminRequest(`/api/admin/safebuy/${encodeURIComponent(code)}/resolve`, { method: 'POST', body: JSON.stringify(d) });
 export const getBankList = () => request('/api/banks');
+export const getPayout = () => request('/api/payout');
+export const savePayout = (d) => request('/api/payout', { method: 'PUT', body: JSON.stringify(d) });
+export const getDirectPaid = (ref) => request(`/api/paid/${encodeURIComponent(ref)}`);
+export const getMySpraySession = (code) => request(`/api/spray/${encodeURIComponent(code)}/my-session`);
 // --- Bulk SMS, Event tickets, More bills ---
 export const getSms = () => request('/api/sms');
 export const quoteSms = (d) => post('/api/sms/quote', d);

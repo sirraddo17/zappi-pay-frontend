@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPayRequest, getPayRequests, closePayRequest, remindPayRequest } from '../api';
 import BottomNav from '../components/BottomNav';
+import PayoutAccount from '../components/PayoutAccount';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const TABS = [['forme', '📥 For you'], ['REQUEST', '💸 Pay me'], ['SPLIT', '🍽️ Split bill'], ['POOL', '🎁 Group gift'], ['mine', '🔗 My links']];
 const STATUS = { OPEN: ['Open', 'var(--green-500)'], DONE: ['Paid', 'var(--green-500)'], CLOSED: ['Closed', 'var(--slate-400)'], CANCELLED: ['Cancelled', 'var(--slate-400)'], EXPIRED: ['Expired', 'var(--slate-400)'] };
 
 export function shareText(r) {
-  if (r.kind === 'POOL') return `🎁 Chip in for “${r.title}”${r.target ? ` — target ${naira(r.target)}` : ''}. Pay from your ZAPPI PAY wallet: ${r.link}`;
+  if (r.kind === 'POOL') return `🎁 Chip in for “${r.title}”${r.target ? ` — target ${naira(r.target)}` : ''}. Pay on ZAPPI PAY: ${r.link}`;
   if (r.kind === 'SPLIT') return `🍽️ Your share for “${r.title}” is ${naira(r.amount)}. Pay with ZAPPI PAY in one tap: ${r.link}`;
   return `💸 Please pay me ${naira(r.amount)} for “${r.title}”. Pay with ZAPPI PAY: ${r.link}`;
 }
@@ -95,9 +96,9 @@ function CreateForm({ kind, onMade }) {
   return (
     <form className="card" style={{ margin: '0 16px 12px' }} onSubmit={submit}>
       <p style={{ marginTop: 0, fontSize: 13, color: 'var(--slate-400)' }}>
-        {kind === 'REQUEST' && 'Make a link that says “pay me”. Send it on WhatsApp — they pay from their ZAPPI PAY wallet with their PIN, straight to you.'}
+        {kind === 'REQUEST' && 'Make a link that says “pay me”. Send it on WhatsApp — they pay on ZAPPI PAY and it comes straight to you.'}
         {kind === 'SPLIT' && 'You paid a bill? Split it — each person gets one link to pay their share, and you can see who has paid.'}
-        {kind === 'POOL' && 'Collect money from many people for a gift or contribution. Everyone can give any amount; it comes straight to your wallet as they pay.'}
+        {kind === 'POOL' && 'Collect money from many people for a gift or contribution. Everyone can give any amount; it comes straight to you as they pay.'}
       </p>
       {err && <p className="error-text">{err}</p>}
       <div className="field"><label htmlFor="rqT">What is it for?</label><input id="rqT" maxLength={80} value={f.title} onChange={set('title')} placeholder={ph[kind]} required /></div>
@@ -143,8 +144,9 @@ export default function Requests() {
       <div className="page-header">
         <Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
         <h1>Request money</h1>
-        <p>Pay me links, split bills and group gifts — paid from ZAPPI PAY wallets, straight to you.</p>
+        <p>Pay me links, split bills and group gifts — paid straight to you.</p>
       </div>
+      <PayoutAccount purpose="payments" />
       <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '0 16px 12px' }}>
         {TABS.map(([k, l]) => (
           <button key={k} type="button" className={tab === k ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '6px 12px', fontSize: 13, whiteSpace: 'nowrap' }} onClick={() => { setTab(k); setMade(null); }}>
@@ -173,7 +175,7 @@ export default function Requests() {
           {d.mine.filter((r) => r.kind === tab && r.status === 'OPEN').map((r) => <Card key={r.id} r={r} onChange={load} />)}
         </>
       )}
-      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '8px 16px' }}>Money goes straight from their wallet to yours — ZAPPI PAY doesn’t hold it. Links last 14 days (group gifts: up to 90). Only ask people you know; never pay a stranger’s link.</p>
+      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '8px 16px' }}>Money goes straight to you — ZAPPI PAY doesn’t hold it. Links last 14 days (group gifts: up to 90). Only ask people you know; never pay a stranger’s link.</p>
       <BottomNav />
     </div>
   );
