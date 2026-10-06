@@ -6,6 +6,7 @@ import { useAppInfo } from '../components/ServiceNotices';
 
 // Home → More. New services go here so the home screen stays short.
 const ITEMS = [
+  { to: '/circles', label: 'Ajo Circle', note: 'Save together: ajo, esusu, adashe — paid in turn', emoji: '🔄', bg: '#4c1d95' },
   { to: '/requests', label: 'Request money', note: 'Pay me links, split bills, group gifts', emoji: '💸', bg: '#1f6b4a' },
   { to: '/international', label: 'International airtime', note: 'Top up phones abroad, pay in naira', emoji: '🌍', bg: '#0f4c8c' },
   { to: '/insurance', label: 'Car insurance', note: 'Third-party motor insurance in minutes', emoji: '🚗', bg: '#8c3b0f' },
@@ -21,7 +22,7 @@ const ITEMS = [
 export default function More() {
   const t = useLang();
   const appInfo = useAppInfo();
-  const items = ITEMS.filter((s) => s.to !== '/international' || appInfo?.intlAirtime);
+  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
       <div className="page-header">

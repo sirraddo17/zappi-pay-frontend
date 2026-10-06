@@ -280,7 +280,13 @@ export default function Buy() {
   const price = priceFor(amount, config?.backendService, pricing);
   const discountPct = price.discountPct;
   const promoDiscount = promo ? Math.min(promo.discount, price.total) : 0;
-  const payTotal = Math.max(0, price.total - promoDiscount);
+  const priceAfterPromo = Math.max(0, price.total - promoDiscount);
+  // Cashback balance (kept apart from the wallet) can pay part of the price.
+  const cb = pricing?.cashback || null;
+  const [useCb, setUseCb] = useState(true);
+  const cbAvail = cb ? Math.floor(Math.min(cb.balance, (priceAfterPromo * cb.maxPercent) / 100) * 100) / 100 : 0;
+  const cbUse = useCb && cbAvail > 0 ? cbAvail : 0;
+  const payTotal = Math.max(0, Math.round((priceAfterPromo - cbUse) * 100) / 100);
   const cashbackPct = Number(appInfo?.cashback?.[config?.backendService] || 0);
 
   // A code checked for one amount/service must be re-checked if either changes.
@@ -349,6 +355,7 @@ export default function Buy() {
         amount,
         meterType: config.needsType ? billType : undefined,
         promoCode: promo ? promo.code : undefined,
+        useCashback: cbUse > 0,
         saveBeneficiary: saveIt && !alreadySaved ? { nickname: nickname.trim() || undefined } : undefined,
         repeat: repeatOn ? { frequency, nickname: nickname.trim() || undefined } : undefined,
         gift: sendGift ? { theme: giftTheme, message: giftMessage } : undefined,
@@ -535,6 +542,18 @@ export default function Buy() {
                 <span>−{naira(promoDiscount)}</span>
               </div>
             )}
+            {cb && cb.balance > 0 && priceAfterPromo > 0 && (
+              <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 14, margin: '6px 0', padding: '8px 10px', borderRadius: 10, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)', cursor: 'pointer' }}>
+                <span>
+                  Use cashback <span style={{ color: 'var(--slate-400)', fontSize: 12 }}>({naira(cb.balance)} available)</span>
+                  {cbAvail < cb.balance && <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 11 }}>Up to {cb.maxPercent}% of each purchase — the rest stays for next time</span>}
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+                  {useCb && <b style={{ color: 'var(--green-500)' }}>−{naira(cbAvail)}</b>}
+                  <input type="checkbox" role="switch" aria-label="Use cashback" checked={useCb} onChange={(e) => setUseCb(e.target.checked)} style={{ width: 'auto' }} />
+                </span>
+              </label>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 16 }}>
               <span>{t('Total')}</span>
               <span>{naira(payTotal)}</span>
@@ -544,7 +563,7 @@ export default function Buy() {
             )}
             {cashbackPct > 0 && payTotal > 0 && (
               <div style={{ fontSize: 13, color: 'var(--green-500)', marginTop: 4 }}>
-                + {cashbackPct}% cashback (about {naira(Math.floor(payTotal * cashbackPct) / 100)}) back to your wallet
+                + {cashbackPct}% cashback (about {naira(Math.floor(priceAfterPromo * cashbackPct) / 100)}) {cb ? 'to your cashback for next time' : 'back to your wallet'}
               </div>
             )}
             <div style={{ marginTop: 10 }}>

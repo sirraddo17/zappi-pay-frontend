@@ -65,11 +65,13 @@ export default function AdminAdStudio() {
   const d = designs[pick] || BLANK;
   const set = (k, v) => setDesigns((list) => list.map((x, i) => (i === pick ? { ...x, [k]: v } : x)));
 
-  async function designWithAi() {
+  async function designWithAi(text) {
+    const b = typeof text === 'string' ? text : brief;
+    if (typeof text === 'string') setBrief(text);
     setBusy('ai');
     setMsg(null);
     try {
-      const r = await adminDesignAd(brief);
+      const r = await adminDesignAd(b);
       setDesigns(r.designs);
       setPick(0);
     } catch (err) {
@@ -132,7 +134,7 @@ export default function AdminAdStudio() {
           placeholder="e.g. We're now on Play Store — tell people to download the app. Or: 5% cashback on data this weekend only." />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
           {ai?.adminEnabled ? (
-            <button type="button" className="btn" style={{ width: 'auto' }} disabled={busy === 'ai' || !brief.trim()} onClick={designWithAi}>
+            <button type="button" className="btn" style={{ width: 'auto' }} disabled={busy === 'ai' || !brief.trim()} onClick={() => designWithAi()}>
               {busy === 'ai' ? 'Designing…' : '✨ Design 3 options with AI'}
             </button>
           ) : (
@@ -145,7 +147,7 @@ export default function AdminAdStudio() {
         <AiPictureBox onPicture={(img) => setPhotoData([img])} />
       </div>
 
-      <FestivalPanel onOpen={openDesign} openId={openId} />
+      <FestivalPanel onOpen={openDesign} openId={openId} onAi={ai?.adminEnabled ? () => designWithAi(`Write a warm, respectful post for everyone (any religion) for: ${d.headline}. ${d.subtext}. Keep the same occasion and facts; thank customers for trusting ZAPPI PAY.`) : null} />
 
       {msg && <p style={{ color: msg.ok ? 'var(--green-500)' : 'var(--red-500)', margin: '0 0 12px' }}>{msg.text}</p>}
 

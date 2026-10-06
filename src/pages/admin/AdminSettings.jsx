@@ -139,6 +139,8 @@ export default function AdminSettings() {
   const [splitOn, setSplitOn] = useState(false);
   const [cbByService, setCbByService] = useState(toServiceMap({}));
   const [cbMax, setCbMax] = useState('500');
+  const [cbSeparate, setCbSeparate] = useState(true);
+  const [cbUsePct, setCbUsePct] = useState('20');
   const [alertsOn, setAlertsOn] = useState(false);
   const [adminPushOn, setAdminPushOn] = useState(true);
   const [adminEmailOn, setAdminEmailOn] = useState(true);
@@ -214,6 +216,8 @@ export default function AdminSettings() {
         setSplitOn(Boolean(s.rewardSplitEnabled));
         setCbByService(toServiceMap(s.cashbackPercentByService));
         setCbMax(String(s.cashbackMaxPerOrder ?? 500));
+        setCbSeparate(s.cashbackSeparate !== false);
+        setCbUsePct(String(s.cashbackUseMaxPercent ?? 20));
         setAlertsOn(Boolean(s.emailAlertsEnabled));
         setAdminPushOn(s.adminAlertPush !== false);
         setAdminEmailOn(s.adminAlertEmail !== false);
@@ -414,7 +418,7 @@ export default function AdminSettings() {
       setStatus((prev) => ({ ...prev, cashback: { error: `Cashback for ${serviceLabel(bad)} must be between 0 and 20%.` } }));
       return;
     }
-    save('cashback', { cashbackEnabled: cbEnabled, cashbackPercentByService: toNumberMap(cbByService), cashbackMaxPerOrder: Number(cbMax || 0) }, 'Cashback settings saved.');
+    save('cashback', { cashbackEnabled: cbEnabled, cashbackPercentByService: toNumberMap(cbByService), cashbackMaxPerOrder: Number(cbMax || 0), cashbackSeparate: cbSeparate, cashbackUseMaxPercent: Number(cbUsePct || 20) }, 'Cashback settings saved.');
   }
 
   function saveAlerts(e) {
@@ -931,7 +935,7 @@ export default function AdminSettings() {
 
       {!loading && !loadError && tab === 'cashback' && (
         <form className="card" style={cardStyle} onSubmit={saveCashback}>
-          <SectionHeader title="Cashback" hint="After a successful purchase, this % of the price goes back into the customer's wallet. It comes out of your profit — keep it below your markup." />
+          <SectionHeader title="Cashback" hint="After a successful purchase, this % of the price is given back as cashback. It comes out of your profit — keep it below your markup." />
           <Status state={status.cashback} />
           {splitOn && <p style={{ fontSize: 13, background: 'rgba(34,197,94,0.1)', border: '1px solid var(--green-500)', borderRadius: 10, padding: '8px 12px', margin: '0 0 12px' }}>🎁 The Rewards split is on, so cashback amounts come from your Rewards split share (the % below is not used). Keep this switched on to take part; change amounts under <b>🎁 Rewards split</b>.</p>}
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
@@ -948,6 +952,17 @@ export default function AdminSettings() {
             <label htmlFor="cbMax">Maximum cashback per purchase (₦)</label>
             <input id="cbMax" type="number" min="0" value={cbMax} onChange={(e) => setCbMax(e.target.value)} />
           </div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '4px 0 12px' }}>
+            <input type="checkbox" checked={cbSeparate} onChange={(e) => setCbSeparate(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
+            <span>Keep cashback in its own balance (like OPay)<br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Customers switch on “Use cashback” at checkout to pay less. It can’t be sent or withdrawn — only used on purchases. Off = cashback goes straight into the wallet.</span></span>
+          </label>
+          {cbSeparate && (
+            <div className="field">
+              <label htmlFor="cbUse">Cashback a customer can use per purchase (% of the price)</label>
+              <input id="cbUse" type="number" min="1" max="100" value={cbUsePct} onChange={(e) => setCbUsePct(e.target.value)} />
+              <small style={{ color: 'var(--slate-400)' }}>e.g. 20% → on a ₦1,000 purchase at most ₦200 comes from cashback; the rest stays for next time.</small>
+            </div>
+          )}
           {saveButton('cashback', 'Save Cashback')}
         </form>
       )}

@@ -36,6 +36,10 @@ function lazy(load) {
 }
 
 const Statement = lazy(() => import('./pages/Statement'));
+const Circles = lazy(() => import('./pages/Circles'));
+const CircleDetail = lazy(() => import('./pages/CircleDetail'));
+const CircleJoin = lazy(() => import('./pages/CircleJoin'));
+const AdminCircles = lazy(() => import('./pages/admin/AdminCircles'));
 const Bulk = lazy(() => import('./pages/Bulk'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const Notifications = lazy(() => import('./pages/Notifications'));
@@ -152,6 +156,9 @@ export default function App() {
           <Route path="/status" element={<Status />} />
           <Route path="/gift/:token" element={<Gift />} />
           <Route path="/r/:token" element={<RequestLink />} />
+          <Route path="/circle/:code" element={<CircleJoin />} />
+          <Route path="/circles" element={<RequireCustomer><Circles /></RequireCustomer>} />
+          <Route path="/circles/:id" element={<RequireCustomer><CircleDetail /></RequireCustomer>} />
           <Route path="/shop/:username" element={<Shop />} />
           <Route path="/profit-book" element={<RequireCustomer><ProfitBook /></RequireCustomer>} />
           <Route path="/family" element={<RequireCustomer><Family /></RequireCustomer>} />
@@ -195,6 +202,7 @@ export default function App() {
           <Route path="/admin/feedback" element={<RequireAdmin><AdminFeedback /></RequireAdmin>} />
           <Route path="/admin/radar" element={<RequireAdmin><AdminRadar /></RequireAdmin>} />
           <Route path="/admin/security" element={<RequireAdmin><AdminSecurity /></RequireAdmin>} />
+          <Route path="/admin/circles" element={<RequireAdmin><AdminCircles /></RequireAdmin>} />
           <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

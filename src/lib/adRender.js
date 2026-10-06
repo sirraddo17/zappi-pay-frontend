@@ -192,7 +192,7 @@ export function drawAd(ctx, design, formatKey, photo, p = {}) {
   }
 
   const hy = top + (story ? 360 : 230);
-  const h = fitHeadline(ctx, design.headline, design.highlight, W - pad * 2 - (design.emoji ? (story ? 250 : 120) : 0), story ? 4 : 3, story ? 132 : 104, 60);
+  const h = fitHeadline(ctx, design.headline, design.highlight, W - pad * 2 - (design.emoji ? (story ? 250 : 210) : 0), story ? 4 : 3, story ? 132 : 104, 60);
   const lift = (1 - ease(a('head'))) * 40;
   ctx.globalAlpha = ease(a('head'));
   ctx.font = font(700, h.px);
@@ -200,10 +200,18 @@ export function drawAd(ctx, design, formatKey, photo, p = {}) {
   let y = hy + h.px + h.lines.length * h.px * 1.04 + 20;
 
   ctx.globalAlpha = ease(a('sub'));
-  ctx.font = font(500, story ? 50 : 40);
-  const sub = layoutWords(ctx, design.subtext, '', W - pad * 2);
-  fillLines(ctx, sub, pad, y, story ? 66 : 54, 'left', 'rgba(255,255,255,0.92)', '#fff');
-  y += sub.length * (story ? 66 : 54) + (story ? 50 : 34);
+  // Long words: shrink the subtext so it never runs into the button.
+  const ctaTop = H - bottomSafe - (story ? 110 : 88) - (story ? 90 : 70);
+  let subPx = story ? 50 : 40;
+  let sub;
+  for (;;) {
+    ctx.font = font(500, subPx);
+    sub = layoutWords(ctx, design.subtext, '', W - pad * 2);
+    if (y + sub.length * subPx * 1.33 <= ctaTop - 16 || subPx <= 26) break;
+    subPx -= 2;
+  }
+  fillLines(ctx, sub, pad, y, subPx * 1.33, 'left', 'rgba(255,255,255,0.92)', '#fff');
+  y += sub.length * subPx * 1.33 + (story ? 50 : 34);
 
   const ctaH = story ? 110 : 88;
   const ctaY = H - bottomSafe - ctaH - (story ? 90 : 70);

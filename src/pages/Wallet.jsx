@@ -4,7 +4,7 @@ import TestModeBanner from '../components/TestModeBanner';
 import SavingsCard from '../components/SavingsCard';
 import SpendingCard from '../components/SpendingCard';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon, startCardPayment, verifyCardPayment } from '../api';
+import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon, startCardPayment, verifyCardPayment, getCashback } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { useAuth } from '../context/AuthContext';
 import BottomNav from '../components/BottomNav';
@@ -76,6 +76,33 @@ function FundingHelper({ info }) {
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+// Cashback is kept apart from the wallet and used at checkout.
+function CashbackCard() {
+  const [d, setD] = useState(null);
+  const [open, setOpen] = useState(false);
+  useEffect(() => { getCashback().then(setD).catch(() => setD(null)); }, []);
+  if (!d || !d.separate || (!(d.balance > 0) && !d.entries.length)) return null;
+  const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  return (
+    <div className="card" style={{ border: '1px solid rgba(16,185,129,0.35)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>🎁 Cashback</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--green-500)' }}>{naira(d.balance)}</div>
+        </div>
+        <button type="button" onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', fontSize: 13 }}>{open ? 'Hide' : 'History'}</button>
+      </div>
+      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>Switch on “Use cashback” when you buy to pay less — up to {d.maxPercent}% of each purchase. Cashback can’t be sent or withdrawn.</p>
+      {open && d.entries.map((e) => (
+        <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '5px 0', borderTop: '1px solid var(--slate-800)' }}>
+          <span>{e.note}<br /><span style={{ fontSize: 11, color: 'var(--slate-400)' }}>{new Date(e.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}</span></span>
+          <b style={{ color: e.amount > 0 ? 'var(--green-500)' : 'var(--slate-300, #cbd5e1)' }}>{e.amount > 0 ? '+' : '−'}{naira(Math.abs(e.amount))}</b>
+        </div>
+      ))}
     </div>
   );
 }
@@ -460,6 +487,8 @@ export default function Wallet() {
         <div className="label">{t('Wallet Balance')}</div>
         <div className="value">{fmtMoney(balance)}</div>
       </div>
+
+      <CashbackCard />
 
       <SavingsCard onChanged={load} />
 

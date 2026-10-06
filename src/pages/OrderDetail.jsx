@@ -74,6 +74,7 @@ export default function OrderDetail() {
     ];
     if (order.recipientName) rows.push(['Name', order.recipientName]);
     if (Number(order.discountAmount) > 0) rows.push(['Discount', fmtMoney(order.discountAmount)]);
+    if (Number(order.cashbackUsed) > 0) rows.push(['Paid with cashback', fmtMoney(order.cashbackUsed)]);
     rows.push(['Date', fmtDate(order.createdAt)], ['Reference', order.vtpassRequestId || order.id]);
     return {
       title: `${order.service.charAt(0)}${order.service.slice(1).toLowerCase()} receipt`,

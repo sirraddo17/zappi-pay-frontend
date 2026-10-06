@@ -1,8 +1,45 @@
 // Ready-made adverts for the newer services. Ad Studio → "Ready-made
 // ads" loads one into the editor (download pictures, copy the caption,
 // or put it in the app with one tap).
+const ad = (key, name, emoji, theme, link, headline, highlight, subtext, cta, badges, inApp, caption, group = 'core') => ({ key, name, emoji, theme, link, headline, highlight, subtext, cta, badges, inApp, caption, group });
+const SITE = '👉 www.zappipay.com.ng';
+
+// Every service, so there's always a ready ad to post.
+export const CORE_ADS = [
+  ad('airtime', 'Airtime', '📱', 'purple', '/buy/airtime', 'Airtime in seconds', 'in seconds', 'MTN, Airtel, Glo & 9mobile — top up any number, any time', 'Buy airtime', ['Instant', 'All networks'], 'Top up any network in seconds — straight from your wallet.', `Credit finish? 📱\n\nTop up MTN, Airtel, Glo or 9mobile in seconds on ZAPPI PAY. Any number, any time, any amount ⚡\n\n${SITE}\n#ZappiPay #Airtime #Naija`),
+  ad('data', 'Data', '📶', 'blue', '/buy/data', 'Data finish? No wahala', 'No wahala', 'Cheap data plans for every network — delivered instantly', 'Buy data', ['SME', 'Gifting', 'Corporate'], 'Cheap data for every network, delivered instantly.', `Data finish? No wahala 😄\n\nGet affordable data plans for MTN, Airtel, Glo and 9mobile on ZAPPI PAY — delivered instantly 📶\n\n${SITE}\n#ZappiPay #CheapData #BuyData`),
+  ad('electricity', 'Electricity', '💡', 'gold', '/buy/electricity', 'Light token in seconds', 'in seconds', 'Prepaid & postpaid for every DisCo — your token comes straight to the app', 'Buy electricity', ['Prepaid', 'Postpaid', 'All DisCos'], 'Pay any DisCo — your token shows in the app instantly.', `NEPA don bring light, but units don finish? 💡😅\n\nBuy prepaid or postpaid electricity for any DisCo on ZAPPI PAY. Your meter is checked first and your token comes in seconds ⚡\n\n${SITE}\n#ZappiPay #Electricity #PrepaidMeter`),
+  ad('cable', 'Cable TV', '📺', 'red', '/buy/cable', 'Renew your TV, no stress', 'no stress', 'DStv, GOtv, StarTimes & Showmax — we check your smartcard first', 'Renew now', ['DStv', 'GOtv', 'StarTimes'], 'Renew DStv, GOtv or StarTimes in seconds.', `Match about to start and your decoder don off? 📺⚽\n\nRenew DStv, GOtv, StarTimes or Showmax on ZAPPI PAY in seconds. We check your smartcard before you pay ✅\n\n${SITE}\n#ZappiPay #DStv #GOtv`),
+  ad('internet', 'Internet', '🌐', 'blue', '/buy/internet', 'Stay connected', 'connected', 'Smile, Spectranet & more — renew your internet plan instantly', 'Renew internet', ['Smile', 'Spectranet'], 'Renew Smile or Spectranet in seconds.', `Work from home? Stay connected 🌐\n\nRenew your Smile or Spectranet plan on ZAPPI PAY in seconds — no queue, no stress.\n\n${SITE}\n#ZappiPay #Internet #Smile #Spectranet`),
+  ad('betting', 'Bet funding', '⚽', 'green', '/buy/betting', 'Fund your bet wallet fast', 'fast', 'Bet9ja, SportyBet, BetKing & more — instant funding', 'Fund now', ['Instant', 'Account checked'], 'Fund your betting wallet instantly. 18+ only — play responsibly.', `Fund your betting wallet in seconds ⚽\n\nBet9ja, SportyBet, BetKing and more — instant funding on ZAPPI PAY. 18+ only. Please play responsibly.\n\n${SITE}\n#ZappiPay #BetFunding`),
+  ad('send-money', 'Send money', '💸', 'purple', '/transfer', 'Send money free, instantly', 'free, instantly', 'To any ZAPPI PAY user by username, phone or QR', 'Send money', ['Free to users', 'QR pay'], 'Send money to friends free — by username, phone or QR.', `Send money to friends and family in seconds 💸\n\nFree between ZAPPI PAY users — just their username, phone number or QR code. You can also send to any bank 🏦\n\n${SITE}\n#ZappiPay #SendMoney`),
+  ad('airtime-cash', 'Airtime to Cash', '🔁', 'green', '/airtime-cash', 'Turn airtime into cash', 'cash', 'Bought too much airtime? Convert it back to wallet money', 'Convert now', ['MTN', 'Airtel', 'Glo'], 'Turn extra airtime back into wallet money.', `Bought airtime by mistake or have too much? 🔁\n\nConvert it back to cash in your ZAPPI PAY wallet. Simple and fast 💰\n\n${SITE}\n#ZappiPay #AirtimeToCash`),
+  ad('bulk', 'Bulk airtime & data', '👥', 'gold', '/bulk', 'Top up 50 numbers at once', '50 numbers', 'Staff, family, customers — one payment, everyone gets theirs', 'Try bulk', ['Staff', 'Family', 'Customers'], 'Send airtime or data to up to 50 numbers at once.', `Need to top up your staff, family or customers? 👥\n\nSend airtime or data to up to 50 numbers at once on ZAPPI PAY. One payment — everyone gets theirs ✅\n\n${SITE}\n#ZappiPay #BulkData #BulkAirtime`),
+  ad('print-cards', 'Print recharge cards', '🖨️', 'dark', '/print-cards', 'Print recharge cards', 'recharge cards', 'Agents & shops: print MTN, Airtel, Glo & 9mobile cards and sell for profit', 'Start printing', ['Agents', 'Shops', 'POS printer'], 'Print and sell recharge cards from your shop.', `Run a shop or POS business? 🖨️\n\nPrint MTN, Airtel, Glo and 9mobile recharge cards on ZAPPI PAY and sell for profit. Works with A4 and POS printers.\n\n${SITE}\n#ZappiPay #RechargeCards #POSBusiness`),
+  ad('gift', 'Gift airtime & data', '🎁', 'red', '/buy/airtime', 'Surprise someone today', 'Surprise', 'Send airtime or data as a gift with your own message', 'Send a gift', ['Birthdays', 'Just because'], 'Send airtime or data as a gift with a sweet message.', `Make someone smile today 🎁\n\nSend airtime or data as a gift on ZAPPI PAY — add your own message and they get a beautiful gift card 💝\n\n${SITE}\n#ZappiPay #GiftData #Love`),
+  ad('refer', 'Refer & earn', '🤝', 'purple', '/refer', 'Invite friends, earn cash', 'earn cash', 'Share your code — you earn when they join and buy', 'Refer & earn', ['Your code', 'Real cash'], 'Invite friends with your code and earn.', `Earn money just by sharing 🤝\n\nInvite your friends to ZAPPI PAY with your referral code — you earn when they join and buy. The more you share, the more you earn 💰\n\n${SITE}\n#ZappiPay #ReferAndEarn`),
+  ad('agent', 'Become an agent', '🏪', 'gold', '/profile', 'Become a ZAPPI PAY agent', 'agent', 'Cheaper prices, your own shop link and a profit book', 'Apply now', ['Agent prices', 'Shop link'], 'Agents get cheaper prices and their own shop link.', `Turn your phone into a business 🏪\n\nBecome a ZAPPI PAY agent: get cheaper prices, your own shop link and a profit book to track sales. Apply in the app today 📈\n\n${SITE}\n#ZappiPay #POSAgent #SmallBusiness`),
+  ad('wallet', 'Fund your wallet', '🏦', 'blue', '/wallet', 'Your own account number', 'account number', 'Transfer from any bank and your wallet is funded automatically', 'Fund wallet', ['Automatic', '24/7'], 'Get your personal account number — funding is automatic.', `Fund your wallet the easy way 🏦\n\nGet your own ZAPPI PAY account number. Transfer from any bank app and your wallet is credited automatically, 24/7 ⚡\n\n${SITE}\n#ZappiPay #Fintech #Naija`),
+];
+
 export const READY_ADS = [
   {
+    group: 'new',
+    key: 'ajo-circle',
+    name: 'Ajo Circle',
+    headline: 'Ajo, the safe way',
+    highlight: 'safe way',
+    subtext: 'Save with people you trust. Paid automatically, in turn — the pot stays locked till everyone pays',
+    cta: 'Start a circle',
+    badges: ['Ajo', 'Esusu', 'Adashe'],
+    emoji: '🔄',
+    theme: 'purple',
+    link: '/circles',
+    inApp: 'Start an Ajo Circle — automatic contributions, paid in turn, locked pot.',
+    caption: 'Ajo, esusu, adashe — now the safe way 🔄\n\nStart an Ajo Circle on ZAPPI PAY: everyone’s contribution is taken automatically, the pot stays locked where all members can see it, and each person gets paid in turn. No more chasing people 🙌\n\n👉 www.zappipay.com.ng\n#ZappiPay #Ajo #Esusu #Adashe #SaveTogether',
+  },
+  {
+    group: 'new',
     key: 'pay-me-link',
     name: 'Pay me link',
     headline: 'Get paid with one link',
@@ -17,6 +54,7 @@ export const READY_ADS = [
     caption: 'Stop sending account numbers up and down 😅\n\nWith ZAPPI PAY, create a Pay-me link, share it on WhatsApp, and get paid straight into your wallet. Free and instant ⚡\n\n👉 www.zappipay.com.ng\n#ZappiPay #PayMeLink #GetPaid #Naija',
   },
   {
+    group: 'new',
     key: 'split-bill',
     name: 'Split a bill',
     headline: 'Split the bill, no wahala',
@@ -31,6 +69,7 @@ export const READY_ADS = [
     caption: '"I go send am later" — we know that one 😂\n\nSplit any bill on ZAPPI PAY: everyone gets a link, pays their share, and you see who has paid. No more chasing people 🙌\n\n👉 www.zappipay.com.ng\n#ZappiPay #SplitTheBill #Naija',
   },
   {
+    group: 'new',
     key: 'group-gift',
     name: 'Group gift',
     headline: 'Chip in for a group gift',
@@ -45,6 +84,7 @@ export const READY_ADS = [
     caption: 'Birthday, wedding or send-forth loading? 🎉\n\nStart a group gift on ZAPPI PAY, share one link, and watch the contributions come in. Everyone can see the total 💛\n\n👉 www.zappipay.com.ng\n#ZappiPay #GroupGift #Owambe',
   },
   {
+    group: 'new',
     key: 'car-insurance',
     name: 'Car insurance',
     headline: 'Car papers? Insurance in minutes',
@@ -59,6 +99,7 @@ export const READY_ADS = [
     caption: 'No more running around for car papers 🚗💨\n\nBuy third-party motor insurance on ZAPPI PAY in minutes — for cars, buses, keke and bikes. Your certificate comes straight to your email ✅\n\n👉 www.zappipay.com.ng\n#ZappiPay #CarInsurance #ThirdPartyInsurance',
   },
   {
+    group: 'new',
     key: 'exam-pins',
     name: 'Bulk WAEC PINs',
     headline: 'WAEC PINs in bulk',
@@ -73,6 +114,7 @@ export const READY_ADS = [
     caption: 'Schools, cyber cafés and agents 📢\n\nBuy up to 50 WAEC result checker PINs at once on ZAPPI PAY, then print them neatly on A4 or your POS printer 🖨️ Agent prices apply.\n\n👉 www.zappipay.com.ng\n#ZappiPay #WAEC #ResultChecker #Schools',
   },
   {
+    group: 'new',
     key: 'jamb-pin',
     name: 'JAMB PIN',
     headline: 'JAMB PIN without stress',
@@ -87,3 +129,5 @@ export const READY_ADS = [
     caption: 'JAMB registration loading? 📚\n\nBuy your UTME PIN on ZAPPI PAY: enter your Profile ID, we confirm your name, and your PIN comes instantly. No queue, no stress ✅\n\n👉 www.zappipay.com.ng\n#ZappiPay #JAMB #UTME',
   },
 ];
+
+export const ALL_READY_ADS = [...READY_ADS, ...CORE_ADS];

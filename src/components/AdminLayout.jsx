@@ -28,6 +28,7 @@ const TABS = [
   { to: '/admin/contests', label: '🏆 Referral Contests' },
   { to: '/admin/ads', label: '📣 In-app Ads' },
   { to: '/admin/ad-studio', label: '🎨 Ad Studio' },
+  { to: '/admin/circles', label: '🔄 Ajo Circles' },
   { to: '/admin/feedback', label: '⭐ Feedback' },
   { to: '/admin/radar', label: '🔭 Radar' },
   { to: '/admin/security', label: '🛡️ Security' },

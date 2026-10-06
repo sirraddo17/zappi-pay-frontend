@@ -27,6 +27,20 @@ export const TOPICS = [
     actions: [{ label: 'Request money', to: '/requests' }],
   },
   {
+    id: 'ajo-circle',
+    title: 'Ajo Circle (group contributions)',
+    keywords: ['ajo', 'esusu', 'adashe', 'isusu', 'thrift', 'contribution group', 'rotating savings', 'circle', 'packing number', 'my turn', 'payout delayed'],
+    answer: 'More → Ajo Circle: save with people you trust. Everyone pays the same amount every day, week or month — it’s taken from your wallet automatically — and each period one member receives the whole pot, in payout-number order. The pot is locked until everyone has paid; late payments get a late fee and a strike. Read the agreement before you join.',
+    actions: [{ label: 'Ajo Circle', to: '/circles' }],
+  },
+  {
+    id: 'cashback-balance',
+    title: 'Using my cashback',
+    keywords: ['cashback', 'use cashback', 'cash back balance', 'where is my cashback'],
+    answer: 'Cashback is kept in its own balance (Wallet → 🎁 Cashback). When you buy, switch on “Use cashback” to pay less — up to a set % of each purchase; the rest stays for next time. Cashback can’t be sent or withdrawn.',
+    actions: [{ label: 'Wallet', to: '/wallet' }],
+  },
+  {
     id: 'insurance',
     title: 'Car insurance',
     keywords: ['insurance', 'third party', 'car papers', 'vehicle insurance', 'keke insurance', 'okada insurance'],

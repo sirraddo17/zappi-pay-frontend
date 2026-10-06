@@ -279,6 +279,27 @@ export const approveFunding = (id) => adminRequest(`/api/admin/wallet/${id}/appr
 export const rejectFunding = (id) => adminRequest(`/api/admin/wallet/${id}/reject`, { method: 'POST' });
 
 // --- Admin: orders & audit log ---
+// --- Ajo Circle ---
+export const getCircles = () => request('/api/circles');
+export const createCircle = (data) => request('/api/circles', { method: 'POST', body: JSON.stringify(data) });
+export const circleAgreementPreview = (data) => request('/api/circles/agreement-preview', { method: 'POST', body: JSON.stringify(data) });
+export const previewCircle = (code) => request(`/api/circles/join/${encodeURIComponent(code)}`);
+export const joinCircle = (code, data) => request(`/api/circles/join/${encodeURIComponent(code)}`, { method: 'POST', body: JSON.stringify(data) });
+export const getCircle = (id) => request(`/api/circles/${encodeURIComponent(id)}`);
+export const inviteToCircle = (id, identifier) => request(`/api/circles/${encodeURIComponent(id)}/invite`, { method: 'POST', body: JSON.stringify({ identifier }) });
+export const leaveCircle = (id) => request(`/api/circles/${encodeURIComponent(id)}/leave`, { method: 'POST' });
+export const orderCircle = (id, data) => request(`/api/circles/${encodeURIComponent(id)}/order`, { method: 'POST', body: JSON.stringify(data) });
+export const startCircle = (id, auth) => request(`/api/circles/${encodeURIComponent(id)}/start`, { method: 'POST', body: JSON.stringify(auth || {}) });
+export const cancelCircle = (id) => request(`/api/circles/${encodeURIComponent(id)}/cancel`, { method: 'POST' });
+export const requestCircleRelease = (id, data) => request(`/api/circles/${encodeURIComponent(id)}/release`, { method: 'POST', body: JSON.stringify(data) });
+export const appealCircleBan = (data) => request('/api/circles/appeal', { method: 'POST', body: JSON.stringify(data) });
+export const getAdminCircles = () => adminRequest('/api/admin/circles');
+export const getAdminCircle = (id) => adminRequest(`/api/admin/circles/${encodeURIComponent(id)}`);
+export const reviewCircleRelease = (id, data) => adminRequest(`/api/admin/circles/releases/${encodeURIComponent(id)}`, { method: 'POST', body: JSON.stringify(data) });
+export const reviewCircleAppeal = (id, data) => adminRequest(`/api/admin/circles/appeals/${encodeURIComponent(id)}`, { method: 'POST', body: JSON.stringify(data) });
+export const unbanCircleMember = (customerId) => adminRequest(`/api/admin/circles/unban/${encodeURIComponent(customerId)}`, { method: 'POST' });
+export const stopCircle = (id, reason) => adminRequest(`/api/admin/circles/${encodeURIComponent(id)}/stop`, { method: 'POST', body: JSON.stringify({ reason }) });
+export const getCashback = () => request('/api/wallet/cashback');
 export const startCardPayment = (amount) => request('/api/wallet/card/start', { method: 'POST', body: JSON.stringify({ amount }) });
 export const verifyCardPayment = (txRef) => request('/api/wallet/card/verify', { method: 'POST', quiet: true, body: JSON.stringify({ txRef }) });
 export const getFundingMethods = () => adminRequest('/api/admin/funding-methods');
