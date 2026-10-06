@@ -15,7 +15,7 @@ import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
-import ServiceNotices from '../components/ServiceNotices';
+import ServiceNotices, { useAppInfo } from '../components/ServiceNotices';
 import LoyaltyCard from '../components/LoyaltyCard';
 import PushToggle from '../components/PushToggle';
 import { LogoIcon, Wordmark } from '../components/Logo';
@@ -196,6 +196,7 @@ export default function Dashboard() {
 
       <ServiceNotices generalOnly />
       <RenewalsCard />
+      <DailyRewardsHome />
 
       {banners.filter((b) => !dismissed.includes(b.id)).map((b) => {
         const st = BANNER_STYLES[b.type] || BANNER_STYLES.INFO;
@@ -400,5 +401,17 @@ export default function Dashboard() {
 
       <BottomNav />
     </div>
+  );
+}
+
+function DailyRewardsHome() {
+  const appInfo = useAppInfo();
+  if (!appInfo?.features?.dailyRewards) return null;
+  return (
+    <Link to="/rewards" className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit' }}>
+      <span style={{ fontSize: 28 }}>🎁</span>
+      <span style={{ flex: 1 }}><b>Daily rewards</b><br /><small style={{ color: 'var(--slate-400)' }}>Check in & answer today’s question for cashback</small></span>
+      <span style={{ color: 'var(--purple)' }}>→</span>
+    </Link>
   );
 }

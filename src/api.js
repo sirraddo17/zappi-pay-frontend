@@ -279,6 +279,53 @@ export const approveFunding = (id) => adminRequest(`/api/admin/wallet/${id}/appr
 export const rejectFunding = (id) => adminRequest(`/api/admin/wallet/${id}/reject`, { method: 'POST' });
 
 // --- Admin: orders & audit log ---
+// --- New features ---
+const post = (url, data) => request(url, { method: 'POST', body: JSON.stringify(data || {}) });
+export const getSprayEvents = () => request('/api/spray');
+export const createSprayEvent = (d) => post('/api/spray', d);
+export const getSprayLive = (code, since) => request(`/api/spray/${encodeURIComponent(code)}/live${since ? `?since=${encodeURIComponent(since)}` : ''}`);
+export const startSpraySession = (code, d) => post(`/api/spray/${encodeURIComponent(code)}/session`, d);
+export const sprayMoney = (code, d) => request(`/api/spray/${encodeURIComponent(code)}/gift`, { method: 'POST', quiet: true, body: JSON.stringify(d) });
+export const closeSprayEvent = (code) => post(`/api/spray/${encodeURIComponent(code)}/close`);
+export const getDuesGroups = () => request('/api/dues');
+export const createDuesGroup = (d) => post('/api/dues', d);
+export const previewDues = (code) => request(`/api/dues/join/${encodeURIComponent(code)}`);
+export const joinDues = (code) => post(`/api/dues/join/${encodeURIComponent(code)}`);
+export const getDuesGroup = (id, period) => request(`/api/dues/${encodeURIComponent(id)}${period ? `?period=${encodeURIComponent(period)}` : ''}`);
+export const payDues = (id, d) => post(`/api/dues/${encodeURIComponent(id)}/pay`, d);
+export const setDuesAutoPay = (id, d) => post(`/api/dues/${encodeURIComponent(id)}/autopay`, d);
+export const remindDues = (id) => post(`/api/dues/${encodeURIComponent(id)}/remind`);
+export const leaveDues = (id) => post(`/api/dues/${encodeURIComponent(id)}/leave`);
+export const getPayForMes = () => request('/api/pay-for-me');
+export const createPayForMe = (d) => post('/api/pay-for-me', d);
+export const viewPayForMe = (t) => request(`/api/pay-for-me/${encodeURIComponent(t)}`);
+export const payPayForMe = (t, d) => post(`/api/pay-for-me/${encodeURIComponent(t)}/pay`, d);
+export const cancelPayForMe = (t) => post(`/api/pay-for-me/${encodeURIComponent(t)}/cancel`);
+export const getLightPots = () => request('/api/shared-light');
+export const createLightPot = (d) => post('/api/shared-light', d);
+export const previewLightPot = (code) => request(`/api/shared-light/join/${encodeURIComponent(code)}`);
+export const joinLightPot = (code) => post(`/api/shared-light/join/${encodeURIComponent(code)}`);
+export const getLightPot = (id) => request(`/api/shared-light/${encodeURIComponent(id)}`);
+export const payLightPot = (id, d) => post(`/api/shared-light/${encodeURIComponent(id)}/pay`, d);
+export const buyLightNow = (id) => post(`/api/shared-light/${encodeURIComponent(id)}/buy`);
+export const closeLightPot = (id) => post(`/api/shared-light/${encodeURIComponent(id)}/close`);
+export const getSafeDeals = () => request('/api/safebuy');
+export const createSafeDeal = (d) => post('/api/safebuy', d);
+export const viewSafeDeal = (c) => request(`/api/safebuy/${encodeURIComponent(c)}`);
+export const safeDealAction = (c, action, d) => post(`/api/safebuy/${encodeURIComponent(c)}/${action}`, d);
+export const getPayroll = () => request('/api/payroll');
+export const addPayrollStaff = (d) => post('/api/payroll/staff', d);
+export const updatePayrollStaff = (id, d) => request(`/api/payroll/staff/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(d) });
+export const runPayroll = (d) => post('/api/payroll/run', d);
+export const getDailyRewards = () => request('/api/rewards/daily');
+export const dailyCheckin = () => post('/api/rewards/daily/checkin');
+export const dailyQuiz = (choice) => post('/api/rewards/daily/quiz', { choice });
+export const getAdminFeatures = () => adminRequest('/api/admin/features');
+export const switchAdminFeature = (key, d) => adminRequest(`/api/admin/features/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify(d) });
+export const saveFeaturesConfig = (d) => adminRequest('/api/admin/features-config', { method: 'PUT', body: JSON.stringify(d) });
+export const resolveSafeDeal = (code, d) => adminRequest(`/api/admin/safebuy/${encodeURIComponent(code)}/resolve`, { method: 'POST', body: JSON.stringify(d) });
+export const getBankList = () => request('/api/banks');
+
 // --- Ajo Circle ---
 export const getCircles = () => request('/api/circles');
 export const createCircle = (data) => request('/api/circles', { method: 'POST', body: JSON.stringify(data) });

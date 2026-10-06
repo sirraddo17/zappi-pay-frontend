@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import GiftForm from '../components/GiftForm';
 import { currentShop, forgetShop } from '../lib/shopRef';
 import { useAuth } from '../context/AuthContext';
-import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo } from '../api';
+import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo, createPayForMe } from '../api';
 import { cached } from '../lib/cache';
 import PinConfirm from '../components/PinConfirm';
 import ServiceNotices, { useAppInfo, pausedFor } from '../components/ServiceNotices';
@@ -160,6 +160,8 @@ export default function Buy() {
   const [promoMsg, setPromoMsg] = useState('');
   const [promoOpen, setPromoOpen] = useState(false);
   const appInfo = useAppInfo();
+  const [askLink, setAskLink] = useState(null);
+  const [asking, setAsking] = useState(false);
 
   useEffect(() => {
     getPricing().then(setPricing).catch(() => setPricing(null));
@@ -334,6 +336,18 @@ export default function Buy() {
       return;
     }
     setConfirmOpen(true);
+  }
+
+  // Pay It For Me: same details, but someone else pays from their wallet.
+  async function askSomeone() {
+    setError('');
+    if (!providerId || !recipient.trim() || !amount) { setError('Fill in the number and amount first, then ask someone to pay.'); return; }
+    if (mustVerify && !verifiedName) { setError('Tap “Verify” first so the right name shows.'); return; }
+    setAsking(true);
+    try {
+      const r = await createPayForMe({ service: config.backendService, serviceID: providerId, variationCode: config.needsVariation ? variationCode : undefined, billersCode: recipient.trim(), amount: config.needsVariation ? undefined : amount, meterType: config.needsType ? billType : undefined, planName: selectedVariation?.name });
+      setAskLink({ link: `${window.location.origin}/p/${r.request.token}`, price: r.request.price, label: r.request.label });
+    } catch (e) { setError(e.message); } finally { setAsking(false); }
   }
 
   // Runs once the customer has entered their PIN / used biometrics.
@@ -635,6 +649,19 @@ export default function Buy() {
         <button className="btn" type="submit" disabled={submitting || !amount || Boolean(pausedFor(appInfo, config.backendService))}>
           {pausedFor(appInfo, config.backendService) ? 'Paused for maintenance' : submitting ? t('Processing…') : `${t('Pay {amount}', { amount: naira(payTotal) })}${repeatOn ? ' & schedule' : ''}`}
         </button>
+        {appInfo?.features?.payForMe && ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'INTERNET', 'EDUCATION'].includes(config.backendService) && (
+          <button type="button" className="btn btn-secondary" style={{ marginTop: 8 }} disabled={asking || !amount} onClick={askSomeone}>{asking ? 'Creating link…' : '🙏 Ask someone to pay'}</button>
+        )}
+        {askLink && (
+          <div style={{ marginTop: 10, padding: 12, borderRadius: 10, background: 'rgba(124,58,237,0.1)', border: '1px solid var(--purple)', fontSize: 14 }}>
+            <b>Link ready ✓</b> — send it to anyone with ZAPPI PAY. When they pay {askLink.price ? naira(askLink.price) : ''}, your {askLink.label} is delivered straight to you.
+            <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+              <button type="button" className="btn" style={{ width: 'auto' }} onClick={() => navigator.clipboard?.writeText(askLink.link)}>Copy link</button>
+              <a className="btn btn-secondary" style={{ width: 'auto', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`Please help me pay for my ${askLink.label} on ZAPPI PAY 🙏 It goes straight to me: ${askLink.link}`)}`}>WhatsApp</a>
+              <Link to="/pay-for-me" style={{ color: 'var(--purple)', alignSelf: 'center' }}>My requests →</Link>
+            </div>
+          </div>
+        )}
       </form>
 
       <PinConfirm

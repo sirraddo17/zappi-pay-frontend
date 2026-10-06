@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getFestivals, updateSettings } from '../../api';
-import { READY_ADS, CORE_ADS } from '../../lib/readyAds';
+import { READY_ADS, CORE_ADS, FEATURE_ADS } from '../../lib/readyAds';
 
 const GROUP = { christian: '✝️', muslim: '🌙', national: '🇳🇬', zappi: '💜' };
 const fmt = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
@@ -74,6 +74,10 @@ export default function FestivalPanel({ onOpen, openId, onAi }) {
         <div style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 4px' }}>🆕 New</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {READY_ADS.map((a) => <button key={a.key} type="button" className={openId === a.key ? 'btn' : 'btn btn-secondary'} style={btn} onClick={() => onOpen(a, a.key)}>{a.emoji} {a.name}</button>)}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--slate-400)', margin: '10px 0 4px' }}>🧩 New features — post only once switched on in Admin → New features</div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {FEATURE_ADS.map((a) => <button key={a.key} type="button" className={openId === a.key ? 'btn' : 'btn btn-secondary'} style={btn} onClick={() => onOpen(a, a.key)}>{a.emoji} {a.name}</button>)}
         </div>
         <div style={{ fontSize: 12, color: 'var(--slate-400)', margin: '10px 0 4px' }}>Everyday services</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

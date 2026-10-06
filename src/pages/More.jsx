@@ -6,7 +6,14 @@ import { useAppInfo } from '../components/ServiceNotices';
 
 // Home → More. New services go here so the home screen stays short.
 const ITEMS = [
-  { to: '/circles', label: 'Ajo Circle', note: 'Save together: ajo, esusu, adashe — paid in turn', emoji: '🔄', bg: '#4c1d95' },
+  { to: '/circles', label: 'Ajo Circle', note: 'Save together: ajo, esusu, adashe — paid in turn', emoji: '🔄', bg: '#4c1d95', circles: true },
+  { to: '/spray', label: 'Owambe Spray', note: 'Guests spray money from their phones at your party', emoji: '💃', bg: '#9d174d', feature: 'spray' },
+  { to: '/dues', label: 'Association Dues', note: 'Estate, church, alumni & club dues with reminders', emoji: '🏘️', bg: '#155e75', feature: 'dues' },
+  { to: '/pay-for-me', label: 'Pay It For Me', note: 'Ask someone to pay your light, data or TV', emoji: '🙏', bg: '#6d28d9', feature: 'payForMe' },
+  { to: '/shared-light', label: 'Shared Light', note: 'Housemates fill one pot — the token buys itself', emoji: '💡', bg: '#a16207', feature: 'sharedLight' },
+  { to: '/safebuy', label: 'SafeBuy', note: 'Buy & sell online — money held till delivery', emoji: '🛡️', bg: '#065f46', feature: 'safeBuy' },
+  { to: '/payroll', label: 'Payroll', note: 'Pay your staff in one tap', emoji: '💼', bg: '#334155', feature: 'payroll' },
+  { to: '/rewards', label: 'Daily rewards', note: 'Check in & answer a question for cashback', emoji: '🎁', bg: '#be185d', feature: 'dailyRewards' },
   { to: '/requests', label: 'Request money', note: 'Pay me links, split bills, group gifts', emoji: '💸', bg: '#1f6b4a' },
   { to: '/international', label: 'International airtime', note: 'Top up phones abroad, pay in naira', emoji: '🌍', bg: '#0f4c8c' },
   { to: '/insurance', label: 'Car insurance', note: 'Third-party motor insurance in minutes', emoji: '🚗', bg: '#8c3b0f' },
@@ -22,7 +29,7 @@ const ITEMS = [
 export default function More() {
   const t = useLang();
   const appInfo = useAppInfo();
-  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime));
+  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime) && (!s.feature || appInfo?.features?.[s.feature]) && (!s.circles || appInfo?.circles !== false));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
       <div className="page-header">

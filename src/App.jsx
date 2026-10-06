@@ -1,3 +1,4 @@
+import { setAfterLogin } from './lib/afterLogin';
 import { lazy as reactLazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -40,6 +41,23 @@ const Circles = lazy(() => import('./pages/Circles'));
 const CircleDetail = lazy(() => import('./pages/CircleDetail'));
 const CircleJoin = lazy(() => import('./pages/CircleJoin'));
 const AdminCircles = lazy(() => import('./pages/admin/AdminCircles'));
+const AdminFeatures = lazy(() => import('./pages/admin/AdminFeatures'));
+const Spray = lazy(() => import('./pages/features/Spray'));
+const SprayEvent = lazy(() => import('./pages/features/Spray').then((m) => ({ default: m.SprayEvent })));
+const SprayHost = lazy(() => import('./pages/features/Spray').then((m) => ({ default: m.SprayHost })));
+const SprayScreen = lazy(() => import('./pages/features/Spray').then((m) => ({ default: m.SprayScreen })));
+const Dues = lazy(() => import('./pages/features/Dues'));
+const DuesJoin = lazy(() => import('./pages/features/Dues').then((m) => ({ default: m.DuesJoin })));
+const DuesDetail = lazy(() => import('./pages/features/Dues').then((m) => ({ default: m.DuesDetail })));
+const PayForMe = lazy(() => import('./pages/features/PayForMe'));
+const PayForMeLink = lazy(() => import('./pages/features/PayForMe').then((m) => ({ default: m.PayForMeLink })));
+const SharedLight = lazy(() => import('./pages/features/SharedLight'));
+const SharedLightJoin = lazy(() => import('./pages/features/SharedLight').then((m) => ({ default: m.SharedLightJoin })));
+const SharedLightDetail = lazy(() => import('./pages/features/SharedLight').then((m) => ({ default: m.SharedLightDetail })));
+const SafeBuy = lazy(() => import('./pages/features/SafeBuy'));
+const SafeBuyDeal = lazy(() => import('./pages/features/SafeBuy').then((m) => ({ default: m.SafeBuyDeal })));
+const Payroll = lazy(() => import('./pages/features/Payroll'));
+const DailyRewards = lazy(() => import('./pages/features/DailyRewards'));
 const Bulk = lazy(() => import('./pages/Bulk'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const Notifications = lazy(() => import('./pages/Notifications'));
@@ -100,7 +118,7 @@ function RequireCustomer({ children }) {
   const { customer, loading } = useAuth();
   const location = useLocation();
   if (loading) return <div className="page-loading">Loading…</div>;
-  if (!customer) return <Navigate to="/login" replace />;
+  if (!customer) { setAfterLogin(location.pathname); return <Navigate to="/login" replace />; }
   // After support issues a temporary password, nothing else in the
   // app is reachable until the customer sets their own.
   if (customer.mustChangePassword && location.pathname !== '/change-password') {
@@ -158,6 +176,22 @@ export default function App() {
           <Route path="/r/:token" element={<RequestLink />} />
           <Route path="/circle/:code" element={<CircleJoin />} />
           <Route path="/circles" element={<RequireCustomer><Circles /></RequireCustomer>} />
+          <Route path="/spray" element={<RequireCustomer><Spray /></RequireCustomer>} />
+          <Route path="/spray/:code" element={<RequireCustomer><SprayEvent /></RequireCustomer>} />
+          <Route path="/spray/:code/host" element={<RequireCustomer><SprayHost /></RequireCustomer>} />
+          <Route path="/spray/:code/screen" element={<SprayScreen />} />
+          <Route path="/dues" element={<RequireCustomer><Dues /></RequireCustomer>} />
+          <Route path="/dues/join/:code" element={<RequireCustomer><DuesJoin /></RequireCustomer>} />
+          <Route path="/dues/:id" element={<RequireCustomer><DuesDetail /></RequireCustomer>} />
+          <Route path="/pay-for-me" element={<RequireCustomer><PayForMe /></RequireCustomer>} />
+          <Route path="/p/:token" element={<RequireCustomer><PayForMeLink /></RequireCustomer>} />
+          <Route path="/shared-light" element={<RequireCustomer><SharedLight /></RequireCustomer>} />
+          <Route path="/shared-light/join/:code" element={<RequireCustomer><SharedLightJoin /></RequireCustomer>} />
+          <Route path="/shared-light/:id" element={<RequireCustomer><SharedLightDetail /></RequireCustomer>} />
+          <Route path="/safebuy" element={<RequireCustomer><SafeBuy /></RequireCustomer>} />
+          <Route path="/safebuy/:code" element={<RequireCustomer><SafeBuyDeal /></RequireCustomer>} />
+          <Route path="/payroll" element={<RequireCustomer><Payroll /></RequireCustomer>} />
+          <Route path="/rewards" element={<RequireCustomer><DailyRewards /></RequireCustomer>} />
           <Route path="/circles/:id" element={<RequireCustomer><CircleDetail /></RequireCustomer>} />
           <Route path="/shop/:username" element={<Shop />} />
           <Route path="/profit-book" element={<RequireCustomer><ProfitBook /></RequireCustomer>} />
@@ -203,6 +237,7 @@ export default function App() {
           <Route path="/admin/radar" element={<RequireAdmin><AdminRadar /></RequireAdmin>} />
           <Route path="/admin/security" element={<RequireAdmin><AdminSecurity /></RequireAdmin>} />
           <Route path="/admin/circles" element={<RequireAdmin><AdminCircles /></RequireAdmin>} />
+          <Route path="/admin/features" element={<RequireAdmin><AdminFeatures /></RequireAdmin>} />
           <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
