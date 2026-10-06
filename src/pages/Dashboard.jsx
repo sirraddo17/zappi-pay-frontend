@@ -15,7 +15,7 @@ import { AdsCarousel, AdPopup, DEFAULT_BOTTOM_SLIDES } from '../components/Ads';
 import { getWalletBalance, getWalletTransactions, getNotifications, getPricing, getActiveBroadcasts, getReferralInfo, getOrders } from '../api';
 import { buyAgainLink, SERVICE_LABEL } from '../lib/repeat';
 import BottomNav from '../components/BottomNav';
-import ServiceNotices, { useFeatures } from '../components/ServiceNotices';
+import ServiceNotices, { useFeatures, useAppInfo } from '../components/ServiceNotices';
 import LoyaltyCard from '../components/LoyaltyCard';
 import PushToggle from '../components/PushToggle';
 import { LogoIcon, Wordmark } from '../components/Logo';
@@ -95,6 +95,10 @@ function writeDismissed(ids) {
 
 export default function Dashboard() {
   const t = useLang();
+  const feat = useFeatures();
+  const info = useAppInfo();
+  // "Send Money" only shows when sending to users or to banks is switched on.
+  const services = SERVICES.filter((s) => s.slug !== 'transfer' || feat.sendMoney || info?.bankTransfer);
   const lite = useLite();
   const { customer } = useAuth();
   const [balance, setBalance] = useState(customer?.walletBalance ?? 0);
@@ -271,7 +275,7 @@ export default function Dashboard() {
 
       <div className="section-label">{t('Services')}</div>
       <div className="service-grid">
-        {SERVICES.map((s) => {
+        {services.map((s) => {
           const Icon = s.Icon;
           const off = s.service ? Number(discounts[s.service] || 0) : 0;
           return (

@@ -19,10 +19,12 @@ import SecurityDetailsCard from '../components/SecurityDetailsCard';
 import SocialLinks from '../components/SocialLinks';
 import ThemeToggle from '../components/ThemeToggle';
 import { passwordIsStrong } from '../lib/passwordRules';
+import { useFeatures } from '../components/ServiceNotices';
 
 const MAX_AVATAR_BYTES = 1_500_000;
 
 export default function Profile() {
+  const features = useFeatures();
   const t = useLang();
   const { customer, logout, refreshCustomer } = useAuth();
   const navigate = useNavigate();
@@ -371,6 +373,7 @@ export default function Profile() {
         ))}
       </div>
 
+      {features.family && (
       <Link to="/family" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
         <span>
           <strong style={{ fontSize: 15 }}>👨‍👩‍👧 Family</strong>
@@ -378,6 +381,7 @@ export default function Profile() {
         </span>
         <span style={{ color: 'var(--purple)' }}>›</span>
       </Link>
+      )}
       <AgentCard />
       {customer?.isAgent && (
         <Link to="/profit-book" className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>

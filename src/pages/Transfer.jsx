@@ -7,6 +7,7 @@ import BottomNav from '../components/BottomNav';
 import PinConfirm from '../components/PinConfirm';
 import BankTransferForm from '../components/BankTransferForm';
 import QrScanner, { usernameFromQr } from '../components/QrScanner';
+import { useFeatures } from '../components/ServiceNotices';
 import MyQr from '../components/MyQr';
 
 export default function Transfer() {
@@ -14,6 +15,10 @@ export default function Transfer() {
   const navigate = useNavigate();
 
   const [tab, setTab] = useState('user');
+  const feat = useFeatures();
+  const userOn = Boolean(feat.sendMoney);
+  // Sending to other users is switched off: only the bank tab shows.
+  const shown = userOn ? tab : 'bank';
 
   const [identifier, setIdentifier] = useState('');
   const [recipient, setRecipient] = useState(null);
@@ -105,16 +110,16 @@ export default function Transfer() {
           &larr; Back
         </Link>
         <h1>Send Money</h1>
-        <p>Transfer to another ZappiPay user or a bank account</p>
+        <p>{userOn ? 'Transfer to another ZappiPay user or a bank account' : 'Transfer to a bank account'}</p>
       </div>
 
       <TestModeBanner />
 
-      <div style={{ display: 'flex', gap: 8, margin: '0 16px 16px' }}>
+      {userOn && <div style={{ display: 'flex', gap: 8, margin: '0 16px 16px' }}>
         <button
           type="button"
           onClick={() => { setTab('user'); setError(''); setSuccess(''); }}
-          className={tab === 'user' ? 'btn' : 'btn-secondary btn'}
+          className={shown === 'user' ? 'btn' : 'btn-secondary btn'}
           style={{ flex: 1 }}
         >
           ZappiPay User
@@ -122,17 +127,17 @@ export default function Transfer() {
         <button
           type="button"
           onClick={() => { setTab('bank'); setError(''); setSuccess(''); }}
-          className={tab === 'bank' ? 'btn' : 'btn-secondary btn'}
+          className={shown === 'bank' ? 'btn' : 'btn-secondary btn'}
           style={{ flex: 1 }}
         >
           Bank Account
         </button>
-      </div>
+      </div>}
 
-      {tab === 'user' && error && <p className="error-text" style={{ margin: '0 16px 12px' }}>{error}</p>}
-      {tab === 'user' && success && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{success}</p>}
+      {shown === 'user' && error && <p className="error-text" style={{ margin: '0 16px 12px' }}>{error}</p>}
+      {shown === 'user' && success && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{success}</p>}
 
-      {tab === 'user' ? (
+      {shown === 'user' ? (
         <div className="card" style={{ margin: '0 16px 90px' }}>
           {!recipient ? (
             <form onSubmit={handleVerify}>

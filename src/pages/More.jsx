@@ -14,7 +14,7 @@ const ITEMS = [
   { to: '/safebuy', label: 'SafeBuy', note: 'Buy & sell online — money held till delivery', emoji: '🛡️', bg: '#065f46', feature: 'safeBuy' },
   { to: '/payroll', label: 'Payroll', note: 'Pay your staff in one tap', emoji: '💼', bg: '#334155', feature: 'payroll' },
   { to: '/rewards', label: 'Daily rewards', note: 'Check in & answer a question for cashback', emoji: '🎁', bg: '#be185d', feature: 'dailyRewards' },
-  { to: '/requests', label: 'Request money', note: 'Pay me links, split bills, group gifts', emoji: '💸', bg: '#1f6b4a' },
+  { to: '/requests', label: 'Request money', note: 'Pay me links, split bills, group gifts', emoji: '💸', bg: '#1f6b4a', feature: 'requests' },
   { to: '/international', label: 'International airtime', note: 'Top up phones abroad, pay in naira', emoji: '🌍', bg: '#0f4c8c' },
   { to: '/insurance', label: 'Car insurance', note: 'Third-party motor insurance in minutes', emoji: '🚗', bg: '#8c3b0f' },
   { to: '/airtime-cash', label: 'Airtime to Cash', note: 'Turn extra airtime into wallet money', Icon: FundIcon, bg: '#5b3fa8' },
@@ -23,7 +23,7 @@ const ITEMS = [
   { to: '/bulk', label: 'Bulk airtime & data', note: 'Top up up to 50 numbers at once', Icon: PhoneIcon, bg: '#863bff' },
   { to: '/deals', label: 'Best data deals', note: 'The most data for your budget', Icon: WifiIcon, bg: '#7a5a10' },
   { to: '/refer', label: 'Refer & Earn', note: 'Invite friends and earn', emoji: '🎁', bg: '#a3316f' },
-  { to: '/family', label: 'Family wallet', note: 'Give family members money with limits', emoji: '👨‍👩‍👧', bg: '#1f6b4a' },
+  { to: '/family', label: 'Family wallet', note: 'Give family members money with limits', emoji: '👨‍👩‍👧', bg: '#1f6b4a', feature: 'family' },
 ];
 
 export default function More() {
