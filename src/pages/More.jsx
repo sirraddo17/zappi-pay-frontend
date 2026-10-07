@@ -18,6 +18,7 @@ const ITEMS = [
   { to: '/payroll', label: 'Payroll', note: 'Pay your staff in one tap', emoji: '💼', bg: '#334155', feature: 'payroll' },
   { to: '/rewards', label: 'Daily rewards', note: 'Check in & answer a question for cashback', emoji: '🎁', bg: '#be185d', feature: 'dailyRewards' },
   { to: '/requests', label: 'Request money', note: 'Pay me links, split bills, group gifts', emoji: '💸', bg: '#1f6b4a', feature: 'requests' },
+  { to: '/buy/betting', label: 'Bet Funding', note: 'Fund your betting wallet', emoji: '🏆', bg: '#a38a0a' },
   { to: '/international', label: 'International airtime', note: 'Top up phones abroad, pay in naira', emoji: '🌍', bg: '#0f4c8c' },
   { to: '/insurance', label: 'Car insurance', note: 'Third-party motor insurance in minutes', emoji: '🚗', bg: '#8c3b0f' },
   { to: '/airtime-cash', label: 'Airtime to Cash', note: 'Turn extra airtime into wallet money', Icon: FundIcon, bg: '#5b3fa8' },
@@ -33,7 +34,7 @@ export default function More() {
   const t = useLang();
   const appInfo = useAppInfo();
   const features = useFeatures();
-  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime) && (!s.feature || features[s.feature]));
+  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime) && (s.to !== '/buy/betting' || features.sendMoney || appInfo?.bankTransfer) && (!s.feature || features[s.feature]));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
       <div className="page-header">

@@ -100,7 +100,9 @@ export default function Dashboard() {
   const feat = useFeatures();
   const info = useAppInfo();
   // "Send Money" only shows when sending to users or to banks is switched on.
-  const services = SERVICES.filter((s) => s.slug !== 'transfer' || feat.sendMoney || info?.bankTransfer);
+  const all = SERVICES.filter((s) => s.slug !== 'transfer' || feat.sendMoney || info?.bankTransfer);
+  // Always 8 tiles with More pinned last, so nothing jumps when settings load.
+  const services = [...all.filter((s) => s.slug !== 'more').slice(0, 7), SERVICES.find((s) => s.slug === 'more')];
   const lite = useLite();
   const { customer } = useAuth();
   const [balance, setBalance] = useState(customer?.walletBalance ?? 0);
@@ -201,7 +203,7 @@ export default function Dashboard() {
       </div>
 
       <div className="service-grid four">
-        {services.slice(0, 8).map((s) => {
+        {services.map((s) => {
           const Icon = s.Icon;
           const off = s.service ? Number(discounts[s.service] || 0) : 0;
           return (
