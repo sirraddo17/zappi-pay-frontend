@@ -10,6 +10,7 @@ import VideoScriptPanel from '../../components/admin/VideoScriptPanel';
 import HeygenVideosPanel from '../../components/admin/HeygenVideosPanel';
 import WeekPlanPanel from '../../components/admin/WeekPlanPanel';
 import AiPictureBox from '../../components/admin/AiPictureBox';
+import StoryVideoPanel from '../../components/admin/StoryVideoPanel';
 
 const BLANK = { headline: 'Data finish? No wahala', highlight: 'No wahala', subtext: 'Top up MTN, Airtel, Glo & 9mobile in seconds', cta: 'Buy data', badges: ['Instant', 'Auto refunds'], emoji: '📶', theme: 'purple', caption: 'Data finish? No wahala 😄 Top up any network in seconds with ZAPPI PAY. 👉 www.zappipay.com.ng #ZappiPay #BuyData', link: '/buy/data' };
 
@@ -217,6 +218,7 @@ export default function AdminAdStudio() {
       </div>
 
       {ai?.adminEnabled && <WeekPlanPanel onOpen={(x) => { setDesigns([{ ...BLANK, ...x, badges: x.badges?.length ? x.badges : [], link: x.link || '' }]); setPick(0); (document.querySelector('main') || window).scrollTo({ top: 0, behavior: 'smooth' }); }} />}
+      <StoryVideoPanel />
       <VideoScriptPanel onHeygen={setHgDraft} />
       <HeygenVideosPanel draft={hgDraft} />
 

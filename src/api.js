@@ -649,3 +649,17 @@ export const viewPayRequest = (token) => request(`/api/pay-requests/public/${enc
 export const payPayRequest = (token, data) => request(`/api/pay-requests/${encodeURIComponent(token)}/pay`, { method: 'POST', quiet: true, body: JSON.stringify(data) });
 export const closePayRequest = (id) => request(`/api/pay-requests/${id}/close`, { method: 'POST' });
 export const remindPayRequest = (id) => request(`/api/pay-requests/${id}/remind`, { method: 'POST' });
+// Ad Studio → Story video: AI voiceover (mp3) for the whole script.
+export async function makeVoiceover(data) {
+  const token = localStorage.getItem('zappipay_admin_token');
+  const res = await fetch(`${API_URL}/api/admin/ai/voiceover`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok || !String(res.headers.get('content-type') || '').includes('audio')) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || 'Could not make the voiceover.');
+  }
+  return res.blob();
+}

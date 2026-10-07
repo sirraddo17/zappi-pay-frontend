@@ -22,7 +22,7 @@ const EMOJI_FONT = (px) => `${px}px "Noto Color Emoji", "Apple Color Emoji", "Se
 const clamp = (x) => Math.max(0, Math.min(1, x));
 const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
 
-function roundRect(ctx, x, y, w, h, r) {
+export function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.arcTo(x + w, y, x + w, y + h, r);
@@ -32,7 +32,7 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function drawLogo(ctx, x, y, s) {
+export function drawLogo(ctx, x, y, s) {
   const k = s / 300;
   ctx.save();
   ctx.translate(x, y);
