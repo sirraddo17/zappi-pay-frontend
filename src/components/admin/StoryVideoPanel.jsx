@@ -4,6 +4,7 @@ import { getOpenAiExtras, makeAdImage, makeVoiceover, getAdminAiStatus, makeStor
 import { THEMES, videoSupported } from '../../lib/adRender';
 import { SIZES, KINDS, TEMPLATE, drawScene, loadClip, loadImage, recordStory, sceneSeconds, totalSeconds, voiceScript, audioSeconds } from '../../lib/storyVideo';
 import { shareFile } from '../../lib/shareCard';
+import { STORY_TEMPLATES } from '../../lib/storyTemplates';
 
 const MAX_MB = 60;
 const newId = () => Math.random().toString(36).slice(2, 9);
@@ -42,7 +43,8 @@ export default function StoryVideoPanel() {
   const [out, setOut] = useState(null);
   const [aiOn, setAiOn] = useState(false);
   const [brief, setBrief] = useState({ topic: '', seconds: 30, language: 'en', tone: 'friendly' });
-  const [postCaption, setPostCaption] = useState('');
+  const [postCaption, setPostCaption] = useState(STORY_TEMPLATES[0].caption);
+  const [tpl, setTpl] = useState('easy');
   const preview = useRef(null);
   const mediaCache = useRef(new Map());
 
@@ -63,6 +65,7 @@ export default function StoryVideoPanel() {
       setVoiceText(voiceScript(r.scenes));
       setLang(brief.language);
       setPostCaption(r.postCaption || '');
+      setTpl('');
       setPick(0);
       setMsg({ ok: true, text: `✍️ ${r.scenes.length} scenes written${r.title ? ` — “${r.title}”` : ''}. Check every line is true, add pictures/clips, then make the voice.` });
     } catch (err) {
@@ -72,6 +75,23 @@ export default function StoryVideoPanel() {
     }
   }
   useEffect(() => () => { scenes.forEach((s) => s.media?.url && URL.revokeObjectURL(s.media.url)); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function loadTemplate(key) {
+    const t = STORY_TEMPLATES.find((x) => x.key === key);
+    if (!t) return;
+    if (scenes.some((x) => x.media) && !window.confirm('Load this ready-made video? The pictures/clips you added will be removed.')) return;
+    const list = t.scenes || TEMPLATE;
+    scenes.forEach((x) => x.media?.url && URL.revokeObjectURL(x.media.url));
+    if (voice?.url) URL.revokeObjectURL(voice.url);
+    setVoice(null);
+    setScenes(withIds(list));
+    setVoiceText(voiceScript(list));
+    setLang('en');
+    setPostCaption(t.caption);
+    setTpl(key);
+    setPick(0);
+    setMsg({ ok: true, text: `Loaded “${t.label.replace(/^\S+\s/, '')}”. Add your pictures and screen recordings, then make the voice.` });
+  }
 
   const total = useMemo(() => totalSeconds(scenes), [scenes]);
   const s = scenes[pick] || scenes[0];
@@ -252,10 +272,15 @@ export default function StoryVideoPanel() {
         <p style={{ ...small, margin: '0 0 10px' }}>✍️ Turn on the admin AI in <Link to="/admin/settings" style={{ color: 'var(--purple)' }}>Settings → AI Assistant</Link> and the AI can write the scenes for you from one line.</p>
       )}
 
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
+        <b style={{ fontSize: 14 }}>📚 Ready-made videos</b>
+        <select value={tpl} onChange={(e) => loadTemplate(e.target.value)} style={{ width: 'auto', flex: '1 1 220px' }} aria-label="Ready-made video">{tpl === '' && <option value="">✍️ Written by AI</option>}{STORY_TEMPLATES.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}</select>
+      </div>
+
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
         <select value={size} onChange={(e) => setSize(e.target.value)} style={{ width: 'auto' }} aria-label="Size">{Object.entries(SIZES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>
         <select value={theme} onChange={(e) => setTheme(e.target.value)} style={{ width: 'auto' }} aria-label="Colour">{Object.keys(THEMES).map((k) => <option key={k} value={k}>{k[0].toUpperCase() + k.slice(1)} colour</option>)}</select>
-        <button type="button" className="btn btn-secondary" style={mini} onClick={() => { if (window.confirm('Start again from the 30-second template?')) { setScenes(withIds(TEMPLATE)); setVoiceText(voiceScript(TEMPLATE)); setPostCaption(''); setPick(0); } }}>↺ Template</button>
+        <button type="button" className="btn btn-secondary" style={mini} onClick={() => { if (window.confirm('Start again from this ready-made video?')) loadTemplate(tpl || 'easy'); }}>↺ Start again</button>
         <span style={{ ...small, alignSelf: 'center' }}>{scenes.length} scenes · {total.toFixed(1).replace(/\.0$/, '')}s</span>
       </div>
 
@@ -342,6 +367,12 @@ export default function StoryVideoPanel() {
           {music && <><span style={small}>{music.name}</span><label style={{ ...small, display: 'flex', gap: 6, alignItems: 'center' }}>Volume<input type="range" min="0.05" max="0.8" step="0.05" value={musicVol} onChange={(e) => setMusicVol(Number(e.target.value))} style={{ width: 100 }} /></label><button type="button" className="btn btn-secondary" style={mini} onClick={() => setMusic(null)}>Remove</button></>}
         </div>
         <p style={{ ...small, margin: '4px 0 0' }}>Only use music you’re allowed to: royalty-free tracks (YouTube Audio Library, Pixabay Music) — or add a TikTok/Instagram sound when you post.</p>
+      </div>
+
+      <div style={{ borderTop: '1px solid var(--slate-800)', marginTop: 14, paddingTop: 12 }}>
+        <b style={{ fontSize: 14 }}>📝 Post caption</b>
+        <textarea rows={3} value={postCaption} onChange={(e) => setPostCaption(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'inherit', marginTop: 6 }} aria-label="Post caption" />
+        <button type="button" className="btn btn-secondary" style={mini} onClick={() => navigator.clipboard?.writeText(postCaption).then(() => setMsg({ ok: true, text: 'Caption copied — paste it when you post.' })).catch(() => {})}>📋 Copy caption</button>
       </div>
 
       {msg && <p style={{ fontSize: 13, color: msg.ok ? 'var(--green-500)' : 'var(--red-500)', margin: '10px 0 0' }}>{msg.text}</p>}
