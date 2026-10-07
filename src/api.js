@@ -663,3 +663,4 @@ export async function makeVoiceover(data) {
   }
   return res.blob();
 }
+export const makeStoryScenes = (data) => adminRequest('/api/admin/ai/story-scenes', { method: 'POST', body: JSON.stringify(data) });

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getOpenAiExtras, makeAdImage, makeVoiceover } from '../../api';
+import { getOpenAiExtras, makeAdImage, makeVoiceover, getAdminAiStatus, makeStoryScenes } from '../../api';
 import { THEMES, videoSupported } from '../../lib/adRender';
 import { SIZES, KINDS, TEMPLATE, drawScene, loadClip, loadImage, recordStory, sceneSeconds, totalSeconds, voiceScript, audioSeconds } from '../../lib/storyVideo';
 import { shareFile } from '../../lib/shareCard';
@@ -40,10 +40,37 @@ export default function StoryVideoPanel() {
   const [progress, setProgress] = useState(0);
   const [msg, setMsg] = useState(null);
   const [out, setOut] = useState(null);
+  const [aiOn, setAiOn] = useState(false);
+  const [brief, setBrief] = useState({ topic: '', seconds: 30, language: 'en', tone: 'friendly' });
+  const [postCaption, setPostCaption] = useState('');
   const preview = useRef(null);
   const mediaCache = useRef(new Map());
 
   useEffect(() => { getOpenAiExtras().then(setOx).catch(() => setOx(null)); }, []);
+  useEffect(() => { getAdminAiStatus().then((a) => setAiOn(Boolean(a?.adminEnabled))).catch(() => setAiOn(false)); }, []);
+
+  async function writeWithAi() {
+    if (!brief.topic.trim()) { setMsg({ ok: false, text: 'Type the service the video is about first.' }); return; }
+    if (scenes.some((x) => x.media) && !window.confirm('Replace the current scenes (and the pictures/clips you added) with new ones from the AI?')) return;
+    setBusy('write');
+    setMsg(null);
+    try {
+      const r = await makeStoryScenes(brief);
+      scenes.forEach((x) => x.media?.url && URL.revokeObjectURL(x.media.url));
+      if (voice?.url) URL.revokeObjectURL(voice.url);
+      setVoice(null);
+      setScenes(withIds(r.scenes));
+      setVoiceText(voiceScript(r.scenes));
+      setLang(brief.language);
+      setPostCaption(r.postCaption || '');
+      setPick(0);
+      setMsg({ ok: true, text: `✍️ ${r.scenes.length} scenes written${r.title ? ` — “${r.title}”` : ''}. Check every line is true, add pictures/clips, then make the voice.` });
+    } catch (err) {
+      setMsg({ ok: false, text: err.message });
+    } finally {
+      setBusy('');
+    }
+  }
   useEffect(() => () => { scenes.forEach((s) => s.media?.url && URL.revokeObjectURL(s.media.url)); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const total = useMemo(() => totalSeconds(scenes), [scenes]);
@@ -202,17 +229,33 @@ export default function StoryVideoPanel() {
     return <div className="card"><b>🎞️ Story video</b><p style={small}>This browser can’t make videos. Open Ad Studio in Chrome on a computer or an Android phone.</p></div>;
   }
 
-  const caption = `${scenes.map((x) => x.caption).filter(Boolean).slice(2, 5).join(' • ')} 👉 www.zappipay.com.ng #ZAPPIPAY #Nigeria #PayBills`;
+  const caption = postCaption || `${scenes.map((x) => x.caption).filter(Boolean).slice(2, 5).join(' • ')} 👉 www.zappipay.com.ng #ZAPPIPAY #Nigeria #PayBills`;
 
   return (
     <div className="card" style={{ marginTop: 16 }}>
       <b>🎞️ Story video — a full TikTok / Reels ad</b>
       <p style={{ ...small, margin: '4px 0 10px' }}>Join scenes into one video with captions, your logo, a voice and music. Use your own photos, phone screen recordings, HeyGen clips or AI pictures. Keep this tab open while it records (it takes as long as the video).</p>
 
+      {aiOn ? (
+        <div style={{ background: 'rgba(134,59,255,0.08)', border: '1px solid rgba(134,59,255,0.35)', borderRadius: 10, padding: 10, marginBottom: 12 }}>
+          <b style={{ fontSize: 14 }}>✍️ Write with AI</b>
+          <p style={{ ...small, margin: '2px 0 8px' }}>Say the service — the AI writes the scenes, captions, voice lines and picture ideas.</p>
+          <input value={brief.topic} onChange={(e) => setBrief({ ...brief, topic: e.target.value })} maxLength={300} placeholder="e.g. Print recharge cards for shop owners · Buy electricity token at night · WAEC result checker" aria-label="What the video is about" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); writeWithAi(); } }} />
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 6 }}>
+            <select value={brief.seconds} onChange={(e) => setBrief({ ...brief, seconds: Number(e.target.value) })} style={{ width: 'auto', fontSize: 12, padding: '4px 6px' }} aria-label="Length">{[15, 20, 30, 45, 60].map((n) => <option key={n} value={n}>{n} seconds</option>)}</select>
+            <select value={brief.language} onChange={(e) => setBrief({ ...brief, language: e.target.value })} style={{ width: 'auto', fontSize: 12, padding: '4px 6px' }} aria-label="Language"><option value="en">English</option><option value="pcm">Pidgin</option></select>
+            <select value={brief.tone} onChange={(e) => setBrief({ ...brief, tone: e.target.value })} style={{ width: 'auto', fontSize: 12, padding: '4px 6px' }} aria-label="Tone"><option value="friendly">Friendly</option><option value="funny">Funny</option><option value="hype">High-energy</option><option value="calm">Calm & trustworthy</option></select>
+            <button type="button" className="btn" style={mini} disabled={busy === 'write'} onClick={writeWithAi}>{busy === 'write' ? 'Writing…' : '✍️ Write the scenes'}</button>
+          </div>
+        </div>
+      ) : (
+        <p style={{ ...small, margin: '0 0 10px' }}>✍️ Turn on the admin AI in <Link to="/admin/settings" style={{ color: 'var(--purple)' }}>Settings → AI Assistant</Link> and the AI can write the scenes for you from one line.</p>
+      )}
+
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
         <select value={size} onChange={(e) => setSize(e.target.value)} style={{ width: 'auto' }} aria-label="Size">{Object.entries(SIZES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>
         <select value={theme} onChange={(e) => setTheme(e.target.value)} style={{ width: 'auto' }} aria-label="Colour">{Object.keys(THEMES).map((k) => <option key={k} value={k}>{k[0].toUpperCase() + k.slice(1)} colour</option>)}</select>
-        <button type="button" className="btn btn-secondary" style={mini} onClick={() => { if (window.confirm('Start again from the 30-second template?')) { setScenes(withIds(TEMPLATE)); setVoiceText(voiceScript(TEMPLATE)); setPick(0); } }}>↺ Template</button>
+        <button type="button" className="btn btn-secondary" style={mini} onClick={() => { if (window.confirm('Start again from the 30-second template?')) { setScenes(withIds(TEMPLATE)); setVoiceText(voiceScript(TEMPLATE)); setPostCaption(''); setPick(0); } }}>↺ Template</button>
         <span style={{ ...small, alignSelf: 'center' }}>{scenes.length} scenes · {total.toFixed(1).replace(/\.0$/, '')}s</span>
       </div>
 
