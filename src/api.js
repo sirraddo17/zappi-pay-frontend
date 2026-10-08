@@ -664,3 +664,19 @@ export async function makeVoiceover(data) {
   return res.blob();
 }
 export const makeStoryScenes = (data) => adminRequest('/api/admin/ai/story-scenes', { method: 'POST', body: JSON.stringify(data) });
+// Admin → Partners (partner desk, auto-pause, away mode, follow-ups)
+export const getPartnerDesk = () => adminRequest('/api/admin/partners');
+export const getPartnerIssues = () => adminRequest('/api/admin/partners/issues');
+export const savePartnerContact = (key, data) => adminRequest(`/api/admin/partners/contacts/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deletePartnerContact = (key) => adminRequest(`/api/admin/partners/contacts/${encodeURIComponent(key)}`, { method: 'DELETE' });
+export const addPartnerTask = (data) => adminRequest('/api/admin/partners/tasks', { method: 'POST', body: JSON.stringify(data) });
+export const updatePartnerTask = (id, data) => adminRequest(`/api/admin/partners/tasks/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deletePartnerTask = (id) => adminRequest(`/api/admin/partners/tasks/${id}`, { method: 'DELETE' });
+export const makeVtpassDraft = (orderIds) => adminRequest('/api/admin/partners/vtpass-draft', { method: 'POST', body: JSON.stringify({ orderIds }) });
+export const runPartnerCheck = () => adminRequest('/api/admin/partners/reconcile', { method: 'POST' });
+export const getPartnerReport = (month) => adminRequest(`/api/admin/partners/report${month ? `?month=${month}` : ''}`);
+export const setAutoPause = (enabled) => adminRequest('/api/admin/partners/auto-pause', { method: 'PUT', body: JSON.stringify({ enabled }) });
+export const resumeProvider = (provider) => adminRequest(`/api/admin/partners/auto-pause/${encodeURIComponent(provider)}/resume`, { method: 'POST' });
+export const setAwayMode = (data) => adminRequest('/api/admin/partners/away', { method: 'PUT', body: JSON.stringify(data) });
+export const sendFollowUp = (id, message) => adminRequest(`/api/admin/partners/follow-ups/${id}/send`, { method: 'POST', body: JSON.stringify({ message }) });
+export const dismissFollowUp = (id) => adminRequest(`/api/admin/partners/follow-ups/${id}/dismiss`, { method: 'POST' });

@@ -68,6 +68,7 @@ const TicketOrder = lazy(() => import('./pages/features/Tickets').then((m) => ({
 const Bills = lazy(() => import('./pages/features/Bills'));
 const BillReceipt = lazy(() => import('./pages/features/Bills').then((m) => ({ default: m.BillReceipt })));
 const AdminExtraServices = lazy(() => import('./pages/admin/AdminExtraServices'));
+const AdminPartners = lazy(() => import('./pages/admin/AdminPartners'));
 const Bulk = lazy(() => import('./pages/Bulk'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const Notifications = lazy(() => import('./pages/Notifications'));
@@ -258,6 +259,7 @@ export default function App() {
           <Route path="/admin/circles" element={<RequireAdmin><AdminCircles /></RequireAdmin>} />
           <Route path="/admin/features" element={<RequireAdmin><AdminFeatures /></RequireAdmin>} />
           <Route path="/admin/extra-services" element={<RequireAdmin><AdminExtraServices /></RequireAdmin>} />
+          <Route path="/admin/partners" element={<RequireAdmin><AdminPartners /></RequireAdmin>} />
           <Route path="/admin/notices" element={<RequireAdmin><AdminNotices /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

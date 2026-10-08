@@ -311,6 +311,12 @@ export default function AdminSupport() {
                           Replied {t.repliedAt ? fmtDate(t.repliedAt) : ''}
                         </div>
                       )}
+                      {t.autoReply && !t.adminReply && (
+                        <details style={{ marginTop: 6, fontSize: 12, color: 'var(--slate-400)' }}>
+                          <summary style={{ cursor: 'pointer' }}>🌙 Auto-replied {t.autoRepliedAt ? fmtDate(t.autoRepliedAt) : ''} ({{ ORDER_SUCCESS: 'order delivered', ORDER_FAILED: 'order failed + refunded', ORDER_PENDING: 'order still pending', HOLD_MONEY: 'money — holding reply', HOLD: 'holding reply', AI_ANSWER: 'AI answer' }[t.autoKind] || 'away mode'}) — still needs you</summary>
+                          <div style={{ whiteSpace: 'pre-wrap', marginTop: 4 }}>{t.autoReply}</div>
+                        </details>
+                      )}
                     </td>
                     <td>
                       {t.order ? (

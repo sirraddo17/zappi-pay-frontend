@@ -55,6 +55,12 @@ function MaintenanceBanner({ info, service, generalOnly }) {
   if (m.all) text = m.message;
   else if (generalOnly && m.services?.length) text = `${m.services.map((x) => PAUSE_LABEL[x] || x).join(', ')} ${m.services.length === 1 ? 'is' : 'are'} paused for a short while. ${m.message && !/paused for a short while/.test(m.message) ? m.message : 'Everything else works as normal.'}`;
   else if (service && m.services?.includes(service)) text = m.message;
+  // Providers paused automatically because they're failing at our partner.
+  const prov = (m.providers || []).filter((x) => (generalOnly ? true : x.service === service));
+  if (!text && prov.length && (service || generalOnly)) {
+    const names = prov.map((x) => x.name).join(', ');
+    text = `${names} ${prov.length === 1 ? 'is' : 'are'} having problems at our provider, so we've paused ${prov.length === 1 ? 'it' : 'them'} for a short while to protect your money. ${generalOnly ? 'Everything else works as normal.' : 'You can still buy the others.'}`;
+  }
   if (!text) return null;
   return (
     <div role="status" className="card" style={{ margin: '0 16px 12px', padding: '10px 12px', fontSize: 14, display: 'flex', gap: 8, background: 'rgba(239,68,68,0.12)', border: '1px solid #ef4444' }}>

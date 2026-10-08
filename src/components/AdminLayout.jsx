@@ -21,6 +21,7 @@ const TABS = [
   { to: '/admin/orders', label: 'Orders' },
   { to: '/admin/support', label: 'Support' },
   { to: '/admin/escalations', label: '✅ Approvals' },
+  { to: '/admin/partners', label: '🤝 Partners' },
   { to: '/admin/broadcasts', label: 'Broadcasts' },
   { to: '/admin/notices', label: 'Service Notices' },
   { to: '/admin/promos', label: 'Promo Codes' },

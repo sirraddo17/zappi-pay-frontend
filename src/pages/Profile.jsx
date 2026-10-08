@@ -346,6 +346,12 @@ export default function Profile() {
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>ZappiPay Support replied:</div>
                     {t.adminReply}
                   </div>
+                ) : t.autoReply ? (
+                  <div style={{ marginTop: 8, padding: '8px 10px', background: 'var(--slate-900)', borderRadius: 8, borderLeft: '3px solid var(--slate-400)', whiteSpace: 'pre-wrap', fontSize: 13 }}>
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>Automatic reply:</div>
+                    {t.autoReply}
+                    {!solved && <div style={{ marginTop: 6, color: 'var(--slate-400)' }}>A team member will also reply here.</div>}
+                  </div>
                 ) : (
                   <div style={{ marginTop: 6, color: 'var(--slate-400)', fontSize: 13 }}>{solved ? 'Marked solved.' : 'We’ve received this and will reply here.'}</div>
                 )}
