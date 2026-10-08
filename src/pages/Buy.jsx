@@ -452,6 +452,19 @@ export default function Buy() {
       </div>
     );
   }
+  if (slug === 'betting' && !features.betFunding) {
+    return (
+      <div className="app-shell">
+        <div className="page-header">
+          <h1>🏆 Bet Funding</h1>
+          <p>Bet funding isn’t available on ZAPPI PAY right now. We’ll announce it in the app when it’s ready.</p>
+        </div>
+        <Link to="/" className="btn" style={{ margin: '0 16px', display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+          Back home
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">

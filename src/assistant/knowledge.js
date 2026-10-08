@@ -16,7 +16,7 @@ export const TOPICS = [
     title: 'What can ZAPPI PAY do?',
     keywords: ['services', 'service you offer', 'what do you offer', 'what can i do', 'what can zappi', 'what does zappi', 'what is zappi', 'features', 'what you do', 'offers', 'what una dey do', 'wetin una dey do', 'wetin i fit do'],
     answer:
-      'With ZAPPI PAY you can:\n• Buy airtime and data (all networks), pay electricity (prepaid & postpaid tokens), cable TV (DStv, GOtv, Startimes, Showmax), internet, exam PINs (WAEC, JAMB) and fund betting wallets.\n• Fund your wallet by bank transfer to your own account number.\n• More: Car insurance, Exam PINs in bulk, Print recharge cards, Bulk airtime & data, Best data deals, Airtime to Cash and Refer & Earn — plus any new services you see under More.\n• Extras: cashback and rewards, gifts, repeat/scheduled top-ups, renewal reminders, and an agent account with cheaper prices for resellers.',
+      'With ZAPPI PAY you can:\n• Buy airtime and data (all networks), pay electricity (prepaid & postpaid tokens), cable TV (DStv, GOtv, Startimes, Showmax), internet and exam PINs (WAEC, JAMB).\n• Fund your wallet by bank transfer to your own account number.\n• More: Car insurance, Exam PINs in bulk, Print recharge cards, Bulk airtime & data, Best data deals, Airtime to Cash and Refer & Earn — plus any new services you see under More.\n• Extras: cashback and rewards, gifts, repeat/scheduled top-ups, renewal reminders, and an agent account with cheaper prices for resellers.',
     actions: [{ label: 'Open More', to: '/more' }, { label: 'Fund wallet', to: '/wallet' }],
   },
   {
@@ -399,7 +399,7 @@ export const QUICK_TOPICS = ['services', 'fund', 'failed', 'a2c', 'transfer', 'e
 // Topics for services that can be switched off (Admin → New features /
 // Settings). When one is off, the help answers "not available yet"
 // instead of explaining how to use it.
-export const TOPIC_FEATURE = { 'card-checkout': 'cardCheckout', 'request-money': 'requests', 'bulk-sms': 'bulkSms', 'event-tickets': 'tickets', 'more-bills': 'moreBills', 'owambe-spray': 'spray', 'association-dues': 'dues', 'pay-for-me': 'payForMe', 'shared-light': 'sharedLight', safebuy: 'safeBuy', payroll: 'payroll', 'daily-rewards': 'dailyRewards', 'ajo-circle': 'circles', transfer: 'sendMoney', bank: 'bankTransfer', family: 'family' };
+export const TOPIC_FEATURE = { 'card-checkout': 'cardCheckout', 'request-money': 'requests', 'bulk-sms': 'bulkSms', 'event-tickets': 'tickets', 'more-bills': 'moreBills', 'owambe-spray': 'spray', 'association-dues': 'dues', 'pay-for-me': 'payForMe', 'shared-light': 'sharedLight', safebuy: 'safeBuy', payroll: 'payroll', 'daily-rewards': 'dailyRewards', 'ajo-circle': 'circles', transfer: 'sendMoney', bank: 'bankTransfer', family: 'family', betting: 'betFunding' };
 export function availableTopic(topic, isOn) {
   const key = topic && TOPIC_FEATURE[topic.id];
   if (!key || !isOn || isOn(key)) return topic;

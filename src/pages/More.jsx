@@ -34,7 +34,7 @@ export default function More() {
   const t = useLang();
   const appInfo = useAppInfo();
   const features = useFeatures();
-  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime) && (s.to !== '/buy/betting' || features.sendMoney || appInfo?.bankTransfer) && (!s.feature || features[s.feature]));
+  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime) && (s.to !== '/buy/betting' || (features.betFunding && (features.sendMoney || appInfo?.bankTransfer))) && (!s.feature || features[s.feature]));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
       <div className="page-header">
