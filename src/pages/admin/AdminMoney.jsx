@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getReconciliation, downloadExport } from '../../api';
+import { getReconciliation, downloadExport, getFundsGuard, setFundsGuard } from '../../api';
 
 const naira = (n) => (n === null || n === undefined ? '—' : `₦${Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
 const LAGOS = 60 * 60 * 1000;
@@ -24,6 +24,40 @@ const EXPORTS = [
   ['bank-transfers', 'Send to bank', 'Payouts to bank accounts with fees and status.'],
   ['customers', 'Customers', 'Customers who joined in the period, with wallet balances.'],
 ];
+
+// Customer-funds guard (rules promised to Monnify): customer money stays
+// ring-fenced, bank transfers pause if it isn't fully covered, and
+// sending money needs BVN/NIN.
+function FundsGuardCard() {
+  const [g, setG] = useState(null);
+  const [err, setErr] = useState('');
+  const load = () => getFundsGuard().then(setG).catch((e) => setErr(e.message));
+  useEffect(() => { load(); }, []);
+  if (err) return <p className="error-text" style={{ margin: '0 0 12px' }}>{err}</p>;
+  if (!g) return null;
+  const ok = g.status === 'OK';
+  return (
+    <div className="card" style={{ margin: '0 0 16px', border: `1px solid ${!g.enabled ? 'var(--slate-700, #334155)' : ok ? 'var(--green-500)' : 'var(--red-500)'}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <h2 style={{ margin: 0, fontSize: 16 }}>🛡️ Customer-funds guard</h2>
+        <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 14 }}>
+          <input type="checkbox" checked={g.enabled} style={{ width: 'auto' }} onChange={(e) => { if (!e.target.checked && !window.confirm('Turn off the guard? Bank transfers will no longer pause when customer money isn’t covered, and unverified customers could send money. Only do this for an emergency fix.')) return; setFundsGuard(e.target.checked).then(setG).catch((x) => setErr(x.message)); }} />
+          On
+        </label>
+      </div>
+      <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 10px' }}>Customer money is only used for customers. Only the money above what customers are owed is yours to withdraw. If money held ever falls short (or balances can’t be read), bank transfers pause by themselves and you’re alerted. Sending money needs BVN/NIN, with daily limits by level.</p>
+      {!g.enabled ? <div style={{ fontSize: 14, color: 'var(--gold)' }}>⚠️ The guard is OFF — switch it back on as soon as possible.</div> : (
+        <>
+          <Row label="Customer money covered" value={ok ? '✅ Yes' : g.status === 'SHORT' ? `❌ Short by ${naira(g.shortBy)}` : '⚠️ Couldn’t read balances'} />
+          <Row label="Bank transfers" value={g.transfersPaused ? '⏸️ Paused to protect customers' : '▶️ Running'} />
+          <Row label="Free in Monnify wallet" value={g.monnifyFree === null ? '—' : naira(g.monnifyFree)} hint="Monnify balance minus transfers on their way out" />
+          <Row label="Safe to withdraw (your profit)" value={<b style={{ color: 'var(--green-500)' }}>{naira(g.safeToWithdraw)}</b>} hint="Never move more than this out of Monnify" />
+          {g.errors?.length > 0 && <div style={{ fontSize: 12, color: 'var(--gold)', marginTop: 6 }}>{g.errors.join(' · ')}</div>}
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function AdminMoney() {
   const [data, setData] = useState(null);
@@ -73,6 +107,7 @@ export default function AdminMoney() {
       {data && (
         <div style={{ maxWidth: 720 }}>
           <div className="card" style={{ margin: '0 0 16px', background: banner.bg, border: `1px solid ${banner.border}`, fontSize: 14 }}>{banner.text}</div>
+          <FundsGuardCard />
 
           <div className="card" style={{ margin: '0 0 16px' }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>What you owe customers</h2>

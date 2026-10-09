@@ -680,3 +680,5 @@ export const resumeProvider = (provider) => adminRequest(`/api/admin/partners/au
 export const setAwayMode = (data) => adminRequest('/api/admin/partners/away', { method: 'PUT', body: JSON.stringify(data) });
 export const sendFollowUp = (id, message) => adminRequest(`/api/admin/partners/follow-ups/${id}/send`, { method: 'POST', body: JSON.stringify({ message }) });
 export const dismissFollowUp = (id) => adminRequest(`/api/admin/partners/follow-ups/${id}/dismiss`, { method: 'POST' });
+export const getFundsGuard = () => adminRequest('/api/admin/funds-guard');
+export const setFundsGuard = (enabled) => adminRequest('/api/admin/funds-guard', { method: 'PUT', body: JSON.stringify({ enabled }) });
