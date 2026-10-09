@@ -45,13 +45,15 @@ function FundsGuardCard() {
           On
         </label>
       </div>
-      <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 10px' }}>Customer money is only used for customers. Only the money above what customers are owed is yours to withdraw. If money held ever falls short (or balances can’t be read), bank transfers pause by themselves and you’re alerted. Sending money needs BVN/NIN, with daily limits by level.</p>
+      <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 10px' }}>Your Monnify wallet alone must always hold at least everything customers are owed — fund VTpass from your own money (it isn’t counted). Only what’s above customer balances in Monnify is yours to move out (it includes what you’ve already spent on VTpass for customers’ purchases, plus profit). If Monnify ever falls short, bank transfers pause by themselves and you’re alerted. Sending money needs BVN/NIN, with daily limits by level.</p>
       {!g.enabled ? <div style={{ fontSize: 14, color: 'var(--gold)' }}>⚠️ The guard is OFF — switch it back on as soon as possible.</div> : (
         <>
-          <Row label="Customer money covered" value={ok ? '✅ Yes' : g.status === 'SHORT' ? `❌ Short by ${naira(g.shortBy)}` : '⚠️ Couldn’t read balances'} />
+          <Row label="Customers are owed" value={naira(g.owed)} hint="Wallets, cashback, savings and transfers on their way" />
+          <Row label="Monnify wallet" value={g.monnify === null ? '—' : naira(g.monnify)} hint="VTpass isn’t counted — it’s funded from your own money" />
+          <Row label="Customer money covered by Monnify" value={ok ? '✅ Yes' : g.status === 'SHORT' ? `❌ Short by ${naira(g.shortBy)}` : '⚠️ Couldn’t read Monnify'} />
           <Row label="Bank transfers" value={g.transfersPaused ? '⏸️ Paused to protect customers' : '▶️ Running'} />
           <Row label="Free in Monnify wallet" value={g.monnifyFree === null ? '—' : naira(g.monnifyFree)} hint="Monnify balance minus transfers on their way out" />
-          <Row label="Safe to withdraw (your profit)" value={<b style={{ color: 'var(--green-500)' }}>{naira(g.safeToWithdraw)}</b>} hint="Never move more than this out of Monnify" />
+          <Row label="Yours to move out of Monnify" value={<b style={{ color: 'var(--green-500)' }}>{naira(g.safeToWithdraw)}</b>} hint="To your bank or to top up VTpass — never move more than this" />
           {g.errors?.length > 0 && <div style={{ fontSize: 12, color: 'var(--gold)', marginTop: 6 }}>{g.errors.join(' · ')}</div>}
         </>
       )}
