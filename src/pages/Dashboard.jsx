@@ -21,7 +21,8 @@ import ServiceNotices, { useFeatures, useAppInfo } from '../components/ServiceNo
 import LoyaltyCard from '../components/LoyaltyCard';
 import PushToggle from '../components/PushToggle';
 import { LogoIcon, Wordmark } from '../components/Logo';
-import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon, GridIcon } from '../components/Icons';
+import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon, GridIcon, PrinterIcon } from '../components/Icons';
+import { homeServices } from '../lib/homeTiles';
 
 const SERVICES = [
   { slug: 'airtime', service: 'AIRTIME', label: 'Airtime', Icon: PhoneIcon, bg: '#863bff' },
@@ -100,9 +101,10 @@ export default function Dashboard() {
   const feat = useFeatures();
   const info = useAppInfo();
   // "Send Money" only shows when sending to users or to banks is switched on.
-  const all = SERVICES.filter((s) => (s.slug !== 'transfer' || feat.sendMoney || info?.bankTransfer) && (s.slug !== 'betting' || feat.betFunding));
-  // Always 8 tiles with More pinned last, so nothing jumps when settings load.
-  const services = [...all.filter((s) => s.slug !== 'more').slice(0, 7), SERVICES.find((s) => s.slug === 'more')];
+  // Up to 7 services, then More last. A service from More fills any gap.
+  const FILLER_LOOK = { 'print-cards': { Icon: PrinterIcon, bg: '#0f6d8c' }, bulk: { Icon: PhoneIcon, bg: '#863bff' }, deals: { Icon: WifiIcon, bg: '#7a5a10' } };
+  const home = homeServices(SERVICES.filter((s) => s.slug !== 'more'), feat, info);
+  const services = [...home.tiles.map((t) => (t.to && FILLER_LOOK[t.slug] ? { ...t, ...FILLER_LOOK[t.slug] } : t)), SERVICES.find((s) => s.slug === 'more')];
   const lite = useLite();
   const { customer } = useAuth();
   const [balance, setBalance] = useState(customer?.walletBalance ?? 0);

@@ -3,6 +3,7 @@ import { useLang } from '../lib/i18n';
 import { FundIcon, PrinterIcon, PhoneIcon, WifiIcon } from '../components/Icons';
 import BottomNav from '../components/BottomNav';
 import { useAppInfo, useFeatures } from '../components/ServiceNotices';
+import { homeServices } from '../lib/homeTiles';
 
 // Home → More. New services go here so the home screen stays short.
 const ITEMS = [
@@ -34,7 +35,11 @@ export default function More() {
   const t = useLang();
   const appInfo = useAppInfo();
   const features = useFeatures();
-  const items = ITEMS.filter((s) => (s.to !== '/international' || appInfo?.intlAirtime) && (s.to !== '/buy/betting' || (features.betFunding && (features.sendMoney || appInfo?.bankTransfer))) && (!s.feature || features[s.feature]));
+  // The same core list as Home (Send Money / Bet Funding only when on).
+  const CORE = ['airtime', 'data', 'electricity', 'cable', 'education', 'transfer', 'internet', 'betting'].map((slug) => ({ slug }));
+  const home = homeServices(CORE, features, appInfo);
+  const onHomeCore = new Set(home.tiles.filter((t) => !t.to).map((t) => t.slug));
+  const items = ITEMS.filter((s) => !home.onHome.includes(s.to) && (s.to !== '/international' || appInfo?.intlAirtime) && (s.to !== '/buy/betting' || (features.betFunding && !onHomeCore.has('betting'))) && (!s.feature || features[s.feature]));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
       <div className="page-header">
