@@ -143,6 +143,7 @@ export default function AdminSettings() {
   const [agentByService, setAgentByService] = useState(toServiceMap({}));
   const [cbEnabled, setCbEnabled] = useState(false);
   const [splitOn, setSplitOn] = useState(false);
+  const [splitPct, setSplitPct] = useState(30);
   const [cbByService, setCbByService] = useState(toServiceMap({}));
   const [cbMax, setCbMax] = useState('500');
   const [cbSeparate, setCbSeparate] = useState(true);
@@ -220,6 +221,7 @@ export default function AdminSettings() {
         setAgentByService(toServiceMap(s.agentDiscountPercentByService));
         setCbEnabled(Boolean(s.cashbackEnabled));
         setSplitOn(Boolean(s.rewardSplitEnabled));
+        setSplitPct(Number(s.rewardSplitPct ?? 30));
         setCbByService(toServiceMap(s.cashbackPercentByService));
         setCbMax(String(s.cashbackMaxPerOrder ?? 500));
         setCbSeparate(s.cashbackSeparate !== false);
@@ -1051,7 +1053,7 @@ export default function AdminSettings() {
             hint="Each customer's username is their referral code. When someone signs up with a code and completes a first successful purchase of at least the minimum below, the referrer's wallet is credited the bonus — once per referred customer. While the Rewards split is on, the bonus is paid from the referral pool or once the friend's own purchases have covered it (what you kept from them reaches the bonus), so a bigger bonus can't cost more than the friend brings in — it just takes a few more of their purchases. As a guide, with 40% given back, each ₦100 of bonus takes about ₦5,500 of the friend's MTN airtime/data."
           />
           <Status state={status.referral} />
-          {splitOn && <p style={{ fontSize: 13, background: 'rgba(34,197,94,0.1)', border: '1px solid var(--green-500)', borderRadius: 10, padding: '8px 12px', margin: '0 0 12px' }}>🎁 The Rewards split is on, so referral bonuses are paid from the referral pool (a bonus waits if the pool is short). Keep this switched on to take part; change amounts under <b>🎁 Rewards split</b>.</p>}
+          {splitOn && <p style={{ fontSize: 13, background: 'rgba(34,197,94,0.1)', border: '1px solid var(--green-500)', borderRadius: 10, padding: '8px 12px', margin: '0 0 12px' }}>🎁 The Rewards split is on, so a referral bonus is paid from the referral pool, or as soon as the friend's own purchases have covered it. Keep this switched on to take part.</p>}
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, marginBottom: 16, cursor: 'pointer' }}>
             <input type="checkbox" checked={refEnabled} onChange={(e) => setRefEnabled(e.target.checked)} style={{ width: 'auto' }} />
             Pay referral bonuses
@@ -1066,6 +1068,24 @@ export default function AdminSettings() {
             <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 0' }}>
               A higher minimum makes it harder for people to farm bonuses with fake accounts. Keep the bonus below your margin on that purchase.
             </p>
+            {splitOn && (() => {
+              // Smallest first purchase whose profit alone covers the bonus,
+              // so it's paid instantly (worked out on MTN airtime/data, the
+              // lowest-paying network).
+              const svc = Number(discountByService.DATA || 0) > Number(discountByService.AIRTIME || 0) ? 'DATA' : 'AIRTIME';
+              const earn = Number(markupByService[svc] || 0) + LOWEST_COMMISSION[svc] - Math.max(0, MONNIFY_FEE - Number(bankFeePercent || 0));
+              const kept = earn - Math.max(Number(discountByService[svc] || 0), (earn * splitPct) / 100);
+              const b = Number(refBonus || 0);
+              if (!(b > 0) || !(kept > 0)) return null;
+              const instant = Math.ceil(b / (kept / 100) / 500) * 500;
+              const ok = Number(refMin || 0) >= instant;
+              return (
+                <div style={{ fontSize: 13, marginTop: 8, padding: '8px 12px', borderRadius: 10, border: `1px solid ${ok ? 'var(--green-500)' : 'var(--gold)'}`, background: ok ? 'rgba(34,197,94,0.08)' : 'rgba(255,184,48,0.08)' }}>
+                  <b>⚡ Instant payout:</b> a first airtime/data purchase of <b>₦{instant.toLocaleString()}</b> or more covers a ₦{b.toLocaleString()} bonus by itself (you keep about {Math.round(kept * 100) / 100}% per sale), so it's paid straight away. {ok ? 'Your minimum already does this ✓' : 'With a lower minimum, the bonus is paid after a few more of their purchases instead.'} Other services pay less, so after a light or TV purchase it may need one or two more.
+                  {!ok && <div style={{ marginTop: 6 }}><button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: 13 }} onClick={() => setRefMin(String(instant))}>Use ₦{instant.toLocaleString()} as the minimum</button></div>}
+                </div>
+              );
+            })()}
           </div>
           {saveButton('referral', 'Save Referral Settings')}
         </form>
