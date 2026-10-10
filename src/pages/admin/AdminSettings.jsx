@@ -853,10 +853,16 @@ export default function AdminSettings() {
             <label htmlFor="loyMin">Minimum points to redeem</label>
             <input id="loyMin" type="number" min="1" value={loyMin} onChange={(e) => setLoyMin(e.target.value)} />
           </div>
-          <p style={{ fontSize: 13, color: 'var(--slate-400)', marginTop: 0 }}>
-            With these numbers a customer gets back about <strong>{((Number(loyPer100 || 0) * Number(loyValue || 0))).toFixed(2)}%</strong> of what they spend
-            (₦{((10000 / 100) * Number(loyPer100 || 0) * Number(loyValue || 0)).toLocaleString()} on every ₦10,000).
-          </p>
+          {splitOn ? (
+            <p style={{ fontSize: 13, color: 'var(--slate-400)', marginTop: 0 }}>
+              Points now come from the Rewards split, so the amount depends on each purchase. Example: MTN ₦1,000 with {splitPct}% given back gives about ₦{(30 * splitPct / 100 * 0.2).toFixed(1)} in points = <strong>{Math.floor((30 * splitPct / 100 * 0.2) / Math.max(0.01, Number(loyValue || 0)))} points</strong> at ₦{Number(loyValue || 0)} each (any part too small for a whole point goes to cashback). Customers can redeem from {Number(loyMin || 0).toLocaleString()} points = ₦{(Number(loyMin || 0) * Number(loyValue || 0)).toLocaleString()}.
+            </p>
+          ) : (
+            <p style={{ fontSize: 13, color: 'var(--slate-400)', marginTop: 0 }}>
+              With these numbers a customer gets back about <strong>{((Number(loyPer100 || 0) * Number(loyValue || 0))).toFixed(2)}%</strong> of what they spend
+              (₦{((10000 / 100) * Number(loyPer100 || 0) * Number(loyValue || 0)).toLocaleString()} on every ₦10,000).
+            </p>
+          )}
           {saveButton('loyalty', 'Save Loyalty Settings')}
         </form>
       )}
