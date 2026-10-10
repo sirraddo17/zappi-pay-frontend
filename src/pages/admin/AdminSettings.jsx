@@ -679,7 +679,7 @@ export default function AdminSettings() {
                     <input
                       id={`markup-${service}`}
                       type="number"
-                      step="0.1"
+                      step="0.01"
                       min="0"
                       value={markupByService[service]}
                       onChange={(e) => setMarkupByService((prev) => ({ ...prev, [service]: e.target.value }))}
@@ -730,7 +730,7 @@ export default function AdminSettings() {
                 <input
                   id={`discount-${service}`}
                   type="number"
-                  step="0.1"
+                  step="0.01"
                   min="0"
                   max="100"
                   value={discountByService[service]}
@@ -928,7 +928,7 @@ export default function AdminSettings() {
           {SERVICES.map((service) => (
             <div className="field" key={service}>
               <label htmlFor={`ag-${service}`}>{serviceLabel(service)} — extra % off for agents</label>
-              <input id={`ag-${service}`} type="number" step="0.1" min="0" max="50" value={agentByService[service]} onChange={(e) => setAgentByService((m) => ({ ...m, [service]: e.target.value }))} />
+              <input id={`ag-${service}`} type="number" step="0.01" min="0" max="50" value={agentByService[service]} onChange={(e) => setAgentByService((m) => ({ ...m, [service]: e.target.value }))} />
             </div>
           ))}
           {saveButton('agents', 'Save Agent Pricing')}
@@ -947,7 +947,7 @@ export default function AdminSettings() {
           {SERVICES.map((service) => (
             <div className="field" key={service}>
               <label htmlFor={`cb-${service}`}>{serviceLabel(service)} (%)</label>
-              <input id={`cb-${service}`} type="number" step="0.1" min="0" max="20" value={cbByService[service]} onChange={(e) => setCbByService((m) => ({ ...m, [service]: e.target.value }))} />
+              <input id={`cb-${service}`} type="number" step="0.01" min="0" max="20" value={cbByService[service]} onChange={(e) => setCbByService((m) => ({ ...m, [service]: e.target.value }))} />
             </div>
           ))}
           <div className="field">

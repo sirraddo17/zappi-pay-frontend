@@ -105,7 +105,7 @@ export default function EpinSettingsPanel() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div className="field">
             <label htmlFor="epSup">ClubKonnect gives you (%)</label>
-            <input id="epSup" type="number" min="0" max="50" step="0.1" value={supplier} onChange={(e) => setSupplier(e.target.value)} />
+            <input id="epSup" type="number" min="0" max="50" step="0.01" value={supplier} onChange={(e) => setSupplier(e.target.value)} />
             <small style={{ color: 'var(--slate-400)' }}>For profit figures. Check your rate on ClubKonnect.</small>
           </div>
           <div className="field">
@@ -114,12 +114,12 @@ export default function EpinSettingsPanel() {
           </div>
           <div className="field">
             <label htmlFor="epCust">Customer discount (%)</label>
-            <input id="epCust" type="number" min="0" max="50" step="0.1" value={cust} onChange={(e) => setCust(e.target.value)} />
+            <input id="epCust" type="number" min="0" max="50" step="0.01" value={cust} onChange={(e) => setCust(e.target.value)} />
             <small style={{ color: 'var(--slate-400)' }}>₦100 card costs {example(100, cust)}</small>
           </div>
           <div className="field">
             <label htmlFor="epAgent">Agent discount (%)</label>
-            <input id="epAgent" type="number" min="0" max="50" step="0.1" value={agent} onChange={(e) => setAgent(e.target.value)} />
+            <input id="epAgent" type="number" min="0" max="50" step="0.01" value={agent} onChange={(e) => setAgent(e.target.value)} />
             <small style={{ color: 'var(--slate-400)' }}>₦100 card costs {example(100, agent)}</small>
           </div>
         </div>
