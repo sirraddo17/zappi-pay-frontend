@@ -21,6 +21,11 @@ import RewardSplitPanel from '../../components/admin/RewardSplitPanel';
 import SafePricingPanel from '../../components/admin/SafePricingPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
+// Lowest VTpass commission per service (% of the sale) — MTN for airtime
+// and data, Jos for light. Mirrors lib/earnings.js. Exam PINs pay a flat ₦
+// per PIN, too small a share on big registrations to count on.
+const LOWEST_COMMISSION = { AIRTIME: 3, DATA: 3, ELECTRICITY: 0.9, CABLE: 1.5, EDUCATION: 0, INTERNET: 5, BETTING: 0, INTERNATIONAL: 0, INSURANCE: 0 };
+const MONNIFY_FEE = 1.6125; // 1.5% + VAT on wallet funding
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING', 'INTERNATIONAL', 'INSURANCE'];
 
 // Each tab is its own form with its own Save button, and only sends
@@ -721,9 +726,12 @@ export default function AdminSettings() {
           {SERVICES.map((service) => {
             const markup = Number(markupByService[service] || 0);
             const discount = Number(discountByService[service] || 0);
-            // Net effect on ₦100 of VTpass price — below 100 means this
-            // service is now being sold under what VTpass charges us.
-            const net = Math.round(100 * (1 + markup / 100)) * (1 - discount / 100);
+            // What you really earn on this service (% of the sale): your
+            // markup + VTpass commission at the lowest-paying provider −
+            // Monnify's fee not covered by the bank-funding fee.
+            const margin = markup + LOWEST_COMMISSION[service] - Math.max(0, MONNIFY_FEE - Number(bankFeePercent || 0));
+            const agentTotal = discount + (agentOn ? Number(agentByService[service] || 0) : 0);
+            const keep = (n) => Math.round((margin - n) * 100) / 100;
             return (
               <div className="field" key={service}>
                 <label htmlFor={`discount-${service}`}>{serviceLabel(service)}</label>
@@ -736,11 +744,15 @@ export default function AdminSettings() {
                   value={discountByService[service]}
                   onChange={(e) => setDiscountByService((prev) => ({ ...prev, [service]: e.target.value }))}
                 />
-                {discount > 0 && net < 100 && (
+                {discount > 0 && (keep(discount) < 0 || keep(agentTotal) < 0) ? (
                   <p style={{ color: 'var(--orange)', fontSize: 12, margin: '4px 0 0' }}>
-                    Heads up: this discount is bigger than the {markup}% markup, so {serviceLabel(service)} sells below VTpass cost.
+                    Heads up: {keep(discount) < 0 ? `${discount}% off` : `${agentTotal}% off for agents`} is more than you earn on {serviceLabel(service)} (about {Math.round(margin * 100) / 100}% at the lowest-paying provider, after Monnify's fee) — these sales lose money.
                   </p>
-                )}
+                ) : discount > 0 ? (
+                  <p style={{ color: 'var(--green-500)', fontSize: 12, margin: '4px 0 0' }}>
+                    You still keep about {keep(discount)}% per sale{agentOn && agentTotal > discount ? ` (${keep(agentTotal)}% on agent sales)` : ''}, before cashback and points.
+                  </p>
+                ) : null}
               </div>
             );
           })}
