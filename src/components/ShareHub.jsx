@@ -29,7 +29,7 @@ function Round({ bg, icon, label, onClick, href }) {
 
 // Refer & Earn sharing: social buttons, a share picture with a QR code,
 // a 3-second animated invite, and one-tap copy tools.
-export default function ShareHub({ code, link, firstName, bonus, minPurchase }) {
+export default function ShareHub({ code, link, firstName, bonus, minPurchase, spendTarget }) {
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');
   const [preview, setPreview] = useState(null); // { url, blob, fileName, video, app }
@@ -126,7 +126,7 @@ export default function ShareHub({ code, link, firstName, bonus, minPurchase }) 
           <div>
             <b style={{ fontSize: 16 }}>Share. Help a friend. Earn.</b>
             <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>
-              {bonus > 0 ? `You get ₦${Number(bonus).toLocaleString()} when they join and start buying (from ₦${Number(minPurchase || 0).toLocaleString()}).` : 'Invite friends to ZAPPI PAY.'}
+              {bonus > 0 ? (spendTarget > 0 ? `You get ₦${Number(bonus).toLocaleString()} when they join and spend ₦${Number(spendTarget).toLocaleString()} in total.` : `You get ₦${Number(bonus).toLocaleString()} when they join and start buying (from ₦${Number(minPurchase || 0).toLocaleString()}).`) : 'Invite friends to ZAPPI PAY.'}
             </div>
           </div>
         </div>

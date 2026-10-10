@@ -166,6 +166,7 @@ export default function AdminSettings() {
   const [refEnabled, setRefEnabled] = useState(false);
   const [refBonus, setRefBonus] = useState('100');
   const [refMin, setRefMin] = useState('500');
+  const [refTarget, setRefTarget] = useState('0');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -244,6 +245,7 @@ export default function AdminSettings() {
         setRefEnabled(Boolean(s.referralEnabled));
         setRefBonus(String(s.referralBonusAmount ?? 100));
         setRefMin(String(s.referralMinPurchase ?? 500));
+        setRefTarget(String(Number(s.referralSpendTarget ?? 0)));
       })
       .catch((err) => setLoadError(err.message))
       .finally(() => setLoading(false));
@@ -462,7 +464,7 @@ export default function AdminSettings() {
       setStatus((prev) => ({ ...prev, referral: { error: 'Set a bonus above ₦0 before turning referrals on.' } }));
       return;
     }
-    save('referral', { referralEnabled: refEnabled, referralBonusAmount: bonus, referralMinPurchase: min }, 'Referral settings saved.');
+    save('referral', { referralEnabled: refEnabled, referralBonusAmount: bonus, referralMinPurchase: min, referralSpendTarget: Math.max(0, Number(refTarget || 0)) }, 'Referral settings saved.');
   }
 
   async function savePassword(e) {
@@ -1063,12 +1065,42 @@ export default function AdminSettings() {
             <input id="refBonus" type="number" step="1" min="0" value={refBonus} onChange={(e) => setRefBonus(e.target.value)} />
           </div>
           <div className="field">
+            <label htmlFor="refTarget">Pay the bonus when the friend has spent this much in total (₦) — 0 = off</label>
+            <input id="refTarget" type="number" step="500" min="0" value={refTarget} onChange={(e) => setRefTarget(e.target.value)} />
+            {(() => {
+              // Safe target: the spend your profit covers the bonus on, at the
+              // lowest-earning counted service (light), and on airtime/data.
+              const b = Number(refBonus || 0);
+              if (!(b > 0)) return null;
+              const pct = splitOn ? splitPct : 0;
+              const keptOn = (svc) => {
+                const earn = Number(markupByService[svc] || 0) + LOWEST_COMMISSION[svc] - Math.max(0, MONNIFY_FEE - Number(bankFeePercent || 0));
+                return earn - Math.max(Number(discountByService[svc] || 0), (earn * pct) / 100);
+              };
+              const lowest = Math.min(...['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'INTERNET'].map(keptOn));
+              const mtn = Math.min(keptOn('AIRTIME'), keptOn('DATA'));
+              if (!(lowest > 0)) return <p style={{ color: 'var(--orange)', fontSize: 12, margin: '4px 0 0' }}>Some services earn you nothing after discounts — fix pricing first.</p>;
+              const round = (n) => Math.ceil(n / 500) * 500;
+              const safe = round(b / (lowest / 100));
+              const airtime = round(b / (mtn / 100));
+              const t = Number(refTarget || 0);
+              return (
+                <div style={{ fontSize: 13, marginTop: 8, padding: '8px 12px', borderRadius: 10, border: `1px solid ${t >= safe ? 'var(--green-500)' : 'var(--gold)'}`, background: t >= safe ? 'rgba(34,197,94,0.08)' : 'rgba(255,184,48,0.08)' }}>
+                  {t > 0 ? "Customers see:" : "With a target, customers see:"} "Get ₦{b.toLocaleString()} when your friend spends ₦{(t > 0 ? t : safe).toLocaleString()} in total". Paid instantly when they reach it; airtime, data, internet, TV and light count (not bet funding or exam PINs).<br />
+                  <b>Safe target: ₦{safe.toLocaleString()}</b> — covers the bonus even if they only buy light. If they mostly buy airtime/data, ₦{airtime.toLocaleString()} would do.
+                  {t > 0 && t < safe && <div style={{ color: 'var(--orange)', marginTop: 4 }}>⚠️ Below the safe target — a friend who only buys light could cost you more than they bring in.</div>}
+                  {t !== safe && <div style={{ marginTop: 6 }}><button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: 13 }} onClick={() => setRefTarget(String(safe))}>Use ₦{safe.toLocaleString()}</button></div>}
+                </div>
+              );
+            })()}
+          </div>
+          <div className="field" style={Number(refTarget || 0) > 0 ? { display: 'none' } : undefined}>
             <label htmlFor="refMin">Referred customer's first purchase must be at least (₦)</label>
             <input id="refMin" type="number" step="1" min="0" value={refMin} onChange={(e) => setRefMin(e.target.value)} />
             <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 0' }}>
               A higher minimum makes it harder for people to farm bonuses with fake accounts. Keep the bonus below your margin on that purchase.
             </p>
-            {splitOn && (() => {
+            {splitOn && !(Number(refTarget || 0) > 0) && (() => {
               // Smallest first purchase whose profit alone covers the bonus,
               // so it's paid instantly (worked out on MTN airtime/data, the
               // lowest-paying network).
