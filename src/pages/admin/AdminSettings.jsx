@@ -18,6 +18,7 @@ import MaintenancePanel from '../../components/admin/MaintenancePanel';
 import DeliveryPromisePanel from '../../components/admin/DeliveryPromisePanel';
 import ShopsPanel from '../../components/admin/ShopsPanel';
 import RewardSplitPanel from '../../components/admin/RewardSplitPanel';
+import SafePricingPanel from '../../components/admin/SafePricingPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING', 'INTERNATIONAL', 'INSURANCE'];
@@ -661,6 +662,7 @@ export default function AdminSettings() {
         </div>
       )}
 
+      {!loading && !loadError && tab === 'markup' && <SafePricingPanel onApplied={() => window.location.reload()} />}
       {!loading && !loadError && tab === 'markup' && (
         <form className="card" style={cardStyle} onSubmit={saveMarkup}>
           <SectionHeader title="Markup per service (%)" hint="Added on top of VTpass's own price for that service. Set a maximum so big bills (e.g. DStv Premium) don't get an expensive charge — e.g. 1% but never more than ₦100." />

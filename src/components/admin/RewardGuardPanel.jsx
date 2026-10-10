@@ -37,7 +37,7 @@ export default function RewardGuardPanel() {
     <form className="card" style={{ margin: '0 0 16px', maxWidth: 640, border: '1px solid var(--green-500, #22c55e)' }} onSubmit={save}>
       <div style={{ fontWeight: 700, fontSize: 16 }}>🛡️ Giveaway safety limit</div>
       <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: '4px 0 10px' }}>
-        On any one purchase, your discount + promo code + cashback + loyalty points together can use at most this share of what you earn on it (your markup + VTpass commission). If they'd add up to more, the app gives a smaller promo discount, then less cashback, then fewer points — so a purchase never loses you money.
+        On any one purchase, your discount + promo code + cashback + loyalty points together can use at most this share of what you really earn on it (your markup + VTpass commission − Monnify's fee on the money the customer funded with). If they'd add up to more, the app gives a smaller promo discount, then less cashback, then fewer points — so a purchase never loses you money.
       </p>
       {err && <p className="error-text" style={{ margin: '0 0 8px' }}>{err}</p>}
       {msg && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '0 0 8px' }}>{msg}</p>}

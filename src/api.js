@@ -681,4 +681,6 @@ export const setAwayMode = (data) => adminRequest('/api/admin/partners/away', { 
 export const sendFollowUp = (id, message) => adminRequest(`/api/admin/partners/follow-ups/${id}/send`, { method: 'POST', body: JSON.stringify({ message }) });
 export const dismissFollowUp = (id) => adminRequest(`/api/admin/partners/follow-ups/${id}/dismiss`, { method: 'POST' });
 export const getFundsGuard = () => adminRequest('/api/admin/funds-guard');
+export const getSafePricing = () => adminRequest('/api/admin/safe-pricing');
+export const applySafePricing = () => adminRequest('/api/admin/safe-pricing/apply', { method: 'POST', body: '{}' });
 export const setFundsGuard = (enabled) => adminRequest('/api/admin/funds-guard', { method: 'PUT', body: JSON.stringify({ enabled }) });
