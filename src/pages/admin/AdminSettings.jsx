@@ -1048,7 +1048,7 @@ export default function AdminSettings() {
         <form className="card" style={cardStyle} onSubmit={saveReferral}>
           <SectionHeader
             title="Referral program"
-            hint="Each customer's username is their referral code. When someone signs up with a code and completes a first successful purchase of at least the minimum below, the referrer's wallet is credited the bonus — once per referred customer."
+            hint="Each customer's username is their referral code. When someone signs up with a code and completes a first successful purchase of at least the minimum below, the referrer's wallet is credited the bonus — once per referred customer. While the Rewards split is on, the bonus is paid from the referral pool or once the friend's own purchases have covered it (what you kept from them reaches the bonus), so a bigger bonus can't cost more than the friend brings in — it just takes a few more of their purchases. As a guide, with 40% given back, each ₦100 of bonus takes about ₦5,500 of the friend's MTN airtime/data."
           />
           <Status state={status.referral} />
           {splitOn && <p style={{ fontSize: 13, background: 'rgba(34,197,94,0.1)', border: '1px solid var(--green-500)', borderRadius: 10, padding: '8px 12px', margin: '0 0 12px' }}>🎁 The Rewards split is on, so referral bonuses are paid from the referral pool (a bonus waits if the pool is short). Keep this switched on to take part; change amounts under <b>🎁 Rewards split</b>.</p>}

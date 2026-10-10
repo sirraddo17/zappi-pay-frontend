@@ -68,7 +68,9 @@ export default function Refer() {
                 <div style={{ fontSize: 13, opacity: 0.85 }}>You earn</div>
                 <div style={{ fontSize: 30, fontWeight: 800, color: 'var(--gold)' }}>{naira(data.bonusAmount)}</div>
                 <p style={{ margin: '6px 0 0', fontSize: 14, lineHeight: 1.45 }}>
-                  for every friend who signs up with your code and makes their first purchase or bank transfer of {naira(data.minPurchase)} or more.
+                  {data.friendFunded
+                    ? <>for every friend who signs up with your code and keeps using ZAPPI PAY. It's paid after a few purchases, starting with one of {naira(data.minPurchase)} or more.</>
+                    : <>for every friend who signs up with your code and makes their first purchase or bank transfer of {naira(data.minPurchase)} or more.</>}
                 </p>
               </>
             ) : (
@@ -139,7 +141,7 @@ export default function Refer() {
                     {r.rewarded
                       ? `+${naira(r.amount)}`
                       : r.purchased
-                        ? (data.enabled ? '✓ Purchased — bonus on the way' : '✓ Purchased (bonus paused)')
+                        ? (!data.enabled ? '✓ Purchased (bonus paused)' : r.progress != null ? `⏳ ${r.progress}% to your bonus` : '✓ Purchased — bonus on the way')
                         : `Waiting: first ${naira(data.minPurchase)}+ purchase`}
                   </span>
                 </div>
@@ -153,7 +155,11 @@ export default function Refer() {
             <ol style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.6, color: 'var(--slate-100)' }}>
               <li>Share your code or invite link.</li>
               <li>Your friend signs up and enters your code (the link fills it in for them).</li>
-              <li>When they make their first purchase or bank transfer of {naira(data.minPurchase)} or more, your bonus lands in your wallet automatically.</li>
+              {data.friendFunded ? (
+                <li>After their first purchase or bank transfer of {naira(data.minPurchase)} or more, every purchase they make moves your bonus closer (see the % next to their name). When it reaches 100%, your bonus lands in your wallet automatically.</li>
+              ) : (
+                <li>When they make their first purchase or bank transfer of {naira(data.minPurchase)} or more, your bonus lands in your wallet automatically.</li>
+              )}
             </ol>
           </div>
         </>

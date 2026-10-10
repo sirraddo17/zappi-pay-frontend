@@ -220,8 +220,9 @@ export default function Landing() {
               <div>
                 <h2>Refer friends, earn ₦{Number(referral.bonusAmount).toLocaleString()}</h2>
                 <p>
-                  Share your referral code. When a friend signs up with it and makes their first purchase of ₦
-                  {Number(referral.minPurchase).toLocaleString()} or more, the bonus lands in your wallet.
+                  {referral.friendFunded
+                    ? <>Share your referral code. When a friend signs up with it and keeps buying (starting with ₦{Number(referral.minPurchase).toLocaleString()} or more), the bonus lands in your wallet after a few purchases.</>
+                    : <>Share your referral code. When a friend signs up with it and makes their first purchase of ₦{Number(referral.minPurchase).toLocaleString()} or more, the bonus lands in your wallet.</>}
                 </p>
               </div>
               <Link to={signupTo} className="lp-btn">Join &amp; start earning</Link>

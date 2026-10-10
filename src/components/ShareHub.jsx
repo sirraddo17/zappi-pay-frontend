@@ -126,7 +126,7 @@ export default function ShareHub({ code, link, firstName, bonus, minPurchase }) 
           <div>
             <b style={{ fontSize: 16 }}>Share. Help a friend. Earn.</b>
             <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>
-              {bonus > 0 ? `You get ₦${Number(bonus).toLocaleString()} when they join and spend ₦${Number(minPurchase || 0).toLocaleString()}+.` : 'Invite friends to ZAPPI PAY.'}
+              {bonus > 0 ? `You get ₦${Number(bonus).toLocaleString()} when they join and start buying (from ₦${Number(minPurchase || 0).toLocaleString()}).` : 'Invite friends to ZAPPI PAY.'}
             </div>
           </div>
         </div>
