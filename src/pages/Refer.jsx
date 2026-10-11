@@ -6,6 +6,7 @@ import BottomNav from '../components/BottomNav';
 import SetUsername from '../components/SetUsername';
 import ContestCard from '../components/ContestCard';
 import ShareHub from '../components/ShareHub';
+import { BoostBanner, MilestoneLadder, LiveTicker, remindLink } from '../components/ReferralExtras';
 import MyQr from '../components/MyQr';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { useShowMore } from '../components/ShowMore';
@@ -59,6 +60,7 @@ export default function Refer() {
 
       {data && (
         <>
+          {data.enabled && data.boostUntil && <BoostBanner until={data.boostUntil} bonus={data.bonusAmount} normalBonus={data.normalBonus} />}
           <div
             className="card"
             style={{ background: 'linear-gradient(135deg, #863bff, #5b1fc4)', border: 'none', color: '#fff' }}
@@ -74,6 +76,11 @@ export default function Refer() {
                     ? <>for every friend who signs up with your code and keeps using ZAPPI PAY. It's paid after a few purchases, starting with one of {naira(data.minPurchase)} or more.</>
                     : <>for every friend who signs up with your code and makes their first purchase or bank transfer of {naira(data.minPurchase)} or more.</>}
                 </p>
+                {data.welcomeBonus > 0 && (
+                  <p style={{ margin: '8px 0 0', fontSize: 13, background: 'rgba(255,255,255,0.12)', borderRadius: 8, padding: '6px 10px' }}>
+                    🎁 Your friend gets <b>{naira(data.welcomeBonus)}</b> cashback too, once they verify their BVN or NIN.
+                  </p>
+                )}
               </>
             ) : (
               <p style={{ margin: 0, fontSize: 14 }}>
@@ -101,7 +108,7 @@ export default function Refer() {
             <SetUsername onDone={(username) => setData((d) => ({ ...d, code: username }))} />
           )}
 
-          {data.code && <ShareHub code={data.code} link={link} firstName={customer?.name?.split(' ')[0]} bonus={data.enabled ? data.bonusAmount : 0} minPurchase={data.minPurchase} spendTarget={data.spendTarget} />}
+          {data.code && <ShareHub code={data.code} link={link} firstName={customer?.name?.split(' ')[0]} bonus={data.enabled ? data.bonusAmount : 0} minPurchase={data.minPurchase} spendTarget={data.spendTarget} welcomeBonus={data.enabled ? data.welcomeBonus : 0} />}
 
           <div className="card" style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
             <div>
@@ -117,6 +124,9 @@ export default function Refer() {
               <div style={{ color: 'var(--slate-400)', fontSize: 12 }}>Earned</div>
             </div>
           </div>
+
+          {data.enabled && <MilestoneLadder milestones={data.milestones} rewarded={data.rewardedCount ?? rewarded} bonus={data.bonusAmount} />}
+          {data.enabled && data.tickerEnabled && <LiveTicker />}
 
           <div className="card">
             <h2 style={{ marginTop: 0, fontSize: 16 }}>Your referrals</h2>
@@ -146,6 +156,11 @@ export default function Refer() {
                         ? (!data.enabled ? '✓ Purchased (bonus paused)' : r.progress != null ? `⏳ ${r.progress}% to your bonus` : '✓ Purchased — bonus on the way')
                         : data.spendTarget > 0 ? 'Waiting: first purchase' : `Waiting: first ${naira(data.minPurchase)}+ purchase`}
                   </span>
+                  {!r.rewarded && data.enabled && link && (
+                    <a href={remindLink({ friend: r.name, progress: r.progress, link, target: data.spendTarget })} target="_blank" rel="noreferrer" style={{ fontSize: 12, fontWeight: 700, color: 'var(--green-500)', textDecoration: 'none', marginLeft: 8, whiteSpace: 'nowrap' }} aria-label={`Remind ${r.name} on WhatsApp`}>
+                      💬 Remind
+                    </a>
+                  )}
                 </div>
               ))
             )}
@@ -155,7 +170,7 @@ export default function Refer() {
           <div className="card">
             <h2 style={{ marginTop: 0, fontSize: 16 }}>How it works</h2>
             <ol style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.6, color: 'var(--slate-100)' }}>
-              <li>Share your code or invite link.</li>
+              <li>Share your code or invite link.{data.welcomeBonus > 0 ? ` Your friend gets ${naira(data.welcomeBonus)} cashback after verifying their BVN or NIN.` : ''}</li>
               <li>Your friend signs up and enters your code (the link fills it in for them).</li>
               {data.spendTarget > 0 ? (
                 <li>Every airtime, data, internet, TV or light purchase they make counts. When their total reaches {naira(data.spendTarget)}, your {naira(data.bonusAmount)} lands in your wallet instantly (see the % next to their name).</li>

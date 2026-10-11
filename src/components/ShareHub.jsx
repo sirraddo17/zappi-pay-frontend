@@ -29,12 +29,12 @@ function Round({ bg, icon, label, onClick, href }) {
 
 // Refer & Earn sharing: social buttons, a share picture with a QR code,
 // a 3-second animated invite, and one-tap copy tools.
-export default function ShareHub({ code, link, firstName, bonus, minPurchase, spendTarget }) {
+export default function ShareHub({ code, link, firstName, bonus, minPurchase, spendTarget, welcomeBonus }) {
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');
   const [preview, setPreview] = useState(null); // { url, blob, fileName, video, app }
 
-  const text = `Join me on ZAPPI PAY — airtime, data, electricity, cable TV & exam PINs in seconds. Sign up with my code ${code}: ${link}`;
+  const text = `Join me on ZAPPI PAY — airtime, data, electricity, cable TV & exam PINs in seconds. Sign up with my code ${code}${welcomeBonus > 0 ? ` and get ₦${Number(welcomeBonus).toLocaleString()} cashback after you verify your BVN/NIN` : ''}: ${link}`;
   const details = { code, link, firstName };
 
   function flash(m) {

@@ -45,7 +45,7 @@ export default function Signup() {
     }
     const t = setTimeout(() => {
       getReferralInfo(code)
-        .then((info) => setReferrer(info.referrerFirstName ? { name: info.referrerFirstName } : { notFound: true }))
+        .then((info) => setReferrer(info.referrerFirstName ? { name: info.referrerFirstName, welcome: info.enabled ? Number(info.welcomeBonus || 0) : 0 } : { notFound: true }))
         .catch(() => setReferrer(null));
     }, 400);
     return () => clearTimeout(t);
@@ -144,7 +144,7 @@ export default function Signup() {
             placeholder="Friend's username"
             autoCapitalize="none"
           />
-          {referrer?.name && <p style={{ color: 'var(--green-500)', fontSize: 12, margin: '4px 0 0' }}>✓ Invited by {referrer.name}</p>}
+          {referrer?.name && <p style={{ color: 'var(--green-500)', fontSize: 12, margin: '4px 0 0' }}>✓ Invited by {referrer.name}{referrer.welcome > 0 ? ` — you'll get ₦${referrer.welcome.toLocaleString()} cashback after verifying your BVN/NIN` : ''}</p>}
           {referrer?.notFound && <p style={{ color: 'var(--gold)', fontSize: 12, margin: '4px 0 0' }}>We couldn't find that code — check it or leave it empty.</p>}
         </div>
         <button className="btn" type="submit" disabled={submitting || !passwordIsStrong(password) || password !== confirm}>

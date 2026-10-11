@@ -159,6 +159,7 @@ export const deleteSchedule = (id) => request(`/api/schedules/${id}`, { method: 
 // --- Referrals ---
 export const getReferralInfo = (code) => request(`/api/referrals/info${code ? `?code=${encodeURIComponent(code)}` : ''}`);
 export const getMyReferrals = () => request('/api/referrals');
+export const getReferralTicker = () => request('/api/referrals/ticker');
 export const checkUsername = (username) => request(`/api/account/username/check?username=${encodeURIComponent(username)}`);
 export const setMyUsername = (username) => request('/api/account/username', { method: 'POST', body: JSON.stringify({ username }) });
 
@@ -681,6 +682,7 @@ export const setAwayMode = (data) => adminRequest('/api/admin/partners/away', { 
 export const sendFollowUp = (id, message) => adminRequest(`/api/admin/partners/follow-ups/${id}/send`, { method: 'POST', body: JSON.stringify({ message }) });
 export const dismissFollowUp = (id) => adminRequest(`/api/admin/partners/follow-ups/${id}/dismiss`, { method: 'POST' });
 export const getFundsGuard = () => adminRequest('/api/admin/funds-guard');
+export const getAdminReferralProgress = () => adminRequest('/api/admin/referrals/progress');
 export const getSafePricing = () => adminRequest('/api/admin/safe-pricing');
 export const applySafePricing = () => adminRequest('/api/admin/safe-pricing/apply', { method: 'POST', body: '{}' });
 export const setFundsGuard = (enabled) => adminRequest('/api/admin/funds-guard', { method: 'PUT', body: JSON.stringify({ enabled }) });

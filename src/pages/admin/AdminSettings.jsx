@@ -19,6 +19,7 @@ import DeliveryPromisePanel from '../../components/admin/DeliveryPromisePanel';
 import ShopsPanel from '../../components/admin/ShopsPanel';
 import RewardSplitPanel from '../../components/admin/RewardSplitPanel';
 import SafePricingPanel from '../../components/admin/SafePricingPanel';
+import ReferralProgressPanel from '../../components/admin/ReferralProgressPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 // Lowest VTpass commission per service (% of the sale) — MTN for airtime
@@ -167,6 +168,12 @@ export default function AdminSettings() {
   const [refBonus, setRefBonus] = useState('100');
   const [refMin, setRefMin] = useState('500');
   const [refTarget, setRefTarget] = useState('0');
+  const [refWelcome, setRefWelcome] = useState('0');
+  const [refMilestones, setRefMilestones] = useState([]);
+  const [refBoostAmt, setRefBoostAmt] = useState('0');
+  const [refBoostTarget, setRefBoostTarget] = useState('0');
+  const [refBoostUntil, setRefBoostUntil] = useState('');
+  const [refTicker, setRefTicker] = useState(true);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -246,6 +253,12 @@ export default function AdminSettings() {
         setRefBonus(String(s.referralBonusAmount ?? 100));
         setRefMin(String(s.referralMinPurchase ?? 500));
         setRefTarget(String(Number(s.referralSpendTarget ?? 0)));
+        setRefWelcome(String(Number(s.referralWelcomeBonus ?? 0)));
+        setRefMilestones(Array.isArray(s.referralMilestones) ? s.referralMilestones.map((m) => ({ count: String(m.count), bonus: String(m.bonus) })) : []);
+        setRefBoostAmt(String(Number(s.referralBoostAmount ?? 0)));
+        setRefBoostTarget(String(Number(s.referralBoostTarget ?? 0)));
+        setRefBoostUntil(s.referralBoostUntil ? new Date(new Date(s.referralBoostUntil).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
+        setRefTicker(s.referralTickerEnabled !== false);
       })
       .catch((err) => setLoadError(err.message))
       .finally(() => setLoading(false));
@@ -452,6 +465,19 @@ export default function AdminSettings() {
     );
   }
 
+  // Lowest % you keep per sale across the services that count toward a
+  // referral target (after discounts, Monnify's fee and the rewards split),
+  // and on MTN airtime/data. Used to suggest safe spend targets.
+  function referralRates() {
+    const pct = splitOn ? splitPct : 0;
+    const keptOn = (svc) => {
+      const earn = Number(markupByService[svc] || 0) + LOWEST_COMMISSION[svc] - Math.max(0, MONNIFY_FEE - Number(bankFeePercent || 0));
+      return earn - Math.max(Number(discountByService[svc] || 0), (earn * pct) / 100);
+    };
+    return { lowest: Math.min(...['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'INTERNET'].map(keptOn)), mtn: Math.min(keptOn('AIRTIME'), keptOn('DATA')) };
+  }
+  const safeTargetFor = (amount) => (referralRates().lowest > 0 ? Math.ceil(amount / (referralRates().lowest / 100) / 500) * 500 : null);
+
   function saveReferral(e) {
     e.preventDefault();
     const bonus = Number(refBonus);
@@ -464,7 +490,14 @@ export default function AdminSettings() {
       setStatus((prev) => ({ ...prev, referral: { error: 'Set a bonus above ₦0 before turning referrals on.' } }));
       return;
     }
-    save('referral', { referralEnabled: refEnabled, referralBonusAmount: bonus, referralMinPurchase: min, referralSpendTarget: Math.max(0, Number(refTarget || 0)) }, 'Referral settings saved.');
+    save('referral', {
+      referralEnabled: refEnabled, referralBonusAmount: bonus, referralMinPurchase: min, referralSpendTarget: Math.max(0, Number(refTarget || 0)),
+      referralWelcomeBonus: Math.max(0, Number(refWelcome || 0)),
+      referralMilestones: refMilestones.map((m) => ({ count: Number(m.count), bonus: Number(m.bonus) })).filter((m) => m.count >= 2 && m.bonus > 0),
+      referralBoostAmount: Math.max(0, Number(refBoostAmt || 0)), referralBoostTarget: Math.max(0, Number(refBoostTarget || 0)),
+      referralBoostUntil: refBoostUntil ? new Date(refBoostUntil).toISOString() : null,
+      referralTickerEnabled: refTicker,
+    }, 'Referral settings saved.');
   }
 
   async function savePassword(e) {
@@ -1078,22 +1111,18 @@ export default function AdminSettings() {
               // lowest-earning counted service (light), and on airtime/data.
               const b = Number(refBonus || 0);
               if (!(b > 0)) return null;
-              const pct = splitOn ? splitPct : 0;
-              const keptOn = (svc) => {
-                const earn = Number(markupByService[svc] || 0) + LOWEST_COMMISSION[svc] - Math.max(0, MONNIFY_FEE - Number(bankFeePercent || 0));
-                return earn - Math.max(Number(discountByService[svc] || 0), (earn * pct) / 100);
-              };
-              const lowest = Math.min(...['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'INTERNET'].map(keptOn));
-              const mtn = Math.min(keptOn('AIRTIME'), keptOn('DATA'));
+              // The friend's welcome cashback is covered by the same spend.
+              const cost = b + (cbSeparate ? Number(refWelcome || 0) : 0);
+              const { lowest, mtn } = referralRates();
               if (!(lowest > 0)) return <p style={{ color: 'var(--orange)', fontSize: 12, margin: '4px 0 0' }}>Some services earn you nothing after discounts — fix pricing first.</p>;
               const round = (n) => Math.ceil(n / 500) * 500;
-              const safe = round(b / (lowest / 100));
-              const airtime = round(b / (mtn / 100));
+              const safe = round(cost / (lowest / 100));
+              const airtime = round(cost / (mtn / 100));
               const t = Number(refTarget || 0);
               return (
                 <div style={{ fontSize: 13, marginTop: 8, padding: '8px 12px', borderRadius: 10, border: `1px solid ${t >= safe ? 'var(--green-500)' : 'var(--gold)'}`, background: t >= safe ? 'rgba(34,197,94,0.08)' : 'rgba(255,184,48,0.08)' }}>
                   {t > 0 ? "Customers see:" : "With a target, customers see:"} "Get ₦{b.toLocaleString()} when your friend spends ₦{(t > 0 ? t : safe).toLocaleString()} in total". Paid instantly when they reach it; airtime, data, internet, TV and light count (not bet funding or exam PINs).<br />
-                  <b>Safe target: ₦{safe.toLocaleString()}</b> — covers the bonus even if they only buy light. If they mostly buy airtime/data, ₦{airtime.toLocaleString()} would do.
+                  <b>Safe target: ₦{safe.toLocaleString()}</b> — covers the bonus{cost > b ? ` and the friend's ₦${(cost - b).toLocaleString()} welcome cashback` : ''} even if they only buy light. If they mostly buy airtime/data, ₦{airtime.toLocaleString()} would do.
                   {t > 0 && t < safe && <div style={{ color: 'var(--orange)', marginTop: 4 }}>⚠️ Below the safe target — a friend who only buys light could cost you more than they bring in.</div>}
                   {t !== safe && <div style={{ marginTop: 6 }}><button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: 13 }} onClick={() => setRefTarget(String(safe))}>Use ₦{safe.toLocaleString()}</button></div>}
                 </div>
@@ -1125,9 +1154,71 @@ export default function AdminSettings() {
               );
             })()}
           </div>
+          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '16px 0', paddingTop: 12 }}>
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>🎁 Welcome bonus for the friend</div>
+            <div className="field">
+              <label htmlFor="refWelcome">Cashback the invited friend gets after verifying BVN/NIN (₦) — 0 = off</label>
+              <input id="refWelcome" type="number" step="10" min="0" max="10000" value={refWelcome} onChange={(e) => setRefWelcome(e.target.value)} />
+              <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 0' }}>
+                Goes into their cashback balance — only spendable on purchases (up to the "cashback per purchase" %), never withdrawn or sent. Once per person; BVN/NIN can't be reused, so fake accounts gain little. {!cbSeparate && <b style={{ color: 'var(--orange)' }}>Needs "Keep cashback in its own balance" on (Cashback tab) — it's off, so no welcome bonus is paid.</b>} The safe target above includes it.
+              </p>
+            </div>
+
+            <div style={{ fontWeight: 700, margin: '14px 0 8px' }}>🏆 Milestone bonuses for the referrer</div>
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 8px' }}>Extra money when this many of their friends have earned them a bonus. Paid from the referral pool (Rewards split), so it never costs more than was set aside — if the pool is short it waits and pays later.</p>
+            {refMilestones.map((m, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                <input aria-label="Friends" type="number" min="2" step="1" value={m.count} onChange={(e) => setRefMilestones((l) => l.map((x, j) => (j === i ? { ...x, count: e.target.value } : x)))} style={{ width: 90 }} />
+                <span style={{ fontSize: 13 }}>friends →</span>
+                <input aria-label="Extra bonus" type="number" min="0" step="50" value={m.bonus} onChange={(e) => setRefMilestones((l) => l.map((x, j) => (j === i ? { ...x, bonus: e.target.value } : x)))} style={{ width: 110 }} />
+                <span style={{ fontSize: 13 }}>₦ extra</span>
+                <button type="button" className="btn btn-secondary" style={{ padding: '2px 10px' }} onClick={() => setRefMilestones((l) => l.filter((_, j) => j !== i))} aria-label="Remove milestone">✕</button>
+              </div>
+            ))}
+            {refMilestones.length < 6 && (
+              <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: 13 }} onClick={() => setRefMilestones((l) => [...l, l.length === 0 ? { count: '3', bonus: '200' } : l.length === 1 ? { count: '5', bonus: '500' } : { count: String(Number(l[l.length - 1].count || 5) + 5), bonus: '1000' }])}>+ Add milestone</button>
+            )}
+
+            <div style={{ fontWeight: 700, margin: '16px 0 8px' }}>🔥 Boost week</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 8 }}>
+              <div className="field" style={{ margin: 0 }}>
+                <label htmlFor="refBoostAmt">Boosted bonus (₦)</label>
+                <input id="refBoostAmt" type="number" min="0" step="10" value={refBoostAmt} onChange={(e) => setRefBoostAmt(e.target.value)} />
+              </div>
+              <div className="field" style={{ margin: 0 }}>
+                <label htmlFor="refBoostTarget">Boost spend target (₦)</label>
+                <input id="refBoostTarget" type="number" min="0" step="500" value={refBoostTarget} onChange={(e) => setRefBoostTarget(e.target.value)} />
+              </div>
+              <div className="field" style={{ margin: 0 }}>
+                <label htmlFor="refBoostUntil">Ends</label>
+                <input id="refBoostUntil" type="datetime-local" value={refBoostUntil} onChange={(e) => setRefBoostUntil(e.target.value)} />
+              </div>
+            </div>
+            {(() => {
+              const amt = Number(refBoostAmt || 0);
+              if (!(amt > 0)) return <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '6px 0 0' }}>Set a bonus and an end date to run a boost — customers see a countdown on Refer &amp; Earn. Leave at 0 for no boost.</p>;
+              const safe = safeTargetFor(amt + (cbSeparate ? Number(refWelcome || 0) : 0));
+              const t = Number(refBoostTarget || 0);
+              const live = refBoostUntil && new Date(refBoostUntil) > new Date();
+              return (
+                <p style={{ fontSize: 12, margin: '6px 0 0', color: t > 0 && safe && t < safe ? 'var(--orange)' : 'var(--slate-400)' }}>
+                  {live ? `Running until ${new Date(refBoostUntil).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })}.` : 'Not running (no future end date).'} Safe target for ₦{amt.toLocaleString()}: <b>₦{safe ? safe.toLocaleString() : '—'}</b>
+                  {safe && t !== safe && <button type="button" className="btn btn-secondary" style={{ padding: '2px 8px', fontSize: 12, marginLeft: 6 }} onClick={() => setRefBoostTarget(String(safe))}>Use it</button>}
+                  {t > 0 && safe && t < safe && ' ⚠️ below the safe target.'}
+                  {refBoostUntil && <button type="button" className="btn btn-secondary" style={{ padding: '2px 8px', fontSize: 12, marginLeft: 6 }} onClick={() => setRefBoostUntil('')}>End boost</button>}
+                </p>
+              );
+            })()}
+
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, margin: '16px 0 0', cursor: 'pointer' }}>
+              <input type="checkbox" checked={refTicker} onChange={(e) => setRefTicker(e.target.checked)} style={{ width: 'auto' }} />
+              Show a live ticker of real referral payouts (names masked, e.g. "Ad*** earned ₦100")
+            </label>
+          </div>
           {saveButton('referral', 'Save Referral Settings')}
         </form>
       )}
+      {!loading && !loadError && tab === 'referral' && <ReferralProgressPanel />}
 
       {!loading && !loadError && tab === 'epins' && <EpinSettingsPanel />}
       {!loading && !loadError && tab === 'ai' && (<div style={{ display: 'grid', gap: 16 }}><AiSettingsPanel /><VoiceSettingsPanel /><OpenAiExtrasPanel /><HeygenSettingsPanel /></div>)}
