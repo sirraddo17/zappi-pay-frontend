@@ -5,6 +5,7 @@ import { getEpinOptions, getEpinBatches, getEpinBatch, buyEpins, markEpinsPrinte
 import { useAuth } from '../context/AuthContext';
 import PinConfirm from '../components/PinConfirm';
 import BottomNav from '../components/BottomNav';
+import { SvcHero, Step, Stepper, Summary, Trust } from '../components/ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const groupPin = (p) => String(p).replace(/(\d{4})(?=\d)/g, '$1 ');
@@ -62,13 +63,10 @@ function BuyCards() {
     navigate(`/print-cards/${r.batch.id}`);
   }
 
+  const face = value * n;
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">
-        <Link to="/" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-        <h1>Print recharge cards</h1>
-        <p>Buy airtime PINs and print them to sell in your shop</p>
-      </div>
+      <SvcHero icon="🖨️" color="#0f6d8c" title="Print recharge cards" sub="Buy airtime PINs at a discount, print them and sell at face value." steps={['Pick network & value', 'Choose how many', 'Print on A4 or POS']} />
 
       {!opts && !error && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}
       {opts && !opts.enabled && (
@@ -77,45 +75,45 @@ function BuyCards() {
 
       {opts?.enabled && (
         <form className="card" onSubmit={start}>
-          <div className="section-label" style={{ margin: '0 0 8px', padding: 0 }}>Network</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-            {opts.networks.map((x) => (
-              <button key={x.key} type="button" aria-pressed={network === x.key} onClick={() => setNetwork(x.key)} style={{ padding: '10px 4px', borderRadius: 12, cursor: 'pointer', fontWeight: 700, fontSize: 13, background: x.color, color: x.ink, border: network === x.key ? '3px solid var(--slate-100)' : '3px solid transparent', opacity: network === x.key ? 1 : 0.7 }}>
-                {x.key === '9MOBILE' ? 'T2 / 9mobile' : x.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="section-label" style={{ margin: '16px 0 8px', padding: 0 }}>Card value</div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {opts.values.map((v) => (
-              <Chip key={v.value} on={value === v.value} onClick={() => setValue(v.value)} style={{ flex: 1 }}>
-                <b style={{ fontSize: 16 }}>{naira(v.value)}</b>
-                {v.price < v.value && <span style={{ display: 'block', fontSize: 11, color: 'var(--green-500)' }}>you pay {naira(v.price)}</span>}
-              </Chip>
-            ))}
-          </div>
-
-          <div className="field" style={{ marginTop: 16 }}>
-            <label htmlFor="qty">How many cards? (1–{opts.maxPerOrder})</label>
-            <input id="qty" type="number" inputMode="numeric" min="1" max={opts.maxPerOrder} value={qty} onChange={(e) => setQty(e.target.value)} />
-            <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-              {QUICK.map((q) => <Chip key={q} on={n === q} onClick={() => setQty(String(q))} style={{ padding: '4px 10px', borderRadius: 999, borderWidth: 1 }}>{q}</Chip>)}
+          <Step n={1} title="Network">
+            <div className="prov-chips" role="radiogroup" aria-label="Network">
+              {opts.networks.map((x) => (
+                <button key={x.key} type="button" role="radio" aria-checked={network === x.key} className={`prov-chip${network === x.key ? ' on' : ''}`} onClick={() => setNetwork(x.key)}>
+                  <span className="prov-badge" style={{ background: x.color, color: x.ink }}>{x.key === '9MOBILE' ? '9mob' : x.label.slice(0, 4)}</span>
+                  {x.key === '9MOBILE' ? 'T2 / 9mobile' : x.label}
+                </button>
+              ))}
             </div>
-          </div>
-          <div className="field">
-            <label htmlFor="biz">Name on the cards (optional)</label>
-            <input id="biz" maxLength={40} value={biz} onChange={(e) => setBiz(e.target.value)} placeholder="e.g. Ade Stores, Ikeja" />
-          </div>
+          </Step>
 
-          <div style={{ background: 'var(--slate-800)', borderRadius: 12, padding: 12, fontSize: 14, marginBottom: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>{n} × {naira(value)} {net?.label}</span><span>{naira(value * n)} airtime</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginTop: 4 }}><span>You pay</span><span>{naira(total)}</span></div>
-            {value * n - total > 0 && <div style={{ color: 'var(--green-500)', fontSize: 12, marginTop: 4 }}>You save {naira(value * n - total)} — sell at face value and keep the difference.</div>}
-            <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>Wallet: {naira(balance)}</div>
-          </div>
+          <Step n={2} title="Card value">
+            <div className="val-grid">
+              {opts.values.map((v) => (
+                <button key={v.value} type="button" className={`val-tile${value === v.value ? ' on' : ''}`} aria-pressed={value === v.value} onClick={() => setValue(v.value)} style={value === v.value && net ? { borderColor: net.color } : undefined}>
+                  <b>{naira(v.value)}</b>
+                  {v.price < v.value ? <small>you pay {naira(v.price)}</small> : <small style={{ color: 'var(--slate-400)' }}>&nbsp;</small>}
+                </button>
+              ))}
+            </div>
+          </Step>
+
+          <Step n={3} title="How many cards?" right={`1–${opts.maxPerOrder}`}>
+            <Stepper value={qty} onChange={setQty} min={1} max={opts.maxPerOrder} quick={QUICK} />
+          </Step>
+          <Step n={4} title="Name on the cards" right="optional">
+            <input id="biz" maxLength={40} value={biz} onChange={(e) => setBiz(e.target.value)} placeholder="e.g. Ade Stores, Ikeja" aria-label="Name on the cards" />
+          </Step>
+
+          {n > 0 && (
+            <Summary
+              rows={[[`${net?.label || ''} ${naira(value)} cards`, `× ${n}`], ['Airtime value', naira(face)], ['Wallet balance', naira(balance), total > balance ? 'bad' : undefined]]}
+              total={naira(total)}
+              note={face - total > 0 ? `Your profit at face value: ${naira(face - total)}` : undefined}
+            />
+          )}
           {error && <p style={{ color: 'var(--red-500)', fontSize: 14 }}>{error}</p>}
-          <button className="btn" type="submit" disabled={!n}>Buy &amp; print {n || ''} card{n === 1 ? '' : 's'}</button>
+          <button className="btn" type="submit" style={{ marginTop: 12 }} disabled={!n}>Buy &amp; print {n || ''} card{n === 1 ? '' : 's'}{n ? ` · ${naira(total)}` : ''}</button>
+          <Trust>Cards you can’t get are refunded automatically. Mark cards as sold to keep track of stock.</Trust>
         </form>
       )}
       {!opts?.enabled && error && <p style={{ color: 'var(--red-500)', fontSize: 14, margin: 16 }}>{error}</p>}
@@ -124,7 +122,7 @@ function BuyCards() {
         <>
           <div className="section-label">Your cards</div>
           {batches.map((b) => (
-            <Link key={b.id} to={`/print-cards/${b.id}`} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit', padding: '12px 14px' }}>
+            <Link key={b.id} to={`/print-cards/${b.id}`} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit', padding: '12px 14px', marginBottom: 8 }}>
               <span style={{ width: 40, height: 40, borderRadius: 10, background: b.color, color: b.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12, flexShrink: 0 }}>{naira(b.value)}</span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <strong style={{ fontSize: 14 }}>{b.status === 'SUCCESS' ? b.delivered : b.quantity} × {naira(b.value)} {b.networkLabel}</strong>
@@ -141,7 +139,8 @@ function BuyCards() {
 
       <PinConfirm
         open={confirmOpen}
-        summary={`Buy ${n} × ${naira(value)} ${net?.label || ''} recharge card${n === 1 ? '' : 's'} for ${naira(total)}.`}
+        title="Buy recharge cards"
+        details={{ rows: [['Network', net?.label || network], ['Card value', naira(value)], ['Quantity', String(n)], ['Airtime value', naira(value * n)]], total: naira(total), note: value * n - total > 0 ? `Profit at face value: ${naira(value * n - total)}` : undefined }}
         onSubmit={submit}
         onError={(err) => setError(err.message || 'Could not buy the cards.')}
         onClose={() => setConfirmOpen(false)}

@@ -6,8 +6,10 @@ import { getAirtimeCashConfig, getMyAirtimeCashRequests, submitAirtimeCashReques
 import useAutoRefresh from '../lib/useAutoRefresh';
 import BottomNav from '../components/BottomNav';
 import { useShowMore } from '../components/ShowMore';
+import { SvcHero, Step, NetChips, Summary, Trust } from '../components/ServiceKit';
+import { NETWORK_STYLE } from '../lib/network';
 
-const STATUS_COLORS = { PENDING: 'var(--orange)', APPROVED: 'var(--green-500)', REJECTED: '#ef4444' };
+const STATUS_PILL = { PENDING: ['Checking', 'wait'], APPROVED: ['Paid', 'ok'], REJECTED: ['Declined', 'no'] };
 const NETWORK_LABELS = { mtn: 'MTN', glo: 'Glo', airtel: 'Airtel', etisalat: '9mobile' };
 
 function naira(n) {
@@ -106,21 +108,17 @@ export default function AirtimeCash() {
 
   return (
     <div className="app-shell">
-      <div className="page-header">
-        <Link to="/" style={{ color: 'var(--purple, var(--orange))', textDecoration: 'none', fontSize: 14 }}>
-          &larr; Back
-        </Link>
-        <h1>Airtime to Cash</h1>
-        <p>Bought airtime by mistake? Turn it back into wallet cash.</p>
-      </div>
+      <SvcHero icon="🔁" color="#0E7490" title="Airtime to Cash" sub="Bought airtime by mistake? Turn it back into wallet money." steps={['Tell us the airtime', 'Transfer it to our line', 'Cash lands in your wallet']} />
 
       {error && <p className="error-text">{error}</p>}
 
       {!config && !error && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}
 
       {unavailable && (
-        <div className="card">
-          <p style={{ margin: 0 }}>Airtime to Cash isn't available right now. Please check back later or contact support.</p>
+        <div className="card" style={{ textAlign: 'center', padding: '22px 16px' }}>
+          <div style={{ fontSize: 30 }} aria-hidden>⏸️</div>
+          <b style={{ display: 'block', margin: '6px 0 4px' }}>Not available right now</b>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--slate-400)' }}>Airtime to Cash is paused for the moment. Please check back later or contact support.</p>
         </div>
       )}
 
@@ -142,49 +140,37 @@ export default function AirtimeCash() {
       {config && !unavailable && (
         <form className="card" onSubmit={handleSubmit}>
           {airtimeOrders.length > 0 && (
-            <div className="field">
-              <label htmlFor="orderId">Which purchase was a mistake? (optional)</label>
-              <select id="orderId" value={orderId} onChange={(e) => setOrderId(e.target.value)}>
-                <option value="">Not linked to a purchase</option>
-                {airtimeOrders.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {(NETWORK_LABELS[o.provider] || o.provider)} · {o.recipient} · {naira(o.costAmount ?? o.amount)} · {fmtDate(o.createdAt)}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Step title="Which purchase was a mistake?" right="optional">
+              <div className="ctry-list" style={{ maxHeight: 220, overflowY: 'auto' }}>
+                {airtimeOrders.slice(0, 6).map((o) => {
+                  const st = NETWORK_STYLE[o.provider];
+                  const on = orderId === o.id;
+                  return (
+                    <button key={o.id} type="button" className="ctry-row" aria-pressed={on} onClick={() => setOrderId(on ? '' : o.id)} style={on ? { background: 'rgba(13,148,136,.15)', borderRadius: 10 } : undefined}>
+                      <span className="hist-ico" style={{ width: 32, height: 32, borderRadius: '50%', fontSize: 8, background: st?.bg || 'var(--slate-700)', color: st?.fg || '#fff' }}>{st?.name?.slice(0, 4) || o.provider}</span>
+                      <span style={{ fontSize: 14 }}>{o.recipient}<small style={{ display: 'block', fontSize: 11, color: 'var(--slate-400)' }}>{fmtDate(o.createdAt)}</small></span>
+                      <span style={{ color: on ? 'var(--purple)' : undefined, fontWeight: 700 }}>{on ? '✓ ' : ''}{naira(o.costAmount ?? o.amount)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </Step>
           )}
 
-          <div className="field">
-            <label htmlFor="network">Network</label>
-            <select id="network" value={network} onChange={(e) => setNetwork(e.target.value)} required>
-              <option value="">Select…</option>
-              {config.networks.map((n) => (
-                <option key={n.key} value={n.key}>{n.label}</option>
-              ))}
-            </select>
-          </div>
+          <Step n={1} title="Network">
+            <NetChips items={config.networks.map((n) => ({ key: n.key, net: n.key, label: n.label }))} value={network} onChange={setNetwork} />
+          </Step>
 
-          <div className="field">
-            <label htmlFor="senderPhone">Phone number the airtime is on</label>
-            <input id="senderPhone" type="tel" inputMode="numeric" maxLength={11} value={senderPhone} onChange={(e) => setSenderPhone(e.target.value)} placeholder="080…" required />
-          </div>
+          <Step n={2} title="Phone number the airtime is on">
+            <input id="senderPhone" type="tel" inputMode="numeric" maxLength={11} value={senderPhone} onChange={(e) => setSenderPhone(e.target.value)} placeholder="080…" required style={{ fontSize: 18, fontWeight: 700, letterSpacing: 0.5 }} />
+          </Step>
 
-          <div className="field">
-            <label htmlFor="amount">Airtime amount (₦)</label>
-            <input
-              id="amount"
-              type="number"
-              min={config.minAmount}
-              max={config.maxAmount}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-            />
-            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 0' }}>
-              Between {naira(config.minAmount)} and {naira(config.maxAmount)}.
-            </p>
-          </div>
+          <Step n={3} title="Airtime amount" right={`${naira(config.minAmount)} – ${naira(config.maxAmount)}`}>
+            <div className="amt-big" style={{ border: '1.5px solid var(--slate-700)', borderRadius: 14, padding: '6px 0', background: 'var(--slate-900)' }}>
+              <span>₦</span>
+              <input id="amount" type="number" inputMode="numeric" min={config.minAmount} max={config.maxAmount} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" required style={{ width: `${Math.max(1, String(amount || '0').length) + 0.6}ch` }} aria-label="Airtime amount" />
+            </div>
+          </Step>
 
           <div className="field">
             <label htmlFor="note">Note (optional)</label>
@@ -192,39 +178,27 @@ export default function AirtimeCash() {
           </div>
 
           {Number(amount) > 0 && (
-            <div style={{ margin: '0 0 12px', fontSize: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--slate-400)' }}>
-                <span>Airtime value</span>
-                <span>{naira(amount)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--slate-400)', margin: '4px 0' }}>
-                <span>Service fee ({config.feePercent}%)</span>
-                <span>−{naira(fee)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 16 }}>
-                <span>You'll receive</span>
-                <span>{naira(payout)}</span>
-              </div>
-              {selectedNetwork && (
-                <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '8px 0 0' }}>
-                  After submitting, you'll transfer the airtime to our {selectedNetwork.label} line: {selectedNetwork.receivingNumber}
-                </p>
-              )}
-            </div>
+            <Summary
+              rows={[['Airtime value', naira(amount)], [`Service fee (${config.feePercent}%)`, `−${naira(fee)}`]]}
+              totalLabel="You’ll receive"
+              total={naira(payout)}
+            />
           )}
+          {selectedNetwork && Number(amount) > 0 && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '0 0 4px' }}>Next you’ll transfer the airtime to our {selectedNetwork.label} line: <b style={{ color: 'var(--gold)' }}>{selectedNetwork.receivingNumber}</b></p>}
 
-          <button className="btn" type="submit" disabled={submitting}>
-            {submitting ? 'Submitting…' : 'Submit Request'}
+          <button className="btn" type="submit" disabled={submitting} style={{ marginTop: 10 }}>
+            {submitting ? 'Submitting…' : Number(amount) > 0 ? `Submit · get ${naira(payout)}` : 'Submit request'}
           </button>
+          <Trust>A person checks every request. You’re paid as soon as the airtime arrives on our line.</Trust>
         </form>
       )}
 
-      <div className="section-label">My Requests</div>
+      <div className="section-label">My requests</div>
       <div className="card">
         {requests === null ? (
           <p className="empty-state" style={{ margin: 0 }}>Loading…</p>
         ) : requests.length === 0 ? (
-          <p className="empty-state" style={{ margin: 0 }}>No requests yet.</p>
+          <p className="empty-state" style={{ margin: 0 }}>No requests yet. They’ll show here with their status.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {reqPage.visible.map((r) => (
@@ -233,7 +207,7 @@ export default function AirtimeCash() {
                   <span style={{ fontWeight: 600 }}>
                     {NETWORK_LABELS[r.network] || r.network} {naira(r.amount)} → {naira(r.payoutAmount)}
                   </span>
-                  <span style={{ color: STATUS_COLORS[r.status], fontWeight: 600, fontSize: 13 }}>{r.status}</span>
+                  <span className={`pill ${STATUS_PILL[r.status]?.[1] || 'wait'}`}>{STATUS_PILL[r.status]?.[0] || r.status}</span>
                 </div>
                 <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 2 }}>
                   From {r.senderPhone} · {fmtDate(r.createdAt)}

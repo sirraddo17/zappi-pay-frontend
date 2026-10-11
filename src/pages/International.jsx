@@ -5,6 +5,7 @@ import { intlCountries, intlTypes, intlOperators, intlVariations, intlQuote, pur
 import PinConfirm from '../components/PinConfirm';
 import BottomNav from '../components/BottomNav';
 import { useAppInfo, pausedFor } from '../components/ServiceNotices';
+import { SvcHero, Step, Summary, Trust } from '../components/ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const POPULAR = ['GH', 'GB', 'US', 'CA', 'KE', 'ZA', 'CM', 'BJ', 'TG', 'AE', 'IE', 'DE'];
@@ -68,28 +69,38 @@ export default function International() {
 
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">
-        <Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-        <h1>International airtime & data</h1>
-        <p>Top up family and friends abroad — pay in naira from your wallet.</p>
-      </div>
+      <SvcHero icon="🌍" color="#1d4ed8" title="International airtime & data" sub="Top up family and friends abroad — pay in naira from your wallet." steps={['Pick the country', 'Choose network & amount', 'Delivered in seconds']} />
       {appInfo && !appInfo.intlAirtime && <div className="card" style={{ textAlign: 'center' }}>🌍 International airtime & data is coming soon.</div>}
       {err && <p className="error-text" style={{ margin: '0 16px 12px' }}>{err}</p>}
       {paused && <p className="error-text" style={{ margin: '0 16px 12px' }}>{paused}</p>}
 
       {appInfo && !appInfo.intlAirtime ? null : !country ? (
         <div className="card">
-          <div className="field"><label htmlFor="inQ">Which country?</label><input id="inQ" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search e.g. Ghana, UK, USA" /></div>
+          <input id="inQ" className="plan-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="🔍 Search country e.g. Ghana, UK, USA" aria-label="Which country?" />
           {!countries ? <p className="empty-state">Loading countries…</p> : (
-            <div style={{ display: 'grid', gap: 6 }}>
-              {!q && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Popular</div>}
-              {shown.map((c) => (
-                <button key={c.code} type="button" className="btn btn-secondary" style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left' }} onClick={() => setCountry(c)}>
-                  {c.flag ? <img src={c.flag} alt="" width="22" height="16" style={{ objectFit: 'cover', borderRadius: 2 }} /> : '🌍'} {c.name} <span style={{ color: 'var(--slate-400)', marginLeft: 'auto' }}>+{c.prefix}</span>
-                </button>
-              ))}
+            <>
+              {!q && (
+                <>
+                  <div className="svc-step-h">Popular</div>
+                  <div className="ctry-pop">
+                    {shown.slice(0, 8).map((c) => (
+                      <button key={c.code} type="button" onClick={() => setCountry(c)}>
+                        {c.flag ? <img src={c.flag} alt="" /> : <span style={{ fontSize: 20 }}>🌍</span>}
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{c.name.replace(/United Kingdom.*/i, 'UK').replace(/United States.*/i, 'USA').replace(/United Arab Emirates/i, 'UAE')}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+              <div className="ctry-list">
+                {(q ? shown : shown.slice(8)).map((c) => (
+                  <button key={c.code} type="button" className="ctry-row" onClick={() => setCountry(c)}>
+                    {c.flag ? <img src={c.flag} alt="" width="26" height="18" /> : '🌍'} {c.name} <span>+{c.prefix} ›</span>
+                  </button>
+                ))}
+              </div>
               {q && shown.length === 0 && <p className="empty-state">No country found.</p>}
-            </div>
+            </>
           )}
         </div>
       ) : (
@@ -99,18 +110,25 @@ export default function International() {
             <button type="button" onClick={() => setCountry(null)} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer' }}>Change</button>
           </div>
           {types.length > 1 && (
-            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-              {types.map((t) => <button key={t.id} type="button" className={type === t.id ? 'btn' : 'btn btn-secondary'} onClick={() => setType(t.id)}>{/data/i.test(t.name) ? '📶 ' : '📞 '}{t.name}</button>)}
+            <div className="seg2">
+              {types.map((t) => <button key={t.id} type="button" className={type === t.id ? 'on' : ''} onClick={() => setType(t.id)}>{/data/i.test(t.name) ? '📶 ' : '📞 '}{t.name}</button>)}
             </div>
           )}
           {type && (
-            <div className="field">
-              <label htmlFor="inOp">Network</label>
-              <select id="inOp" value={op} onChange={(e) => setOp(e.target.value)} required>
-                <option value="">{ops.length ? 'Choose network' : 'Loading…'}</option>
-                {ops.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-              </select>
-            </div>
+            <Step n={1} title="Network">
+              {ops.length ? (
+                <div className="prov-chips" role="radiogroup" aria-label="Network">
+                  {ops.map((o) => {
+                    let h = 0; for (const ch of String(o.name)) h = (h * 31 + ch.charCodeAt(0)) % 360;
+                    return (
+                      <button key={o.id} type="button" role="radio" aria-checked={op === o.id} className={`prov-chip${op === o.id ? ' on' : ''}`} onClick={() => setOp(o.id)}>
+                        <span className="prov-badge" style={{ background: `hsl(${h} 60% 38%)` }}>{String(o.name).replace(/[^A-Za-z0-9]/g, '').slice(0, 4)}</span>{o.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>Loading networks…</p>}
+            </Step>
           )}
           {op && (
             <div className="field">
@@ -143,15 +161,15 @@ export default function International() {
               </div>
             </div>
           )}
-          {price && <p style={{ fontSize: 15, margin: '4px 0 10px' }}>You pay <b>{naira(price)}</b></p>}
-          <button className="btn" type="submit" disabled={busy || !price || phone.replace(/\D/g, '').length < 6 || Boolean(paused)}>{price ? `Pay ${naira(price)}` : 'Pay'}</button>
+          {price && <Summary rows={[['Country', country.name], ['Sending', v.name], !v.fixed && ['They get', `${local} ${country.currency || ''}`], phone && ['To', `+${fullPhone}`]].filter(Boolean)} total={naira(price)} />}
+          <button className="btn" type="submit" style={{ marginTop: 12 }} disabled={busy || !price || phone.replace(/\D/g, '').length < 6 || Boolean(paused)}>{price ? `Pay ${naira(price)}` : 'Pay'}</button>
           <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '8px 0 0' }}>Check the number carefully — international top-ups can’t be reversed once delivered. If it fails, you’re refunded automatically.</p>
         </form>
       )}
 
       <PinConfirm
         open={confirm}
-        summary={v ? `Pay ${naira(price)} · ${v.name} to +${fullPhone}` : ''}
+        details={v ? { rows: [['Country', country?.name || ''], ['Sending', v.name], ['To', `+${fullPhone}`]], total: naira(price), note: 'International top-ups can’t be reversed once delivered.' } : undefined}
         onSubmit={buy}
         onError={(e) => setErr(e.message || 'Purchase failed.')}
         onClose={() => setConfirm(false)}

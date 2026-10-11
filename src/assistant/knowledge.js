@@ -185,6 +185,13 @@ export const TOPICS = [
     actions: [{ label: 'Buy Airtime', to: '/buy/airtime' }],
   },
   {
+    id: 'bulk-topup',
+    title: 'Bulk airtime & data',
+    keywords: ['bulk airtime', 'bulk data', 'many numbers', 'staff airtime', 'send to many', 'multiple numbers', 'group recharge'],
+    answer: 'Home → More → “Bulk airtime & data”. Choose Airtime or Data, tap the network, pick an amount or plan, then type or paste up to 50 numbers — each shows as a chip with its network badge (gold means it looks like another network, red means not valid). Check the summary and pay once with your PIN. Any number that fails is refunded straight away.',
+    actions: [{ label: 'Bulk airtime & data', to: '/bulk' }],
+  },
+  {
     id: 'data',
     title: 'Buy data',
     keywords: ['data', 'bundle', 'subscription data', 'gb', 'mb', 'internet data'],

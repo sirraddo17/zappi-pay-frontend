@@ -5,6 +5,7 @@ import { getVtpassVariations, getOrder, getOrders, purchase, getPricing } from '
 import PinConfirm from '../components/PinConfirm';
 import BottomNav from '../components/BottomNav';
 import { useAppInfo, pausedFor } from '../components/ServiceNotices';
+import { SvcHero, Step, Stepper, Summary, Trust } from '../components/ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const MAX = 50;
@@ -71,54 +72,65 @@ function Buy() {
     navigate(res?.order?.id ? `/exam-pins/${res.order.id}` : '/orders');
   }
 
+  const each = q ? total / q : 0;
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">
-        <Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-        <h1>Exam PINs in bulk</h1>
-        <p>Buy many WAEC result checker PINs at once and print them for your students or customers.</p>
-      </div>
+      <SvcHero icon="🎓" color="#15803d" title="Exam PINs in bulk" sub="For schools, cafés and agents — buy many result checkers at once, then print." steps={['Pick how many', 'Pay from wallet', 'Print, copy or download']} />
       {err && <p className="error-text" style={{ margin: '0 16px 12px' }}>{err}</p>}
       {paused && <p className="error-text" style={{ margin: '0 16px 12px' }}>{paused}</p>}
       <form className="card" onSubmit={(e) => { e.preventDefault(); setErr(''); setConfirm(true); }}>
-        <div className="field">
-          <label htmlFor="exV">Exam</label>
-          <select id="exV" value={code} onChange={(e) => setCode(e.target.value)} required>
-            {vars === null && <option value="">Loading…</option>}
-            {(vars || []).map((x) => <option key={x.variation_code} value={x.variation_code}>{EXAMS.waec.label} — {x.name}</option>)}
-          </select>
-        </div>
-        <div className="field">
-          <label htmlFor="exQ">How many PINs? (1–{MAX})</label>
-          <input id="exQ" type="number" inputMode="numeric" min="1" max={MAX} value={qty} onChange={(e) => setQty(e.target.value)} required />
-          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-            {QUICK.map((n) => <button key={n} type="button" className={q === n ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '4px 12px', fontSize: 13 }} onClick={() => setQty(n)}>{n}</button>)}
-          </div>
-        </div>
-        <div className="field">
-          <label htmlFor="exN">Name on the printed sheet (optional)</label>
-          <input id="exN" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Bright Future College, or your shop name" />
-        </div>
-        {unit > 0 && <p style={{ fontSize: 15, margin: '4px 0 10px' }}>{q} PIN{q === 1 ? '' : 's'} · you pay <b>{naira(total)}</b>{total !== unit * q ? <span style={{ fontSize: 12, color: 'var(--slate-400)' }}> ({naira(total / q)} each)</span> : ''}</p>}
-        <button className="btn" type="submit" disabled={!unit || Boolean(paused)}>{unit ? `Pay ${naira(total)}` : 'Pay'}</button>
-        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '8px 0 0' }}>The PINs appear right after payment, ready to print, copy or download. If VTpass can’t deliver them, you’re refunded automatically. Agent prices and discounts apply.</p>
+        <Step n={1} title="Exam">
+          {vars === null ? <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>Loading…</p> : (
+            <div className="pkg-list" role="radiogroup">
+              {(vars || []).map((x) => {
+                const on = x.variation_code === code;
+                return (
+                  <button key={x.variation_code} type="button" role="radio" aria-checked={on} className={`pkg-card${on ? ' on' : ''}`} onClick={() => setCode(x.variation_code)}>
+                    <span className={`pkg-radio${on ? ' on' : ''}`} aria-hidden />
+                    <span className="prov-badge" style={{ background: EXAMS.waec.color, minWidth: 40, height: 40, borderRadius: 12, fontSize: 10 }}>WAEC</span>
+                    <span className="pkg-main"><span className="pkg-name">{EXAMS.waec.label}</span><span className="pkg-sub">{EXAMS.waec.check}</span></span>
+                    <span className="pkg-price">{naira(priceFor(Number(x.variation_amount), pricing))}<small style={{ display: 'block', fontSize: 10, fontWeight: 500, color: 'var(--slate-400)' }}>per PIN</small></span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </Step>
+        <Step n={2} title="How many PINs?" right={`1–${MAX}`}>
+          <Stepper value={qty} onChange={setQty} min={1} max={MAX} quick={QUICK} />
+        </Step>
+        <Step n={3} title="Name on the printed sheet" right="optional">
+          <input id="exN" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Bright Future College, or your shop name" aria-label="Name on the printed sheet" />
+        </Step>
+        {unit > 0 && (
+          <Summary
+            rows={[['Exam', 'WAEC result checker'], ['Price per PIN', naira(each)], ['Quantity', `× ${q}`], ['Wallet balance', naira(customer?.walletBalance), Number(customer?.walletBalance || 0) < total ? 'bad' : undefined]]}
+            total={naira(total)}
+            note={total < unit * q ? `You save ${naira(unit * q - total)}` : undefined}
+          />
+        )}
+        <button className="btn" type="submit" style={{ marginTop: 12 }} disabled={!unit || Boolean(paused)}>{unit ? `Buy ${q} PIN${q === 1 ? '' : 's'} · ${naira(total)}` : 'Pay'}</button>
+        <Trust>PINs appear right after payment, ready to print (A4, list or POS), copy or download. If they can’t be delivered you’re refunded automatically.</Trust>
       </form>
 
       {recent.length > 0 && (
         <>
           <div className="section-label">Your recent PINs</div>
-          {recent.map((o) => (
-            <Link key={o.id} to={`/exam-pins/${o.id}`} className="card" style={{ display: 'flex', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}>
-              <span>{o.quantity || 1} × WAEC · {new Date(o.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}</span>
-              <span style={{ color: 'var(--purple)' }}>Open ›</span>
-            </Link>
-          ))}
+          <div className="card" style={{ padding: 0 }}>
+            {recent.map((o) => (
+              <Link key={o.id} to={`/exam-pins/${o.id}`} className="hist-row">
+                <span className="hist-ico" style={{ background: '#15803d', color: '#fff' }}>WAEC</span>
+                <span className="hist-main"><b>{o.quantity || 1} × result checker</b><small>{new Date(o.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })} · {naira(o.amount)}</small></span>
+                <span className="pill ok">Print ›</span>
+              </Link>
+            ))}
+          </div>
         </>
       )}
 
       <PinConfirm
         open={confirm}
-        summary={`Pay ${naira(total)} · ${q} WAEC result checker PIN${q === 1 ? '' : 's'}`}
+        details={{ rows: [['Exam', 'WAEC result checker'], ['Price per PIN', naira(each)], ['Quantity', String(q)], name.trim() && ['Printed name', name.trim()]].filter(Boolean), total: naira(total) }}
         onSubmit={buy}
         onError={(e) => setErr(e.message || 'Purchase failed.')}
         onClose={() => setConfirm(false)}

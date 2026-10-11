@@ -6,6 +6,7 @@ import { insurancePlans, insuranceOptions, purchase } from '../api';
 import PinConfirm from '../components/PinConfirm';
 import BottomNav from '../components/BottomNav';
 import { useAppInfo, pausedFor } from '../components/ServiceNotices';
+import { SvcHero, Step, Summary, Trust } from '../components/ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
 const PLAN_EMOJI = { private: '🚗', commercial: '🚌', tricycle: '🛺', motorcycle: '🏍️' };
@@ -61,24 +62,23 @@ export default function Insurance() {
 
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">
-        <Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-        <h1>Car insurance</h1>
-        <p>Third-party motor insurance — required by law. Certificate in minutes, by Universal Insurance.</p>
-      </div>
+      <SvcHero icon="🚗" color="#c2410c" title="Car insurance" sub="Third-party motor insurance — required by law. Certificate by email in minutes." steps={['Pick your vehicle', 'Enter its papers', 'Get your certificate']} />
       {err && <p className="error-text" style={{ margin: '0 16px 12px' }}>{err}</p>}
       {paused && <p className="error-text" style={{ margin: '0 16px 12px' }}>{paused}</p>}
       <form className="card" onSubmit={(e) => { e.preventDefault(); setErr(''); setConfirm(true); }}>
-        <div className="field">
-          <label>Vehicle type</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {plans === null ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : plans.map((x) => (
-              <button key={x.code} type="button" className={plan === x.code ? 'btn' : 'btn btn-secondary'} style={{ padding: '10px 8px', fontSize: 13 }} onClick={() => setPlan(x.code)}>
-                {emojiFor(x.name)} {x.name}<br /><b>{x.price ? naira(x.price) : ''}</b>
-              </button>
-            ))}
-          </div>
-        </div>
+        <Step n={1} title="Vehicle type">
+          {plans === null ? <SkeletonRows rows={2} /> : (
+            <div className="veh-grid" role="radiogroup">
+              {plans.map((x) => (
+                <button key={x.code} type="button" role="radio" aria-checked={plan === x.code} className={`veh-tile${plan === x.code ? ' on' : ''}`} onClick={() => setPlan(x.code)}>
+                  <span aria-hidden>{emojiFor(x.name)}</span>
+                  <span style={{ minWidth: 0 }}><b>{x.name.replace(/\s*\(.*?\)/g, '')}</b><small>{x.price ? naira(x.price) : ''}<span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: 11 }}>{x.price ? ' / year' : ''}</span></small></span>
+                </button>
+              ))}
+            </div>
+          )}
+        </Step>
+        <Step n={2} title="Vehicle papers"><span /></Step>
         <div className="field"><label htmlFor="isN">Owner’s full name (as on vehicle papers)</label><input id="isN" maxLength={80} value={f.insuredName} onChange={set('insuredName')} required /></div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <div className="field"><label htmlFor="isP">Plate number</label><input id="isP" maxLength={12} value={f.plateNumber} onChange={(e) => set('plateNumber')(e.target.value.toUpperCase())} placeholder="ABC123XY" required /></div>
@@ -91,15 +91,17 @@ export default function Insurance() {
           <Pick id="isCo" label="Colour" kind="color" value={f.vehicleColor} onChange={set('vehicleColor')} />
           <Pick id="isEc" label="Engine capacity" kind="engine-capacity" value={f.engineCapacity} onChange={set('engineCapacity')} />
         </div>
+        <Step n={3} title="Where it’s registered"><span /></Step>
         <Pick id="isSt" label="State" kind="state" value={f.state} onChange={set('state')} />
         <Pick id="isL" label="Local government" kind="lga" parent={f.state} value={f.lga} onChange={set('lga')} disabled={!f.state} />
         <div className="field"><label htmlFor="isE">Email (certificate is sent here)</label><input id="isE" type="email" value={f.email} onChange={set('email')} required /></div>
-        <button className="btn" type="submit" disabled={!p?.price || Boolean(paused)}>{p?.price ? `Pay ${naira(p.price)}` : 'Pay'}</button>
+        {p?.price > 0 && <Summary rows={[['Cover', `${p.name} · third party`], ['Plate', f.plateNumber || '—'], ['Lasts', '1 year']]} total={naira(p.price)} />}
+        <button className="btn" type="submit" style={{ marginTop: 12 }} disabled={!p?.price || Boolean(paused)}>{p?.price ? `Pay ${naira(p.price)}` : 'Pay'}</button>
         <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '8px 0 0' }}>Third-party cover pays for damage you cause to other people’s vehicles or property and their injuries. It does not cover your own car. Cover lasts one year. If the purchase fails, you’re refunded automatically.</p>
       </form>
       <PinConfirm
         open={confirm}
-        summary={p ? `Pay ${naira(p.price)} · ${p.name} insurance for ${f.plateNumber}` : ''}
+        details={p ? { rows: [['Cover', `${p.name} · third party`], ['Plate', f.plateNumber], ['Owner', f.insuredName], ['Certificate to', f.email]], total: naira(p.price) } : undefined}
         onSubmit={buy}
         onError={(e) => setErr(e.message || 'Purchase failed.')}
         onClose={() => setConfirm(false)}
