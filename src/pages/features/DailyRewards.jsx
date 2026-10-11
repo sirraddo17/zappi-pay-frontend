@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { getDailyRewards, dailyCheckin, dailyQuiz } from '../../api';
 import BottomNav from '../../components/BottomNav';
 import { naira } from '../../components/circles/shared';
+import { SvcHero } from '../../components/ServiceKit';
 
 export default function DailyRewards() {
   const [d, setD] = useState(null);
@@ -16,7 +17,7 @@ export default function DailyRewards() {
   const inWeek = d.checkedIn ? ((d.streak - 1) % 7) + 1 : d.streak % 7;
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header"><Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link><h1>🎁 Daily rewards</h1><p>Check in every day and answer one quick question. Rewards go to your cashback balance.</p></div>
+      <SvcHero back="/more" icon="🎁" color="#be185d" title="Daily rewards" sub="Check in every day and answer one quick question. Rewards go to your cashback balance." steps={['Check in daily', 'Answer a question', 'Earn cashback']} />
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       {msg && <p style={{ color: 'var(--green-500)', margin: '0 16px', fontSize: 14 }}>{msg}</p>}
       {!d.enabled && <p className="card" style={{ fontSize: 14 }}>Daily rewards are paused right now.</p>}

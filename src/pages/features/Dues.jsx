@@ -7,6 +7,7 @@ import BottomNav from '../../components/BottomNav';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { naira } from '../../components/circles/shared';
 import PayoutAccount, { goToCheckout } from '../../components/PayoutAccount';
+import { SvcHero } from '../../components/ServiceKit';
 
 const OFTEN = { WEEKLY: 'weekly', MONTHLY: 'monthly', YEARLY: 'yearly' };
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -23,7 +24,7 @@ export default function Dues() {
   const set = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">{back('/more', 'Back')}<h1>🏘️ Association Dues</h1><p>Estates, churches, mosques, alumni, staff clubs — collect dues with reminders, auto-pay and a paid/unpaid list.</p></div>
+      <SvcHero back="/more" icon="🏘️" color="#0e7490" title="Association Dues" sub="Estates, churches, mosques, alumni and clubs — dues with reminders, auto-pay and a paid list." steps={['Create the group', 'Members join by link', 'Reminders and paid list']} />
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       {!open ? <div style={{ margin: '0 16px 12px' }}><button type="button" className="btn" onClick={() => setOpen(true)}>＋ Start collecting dues</button></div> : (
         <form className="card" onSubmit={async (e) => { e.preventDefault(); setErr(''); try { const r = await createDuesGroup(f); navigate(`/dues/${r.group.id}`); } catch (e2) { setErr(e2.message); } }}>

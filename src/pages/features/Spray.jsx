@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { naira } from '../../components/circles/shared';
 import { qrDataUrl } from '../../lib/shareCard';
+import { SvcHero } from '../../components/ServiceKit';
 
 function Qr({ link, size, style }) {
   const [src, setSrc] = useState('');
@@ -154,11 +155,7 @@ export default function Spray() {
   useEffect(() => { load(); }, []);
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">
-        <Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-        <h1>💃 Owambe Spray</h1>
-        <p>Guests scan your QR and spray money from their phones — it comes straight to you, live on screen.</p>
-      </div>
+      <SvcHero back="/more" icon="💃" color="#be185d" title="Owambe Spray" sub="Guests scan your QR and spray money from their phones — straight to you, live on screen." steps={['Create your party', 'Guests scan your QR', 'Sprays land live']} />
       <form className="card" onSubmit={async (e) => { e.preventDefault(); setErr(''); try { const r = await createSprayEvent({ title, celebrant }); navigate(`/spray/${r.event.code}/host`); } catch (e2) { setErr(e2.message); } }}>
         <b>Start a spray event</b>
         <div className="field" style={{ marginTop: 8 }}><label htmlFor="sT">Party name</label><input id="sT" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={60} placeholder="e.g. Tunde & Ada’s wedding" required /></div>

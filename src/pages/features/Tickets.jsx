@@ -7,6 +7,7 @@ import QrScanner from '../../components/QrScanner';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { qrDataUrl } from '../../lib/shareCard';
 import { naira } from '../../components/circles/shared';
+import { SvcHero } from '../../components/ServiceKit';
 
 const back = (to, label) => <Link to={to} style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← {label}</Link>;
 const when = (d) => new Date(d).toLocaleString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
@@ -43,7 +44,7 @@ export default function Tickets() {
   const upcoming = d.tickets.filter((t) => new Date(t.startsAt) > new Date(Date.now() - 12 * 3600 * 1000));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">{back('/more', 'Back')}<h1>🎟️ Event tickets</h1><p>Sell tickets for owambes, concerts, church programmes and seminars. Buyers pay by card or transfer, and the money goes straight to your bank account.</p></div>
+      <SvcHero back="/more" icon="🎟️" color="#c2410c" title="Event tickets" sub="Sell tickets for owambes, concerts, church programmes and seminars — paid straight to your bank." steps={['Create your event', 'Share the link', 'Scan QR at the door']} />
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       <div className="card">
         <b>My tickets</b>

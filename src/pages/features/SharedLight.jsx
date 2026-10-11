@@ -6,6 +6,7 @@ import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { naira } from '../../components/circles/shared';
+import { SvcHero } from '../../components/ServiceKit';
 
 const back = (to, label) => <Link to={to} style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← {label}</Link>;
 const bar = (a, b) => <div style={{ height: 12, borderRadius: 6, background: 'var(--slate-800)', overflow: 'hidden', margin: '8px 0' }}><div style={{ width: `${Math.min(100, Math.round((a / Math.max(1, b)) * 100))}%`, height: '100%', background: 'var(--gold)' }} /></div>;
@@ -23,7 +24,7 @@ export default function SharedLight() {
   const set = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">{back('/more', 'Back')}<h1>💡 Shared Light</h1><p>Housemates, flatmates or shop neighbours put money into one pot. When it’s full, the token is bought automatically for your shared meter.</p></div>
+      <SvcHero back="/more" icon="💡" color="#a16207" title="Shared Light" sub="Housemates or shop neighbours fill one pot — the token buys itself for your shared meter." steps={['Start a light pot', 'Everyone chips in', 'Token buys itself']} />
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       {!open ? <div style={{ margin: '0 16px 12px' }}><button type="button" className="btn" onClick={() => setOpen(true)}>＋ Start a light pot</button></div> : (
         <form className="card" onSubmit={async (e) => { e.preventDefault(); setErr(''); setBusy(true); try { const r = await createLightPot(f); navigate(`/shared-light/${r.pot.id}`); } catch (e2) { setErr(e2.message); } finally { setBusy(false); } }}>

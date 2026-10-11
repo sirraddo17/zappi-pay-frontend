@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getFamily, inviteFamily, respondFamily, leaveFamily, updateFamily, familySendNow, removeFamily } from '../api';
 import { SERVICE_LABEL } from '../lib/repeat';
+import { SvcHero } from '../components/ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
 const date = (d) => new Date(d).toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -99,11 +100,7 @@ export default function Family() {
   const mb = d?.managedBy;
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">
-        <Link to="/profile" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-        <h1>👨‍👩‍👧 Family</h1>
-        <p>Send an allowance and set spending limits for your family</p>
-      </div>
+      <SvcHero back="/more" icon="👨‍👩‍👧" color="#1f6b4a" title="Family wallet" sub="Send allowances and set spending limits for your family." steps={['Invite a family member', 'Send an allowance', 'Set their limits']} />
       {err && <p className="error-text" style={{ margin: '0 16px 8px' }}>{err}</p>}
       {msg && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '0 16px 8px' }}>{msg}</p>}
       {!d && !err && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}

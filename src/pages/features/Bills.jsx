@@ -5,6 +5,7 @@ import { getBillCategories, getBillers, getBillItems, validateBill, payBill, get
 import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { naira } from '../../components/circles/shared';
+import { SvcHero } from '../../components/ServiceKit';
 
 const ICON = { TAX: '🏛️', UTILITYBILLS: '💧', TRANSLOG: '🚌', DONATIONS: '🤲', RELINST: '⛪', SCHPB: '🏫', DEALPAY: '🧾' };
 const iconFor = (c) => ICON[c.code] || (/tax/i.test(c.name) ? '🏛️' : /school|professional/i.test(c.name) ? '🏫' : /relig|church|mosque/i.test(c.name) ? '⛪' : /transport|toll/i.test(c.name) ? '🚌' : /donat/i.test(c.name) ? '🤲' : /utility|water|waste/i.test(c.name) ? '💧' : '🧾');
@@ -52,12 +53,12 @@ export default function Bills() {
   );
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">{cat ? <button type="button" onClick={() => (biller ? setBiller(null) : setCat(null))} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 14 }}>← Back</button> : back('/more', 'Back')}<h1>🧾 {cat ? cat.name : 'More bills'}</h1><p>{biller ? biller.name : 'Tax, waste, water, tolls, school & professional fees, offerings and more — paid from your wallet.'}</p></div>
+      {cat ? <div className="page-header"><button type="button" onClick={() => (biller ? setBiller(null) : setCat(null))} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 14 }}>← Back</button><h1>🧾 {cat.name}</h1><p>{biller ? biller.name : ''}</p></div> : <SvcHero back="/more" icon="🧾" color="#0e7490" title="More bills" sub="Tax, waste, water, tolls, school and professional fees, offerings and more — from your wallet." steps={['Pick a category', 'Choose who to pay', 'Pay and get a receipt']} />}
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       {!cat && (
         !cats ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10, margin: '0 16px 16px' }}>
-            {cats.map((c) => <button key={c.code} type="button" className="card" onClick={() => pickCat(c)} style={{ margin: 0, cursor: 'pointer', textAlign: 'left', color: 'inherit', border: '1px solid var(--slate-800)' }}><div style={{ fontSize: 26 }}>{iconFor(c)}</div><b style={{ fontSize: 14 }}>{c.name}</b></button>)}
+            {cats.map((c) => <button key={c.code} type="button" className="veh-tile" onClick={() => pickCat(c)}><span aria-hidden>{iconFor(c)}</span><span style={{ minWidth: 0 }}><b>{c.name}</b><small style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: 11 }}>Tap to choose</small></span></button>)}
           </div>
         )
       )}

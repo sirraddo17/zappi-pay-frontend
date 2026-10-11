@@ -11,6 +11,7 @@ import MyQr from '../components/MyQr';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { useShowMore } from '../components/ShowMore';
 import { useAuth } from '../context/AuthContext';
+import { SvcHero } from '../components/ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
 
@@ -47,13 +48,7 @@ export default function Refer() {
 
   return (
     <div className="app-shell">
-      <div className="page-header">
-        <Link to="/profile" style={{ color: 'var(--purple, var(--orange))', textDecoration: 'none', fontSize: 14 }}>
-          &larr; Back to profile
-        </Link>
-        <h1>Refer &amp; Earn</h1>
-        <p>Invite friends to ZAPPI PAY</p>
-      </div>
+      <SvcHero back="/profile" icon="🎁" color="#a3316f" title="Refer &amp; Earn" sub="Invite friends to ZAPPI PAY — earn when they start buying." steps={['Share your link or code', 'Friend joins and buys', 'You get paid instantly']} />
 
       {error && <p className="error-text">{error}</p>}
       {!data && !error && <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div>}

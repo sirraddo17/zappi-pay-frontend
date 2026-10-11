@@ -6,6 +6,7 @@ import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { naira } from '../../components/circles/shared';
+import { SvcHero } from '../../components/ServiceKit';
 
 const back = (to, label) => <Link to={to} style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← {label}</Link>;
 const STATUS = {
@@ -29,9 +30,8 @@ export default function SafeBuy() {
   const set = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">{back('/more', 'Back')}<h1>🛡️ SafeBuy</h1><p>Buying or selling on WhatsApp, Instagram or Facebook? The buyer’s money is held until they confirm they got the item. No more “I sent it, they blocked me”.</p></div>
+      <SvcHero back="/more" icon="🛡️" color="#047857" title="SafeBuy" sub="Buying or selling on WhatsApp or Instagram? The buyer’s money is held until they get the item." steps={['Buyer pays — money held', 'Seller sends the item', 'Buyer confirms, seller paid']} />
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
-      <div className="card"><b>How it works</b><ol style={{ fontSize: 14, margin: '6px 0 0', paddingLeft: 18, lineHeight: 1.6 }}>{STEPS.map((s) => <li key={s}>{s}</li>)}</ol></div>
       {!open ? <div style={{ margin: '0 16px 12px' }}><button type="button" className="btn" onClick={() => setOpen(true)}>＋ I’m selling — create a SafeBuy link</button></div> : (
         <form className="card" onSubmit={async (e) => { e.preventDefault(); setErr(''); try { const r = await createSafeDeal(f); navigate(`/safebuy/${r.deal.code}`); } catch (e2) { setErr(e2.message); } }}>
           <b>What are you selling?</b>

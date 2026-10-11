@@ -5,6 +5,7 @@ import { getPayroll, addPayrollStaff, updatePayrollStaff, runPayroll, getBankLis
 import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { naira } from '../../components/circles/shared';
+import { SvcHero } from '../../components/ServiceKit';
 
 export default function Payroll() {
   const [d, setD] = useState(null);
@@ -28,7 +29,7 @@ export default function Payroll() {
   }
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header"><Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link><h1>💼 Payroll</h1><p>Pay your shop staff, workers or helpers in one tap — to their ZAPPI PAY wallet (free, instant) or any bank account.</p></div>
+      <SvcHero back="/more" icon="💼" color="#475569" title="Payroll" sub="Pay shop staff, workers or helpers in one tap — to their wallet (free) or any bank." steps={['Add your staff', 'Set each person’s pay', 'Pay everyone in one tap']} />
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       {msg && <p style={{ color: 'var(--green-500)', margin: '0 16px', fontSize: 14 }}>{msg}</p>}
       {!d ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : (

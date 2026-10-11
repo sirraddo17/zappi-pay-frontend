@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPayRequest, getPayRequests, closePayRequest, remindPayRequest } from '../api';
 import BottomNav from '../components/BottomNav';
 import PayoutAccount from '../components/PayoutAccount';
+import { SvcHero } from '../components/ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const TABS = [['forme', '📥 For you'], ['REQUEST', '💸 Pay me'], ['SPLIT', '🍽️ Split bill'], ['POOL', '🎁 Group gift'], ['mine', '🔗 My links']];
@@ -141,11 +142,7 @@ export default function Requests() {
 
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">
-        <Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-        <h1>Request money</h1>
-        <p>Pay me links, split bills and group gifts — paid straight to you.</p>
-      </div>
+      <SvcHero back="/more" icon="💸" color="#1f6b4a" title="Request money" sub="Pay-me links, split bills and group gifts — paid straight to you." steps={['Make a link', 'Share it on WhatsApp', 'Paid straight to you']} />
       <PayoutAccount purpose="payments" />
       <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '0 16px 12px' }}>
         {TABS.map(([k, l]) => (

@@ -1014,3 +1014,6 @@ html[data-lite] *::after {
 .ctry-pop { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
 .ctry-pop button { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 2px; border-radius: 14px; border: 1px solid var(--slate-700, #1E4650); background: var(--slate-900, #0B1F24); color: inherit; font-size: 11px; cursor: pointer; }
 .ctry-pop img { width: 30px; height: 21px; border-radius: 3px; object-fit: cover; }
+/* Section titles inside cards on service pages */
+.app-shell .card > b:first-child, .app-shell .card > strong:first-child { display: block; font-size: 15px; margin-bottom: 8px; }
+.svc-hero + .card, .svc-hero + p + .card { margin-top: 8px; }

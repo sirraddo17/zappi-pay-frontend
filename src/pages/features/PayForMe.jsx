@@ -6,6 +6,7 @@ import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { naira } from '../../components/circles/shared';
+import { SvcHero } from '../../components/ServiceKit';
 
 const STATUS = { OPEN: ['⏳ waiting', 'var(--gold)'], PAYING: ['⏳ paying…', 'var(--gold)'], PAID: ['✅ paid', 'var(--green-500)'], CANCELLED: ['cancelled', 'var(--slate-400)'], EXPIRED: ['expired', 'var(--slate-400)'] };
 const back = (to, label) => <Link to={to} style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← {label}</Link>;
@@ -16,7 +17,7 @@ export default function PayForMe() {
   useEffect(() => { getPayForMes().then((d) => setList(d.requests)).catch((e) => setErr(e.message)); }, []);
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">{back('/more', 'Back')}<h1>🙏 Pay It For Me</h1><p>Ask family or friends to pay for your airtime, data, light, TV or exam PIN. They pay — it comes straight to you. No “send me money for light” palaver.</p></div>
+      <SvcHero back="/more" icon="🙏" color="#be185d" title="Pay It For Me" sub="Ask family or friends to pay your airtime, data, light or TV. They pay — it comes straight to you." steps={['Fill in any service', 'Tap Ask someone to pay', 'Share the link']} />
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       <div className="card">
         <b>How to ask</b>

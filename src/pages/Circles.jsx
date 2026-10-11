@@ -5,6 +5,7 @@ import { getCircles, createCircle, circleAgreementPreview, appealCircleBan } fro
 import PinConfirm from '../components/PinConfirm';
 import BottomNav from '../components/BottomNav';
 import { naira, PER, OFTEN, STATUS, fmtDay, Agreement, HowItWorks } from '../components/circles/shared';
+import { SvcHero } from '../components/ServiceKit';
 
 const tomorrow = () => new Date(Date.now() + 26 * 3600 * 1000).toISOString().slice(0, 10);
 
@@ -121,11 +122,7 @@ export default function Circles() {
 
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header">
-        <Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-        <h1>🔄 Ajo Circle</h1>
-        <p>Save together with people you trust — ajo, esusu, adashe — paid automatically and in turn.</p>
-      </div>
+      <SvcHero back="/more" icon="🔄" color="#b45309" title="Ajo Circle" sub="Save together with people you trust — ajo, esusu, adashe — paid automatically, in turn." steps={['Gather your people', 'Everyone pays in', 'Paid out in turn']} />
       {err && <p className="error-text" style={{ margin: '0 16px 12px' }}>{err}</p>}
       {!d ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : !d.enabled ? (
         <div className="card"><b>Coming soon</b><p style={{ fontSize: 14, color: 'var(--slate-400)' }}>Ajo Circle is almost ready. Here’s how it will work:</p><HowItWorks /></div>

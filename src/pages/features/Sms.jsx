@@ -5,6 +5,7 @@ import { getSms, sendSms, requestSmsSender } from '../../api';
 import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { naira } from '../../components/circles/shared';
+import { SvcHero } from '../../components/ServiceKit';
 
 // Same rules as the server (lib/bulkSms.js) so the price shows as you type.
 const GSM = "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà";
@@ -51,7 +52,7 @@ export default function Sms() {
   }
   return (
     <div className="app-shell" style={{ paddingBottom: 90 }}>
-      <div className="page-header"><Link to="/more" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link><h1>📩 Bulk SMS</h1><p>Send sales alerts, reminders and announcements to your customers or members. Pay only for what you send.</p></div>
+      <SvcHero back="/more" icon="📩" color="#1d4ed8" title="Bulk SMS" sub="Sales alerts, reminders and announcements to customers or members. Pay only for what you send." steps={['Set your sender name', 'Add numbers and message', 'Pay per SMS sent']} />
       {err && <p className="error-text" style={{ margin: '0 16px' }}>{err}</p>}
       {msg && <p style={{ color: 'var(--green-500)', margin: '0 16px', fontSize: 14 }}>{msg}</p>}
       <form className="card" onSubmit={(e) => { e.preventDefault(); setErr(''); setMsg(''); if (!n) { setErr('Add at least one valid Nigerian phone number.'); return; } setPin(true); }}>
