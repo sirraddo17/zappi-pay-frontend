@@ -5,6 +5,7 @@ import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import GiftForm from '../components/GiftForm';
 import { currentShop, forgetShop } from '../lib/shopRef';
 import { useAuth } from '../context/AuthContext';
+import PlanGrid, { AmountGrid } from '../components/PlanGrid';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo, createPayForMe, getOrders, request as apiRequest } from '../api';
 import { extractToken } from '../lib/receipt';
 import { cached } from '../lib/cache';
@@ -176,6 +177,14 @@ export default function Buy() {
   useEffect(() => {
     getPricing().then(setPricing).catch(() => setPricing(null));
   }, []);
+
+  // Airtime / data: start with the customer's own number — they only
+  // change it to top up someone else.
+  const ownNumber = String(customer?.phone || '').replace(/^\+?234/, '0');
+  useEffect(() => {
+    if (!isPhoneService || searchParams.get('recipient') || !ownNumber) return;
+    setRecipient((r) => r || ownNumber);
+  }, [slug, ownNumber]);
 
   // Pre-fill from a "Buy again" / saved-number link.
   useEffect(() => {
@@ -580,6 +589,13 @@ export default function Buy() {
             placeholder={slug === 'education' && String(providerId).startsWith('jamb') ? 'Your JAMB Profile ID (required)' : config.recipientPlaceholder}
             required={slug !== 'education' || String(providerId).startsWith('jamb')}
           />
+          {isPhoneService && ownNumber && (
+            <div style={{ fontSize: 12, marginTop: 4, color: 'var(--slate-400)' }}>
+              {recipient.replace(/\D/g, '').slice(-10) === ownNumber.replace(/\D/g, '').slice(-10)
+                ? '📱 Your number — change it to top up someone else'
+                : <button type="button" onClick={() => { setRecipient(ownNumber); manualProvider.current = false; setVerifiedName(''); }} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 12 }}>↩ Use my number ({ownNumber})</button>}
+            </div>
+          )}
           {isPhoneService && (autoNet || canPickContact()) && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6, fontSize: 12, gap: 8 }}>
               <span style={{ color: 'var(--slate-400)' }}>{autoNet ? `✓ ${NETWORK_STYLE[autoNet]?.name} detected — tap another network if the number was ported` : ''}</span>
@@ -621,7 +637,13 @@ export default function Buy() {
           {verifiedName && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '6px 0 0' }}>{verifiedName}{verifiedDue && <span style={{ color: 'var(--slate-400)' }}> · current plan ends {verifiedDue}</span>}</p>}
         </div>
 
-        {config.needsVariation ? (
+        {config.needsVariation && slug === 'data' ? (
+          <div className="field">
+            <label>{t('Data plan')}</label>
+            <PlanGrid variations={variations} value={variationCode} onChange={setVariationCode} priceOf={(base) => ({ base: Number(base), total: priceFor(base, config.backendService, pricing).total })} />
+            {selectedVariation && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>Selected: {selectedVariation.name}</p>}
+          </div>
+        ) : config.needsVariation ? (
           <div className="field">
             <label htmlFor="variation">{t(slug === 'data' || slug === 'internet' ? 'Data plan' : slug === 'cable' ? 'Package' : 'Exam type')}</label>
             <select id="variation" value={variationCode} onChange={(e) => setVariationCode(e.target.value)} required>
@@ -635,7 +657,10 @@ export default function Buy() {
           </div>
         ) : (
           <div className="field">
-            <label htmlFor="amount">{t('Amount (₦)')}</label>
+            {slug === 'airtime' && (
+              <AmountGrid amounts={[100, 200, 500, 1000, 2000, 5000]} value={customAmount} onPick={setCustomAmount} priceOf={(base) => ({ base, total: priceFor(base, config.backendService, pricing).total })} />
+            )}
+            <label htmlFor="amount">{t(slug === 'airtime' ? 'Or enter an amount (₦)' : 'Amount (₦)')}</label>
             <input id="amount" type="number" min="50" value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} required />
           </div>
         )}
