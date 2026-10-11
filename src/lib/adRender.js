@@ -9,13 +9,17 @@ export const FORMATS = {
 };
 
 export const THEMES = {
-  purple: { stops: ['#a46bff', '#0D9488', '#0B5F66', '#2a0b66'], accent: '#FFB830', ink: '#2a0b66' },
+  // Brand: deep teal + gold (matches the app and the lion logo).
+  teal: { stops: ['#2DD4BF', '#0D9488', '#0B5F66', '#062A2E'], accent: '#F5B82E', ink: '#062A2E' },
   gold: { stops: ['#fcd34d', '#f59e0b', '#b45309', '#78350f'], accent: '#ffffff', ink: '#78350f' },
   green: { stops: ['#34d399', '#10b981', '#047857', '#064e3b'], accent: '#FFE27A', ink: '#064e3b' },
   blue: { stops: ['#60a5fa', '#2563eb', '#1e40af', '#1e1b4b'], accent: '#FFB830', ink: '#1e1b4b' },
   dark: { stops: ['#334155', '#1e293b', '#0f172a', '#020617'], accent: '#FFB830', ink: '#0f172a' },
   red: { stops: ['#f87171', '#ef4444', '#b91c1c', '#7f1d1d'], accent: '#FFE27A', ink: '#7f1d1d' },
 };
+// Designs saved before the rebrand say "purple" — draw them in the brand
+// teal. Hidden from colour pickers (not enumerable).
+Object.defineProperty(THEMES, 'purple', { value: THEMES.teal, enumerable: false });
 
 const font = (w, px) => `${w} ${px}px Poppins, "Segoe UI", Roboto, Arial, sans-serif`;
 const EMOJI_FONT = (px) => `${px}px "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
@@ -132,7 +136,7 @@ function pill(ctx, text, x, y, h, bg, color, px, align = 'left') {
 // p: animation progress per part (0..1); omit for the finished picture.
 export function drawAd(ctx, design, formatKey, photo, p = {}) {
   const { w: W, h: H } = FORMATS[formatKey];
-  const theme = THEMES[design.theme] || THEMES.purple;
+  const theme = THEMES[design.theme] || THEMES.teal;
   const a = (k) => clamp(p[k] ?? 1);
   if (!p.noBg) background(ctx, W, H, theme, photo, a('bg'));
   ctx.textBaseline = 'alphabetic';
@@ -303,7 +307,7 @@ export async function recordAdVideo(design, formatKey, photo) {
 
 // Thin banners (e.g. 728 × 90): logo, one-line headline and button in a row.
 function drawStrip(ctx, design, W, H) {
-  const theme = THEMES[design.theme] || THEMES.purple;
+  const theme = THEMES[design.theme] || THEMES.teal;
   const pad = Math.round(H * 0.18);
   const logo = Math.round(H * 0.6);
   drawLogo(ctx, pad, (H - logo) / 2, logo);
@@ -332,7 +336,7 @@ export async function renderAdSize(design, w, h, photo, type = 'image/png', qual
   c.width = w;
   c.height = h;
   const ctx = c.getContext('2d');
-  const theme = THEMES[design.theme] || THEMES.purple;
+  const theme = THEMES[design.theme] || THEMES.teal;
   const r = w / h;
   background(ctx, w, h, theme, photo, 1);
   if (r >= 3.2) {

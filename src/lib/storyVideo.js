@@ -188,8 +188,8 @@ function logoEnd(ctx, s, W, H, p, theme) {
 }
 
 // One scene at progress p (0..1). media = loaded <img>/<video> or null.
-export function drawScene(ctx, s, media, W, H, p, themeKey = 'purple', opts = {}) {
-  const theme = THEMES[themeKey] || THEMES.purple;
+export function drawScene(ctx, s, media, W, H, p, themeKey = 'teal', opts = {}) {
+  const theme = THEMES[themeKey] || THEMES.teal;
   ctx.save();
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
@@ -236,7 +236,7 @@ export async function audioSeconds(blob) {
 }
 
 // scenes: [{kind, seconds, caption, title, sub, media: {type, url}}]
-export async function recordStory({ scenes, size = 'tall', theme = 'purple', voice, music, musicVolume = 0.25, onProgress }) {
+export async function recordStory({ scenes, size = 'tall', theme = 'teal', voice, music, musicVolume = 0.25, onProgress }) {
   if (!videoSupported()) throw new Error("This browser can't make videos. Use Chrome on a computer or Android.");
   if (!scenes.length) throw new Error('Add at least one scene.');
   const { w: W, h: H } = SIZES[size] || SIZES.tall;

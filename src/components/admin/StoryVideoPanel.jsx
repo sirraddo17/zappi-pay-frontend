@@ -28,7 +28,7 @@ export default function StoryVideoPanel() {
   const [scenes, setScenes] = useState(() => withIds(TEMPLATE));
   const [pick, setPick] = useState(0);
   const [size, setSize] = useState('tall');
-  const [theme, setTheme] = useState('purple');
+  const [theme, setTheme] = useState('teal');
   const [ox, setOx] = useState(null);
   const [voiceText, setVoiceText] = useState(() => voiceScript(TEMPLATE));
   const [lang, setLang] = useState('en');
