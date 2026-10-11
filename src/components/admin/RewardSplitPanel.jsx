@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getRewardSplit, saveRewardSplit } from '../../api';
 
 const naira = (n) => { const v = Number(n || 0); return `₦${v.toLocaleString('en-NG', Number.isInteger(v) ? {} : { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; };
-const TYPE = { CASHBACK: 'Cashback', LOYALTY: 'Loyalty redeemed', REFERRAL_BONUS: 'Referral bonuses', CHALLENGE_REWARD: 'Challenges', DELIVERY_BONUS: 'Delivery promise', SHOP_COMMISSION: 'Shop commission', CONTEST_PRIZE: 'Contest prizes', COUPON: 'Coupons' };
+const TYPE = { CASHBACK: 'Cashback', LOYALTY: 'Loyalty redeemed', REFERRAL_BONUS: 'Referral bonuses', CHALLENGE_REWARD: 'Challenges', DELIVERY_BONUS: 'Delivery promise', SHOP_COMMISSION: 'Shop commission', CONTEST_PRIZE: 'Contest prizes', COUPON: 'Coupons', DAILY_REWARD: 'Daily rewards', WELCOME_BONUS: 'Welcome bonuses' };
 const HOW = {
   CASHBACK: 'Paid to the buyer on every purchase',
   LOYALTY: 'Points for the buyer on every purchase',
