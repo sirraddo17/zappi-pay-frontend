@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { login as apiLogin, signup as apiSignup, getMe, endThisSession } from '../api';
 import { getQuickLogin, isUnlocked, markUnlocked, clearUnlocked, saveQuickLogin } from '../lib/quickLogin';
 import { readCache, writeCache, clearCache } from '../lib/cache';
-import useIdleLogout from '../lib/useIdleLogout';
+import useIdleLogout, { markActive } from '../lib/useIdleLogout';
 
 // Minutes without activity before a customer is logged out.
 export const CUSTOMER_IDLE_MINUTES = 10;
@@ -50,6 +50,7 @@ export function AuthProvider({ children }) {
 
   function startSession(data) {
     localStorage.setItem('zappipay_customer_token', data.token);
+    markActive('customer');
     markUnlocked();
     setCustomer(data.customer);
     if (getQuickLogin()) {

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { adminLogin as apiAdminLogin, adminLoginVerify, getAdminMe } from '../api';
-import useIdleLogout from '../lib/useIdleLogout';
+import useIdleLogout, { markActive } from '../lib/useIdleLogout';
 
 const AdminAuthContext = createContext(null);
 
@@ -32,6 +32,7 @@ export function AdminAuthProvider({ children }) {
 
   function finish(data) {
     localStorage.setItem('zappipay_admin_token', data.token);
+    markActive('admin');
     localStorage.setItem('zappipay_admin', JSON.stringify(data.admin));
     if (data.rememberToken) localStorage.setItem('zappipay_admin_remember', data.rememberToken);
     setAdmin(data.admin);

@@ -19,6 +19,13 @@ function write(key, v) {
   } catch { /* private mode */ }
 }
 
+// A fresh login is activity: without this, an old "last active" time left
+// from a session that was closed (not timed out) would log the customer
+// straight back out the moment they log in.
+export function markActive(kind) {
+  write(`zappipay_last_active_${kind}`, Date.now());
+}
+
 export function idleMessage(kind) {
   try {
     const m = sessionStorage.getItem(`zappipay_idle_${kind}`);
