@@ -181,14 +181,14 @@ export const TOPICS = [
     id: 'airtime',
     title: 'Buy airtime',
     keywords: ['airtime', 'recharge', 'credit card for phone', 'vtu', 'buy card'],
-    answer: 'Tap Airtime on the home screen, choose the network, enter the phone number and amount, then pay from your wallet.',
+    answer: 'Tap Airtime on the home screen. Your own number is filled in already — change it to top up someone else. Tap a quick amount (₦100–₦5,000) or type one, then pay from your wallet.',
     actions: [{ label: 'Buy Airtime', to: '/buy/airtime' }],
   },
   {
     id: 'data',
     title: 'Buy data',
     keywords: ['data', 'bundle', 'subscription data', 'gb', 'mb', 'internet data'],
-    answer: 'Tap Data, choose the network and a plan, enter the phone number, then pay. The price shown is exactly what your wallet is charged.',
+    answer: 'Tap Data. Your own number is filled in (change it for someone else). Plans are grouped in tabs — Best value, Daily, Weekly, Monthly and more — tap a plan card, then pay. The price on the card is exactly what your wallet is charged.',
     actions: [{ label: 'Buy Data', to: '/buy/data' }],
   },
   {
@@ -341,7 +341,7 @@ export const TOPICS = [
     title: 'Refer & earn',
     keywords: ['refer', 'referral', 'invite', 'invite friend', 'referral code', 'referral bonus', 'earn money', 'bonus'],
     answer:
-      'Your username is your referral code. Share it (or your invite link) from Refer & Earn. When a friend signs up with it and makes their first qualifying purchase, a bonus is added to your wallet automatically.',
+      'Your username is your referral code. Share it (or your invite link) from Refer & Earn. When a friend signs up with it and their purchases reach the target shown on Refer & Earn, your bonus is added to your wallet automatically — you can see each friend\'s progress there. Your friend may also get a welcome cashback after verifying their BVN or NIN, and you can unlock extra milestone bonuses.',
     actions: [{ label: 'Refer & Earn', to: '/refer' }],
   },
   {

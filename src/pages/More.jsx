@@ -7,13 +7,13 @@ import { homeServices } from '../lib/homeTiles';
 
 // Home → More. New services go here so the home screen stays short.
 const ITEMS = [
-  { to: '/circles', label: 'Ajo Circle', note: 'Save together: ajo, esusu, adashe — paid in turn', emoji: '🔄', bg: '#4c1d95', feature: 'circles' },
+  { to: '/circles', label: 'Ajo Circle', note: 'Save together: ajo, esusu, adashe — paid in turn', emoji: '🔄', bg: '#b45309', feature: 'circles' },
   { to: '/bills', label: 'More bills', note: 'Tax, waste, water, tolls, school & professional fees', emoji: '🧾', bg: '#0e7490', feature: 'moreBills' },
   { to: '/tickets', label: 'Event tickets', note: 'Sell or buy tickets — QR check-in at the door', emoji: '🎟️', bg: '#7c2d12', feature: 'tickets' },
   { to: '/sms', label: 'Bulk SMS', note: 'Send alerts to your customers or members', emoji: '📩', bg: '#1e3a8a', feature: 'bulkSms' },
   { to: '/spray', label: 'Owambe Spray', note: 'Guests spray money from their phones at your party', emoji: '💃', bg: '#9d174d', feature: 'spray' },
   { to: '/dues', label: 'Association Dues', note: 'Estate, church, alumni & club dues with reminders', emoji: '🏘️', bg: '#155e75', feature: 'dues' },
-  { to: '/pay-for-me', label: 'Pay It For Me', note: 'Ask someone to pay your light, data or TV', emoji: '🙏', bg: '#6d28d9', feature: 'payForMe' },
+  { to: '/pay-for-me', label: 'Pay It For Me', note: 'Ask someone to pay your light, data or TV', emoji: '🙏', bg: '#be185d', feature: 'payForMe' },
   { to: '/shared-light', label: 'Shared Light', note: 'Housemates fill one pot — the token buys itself', emoji: '💡', bg: '#a16207', feature: 'sharedLight' },
   { to: '/safebuy', label: 'SafeBuy', note: 'Buy & sell online — money held till delivery', emoji: '🛡️', bg: '#065f46', feature: 'safeBuy' },
   { to: '/payroll', label: 'Payroll', note: 'Pay your staff in one tap', emoji: '💼', bg: '#334155', feature: 'payroll' },
@@ -22,7 +22,7 @@ const ITEMS = [
   { to: '/buy/betting', label: 'Bet Funding', note: 'Fund your betting wallet', emoji: '🏆', bg: '#a38a0a' },
   { to: '/international', label: 'International airtime', note: 'Top up phones abroad, pay in naira', emoji: '🌍', bg: '#0f4c8c' },
   { to: '/insurance', label: 'Car insurance', note: 'Third-party motor insurance in minutes', emoji: '🚗', bg: '#8c3b0f' },
-  { to: '/airtime-cash', label: 'Airtime to Cash', note: 'Turn extra airtime into wallet money', Icon: FundIcon, bg: '#5b3fa8' },
+  { to: '/airtime-cash', label: 'Airtime to Cash', note: 'Turn extra airtime into wallet money', Icon: FundIcon, bg: '#0E7490' },
   { to: '/exam-pins', label: 'Exam PINs (bulk)', note: 'Buy & print many WAEC result checkers at once', emoji: '🎓', bg: '#0b6b3a' },
   { to: '/print-cards', label: 'Print Cards', note: 'Buy recharge card PINs to print and sell', Icon: PrinterIcon, bg: '#0f6d8c' },
   { to: '/bulk', label: 'Bulk airtime & data', note: 'Top up up to 50 numbers at once', Icon: PhoneIcon, bg: '#0D9488' },

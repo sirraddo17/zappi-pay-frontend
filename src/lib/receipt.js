@@ -68,7 +68,7 @@ export async function drawReceipt({ title, amount, status, rows, highlight, invi
   const hlLines = highlight ? wrap(ctx, highlight.value, W - PAD * 2 - 40) : [];
   const INVITE_H = 230;
   const height = 250 + 150 + rowLines.reduce((s, l) => s + 22 + l.length * 30, 0) + (highlight ? 70 + hlLines.length * 40 : 0) + 130 + (invite ? INVITE_H + 20 : 0);
-  const qrImg = invite ? await loadImage(await QRCode.toDataURL(invite.link, { margin: 1, width: 300, color: { dark: '#2a0b66', light: '#ffffff' }, errorCorrectionLevel: 'M' })).catch(() => null) : null;
+  const qrImg = invite ? await loadImage(await QRCode.toDataURL(invite.link, { margin: 1, width: 300, color: { dark: '#062A2E', light: '#ffffff' }, errorCorrectionLevel: 'M' })).catch(() => null) : null;
 
   const scale = 2;
   canvas.width = W * scale;

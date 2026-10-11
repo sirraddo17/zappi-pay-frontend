@@ -45,7 +45,7 @@ function PhoneMockup() {
     ['Exams', CapIcon, '#8c2f4a'],
     ['Bets', TrophyIcon, '#a38a0a'],
     ['Internet', GlobeIcon, '#c2540f'],
-    ['A2Cash', FundIcon, '#5b3fa8'],
+    ['A2Cash', FundIcon, '#0E7490'],
   ];
   return (
     <div className="lp-phone" aria-hidden="true">

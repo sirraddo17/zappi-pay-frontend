@@ -35,7 +35,7 @@ function drawLogo(ctx, x, y, s) {
 }
 
 async function qrImage(link) {
-  const url = await QRCode.toDataURL(link, { margin: 1, width: 420, color: { dark: '#2a0b66', light: '#ffffff' }, errorCorrectionLevel: 'M' });
+  const url = await QRCode.toDataURL(link, { margin: 1, width: 420, color: { dark: '#062A2E', light: '#ffffff' }, errorCorrectionLevel: 'M' });
   const img = new Image();
   img.src = url;
   await img.decode();
@@ -44,10 +44,10 @@ async function qrImage(link) {
 
 function background(ctx, t = 0) {
   const g = ctx.createRadialGradient(W * (0.8 - 0.1 * t), H * 0.1, 60, W * 0.5, H * 0.5, H);
-  g.addColorStop(0, '#a46bff');
+  g.addColorStop(0, '#2DD4BF');
   g.addColorStop(0.35, '#0D9488');
   g.addColorStop(0.75, '#0B5F66');
-  g.addColorStop(1, '#2a0b66');
+  g.addColorStop(1, '#062A2E');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
   const glow = ctx.createRadialGradient(W, H, 10, W, H, 700);
@@ -88,7 +88,7 @@ function drawFrame(ctx, d, qr, p = {}) {
   roundRect(ctx, W / 2 - 250, 640, 500, 96, 48);
   ctx.fillStyle = '#FFB830';
   ctx.fill();
-  ctx.fillStyle = '#2a0b66';
+  ctx.fillStyle = '#062A2E';
   ctx.font = font(700, 54);
   ctx.fillText(d.code, W / 2, 707);
   ctx.globalAlpha = 1;
@@ -182,5 +182,5 @@ export async function shareFile(blob, fileName, text) {
 }
 
 export async function qrDataUrl(text, size = 320) {
-  return QRCode.toDataURL(text, { margin: 1, width: size, color: { dark: '#2a0b66', light: '#ffffff' }, errorCorrectionLevel: 'M' });
+  return QRCode.toDataURL(text, { margin: 1, width: size, color: { dark: '#062A2E', light: '#ffffff' }, errorCorrectionLevel: 'M' });
 }

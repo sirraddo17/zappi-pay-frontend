@@ -34,7 +34,7 @@ const SERVICES = [
   { slug: 'internet', service: 'INTERNET', label: 'Internet', Icon: GlobeIcon, bg: '#c2540f' },
   { slug: 'betting', service: 'BETTING', label: 'Bet Funding', Icon: TrophyIcon, bg: '#a38a0a' },
   // Everything else (Airtime to Cash, Print Cards, and new services) lives under More.
-  { slug: 'more', to: '/more', label: 'More', Icon: GridIcon, bg: '#5b3fa8' },
+  { slug: 'more', to: '/more', label: 'More', Icon: GridIcon, bg: '#0B5F66' },
 ];
 
 function fmtTxDate(d) {

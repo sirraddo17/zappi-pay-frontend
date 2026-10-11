@@ -789,7 +789,7 @@ export default function Buy() {
           <button type="button" className="btn btn-secondary" style={{ marginTop: 8 }} disabled={asking || !amount} onClick={askSomeone}>{asking ? 'Creating link…' : '🙏 Ask someone to pay'}</button>
         )}
         {askLink && (
-          <div style={{ marginTop: 10, padding: 12, borderRadius: 10, background: 'rgba(124,58,237,0.1)', border: '1px solid var(--purple)', fontSize: 14 }}>
+          <div style={{ marginTop: 10, padding: 12, borderRadius: 10, background: 'rgba(13,148,136,0.1)', border: '1px solid var(--purple)', fontSize: 14 }}>
             <b>Link ready ✓</b> — send it to anyone with ZAPPI PAY. When they pay {askLink.price ? naira(askLink.price) : ''}, your {askLink.label} is delivered straight to you.
             <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
               <button type="button" className="btn" style={{ width: 'auto' }} onClick={() => navigator.clipboard?.writeText(askLink.link)}>Copy link</button>

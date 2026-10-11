@@ -56,7 +56,7 @@ export function SprayScreen() {
   const { d, notes } = useLive(code);
   const link = `${window.location.origin}/spray/${code}`;
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(circle at 50% 30%, #6d28d9, #1e0b3d 70%)', color: '#fff', overflow: 'hidden', fontFamily: 'Poppins, system-ui, sans-serif' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(circle at 50% 30%, #0D9488, #062A2E 70%)', color: '#fff', overflow: 'hidden', fontFamily: 'Poppins, system-ui, sans-serif' }}>
       <style>{SPRAY_CSS}</style>
       <div style={{ textAlign: 'center', paddingTop: '4vh' }}>
         <div style={{ fontSize: '2.2vh', letterSpacing: 2, opacity: 0.8 }}>💃 OWAMBE SPRAY · ZAPPI PAY</div>

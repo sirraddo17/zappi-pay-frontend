@@ -60,7 +60,7 @@ function AdSlide({ ad, onOpen }) {
           {ad.emoji && <span aria-hidden="true" style={{ position: 'absolute', right: 14, bottom: 6, fontSize: 64, opacity: 0.9 }}>{ad.emoji}</span>}
           <b style={{ fontSize: 16, display: 'block', paddingRight: ad.emoji ? 70 : 0 }}>{ad.title}</b>
           {ad.body && <div style={{ fontSize: 13, marginTop: 4, opacity: 0.95, paddingRight: ad.emoji ? 70 : 0 }}>{ad.body}</div>}
-          {ad.buttonText && <div style={{ marginTop: 10, display: 'inline-block', background: '#FFB830', color: '#2a0b66', fontWeight: 700, fontSize: 13, padding: '6px 12px', borderRadius: 999 }}>{ad.buttonText}</div>}
+          {ad.buttonText && <div style={{ marginTop: 10, display: 'inline-block', background: '#FFB830', color: '#062A2E', fontWeight: 700, fontSize: 13, padding: '6px 12px', borderRadius: 999 }}>{ad.buttonText}</div>}
         </div>
       )}
     </button>
