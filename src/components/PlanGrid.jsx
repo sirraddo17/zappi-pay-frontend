@@ -107,25 +107,48 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
       {variations.length > 12 && (
         <input className="plan-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search plans (e.g. 2GB, 30 days)" aria-label="Search plans" />
       )}
-      <div className="plan-grid">
-        {shown.map((v) => {
-          const s = size(v.name);
-          const p = priceOf(v.variation_amount);
-          const on = v.variation_code === value;
-          const save = Math.round(p.base - p.total);
-          return (
-            <button key={v.variation_code} type="button" className={`plan-card${on ? ' on' : ''}`} onClick={() => onChange(v.variation_code)} aria-pressed={on} title={v.name}>
-              {save >= 5 && <span className="plan-save">Save {naira(save)}</span>}
-              {on && <span className="plan-check" aria-hidden>✓</span>}
-              {s ? <div className="plan-size">{s.value}<small>{s.unit}</small></div> : <div className="plan-size plan-size-text">{v.name.replace(/^\w+\s+(data\s+)?/i, '').slice(0, 28)}</div>}
-              <div className="plan-valid">{validityLabel(v.name) || special(v.name) || '\u00a0'}</div>
-              <div className="plan-price">{naira(p.total)}</div>
-              {p.total < p.base && <s className="plan-old">{naira(p.base)}</s>}
-            </button>
-          );
-        })}
-        {shown.length === 0 && <p style={{ gridColumn: '1 / -1', color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>No plans match.</p>}
-      </div>
+      {(() => {
+        // Value bars: the cheapest ₦ per GB in this list fills the bar;
+        // dearer plans fill less. Tags: Best deal, Night, Social.
+        const per = (v) => { const g = perGb(v); return g === Infinity ? null : g; };
+        // Bars compare against the cheapest everyday plan (≤ ₦10,000), so a
+        // ₦200k yearly bundle doesn't make every normal plan look bad.
+        const everyday = shown.filter((v) => Number(v.variation_amount) <= 10000);
+        const vals = (everyday.length > 1 ? everyday : shown).map(per).filter((x) => x != null);
+        const best = vals.length > 1 ? Math.min(...vals) : null;
+        return (
+          <div className="vplan-list" role="radiogroup" aria-label="Data plans">
+            {shown.map((v) => {
+              const s = size(v.name);
+              const p = priceOf(v.variation_amount);
+              const on = v.variation_code === value;
+              const g = per(v);
+              const isBest = best != null && g != null && g <= best + 0.01 && (everyday.length <= 1 || Number(v.variation_amount) <= 10000);
+              const sp = special(v.name);
+              const tag = isBest ? '🏆 Best deal' : sp === 'Night' ? '🌙 Night' : sp === 'Social' ? '💬 Social' : sp;
+              const save = Math.round(p.base - p.total);
+              return (
+                <button key={v.variation_code} type="button" role="radio" aria-checked={on} className={`vplan${on ? ' on' : ''}${isBest ? ' best' : ''}`} onClick={() => onChange(v.variation_code)} title={v.name}>
+                  <div className="vplan-top">
+                    <div style={{ minWidth: 0 }}>
+                      {s ? <span className="vplan-gb">{s.value}<small>{s.unit}</small></span> : <span className="vplan-gb" style={{ fontSize: 15 }}>{v.name.replace(/^\w+\s+(data\s+)?/i, '').slice(0, 30)}</span>}
+                      <span className="vplan-valid">{validityLabel(v.name) || ''}</span>
+                    </div>
+                    <div className="vplan-price">{on && '✓ '}{naira(p.total)}{p.total < p.base && <s>{naira(p.base)}</s>}</div>
+                  </div>
+                  <div className="vplan-meta">
+                    {g != null ? <>{naira(p.total / (v.variation_amount / g))} per GB</> : ' '}
+                    {tag && <> · <b>{tag}</b></>}
+                    {save >= 5 && <> · save {naira(save)}</>}
+                  </div>
+                  {g != null && best != null && <div className="vplan-bar" aria-hidden><i style={{ width: `${Math.min(100, Math.max(8, Math.round((best / g) * 100)))}%` }} /></div>}
+                </button>
+              );
+            })}
+            {shown.length === 0 && <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>No plans match.</p>}
+          </div>
+        );
+      })()}
       {!all && !q.trim() && list.length > LIMIT && (
         <button type="button" className="plan-more" onClick={() => setAll(true)}>Show all {list.length} plans ▾</button>
       )}

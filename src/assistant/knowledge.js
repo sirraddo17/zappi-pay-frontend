@@ -181,14 +181,14 @@ export const TOPICS = [
     id: 'airtime',
     title: 'Buy airtime',
     keywords: ['airtime', 'recharge', 'credit card for phone', 'vtu', 'buy card'],
-    answer: 'Tap Airtime on the home screen. Your own number is filled in already — change it to top up someone else. Tap a quick amount (₦100–₦5,000) or type one, then pay from your wallet.',
+    answer: 'Tap Airtime on the home screen. Your own number is filled in already, with the network shown as a badge — tap “change network” only if the number was ported. To top up someone else, type their number or tap a circle in the Recent row. Type the amount under “How much?” or tap a quick amount (₦100–₦5,000), then pay from your wallet.',
     actions: [{ label: 'Buy Airtime', to: '/buy/airtime' }],
   },
   {
     id: 'data',
     title: 'Buy data',
     keywords: ['data', 'bundle', 'subscription data', 'gb', 'mb', 'internet data'],
-    answer: 'Tap Data. Your own number is filled in (change it for someone else). Plans are grouped in tabs — Best value, Daily, Weekly, Monthly and more — tap a plan card, then pay. The price on the card is exactly what your wallet is charged.',
+    answer: 'Tap Data. Your own number is filled in (change it, or tap a circle in the Recent row, for someone else). Plans are grouped in tabs — Best value, Daily, Weekly, Monthly and more. Each plan shows its price and “₦X per GB” with a value bar: the fuller the bar, the more data for your money, and the gold “Best deal” is the cheapest per GB. Tap a plan, then pay — the price shown is exactly what your wallet is charged.',
     actions: [{ label: 'Buy Data', to: '/buy/data' }],
   },
   {

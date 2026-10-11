@@ -168,9 +168,15 @@ export default function Buy() {
   const [askLink, setAskLink] = useState(null);
   const manualProvider = useRef(false);
   const [pastLight, setPastLight] = useState([]);
+  const [pastPhone, setPastPhone] = useState([]);
+  const [showNets, setShowNets] = useState(false);
   useEffect(() => {
     if (slug !== 'electricity') return;
-    getOrders().then((d) => setPastLight((d.orders || []).filter((o) => o.service === 'ELECTRICITY' && o.status === 'SUCCESS'))).catch(() => {});
+    getOrders().then((d) => {
+      const ok = (d.orders || []).filter((o) => o.status === 'SUCCESS');
+      setPastLight(ok.filter((o) => o.service === 'ELECTRICITY'));
+      setPastPhone(ok.filter((o) => o.service === 'AIRTIME' || o.service === 'DATA'));
+    }).catch(() => {});
   }, [slug]);
   const [autoNet, setAutoNet] = useState('');
   const [asking, setAsking] = useState(false);
@@ -508,7 +514,7 @@ export default function Buy() {
 
       {error && <p className="error-text">{error}</p>}
 
-      {saved.length > 0 && (
+      {saved.length > 0 && !isPhoneService && (
         <div style={{ padding: '0 16px 12px' }}>
           <div style={{ fontSize: 13, color: 'var(--slate-400)', marginBottom: 6 }}>Saved</div>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
@@ -544,7 +550,7 @@ export default function Buy() {
       )}
 
       <form className="card" onSubmit={handleSubmit}>
-        {isPhoneService && providers.length > 0 && providers.length <= 8 && (
+        {isPhoneService && providers.length > 0 && providers.length <= 8 && (showNets || !autoNet) && (
           <div className="net-pills" role="radiogroup" aria-label={t('{service} provider', { service: config.label })}>
             {providers.map((p) => {
               const st = NETWORK_STYLE[networkOf(p.serviceID)] || { bg: 'var(--slate-700)', fg: '#fff' };
@@ -582,6 +588,53 @@ export default function Buy() {
           </div>
         )}
 
+        {isPhoneService ? (() => {
+          const net = autoNet || networkOf(providerId);
+          const st = NETWORK_STYLE[net];
+          const last10 = (n) => String(n || '').replace(/\D/g, '').slice(-10);
+          const nick = (n) => saved.find((b) => last10(b.billersCode) === last10(n))?.nickname;
+          const seen = new Set([last10(ownNumber)]);
+          const recents = [];
+          for (const o of [...saved.map((b) => ({ recipient: b.billersCode })), ...pastPhone]) {
+            const k = last10(o.recipient);
+            if (k.length === 10 && !seen.has(k)) { seen.add(k); recents.push(o.recipient); }
+            if (recents.length >= 4) break;
+          }
+          const initials = (n) => { const w = String(nick(n) || '').trim().split(/\s+/).filter(Boolean); return w.length ? (w[0][0] + (w[1]?.[0] || '')).toUpperCase() : String(n).slice(-2); };
+          const pick = (n) => { setRecipient(n); manualProvider.current = false; setVerifiedName(''); };
+          return (
+            <div className="field">
+              <label htmlFor="recipient">{t(config.recipientLabel)}</label>
+              <div className="num-field">
+                <span className="num-badge" style={st ? { background: st.bg, color: st.fg } : undefined}>{st ? st.name : '📱'}</span>
+                <input id="recipient" type="text" value={recipient} onChange={(e) => { setRecipient(e.target.value); setVerifiedName(''); }} inputMode="tel" placeholder={config.recipientPlaceholder} required autoComplete="tel" />
+                {canPickContact() && <button type="button" className="num-contacts" aria-label="Pick from contacts" onClick={() => pickContactNumber().then((c) => { if (c) pick(c.number); }).catch(() => {})}>📇</button>}
+              </div>
+              <div className="num-hint">
+                {st ? <>{st.name} {autoNet ? 'detected' : 'selected'} · <button type="button" onClick={() => setShowNets((v) => !v)}>{showNets ? 'hide networks' : 'change network'}</button></> : 'Enter an 11-digit number'}
+              </div>
+              {(ownNumber || recents.length > 0) && (
+                <div className="recents" aria-label="Recent numbers">
+                  {ownNumber && (
+                    <button type="button" className={`recent${last10(recipient) === last10(ownNumber) ? ' on' : ''}`} onClick={() => pick(ownNumber)}>
+                      <span>Me</span><small>My line</small>
+                    </button>
+                  )}
+                  {recents.map((n) => (
+                    <button key={n} type="button" className={`recent${last10(recipient) === last10(n) ? ' on' : ''}`} onClick={() => pick(n)} title={n}>
+                      <span>{initials(n)}</span><small>{nick(n) || `…${String(n).slice(-4)}`}</small>
+                    </button>
+                  ))}
+                  {canPickContact() && (
+                    <button type="button" className="recent" onClick={() => pickContactNumber().then((c) => { if (c) pick(c.number); }).catch(() => {})}>
+                      <span>+</span><small>Contacts</small>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })() : (
         <div className="field">
           <label htmlFor="recipient">{t(config.recipientLabel)}</label>
           <input
@@ -589,23 +642,9 @@ export default function Buy() {
             type="text"
             value={recipient}
             onChange={(e) => { setRecipient(e.target.value); setVerifiedName(''); }}
-            inputMode={isPhoneService ? 'tel' : undefined}
             placeholder={slug === 'education' && String(providerId).startsWith('jamb') ? 'Your JAMB Profile ID (required)' : config.recipientPlaceholder}
             required={slug !== 'education' || String(providerId).startsWith('jamb')}
           />
-          {isPhoneService && ownNumber && (
-            <div style={{ fontSize: 12, marginTop: 4, color: 'var(--slate-400)' }}>
-              {recipient.replace(/\D/g, '').slice(-10) === ownNumber.replace(/\D/g, '').slice(-10)
-                ? '📱 Your number — change it to top up someone else'
-                : <button type="button" onClick={() => { setRecipient(ownNumber); manualProvider.current = false; setVerifiedName(''); }} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 12 }}>↩ Use my number ({ownNumber})</button>}
-            </div>
-          )}
-          {isPhoneService && (autoNet || canPickContact()) && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6, fontSize: 12, gap: 8 }}>
-              <span style={{ color: 'var(--slate-400)' }}>{autoNet ? `✓ ${NETWORK_STYLE[autoNet]?.name} detected — tap another network if the number was ported` : ''}</span>
-              {canPickContact() && <button type="button" onClick={() => pickContactNumber().then((c) => { if (c) { setRecipient(c.number); setVerifiedName(''); } }).catch(() => {})} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, fontSize: 13, whiteSpace: 'nowrap' }}>📇 Contacts</button>}
-            </div>
-          )}
           {slug === 'electricity' && (() => {
             const mine = pastLight.filter((o) => String(o.recipient) === recipient.trim());
             if (!mine.length) return null;
@@ -640,6 +679,7 @@ export default function Buy() {
           )}
           {verifiedName && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '6px 0 0' }}>{verifiedName}{verifiedDue && <span style={{ color: 'var(--slate-400)' }}> · current plan ends {verifiedDue}</span>}</p>}
         </div>
+        )}
 
         {config.needsVariation && slug === 'data' ? (
           <div className="field">
@@ -666,13 +706,27 @@ export default function Buy() {
         ) : (
           <div className="field">
             {slug === 'airtime' && (
-              <AmountGrid amounts={[100, 200, 500, 1000, 2000, 5000]} value={customAmount} onPick={setCustomAmount} priceOf={(base) => ({ base, total: priceFor(base, config.backendService, pricing).total })} />
+              <>
+                <label htmlFor="amount">{t('How much?')}</label>
+                <div className="amt-big">
+                  <span>₦</span>
+                  <input id="amount" type="number" inputMode="numeric" min="50" value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} placeholder="0" required style={{ width: `${Math.max(1, String(customAmount || '0').length) + 0.6}ch` }} />
+                </div>
+                <div className="amt-sub">
+                  {Number(customAmount) > 0 ? <>You pay <b>{naira(priceFor(Number(customAmount), config.backendService, pricing).total)}</b>{appInfo?.rewardsSplit ? ' · earns cashback 🎁' : ''}</> : 'Min ₦50 · max ₦50,000'}
+                </div>
+                <AmountGrid amounts={[100, 200, 500, 1000, 2000, 5000]} value={customAmount} onPick={setCustomAmount} priceOf={(base) => ({ base, total: priceFor(base, config.backendService, pricing).total })} />
+              </>
             )}
             {(slug === 'electricity' || slug === 'betting') && (
               <QuickAmounts amounts={slug === 'electricity' ? [1000, 2000, 3000, 5000, 10000, 20000] : [500, 1000, 2000, 5000, 10000, 20000]} value={customAmount} onPick={setCustomAmount} priceOf={(base) => ({ base, total: priceFor(base, config.backendService, pricing).total })} />
             )}
-            <label htmlFor="amount">{t(['airtime', 'electricity', 'betting'].includes(slug) ? 'Or enter an amount (₦)' : 'Amount (₦)')}</label>
-            <input id="amount" type="number" min="50" value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} required />
+            {slug !== 'airtime' && (
+              <>
+                <label htmlFor="amount">{t(['electricity', 'betting'].includes(slug) ? 'Or enter an amount (₦)' : 'Amount (₦)')}</label>
+                <input id="amount" type="number" min="50" value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} required />
+              </>
+            )}
           </div>
         )}
 
