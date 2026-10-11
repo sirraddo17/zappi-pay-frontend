@@ -29,7 +29,7 @@ function badge(p) {
 // "Ikeja Electric Payment" → "Ikeja Electric"; "KEDCO - Kano Electric" → "Kano Electric".
 function cleanName(name) {
   let s = String(name || '').replace(/\s*\(.*?\)\s*/g, ' ').replace(/\b(payment|subscription|vending|disco)\b/gi, '').trim();
-  const parts = s.split(/\s+[-–]\s+/);
+  const parts = s.split(/\s*[-–]\s+|\s+[-–]\s*/);
   if (parts.length > 1) s = parts.sort((a, b) => b.length - a.length)[0];
   s = s.replace(/\bElectricity Distribution Company\b/i, 'Electric').replace(/[-–]\s*$/, '').replace(/\s+/g, ' ').trim();
   // "DSTV" → "DStv", "Gotv" → "GOtv"
@@ -42,19 +42,21 @@ export function ProviderGrid({ providers, value, onChange, label }) {
   return (
     <div>
       {providers.length > 8 && <input className="plan-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${label.toLowerCase()} (e.g. Ikeja, IBEDC)`} aria-label={`Search ${label}`} />}
-      <div className="prov-grid" role="radiogroup" aria-label={label}>
+      {/* Few providers (TV, exams): compact chips. Many (discos): tile grid. */}
+      <div className={providers.length > 6 ? 'prov-grid' : 'prov-chips'} role="radiogroup" aria-label={label}>
         {list.map((p) => {
           const [short, color] = badge(p);
           const on = p.serviceID === value;
+          const tiles = providers.length > 6;
           return (
-            <button key={p.serviceID} type="button" role="radio" aria-checked={on} className={`prov-card${on ? ' on' : ''}`} onClick={() => onChange(p.serviceID)} title={p.name}>
+            <button key={p.serviceID} type="button" role="radio" aria-checked={on} className={`${tiles ? 'prov-card' : 'prov-chip'}${on ? ' on' : ''}`} onClick={() => onChange(p.serviceID)} title={p.name}>
               <span className="prov-badge" style={{ background: color }}>{short}</span>
-              <span className="prov-name">{cleanName(p.name)}</span>
-              {on && <span className="plan-check" aria-hidden>✓</span>}
+              {tiles ? <span className="prov-name">{cleanName(p.name)}</span> : cleanName(p.name)}
+              {tiles && on && <span className="plan-check" aria-hidden>✓</span>}
             </button>
           );
         })}
-        {list.length === 0 && <p style={{ gridColumn: '1 / -1', color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>No match.</p>}
+        {list.length === 0 && <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>No match.</p>}
       </div>
     </div>
   );
@@ -92,6 +94,11 @@ export function PackageList({ variations, value, onChange, priceOf, kind }) {
   }, [variations]);
   const [tab, setTab] = useState(0);
   const [q, setQ] = useState('');
+  // The best-known mid-range package gets a "POPULAR" tag.
+  const popularCode = useMemo(() => {
+    const hit = variations.find((v) => !period(v.name) && /\b(jinja|compact|classic|basic|nova)\b/i.test(v.name));
+    return hit?.variation_code || null;
+  }, [variations]);
   // Only one choice (e.g. WAEC result checker) — pick it for them.
   useEffect(() => {
     if (variations.length === 1 && value !== variations[0].variation_code) onChange(variations[0].variation_code);
@@ -108,28 +115,34 @@ export function PackageList({ variations, value, onChange, priceOf, kind }) {
         </div>
       )}
       {variations.length > 10 && <input className="plan-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={kind === 'cable' ? 'Search packages (e.g. Compact, Jolli)' : 'Search'} aria-label="Search" />}
-      <div className="pkg-list" role="radiogroup">
+      <div className={shown.length === 1 ? 'pkg-list' : 'pkg-grid'} role="radiogroup">
         {shown.map((v) => {
           const p = priceOf(v.variation_amount);
           const on = v.variation_code === value;
           const per = period(v.name) || (kind === 'cable' ? 'Monthly' : null);
+          const base = tidy(v.name).toLowerCase();
+          const monthly = per === 'Yearly' || per === 'Quarterly' ? variations.find((m) => tidy(m.name).toLowerCase() === base && !period(m.name)) || variations.find((m) => tidy(m.name).toLowerCase() === base && period(m.name) === null) : null;
+          const months = per === 'Yearly' ? 12 : per === 'Quarterly' ? 3 : 0;
+          const save = monthly && months ? Math.round((1 - Number(v.variation_amount) / (Number(monthly.variation_amount) * months)) * 100) : 0;
+          const popular = v.variation_code === popularCode;
           return (
-            <button key={v.variation_code} type="button" role="radio" aria-checked={on} className={`pkg-card${on ? ' on' : ''}`} onClick={() => onChange(v.variation_code)} title={v.name}>
-              <span className={`pkg-radio${on ? ' on' : ''}`} aria-hidden />
-              <span className="pkg-main">
+            <button key={v.variation_code} type="button" role="radio" aria-checked={on} className={shown.length === 1 ? `pkg-card${on ? ' on' : ''}` : `pkg-tile${on ? ' on' : ''}`} onClick={() => onChange(v.variation_code)} title={v.name}>
+              {popular && shown.length > 1 && <span className="pkg-pop">POPULAR</span>}
+              {shown.length === 1 && <span className={`pkg-radio${on ? ' on' : ''}`} aria-hidden />}
+              <span className="pkg-main" style={shown.length === 1 ? undefined : { flex: '0 0 auto' }}>
                 <span className="pkg-name">{tidy(v.name)}</span>
-                {per && <span className="pkg-sub">{per}</span>}
+                {(per || save > 0) && <span className="pkg-sub">{per}{save > 4 && <span className="pkg-save"> · save {save}%</span>}</span>}
               </span>
-              <span className="pkg-price">
+              <span className={shown.length === 1 ? 'pkg-price' : 'pkg-big'}>
                 {naira(p.total)}
                 {p.total < p.base && <s>{naira(p.base)}</s>}
-                {p.total > p.base && <small>incl. ₦{Math.round(p.total - p.base).toLocaleString()} service charge</small>}
               </span>
             </button>
           );
         })}
         {shown.length === 0 && <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>No match.</p>}
       </div>
+      {(() => { const v = variations.find((x) => x.variation_code === value); const p = v && priceOf(v.variation_amount); return p && p.total > p.base ? <p className="pkg-note">Includes ₦{Math.round(p.total - p.base).toLocaleString()} service charge</p> : null; })()}
     </div>
   );
 }

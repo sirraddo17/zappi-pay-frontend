@@ -815,6 +815,21 @@ export default function Buy() {
       <PinConfirm
         open={confirmOpen}
         summary={`Pay ${naira(payTotal)} · ${config.label}${recipient.trim() ? ` for ${recipient.trim()}` : ''}`}
+        details={(() => {
+          const prov = providers.find((p) => p.serviceID === providerId)?.name?.replace(/\s*\b(Airtime|VTU|Payment|Subscription)\b/gi, '').trim();
+          const rows = [];
+          if (prov) rows.push([slug === 'electricity' ? 'Company' : slug === 'education' ? 'Exam' : 'Provider', prov]);
+          if (recipient.trim()) rows.push([t(config.recipientLabel), recipient.trim()]);
+          if (verifiedName) rows.push(['Name', verifiedName.replace(/^✓\s*/, '')]);
+          if (config.needsType) rows.push(['Meter type', billType === 'postpaid' ? 'Postpaid' : 'Prepaid']);
+          if (selectedVariation) rows.push([slug === 'cable' ? 'Package' : slug === 'education' ? 'Type' : 'Plan', selectedVariation.name]);
+          rows.push([config.needsVariation ? 'Price' : 'Amount', naira(amount)]);
+          if (price.markedUp > amount) rows.push(['Service charge', naira(price.markedUp - amount)]);
+          if (price.discount > 0) rows.push([`Discount (${discountPct}%)`, `−${naira(price.discount)}`, 'good']);
+          if (promoDiscount > 0) rows.push([`Promo ${promo.code}`, `−${naira(promoDiscount)}`, 'good']);
+          if (cbUse > 0) rows.push(['Cashback used', `−${naira(cbUse)}`, 'good']);
+          return { rows, total: naira(payTotal), note: appInfo?.rewardsSplit ? '🎁 This purchase earns you cashback and points' : null };
+        })()}
         notice={slow && (
           <div style={{ background: 'rgba(255,184,48,0.1)', border: '1px solid var(--gold)', borderRadius: 10, padding: '10px 12px', fontSize: 13 }}>
             ⏳ The network is taking a little longer than usual. You can leave this page. Your order keeps processing, and if it fails you're refunded automatically.
