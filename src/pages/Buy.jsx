@@ -641,7 +641,6 @@ export default function Buy() {
           <div className="field">
             <label>{t('Data plan')}</label>
             <PlanGrid variations={variations} value={variationCode} onChange={setVariationCode} priceOf={(base) => ({ base: Number(base), total: priceFor(base, config.backendService, pricing).total })} />
-            {selectedVariation && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>Selected: {selectedVariation.name}</p>}
           </div>
         ) : config.needsVariation ? (
           <div className="field">
