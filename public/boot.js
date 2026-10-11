@@ -19,7 +19,7 @@
   document.getElementById('app-manifest').href = '/admin.webmanifest';
   document.getElementById('app-touch-icon').href = '/admin-icon-192.png';
   document.getElementById('app-title').content = 'ZP Admin';
-  document.querySelector('meta[name="theme-color"]').content = '#0f1628';
+  document.querySelector('meta[name="theme-color"]').content = '#0B1F24';
 })();
 // Light / dark mode, applied before the app draws so there's no
 // flash. Saved choice: 'light', 'dark' or 'system' (default dark).

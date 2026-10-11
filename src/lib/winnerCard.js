@@ -25,8 +25,8 @@ export async function drawWinnerCard({ contestTitle, rank, prize, friends, code,
 
   const g = ctx.createRadialGradient(S * 0.85, S * 0.1, 50, S * 0.5, S * 0.5, S);
   g.addColorStop(0, '#a46bff');
-  g.addColorStop(0.35, '#863bff');
-  g.addColorStop(0.75, '#5b1fc4');
+  g.addColorStop(0.35, '#0D9488');
+  g.addColorStop(0.75, '#0B5F66');
   g.addColorStop(1, '#2a0b66');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, S, S);

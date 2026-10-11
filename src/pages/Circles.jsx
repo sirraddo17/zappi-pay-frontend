@@ -65,7 +65,7 @@ function CreateForm({ limits, onDone }) {
         <div className="field"><label htmlFor="cS">Number of members</label><input id="cS" type="number" min="2" max={limits.maxMembers} value={f.size} onChange={set('size')} required style={input} /></div>
         <div className="field"><label htmlFor="cD">First payment day</label><input id="cD" type="date" min={tomorrow()} value={f.startDate} onChange={set('startDate')} required style={input} /></div>
       </div>
-      {pot > 0 && <p style={{ fontSize: 14, margin: '0 0 12px', background: 'rgba(134,59,255,0.1)', borderRadius: 10, padding: 10 }}>Each {PER[f.frequency]} one member receives <b>{naira(pot - fee)}</b>{fee > 0 ? ` (${naira(pot)} − ${naira(fee)} fee)` : ''}. The circle runs for {size} {PER[f.frequency]}s.</p>}
+      {pot > 0 && <p style={{ fontSize: 14, margin: '0 0 12px', background: 'rgba(13, 148, 136,0.1)', borderRadius: 10, padding: 10 }}>Each {PER[f.frequency]} one member receives <b>{naira(pot - fee)}</b>{fee > 0 ? ` (${naira(pot)} − ${naira(fee)} fee)` : ''}. The circle runs for {size} {PER[f.frequency]}s.</p>}
 
       <details style={{ marginBottom: 12 }}>
         <summary style={{ cursor: 'pointer', fontSize: 14, color: 'var(--purple)' }}>Fees and late rules (optional)</summary>

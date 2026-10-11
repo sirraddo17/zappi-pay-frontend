@@ -77,7 +77,7 @@ export default function GiftPanel({ order, autoOpen = false }) {
           <div style={{ display: 'flex', gap: 8 }}>
             <a
               className="btn"
-              style={{ flex: 1, textAlign: 'center', textDecoration: 'none', background: '#25d366', color: '#0f1628' }}
+              style={{ flex: 1, textAlign: 'center', textDecoration: 'none', background: '#25d366', color: '#0B1F24' }}
               href={`https://wa.me/${gift.whatsapp || ''}?text=${encodeURIComponent(text)}`}
               target="_blank"
               rel="noreferrer"

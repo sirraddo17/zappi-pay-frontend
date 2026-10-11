@@ -59,7 +59,7 @@ function FundingHelper({ info }) {
   const fee = send ? fundingFee(send, info) : 0;
   const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   return (
-    <div style={{ background: 'rgba(134,59,255,0.08)', border: '1px solid var(--slate-700)', borderRadius: 10, padding: 12, margin: '10px 0' }}>
+    <div style={{ background: 'rgba(13, 148, 136,0.08)', border: '1px solid var(--slate-700)', borderRadius: 10, padding: 12, margin: '10px 0' }}>
       <label htmlFor="want" style={{ fontSize: 13, fontWeight: 600 }}>How much do you want in your wallet?</label>
       <input id="want" type="number" inputMode="numeric" min="1" value={want} onChange={(e) => setWant(e.target.value)} placeholder="e.g. 1000" style={{ marginTop: 6 }} />
       {send > 0 && (
@@ -238,7 +238,7 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
                 <input id="idDob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} max={new Date().toISOString().slice(0, 10)} required />
               </div>
             )}
-            <p style={{ fontSize: 13, margin: '0 0 8px', padding: '8px 10px', borderRadius: 8, background: 'rgba(134,59,255,0.08)' }}>
+            <p style={{ fontSize: 13, margin: '0 0 8px', padding: '8px 10px', borderRadius: 8, background: 'rgba(13, 148, 136,0.08)' }}>
               Your name <b>{customerName || 'on your profile'}</b> and date of birth must match your {idType} exactly. If your name is spelt differently, fix it in Profile first.
             </p>
             <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginBottom: 10 }}>
@@ -442,7 +442,7 @@ export default function Wallet() {
               <div
                 key={m.id || m.accountNumber}
                 onClick={() => manualList.length > 1 && setPaidTo(m.id)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'rgba(134,59,255,0.1)', border: `${picked ? 2 : 1}px solid ${picked ? 'var(--gold, #FFB830)' : 'var(--purple)'}`, borderRadius: 10, padding: 12, marginBottom: 10, cursor: manualList.length > 1 ? 'pointer' : 'default' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'rgba(13, 148, 136,0.1)', border: `${picked ? 2 : 1}px solid ${picked ? 'var(--gold, #FFB830)' : 'var(--purple)'}`, borderRadius: 10, padding: 12, marginBottom: 10, cursor: manualList.length > 1 ? 'pointer' : 'default' }}
               >
                 {manualList.length > 1 && (
                   <input type="radio" name="paidTo" aria-label={`I paid into ${m.bankName}`} checked={picked} onChange={() => setPaidTo(m.id)} style={{ width: 'auto', margin: 0 }} />

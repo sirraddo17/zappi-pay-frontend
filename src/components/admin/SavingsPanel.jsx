@@ -73,7 +73,7 @@ export default function SavingsPanel() {
   const r = Number(rate) || 0;
   const perDay = (bal) => Math.floor(((Math.min(bal, Number(max) || 0) * r) / 100 / 365) * 100) / 100;
   const stat = (label, value) => (
-    <div style={{ flex: '1 1 140px', background: 'rgba(134,59,255,0.08)', borderRadius: 10, padding: 10 }}>
+    <div style={{ flex: '1 1 140px', background: 'rgba(13, 148, 136,0.08)', borderRadius: 10, padding: 10 }}>
       <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{label}</div>
       <div style={{ fontWeight: 700 }}>{value}</div>
     </div>

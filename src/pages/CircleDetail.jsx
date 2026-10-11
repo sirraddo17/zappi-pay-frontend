@@ -118,7 +118,7 @@ export default function CircleDetail() {
         </div>
         {list.map((m, i) => (
           <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid var(--slate-800)' }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: m.received ? 'var(--green-500)' : 'rgba(134,59,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>{m.received ? '✓' : order ? i + 1 : m.position}</div>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: m.received ? 'var(--green-500)' : 'rgba(13, 148, 136,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>{m.received ? '✓' : order ? i + 1 : m.position}</div>
             <div style={{ flex: 1, fontSize: 14 }}>
               <b>{m.name}</b>{m.isCreator ? <span style={{ fontSize: 11, color: 'var(--slate-400)' }}> · creator</span> : ''}
               <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>

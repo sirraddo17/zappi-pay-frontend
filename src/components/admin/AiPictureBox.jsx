@@ -41,7 +41,7 @@ export default function AiPictureBox({ onPicture }) {
     }
   }
 
-  const chip = (on) => ({ padding: '4px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(134,59,255,0.18)' : 'transparent', color: 'var(--slate-100)' });
+  const chip = (on) => ({ padding: '4px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(13, 148, 136,0.18)' : 'transparent', color: 'var(--slate-100)' });
   return (
     <div style={{ marginTop: 10, padding: 10, borderRadius: 10, background: 'var(--slate-900)' }}>
       <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>✨ Or make a background picture with AI</div>

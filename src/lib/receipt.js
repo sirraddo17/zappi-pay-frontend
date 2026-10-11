@@ -6,7 +6,7 @@ import { getReceiptInvite } from '../api';
 
 const W = 720;
 const PAD = 48;
-const PURPLE = '#7c3aed';
+const PURPLE = '#0F766E';
 
 function money(n) {
   return `₦${Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -79,9 +79,9 @@ export async function drawReceipt({ title, amount, status, rows, highlight, invi
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, height);
   const g = ctx.createLinearGradient(0, 0, W, 150);
-  g.addColorStop(0, '#9b5cff');
-  g.addColorStop(0.6, '#6d2fd6');
-  g.addColorStop(1, '#4b1aa8');
+  g.addColorStop(0, '#2DD4BF');
+  g.addColorStop(0.6, '#0B6E75');
+  g.addColorStop(1, '#0A4F55');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, 150);
   // Soft decorative circles.
@@ -129,7 +129,7 @@ export async function drawReceipt({ title, amount, status, rows, highlight, invi
   // Highlighted value (e.g. electricity token).
   if (highlight) {
     const boxH = 50 + hlLines.length * 40;
-    ctx.fillStyle = '#f5f3ff';
+    ctx.fillStyle = '#F0FDFA';
     ctx.strokeStyle = PURPLE;
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -169,7 +169,7 @@ export async function drawReceipt({ title, amount, status, rows, highlight, invi
   // Invite box: the sender's referral link + QR code.
   if (invite) {
     const top = height - 130 - INVITE_H;
-    ctx.fillStyle = '#f5f3ff';
+    ctx.fillStyle = '#F0FDFA';
     ctx.strokeStyle = PURPLE;
     ctx.lineWidth = 2;
     ctx.beginPath();

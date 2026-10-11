@@ -63,7 +63,7 @@ export default function Refer() {
           {data.enabled && data.boostUntil && <BoostBanner until={data.boostUntil} bonus={data.bonusAmount} normalBonus={data.normalBonus} />}
           <div
             className="card"
-            style={{ background: 'linear-gradient(135deg, #863bff, #5b1fc4)', border: 'none', color: '#fff' }}
+            style={{ background: 'linear-gradient(135deg, #0D9488, #0B5F66)', border: 'none', color: '#fff' }}
           >
             {data.enabled ? (
               <>

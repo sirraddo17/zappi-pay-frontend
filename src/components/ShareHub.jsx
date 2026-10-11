@@ -120,7 +120,7 @@ export default function ShareHub({ code, link, firstName, bonus, minPurchase, sp
 
   return (
     <>
-      <div className="card" style={{ background: 'linear-gradient(180deg, rgba(134,59,255,0.14), rgba(134,59,255,0.04))', border: '1px solid rgba(134,59,255,0.35)' }}>
+      <div className="card" style={{ background: 'linear-gradient(180deg, rgba(13, 148, 136,0.14), rgba(13, 148, 136,0.04))', border: '1px solid rgba(13, 148, 136,0.35)' }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
           <span style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>📤</span>
           <div>

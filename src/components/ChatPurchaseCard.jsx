@@ -50,7 +50,7 @@ export default function ChatPurchaseCard({ draft, onDone, onClose }) {
   }
 
   return (
-    <div style={{ marginTop: 6, padding: 12, borderRadius: 12, border: '1px solid var(--purple)', background: 'rgba(134,59,255,0.08)' }}>
+    <div style={{ marginTop: 6, padding: 12, borderRadius: 12, border: '1px solid var(--purple)', background: 'rgba(13, 148, 136,0.08)' }}>
       <div style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 4 }}>Please check before you pay</div>
       <div style={{ fontWeight: 700, fontSize: 14 }}>{ICON[draft.service]} {draft.summary}</div>
       {draft.gift?.message && <div style={{ fontSize: 12, marginTop: 4 }}>🎁 “{draft.gift.message}”</div>}

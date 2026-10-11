@@ -48,7 +48,7 @@ export default function FundingMethodsPanel() {
           </div>
         ))}
         <button type="button" className="btn btn-secondary" disabled={busy || !Object.values(keys).some((v) => v.trim())} onClick={async () => { const body = Object.fromEntries(Object.entries(keys).filter(([, v]) => v.trim())); if (await save(body, 'Keys saved.')) setKeys({ publicKey: '', secretKey: '', secretHash: '' }); }}>Save keys</button>
-        <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 10, background: 'rgba(134,59,255,0.08)', borderRadius: 8, padding: 10 }}>
+        <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 10, background: 'rgba(13, 148, 136,0.08)', borderRadius: 8, padding: 10 }}>
           In Flutterwave → Settings → <b>Webhooks</b>, set:<br />
           URL: <code style={{ wordBreak: 'break-all' }}>{d.webhookUrl}</code><br />
           Secret hash: the same one you typed above. Tick “Receive webhook response in JSON format” if shown.

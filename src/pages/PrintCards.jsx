@@ -12,7 +12,7 @@ const QUICK = [5, 10, 20, 50, 100];
 
 function Chip({ on, children, onClick, style }) {
   return (
-    <button type="button" aria-pressed={on} onClick={onClick} style={{ padding: '8px 12px', borderRadius: 12, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', border: `2px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(134,59,255,0.18)' : 'transparent', color: 'var(--slate-100)', ...style }}>
+    <button type="button" aria-pressed={on} onClick={onClick} style={{ padding: '8px 12px', borderRadius: 12, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', border: `2px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(13, 148, 136,0.18)' : 'transparent', color: 'var(--slate-100)', ...style }}>
       {children}
     </button>
   );

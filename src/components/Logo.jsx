@@ -8,7 +8,7 @@
 export function LogoIcon({ size = 40 }) {
   return (
     <svg viewBox="0 0 400 400" width={size} height={size} aria-hidden="true">
-      <rect x="50" y="50" width="300" height="300" rx="72" fill="#863bff" />
+      <rect x="50" y="50" width="300" height="300" rx="72" fill="#0D9488" />
       <rect x="100" y="118" width="200" height="36" rx="8" fill="white" />
       <polygon points="280,154 120,234 164,234 324,154" fill="white" />
       <rect x="100" y="234" width="200" height="36" rx="8" fill="white" />

@@ -7,7 +7,7 @@ function money(n) {
 }
 
 const RANGES = [7, 30, 90];
-const BAR = '#8b5cf6';
+const BAR = '#14B8A6';
 
 // Daily profit bars (one series, so no legend) with a hover tooltip on
 // each bar. Negative days (refund-heavy) sit below a zero line.

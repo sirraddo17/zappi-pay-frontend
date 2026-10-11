@@ -164,7 +164,7 @@ export default function Transfer() {
             <form onSubmit={handleSend}>
               <div
                 style={{
-                  background: 'rgba(134,59,255,0.1)',
+                  background: 'rgba(13, 148, 136,0.1)',
                   border: '1px solid var(--purple, var(--orange))',
                   borderRadius: 10,
                   padding: 12,

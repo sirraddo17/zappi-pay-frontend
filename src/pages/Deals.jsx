@@ -12,7 +12,7 @@ const days = (d) => (!d ? '' : d === 1 ? '1 day' : d % 30 === 0 && d >= 30 ? `${
 
 function Chip({ on, children, onClick }) {
   return (
-    <button type="button" aria-pressed={on} onClick={onClick} style={{ padding: '6px 12px', borderRadius: 999, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(134,59,255,0.18)' : 'transparent', color: 'var(--slate-100)' }}>
+    <button type="button" aria-pressed={on} onClick={onClick} style={{ padding: '6px 12px', borderRadius: 999, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(13, 148, 136,0.18)' : 'transparent', color: 'var(--slate-100)' }}>
       {children}
     </button>
   );

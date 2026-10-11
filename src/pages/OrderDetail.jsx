@@ -183,7 +183,7 @@ export default function OrderDetail() {
         )}
 
         {token && order.service !== 'INSURANCE' && !(order.provider === 'waec' && (order.quantity || 1) > 1) && (
-          <div style={{ background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)', borderRadius: 12, padding: 14, marginBottom: 18, textAlign: 'left' }}>
+          <div style={{ background: 'rgba(13, 148, 136,0.12)', border: '1px solid var(--purple)', borderRadius: 12, padding: 14, marginBottom: 18, textAlign: 'left' }}>
             <div style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 4 }}>{order.service === 'ELECTRICITY' ? 'Your token' : 'PIN / code'}</div>
             <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1, wordBreak: 'break-word' }}>{token}</div>
             <button

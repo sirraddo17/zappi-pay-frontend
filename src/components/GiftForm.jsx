@@ -12,14 +12,14 @@ export default function GiftForm({ theme, setTheme, message, setMessage }) {
             role="radio"
             aria-checked={theme === k}
             onClick={() => setTheme(k)}
-            style={{ padding: '5px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', border: `1px solid ${theme === k ? 'var(--purple)' : 'var(--slate-700)'}`, background: theme === k ? 'rgba(134,59,255,0.18)' : 'transparent', color: 'var(--slate-100)' }}
+            style={{ padding: '5px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', border: `1px solid ${theme === k ? 'var(--purple)' : 'var(--slate-700)'}`, background: theme === k ? 'rgba(13, 148, 136,0.18)' : 'transparent', color: 'var(--slate-100)' }}
           >
             {t.emoji} {t.label}
           </button>
         ))}
       </div>
       <div className="field" style={{ margin: 0 }}>
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} maxLength={160} rows={2} placeholder="Add a message (optional), e.g. Happy birthday, sis!" aria-label="Gift message" style={{ fontFamily: "inherit", fontSize: 14, width: "100%", boxSizing: "border-box", background: "var(--slate-900, #0f1628)", color: "var(--slate-100)", border: "1px solid var(--slate-700)", borderRadius: 10, padding: "10px 12px", resize: "vertical" }} />
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} maxLength={160} rows={2} placeholder="Add a message (optional), e.g. Happy birthday, sis!" aria-label="Gift message" style={{ fontFamily: "inherit", fontSize: 14, width: "100%", boxSizing: "border-box", background: "var(--slate-900, #0B1F24)", color: "var(--slate-100)", border: "1px solid var(--slate-700)", borderRadius: 10, padding: "10px 12px", resize: "vertical" }} />
       </div>
       <small style={{ display: 'block', marginTop: 4, color: 'var(--slate-400)' }}>They get a gift card link you can send on WhatsApp. {160 - message.length} characters left.</small>
     </div>

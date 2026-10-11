@@ -14,8 +14,8 @@ export default function ShowMore({ total, shown, setShown, first = FIRST_COUNT }
   const remaining = total - shown;
   const btn = {
     background: 'none',
-    border: '1px solid var(--purple, #7c3aed)',
-    color: 'var(--purple, #7c3aed)',
+    border: '1px solid var(--purple, #0F766E)',
+    color: 'var(--purple, #0F766E)',
     borderRadius: 999,
     padding: '8px 16px',
     fontSize: 14,

@@ -3,7 +3,7 @@
 .lp {
   min-height: 100vh;
   background:
-    radial-gradient(900px 500px at 85% -10%, rgba(134, 59, 255, 0.35), transparent 60%),
+    radial-gradient(900px 500px at 85% -10%, rgba(13, 148, 136, 0.35), transparent 60%),
     radial-gradient(700px 400px at -10% 30%, rgba(255, 184, 48, 0.08), transparent 60%),
     var(--slate-900);
   color: var(--slate-100);
@@ -55,7 +55,7 @@
 .lp-btn-primary {
   background: var(--purple);
   color: #fff;
-  box-shadow: 0 8px 24px rgba(134, 59, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.35);
 }
 .lp-btn-primary:hover {
   background: var(--orange-dark);
@@ -145,7 +145,7 @@
   padding-bottom: 16px;
 }
 .lp-screen-top {
-  background: linear-gradient(135deg, #863bff, #5b1fc4);
+  background: linear-gradient(135deg, #0D9488, #0B5F66);
   padding: 18px 16px 44px;
 }
 .lp-screen-top small {
@@ -253,8 +253,8 @@
 .lp-feature {
   border-radius: 16px;
   padding: 18px;
-  background: linear-gradient(180deg, rgba(134, 59, 255, 0.1), rgba(26, 34, 64, 0.6));
-  border: 1px solid rgba(134, 59, 255, 0.25);
+  background: linear-gradient(180deg, rgba(13, 148, 136, 0.1), rgba(26, 34, 64, 0.6));
+  border: 1px solid rgba(13, 148, 136, 0.25);
 }
 .lp-feature .emoji {
   font-size: 24px;
@@ -292,7 +292,7 @@
   height: 34px;
   border-radius: 50%;
   background: var(--gold);
-  color: #1a0b3d;
+  color: #062A2E;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -311,23 +311,23 @@
 .lp-refer {
   border-radius: 20px;
   padding: 26px 20px;
-  background: linear-gradient(135deg, #863bff, #4b17a8);
+  background: linear-gradient(135deg, #0D9488, #0A4F55);
   display: flex;
   flex-direction: column;
   gap: 14px;
-  box-shadow: 0 20px 50px rgba(134, 59, 255, 0.3);
+  box-shadow: 0 20px 50px rgba(13, 148, 136, 0.3);
 }
 .lp-refer h2 {
   margin: 0;
 }
 .lp-refer p {
   margin: 0;
-  color: #eadcff;
+  color: #CCFBF1;
   line-height: 1.5;
 }
 .lp-refer .lp-btn {
   background: var(--gold);
-  color: #1a0b3d;
+  color: #062A2E;
   align-self: flex-start;
 }
 .lp-faq details {

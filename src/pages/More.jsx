@@ -25,7 +25,7 @@ const ITEMS = [
   { to: '/airtime-cash', label: 'Airtime to Cash', note: 'Turn extra airtime into wallet money', Icon: FundIcon, bg: '#5b3fa8' },
   { to: '/exam-pins', label: 'Exam PINs (bulk)', note: 'Buy & print many WAEC result checkers at once', emoji: '🎓', bg: '#0b6b3a' },
   { to: '/print-cards', label: 'Print Cards', note: 'Buy recharge card PINs to print and sell', Icon: PrinterIcon, bg: '#0f6d8c' },
-  { to: '/bulk', label: 'Bulk airtime & data', note: 'Top up up to 50 numbers at once', Icon: PhoneIcon, bg: '#863bff' },
+  { to: '/bulk', label: 'Bulk airtime & data', note: 'Top up up to 50 numbers at once', Icon: PhoneIcon, bg: '#0D9488' },
   { to: '/deals', label: 'Best data deals', note: 'The most data for your budget', Icon: WifiIcon, bg: '#7a5a10' },
   { to: '/refer', label: 'Refer & Earn', note: 'Invite friends and earn', emoji: '🎁', bg: '#a3316f' },
   { to: '/family', label: 'Family wallet', note: 'Give family members money with limits', emoji: '👨‍👩‍👧', bg: '#1f6b4a', feature: 'family' },

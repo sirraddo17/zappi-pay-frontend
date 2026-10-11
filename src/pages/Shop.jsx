@@ -41,7 +41,7 @@ export default function Shop() {
       {err && <div className="card" style={{ textAlign: 'center' }}><div style={{ fontSize: 36 }}>🏪</div><p>{err}</p></div>}
       {shop && (
         <>
-          <div className="card" style={{ background: 'linear-gradient(135deg, #863bff, #5b1fc4)', border: 'none', color: '#fff' }}>
+          <div className="card" style={{ background: 'linear-gradient(135deg, #0D9488, #0B5F66)', border: 'none', color: '#fff' }}>
             <div style={{ fontSize: 13, opacity: 0.85 }}>🏪 ZAPPI PAY agent</div>
             <div style={{ fontSize: 24, fontWeight: 800, marginTop: 4 }}>{shop.name}</div>
             {shop.tagline && <div style={{ fontSize: 14, marginTop: 4 }}>{shop.tagline}</div>}
@@ -68,7 +68,7 @@ export default function Shop() {
             )}
           </div>
           {shop.whatsapp && (
-            <a href={`https://wa.me/${shop.whatsapp}`} target="_blank" rel="noreferrer" className="btn" style={{ display: 'block', margin: '0 16px', width: 'calc(100% - 32px)', boxSizing: 'border-box', textAlign: 'center', textDecoration: 'none', background: '#25d366', color: '#0f1628' }}>
+            <a href={`https://wa.me/${shop.whatsapp}`} target="_blank" rel="noreferrer" className="btn" style={{ display: 'block', margin: '0 16px', width: 'calc(100% - 32px)', boxSizing: 'border-box', textAlign: 'center', textDecoration: 'none', background: '#25d366', color: '#0B1F24' }}>
               Chat with {shop.owner} on WhatsApp
             </a>
           )}

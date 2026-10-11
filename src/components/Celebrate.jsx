@@ -15,7 +15,7 @@ export default function Celebrate({ run = true }) {
     const W = window.innerWidth;
     const H = window.innerHeight;
     c.width = W * dpr; c.height = H * dpr; ctx.scale(dpr, dpr);
-    const colors = ['#863bff', '#f5b82e', '#22c55e', '#ffffff', '#ec4899', '#38bdf8'];
+    const colors = ['#0D9488', '#f5b82e', '#22c55e', '#ffffff', '#ec4899', '#38bdf8'];
     const bits = Array.from({ length: 140 }, () => ({
       x: W / 2 + (Math.random() - 0.5) * 60, y: H * 0.32,
       vx: (Math.random() - 0.5) * 12, vy: -Math.random() * 13 - 4,

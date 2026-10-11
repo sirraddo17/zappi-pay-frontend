@@ -78,7 +78,7 @@ export default function SessionsCard() {
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: 14 }}>
                   {s.label}
-                  {s.current && <span style={{ marginLeft: 6, fontSize: 11, padding: '2px 6px', borderRadius: 6, background: 'var(--green-500)', color: '#0f1628', fontWeight: 700 }}>This device</span>}
+                  {s.current && <span style={{ marginLeft: 6, fontSize: 11, padding: '2px 6px', borderRadius: 6, background: 'var(--green-500)', color: '#0B1F24', fontWeight: 700 }}>This device</span>}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>
                   {ago(s.lastSeenAt)} · logged in with {METHOD[s.method] || s.method} on {new Date(s.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}

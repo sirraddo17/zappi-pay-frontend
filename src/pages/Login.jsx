@@ -97,7 +97,7 @@ function QuickLogin({ quick, onUsePassword, onSwitchAccount }) {
                 onClick={withBiometric}
                 disabled={busy}
                 aria-label="Log in with fingerprint or Face ID"
-                style={{ height: 58, borderRadius: 14, border: '1px solid var(--purple)', background: 'rgba(134,59,255,0.15)', color: 'var(--gold)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ height: 58, borderRadius: 14, border: '1px solid var(--purple)', background: 'rgba(13, 148, 136,0.15)', color: 'var(--gold)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <FingerprintIcon />
               </button>
@@ -133,7 +133,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [idle] = useState(() => idleMessage('customer'));
-  const idleNote = idle && <p style={{ margin: '12px 16px 0', padding: '10px 12px', borderRadius: 10, fontSize: 13, background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)' }}>🔒 {idle}</p>;
+  const idleNote = idle && <p style={{ margin: '12px 16px 0', padding: '10px 12px', borderRadius: 10, fontSize: 13, background: 'rgba(13, 148, 136,0.12)', border: '1px solid var(--purple)' }}>🔒 {idle}</p>;
 
   useEffect(() => {
     if (customer) navigate(takeAfterLogin(), { replace: true });

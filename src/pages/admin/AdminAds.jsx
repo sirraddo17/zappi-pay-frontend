@@ -196,7 +196,7 @@ export default function AdminAds() {
             const live = ad.active && (!ad.startsAt || new Date(ad.startsAt).getTime() <= now) && (!ad.endsAt || new Date(ad.endsAt).getTime() > now);
             return (
               <div key={ad.id} className="card" style={{ margin: 0, padding: 0, overflow: 'hidden', opacity: live ? 1 : 0.6 }}>
-                {ad.hasImage ? <img src={adImageUrl(ad)} alt="" style={{ display: 'block', width: '100%', aspectRatio: '2 / 1', objectFit: 'cover' }} /> : <div style={{ aspectRatio: '2 / 1', background: 'linear-gradient(135deg, #863bff, #5b1fc4)', padding: 12, color: '#fff', fontWeight: 700 }}>{ad.title}</div>}
+                {ad.hasImage ? <img src={adImageUrl(ad)} alt="" style={{ display: 'block', width: '100%', aspectRatio: '2 / 1', objectFit: 'cover' }} /> : <div style={{ aspectRatio: '2 / 1', background: 'linear-gradient(135deg, #0D9488, #0B5F66)', padding: 12, color: '#fff', fontWeight: 700 }}>{ad.title}</div>}
                 <div style={{ padding: 12 }}>
                   <b>{ad.title}</b>
                   <div style={{ fontSize: 12, color: live ? 'var(--green-500)' : 'var(--slate-400)' }}>

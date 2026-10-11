@@ -257,7 +257,7 @@ export default function StoryVideoPanel() {
       <p style={{ ...small, margin: '4px 0 10px' }}>Join scenes into one video with captions, your logo, a voice and music. Use your own photos, phone screen recordings, HeyGen clips or AI pictures. Keep this tab open while it records (it takes as long as the video).</p>
 
       {aiOn ? (
-        <div style={{ background: 'rgba(134,59,255,0.08)', border: '1px solid rgba(134,59,255,0.35)', borderRadius: 10, padding: 10, marginBottom: 12 }}>
+        <div style={{ background: 'rgba(13, 148, 136,0.08)', border: '1px solid rgba(13, 148, 136,0.35)', borderRadius: 10, padding: 10, marginBottom: 12 }}>
           <b style={{ fontSize: 14 }}>✍️ Write with AI</b>
           <p style={{ ...small, margin: '2px 0 8px' }}>Say the service — the AI writes the scenes, captions, voice lines and picture ideas.</p>
           <input value={brief.topic} onChange={(e) => setBrief({ ...brief, topic: e.target.value })} maxLength={300} placeholder="e.g. Print recharge cards for shop owners · Buy electricity token at night · WAEC result checker" aria-label="What the video is about" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); writeWithAi(); } }} />
@@ -287,7 +287,7 @@ export default function StoryVideoPanel() {
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <div style={{ flex: '1 1 320px', minWidth: 0 }}>
           {scenes.map((x, i) => (
-            <div key={x.id} onClick={() => setPick(i)} style={{ border: `1px solid ${i === pick ? 'var(--purple)' : 'var(--slate-700, #334155)'}`, borderRadius: 10, padding: 10, marginBottom: 8, cursor: 'pointer', background: i === pick ? 'rgba(134,59,255,0.08)' : 'transparent' }}>
+            <div key={x.id} onClick={() => setPick(i)} style={{ border: `1px solid ${i === pick ? 'var(--purple)' : 'var(--slate-700, #334155)'}`, borderRadius: 10, padding: 10, marginBottom: 8, cursor: 'pointer', background: i === pick ? 'rgba(13, 148, 136,0.08)' : 'transparent' }}>
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                 <b style={{ fontSize: 13 }}>{i + 1}.</b>
                 <select value={x.kind} onChange={(e) => update(i, { kind: e.target.value })} style={{ width: 'auto', fontSize: 12, padding: '4px 6px' }} aria-label="Scene type">{Object.entries(KINDS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>

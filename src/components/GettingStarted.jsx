@@ -24,13 +24,13 @@ export default function GettingStarted({ customer, balance, funded, onHide }) {
     onHide?.();
   }
   return (
-    <div className="card" style={{ marginTop: 16, border: '1px solid var(--purple, #863bff)', background: 'rgba(134,59,255,0.06)' }}>
+    <div className="card" style={{ marginTop: 16, border: '1px solid var(--purple, #0D9488)', background: 'rgba(13, 148, 136,0.06)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <b style={{ flex: 1, fontSize: 15 }}>👋 Getting started · {doneCount}/4</b>
         <button type="button" onClick={hide} style={{ background: 'none', border: 'none', color: 'var(--slate-400)', cursor: 'pointer', fontSize: 12 }}>Hide</button>
       </div>
       <div style={{ height: 6, background: 'var(--slate-800)', borderRadius: 4, margin: '8px 0 10px' }}>
-        <div style={{ width: `${(doneCount / 4) * 100}%`, height: '100%', background: 'var(--purple, #863bff)', borderRadius: 4 }} />
+        <div style={{ width: `${(doneCount / 4) * 100}%`, height: '100%', background: 'var(--purple, #0D9488)', borderRadius: 4 }} />
       </div>
       <div style={{ display: 'grid', gap: 6 }}>
         {steps.map((s) => (

@@ -45,7 +45,7 @@ export default function Status() {
 
       {o && (
         <div className="card" style={{ border: `1px solid ${o.color}`, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span aria-hidden="true" style={{ width: 36, height: 36, borderRadius: '50%', background: o.color, color: '#0f1628', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>{o.icon}</span>
+          <span aria-hidden="true" style={{ width: 36, height: 36, borderRadius: '50%', background: o.color, color: '#0B1F24', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>{o.icon}</span>
           <div>
             <div style={{ fontWeight: 700, fontSize: 17 }}>{err ? 'We can’t reach ZAPPI PAY right now' : OVERALL[overall]}</div>
             <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>
@@ -66,7 +66,7 @@ export default function Status() {
                   {s.note && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{s.note}</div>}
                 </div>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, whiteSpace: 'nowrap', color: 'var(--slate-100)' }}>
-                  <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: '50%', background: st.color, color: '#0f1628', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800 }}>{st.icon}</span>
+                  <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: '50%', background: st.color, color: '#0B1F24', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800 }}>{st.icon}</span>
                   {st.label}
                 </span>
               </div>

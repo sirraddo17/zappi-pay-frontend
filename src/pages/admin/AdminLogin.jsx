@@ -60,7 +60,7 @@ export default function AdminLogin() {
         <p>Log in to the admin panel</p>
       </div>
 
-      {idle && <p style={{ margin: '0 0 12px', padding: '10px 12px', borderRadius: 10, fontSize: 13, background: 'rgba(134,59,255,0.12)', border: '1px solid var(--purple)' }}>🔒 {idle}</p>}
+      {idle && <p style={{ margin: '0 0 12px', padding: '10px 12px', borderRadius: 10, fontSize: 13, background: 'rgba(13, 148, 136,0.12)', border: '1px solid var(--purple)' }}>🔒 {idle}</p>}
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
 
       {challenge ? (

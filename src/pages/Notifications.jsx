@@ -109,7 +109,7 @@ export default function Notifications() {
               role="tab"
               aria-selected={on}
               onClick={() => setTab(t.key)}
-              style={{ position: 'relative', flex: '1 0 auto', padding: '9px 14px', borderRadius: 999, fontSize: 14, fontWeight: on ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(134,59,255,0.22)' : 'var(--slate-800)', color: on ? '#fff' : 'var(--slate-300, #cbd5e1)' }}
+              style={{ position: 'relative', flex: '1 0 auto', padding: '9px 14px', borderRadius: 999, fontSize: 14, fontWeight: on ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(13, 148, 136,0.22)' : 'var(--slate-800)', color: on ? '#fff' : 'var(--slate-300, #cbd5e1)' }}
             >
               {t.label}
               {unread > 0 && <span style={{ marginLeft: 6, minWidth: 18, padding: '0 5px', height: 18, lineHeight: '18px', display: 'inline-block', borderRadius: 9, background: 'var(--red-500, #ef4444)', color: '#fff', fontSize: 11, fontWeight: 700 }}>{unread > 99 ? '99+' : unread}</span>}
@@ -150,10 +150,10 @@ export default function Notifications() {
                 padding: '14px 16px',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
                 cursor: n.read ? 'default' : 'pointer',
-                background: n.read ? 'transparent' : 'rgba(134,59,255,0.08)',
+                background: n.read ? 'transparent' : 'rgba(13, 148, 136,0.08)',
               }}
             >
-              <span aria-hidden="true" style={{ position: 'relative', width: 36, height: 36, borderRadius: '50%', background: 'rgba(134,59,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>
+              <span aria-hidden="true" style={{ position: 'relative', width: 36, height: 36, borderRadius: '50%', background: 'rgba(13, 148, 136,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>
                 {TABS.find((t) => t.key === n.category)?.icon || '🔔'}
                 {!n.read && <span style={{ position: 'absolute', top: 0, right: 0, width: 9, height: 9, borderRadius: '50%', background: 'var(--red-500, #ef4444)', border: '2px solid var(--slate-900, #0f172a)' }} />}
               </span>

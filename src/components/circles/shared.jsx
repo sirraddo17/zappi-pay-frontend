@@ -50,7 +50,7 @@ export function HowItWorks() {
     <div style={{ display: 'grid', gap: 10 }}>
       {steps.map(([e, t, d], i) => (
         <div key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(134,59,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{e}</div>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(13, 148, 136,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{e}</div>
           <div><b style={{ fontSize: 14 }}>{i + 1}. {t}</b><div style={{ fontSize: 13, color: 'var(--slate-400)' }}>{d}</div></div>
         </div>
       ))}

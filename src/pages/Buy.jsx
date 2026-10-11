@@ -525,7 +525,7 @@ export default function Buy() {
                     padding: '8px 12px',
                     borderRadius: 12,
                     border: `1px solid ${active ? 'var(--purple)' : 'var(--slate-700)'}`,
-                    background: active ? 'rgba(134,59,255,0.18)' : 'var(--slate-800)',
+                    background: active ? 'rgba(13, 148, 136,0.18)' : 'var(--slate-800)',
                     color: 'var(--slate-100)',
                     cursor: 'pointer',
                     maxWidth: 180,

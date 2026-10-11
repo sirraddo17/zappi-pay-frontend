@@ -33,7 +33,7 @@ export default function AiActionCard({ action }) {
   const done = a.status === 'APPLIED';
   const border = done ? 'var(--green-500)' : a.status === 'PENDING' ? 'var(--purple)' : 'var(--slate-700)';
   return (
-    <div style={{ marginTop: 8, border: `1.5px solid ${border}`, borderRadius: 12, padding: 12, background: 'rgba(134,59,255,0.06)', maxWidth: 560 }}>
+    <div style={{ marginTop: 8, border: `1.5px solid ${border}`, borderRadius: 12, padding: 12, background: 'rgba(13, 148, 136,0.06)', maxWidth: 560 }}>
       <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{a.status === 'PENDING' ? 'Please check before applying' : a.status === 'APPLIED' ? '✅ Applied' : a.status === 'UNDONE' ? '↩️ Undone' : a.status === 'DISMISSED' ? 'Dismissed' : a.status === 'FAILED' ? 'Not applied' : a.status}</div>
       <div style={{ fontWeight: 700, margin: '2px 0 8px' }}>{KIND_ICON[a.kind] || '⚙️'} {a.summary}</div>
       <div style={{ display: 'grid', gap: 6 }}>

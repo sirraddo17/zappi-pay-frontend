@@ -1,39 +1,44 @@
 :root {
-  --purple: #863bff;
-  --gold: #FFB830;
-  /* orange is kept as the app's legacy accent name so existing
-     buttons/badges elsewhere pick up the new brand color without
-     needing every reference renamed. */
-  --orange: #863bff;
-  --orange-dark: #6d2fd6;
-  --slate-900: #0f1628;
-  --slate-800: #1a2240;
-  --slate-700: #2a3454;
-  --slate-400: #8899bb;
-  --slate-100: #f1f5f9;
+  /* Brand: deep teal + gold (the lion logo). "--purple" / "--orange" are
+     legacy names kept so every existing button and link picks up the
+     brand colour without renaming. */
+  --purple: #2DD4BF;
+  --gold: #F5B82E;
+  --orange: #0D9488;
+  --orange-dark: #0B6E75;
+  --brand: #0D9488;
+  --brand-2: #0B5F66;
+  --slate-900: #0B1F24;
+  --slate-800: #12313A;
+  --slate-700: #1E4650;
+  --slate-400: #8FB3B6;
+  --slate-100: #EAF6F5;
   --red-500: #ef4444;
   --green-500: #22c55e;
-  --slate-300: #cbd5e1;
+  --slate-300: #C9DEDD;
   --wordmark: #fff;
   --radius: 12px;
   color-scheme: dark;
 }
 
 /* Light mode (Profile → Appearance). Same layout, light surfaces. The
-   purple header and buttons keep white text. */
+   teal header and buttons keep white text. */
 :root[data-theme="light"] {
-  --slate-900: #f4f5fb;
+  --purple: #0D9488;
+  --slate-900: #F2F8F8;
   --slate-800: #ffffff;
-  --slate-700: #dfe3ee;
-  --slate-400: #5a6785;
-  --slate-300: #334155;
-  --slate-100: #0f1628;
-  --wordmark: #0f1628;
+  --slate-700: #D6E6E6;
+  --slate-400: #4F6E72;
+  --slate-300: #23413F;
+  --slate-100: #0B1F24;
+  --wordmark: #0B1F24;
   color-scheme: light;
 }
-:root[data-theme="light"] .card { box-shadow: 0 1px 3px rgba(15, 22, 40, 0.06); }
+:root[data-theme="light"] .card { box-shadow: 0 1px 3px rgba(11, 31, 36, 0.07); }
 :root[data-theme="light"] .dash-header,
 :root[data-theme="light"] .dash-header * { --wordmark: #fff; }
+
+* { --wordmark: #fff; }
 
 * {
   box-sizing: border-box;
@@ -128,8 +133,8 @@ input, select {
 }
 
 .btn {
-  background: var(--orange);
-  color: var(--slate-900);
+  background: linear-gradient(135deg, var(--orange), var(--brand-2));
+  color: #fff;
   border: none;
   border-radius: 8px;
   padding: 12px 16px;
@@ -633,10 +638,10 @@ th {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 3px solid #7c3aed;
+  border-bottom: 3px solid #0F766E;
   padding-bottom: 12px;
 }
-.statement-brand { font-size: 22px; font-weight: 800; color: #7c3aed; }
+.statement-brand { font-size: 22px; font-weight: 800; color: #0F766E; }
 .statement-sub { color: #64748b; }
 .statement-period { margin: 12px 0; font-weight: 600; }
 .statement-summary {
@@ -646,7 +651,7 @@ th {
   margin-bottom: 16px;
 }
 .statement-summary div {
-  background: #f5f3ff;
+  background: #F0FDFA;
   border-radius: 8px;
   padding: 8px 10px;
   display: flex;
@@ -755,7 +760,7 @@ html[data-lite] *::after {
   background:
     radial-gradient(120% 90% at 100% 0%, rgba(255, 184, 48, 0.28), transparent 55%),
     radial-gradient(90% 80% at 0% 100%, rgba(236, 72, 153, 0.25), transparent 60%),
-    linear-gradient(150deg, #9b5cff 0%, #6d2fd6 55%, #4b1aa8 100%);
+    linear-gradient(150deg, #2DD4BF 0%, #0B6E75 55%, #0A4F55 100%);
   overflow: hidden;
   margin-bottom: 18px;
 }
@@ -770,7 +775,7 @@ html[data-lite] *::after {
 .dash-hero > * { position: relative; }
 .dash-hero .dash-greeting { color: #fff; font-size: 17px; font-weight: 700; margin: 16px 0 12px; }
 .hero-bell { position: relative; display: inline-flex; width: 38px; height: 38px; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255,255,255,0.14); }
-.hero-bell-dot { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: var(--gold); color: #1a0b3d; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #6d2fd6; }
+.hero-bell-dot { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: var(--gold); color: #062A2E; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #0B6E75; }
 .glass-wallet {
   border-radius: 22px;
   padding: 16px 16px 14px;
@@ -783,18 +788,18 @@ html[data-lite] *::after {
 .glass-wallet .label { font-size: 12px; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: .08em; }
 .glass-wallet .value { font-size: 32px; font-weight: 800; color: #fff; margin: 4px 0 8px; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
 .eye-btn { background: rgba(255,255,255,0.14); border: none; border-radius: 10px; padding: 4px 8px; cursor: pointer; font-size: 14px; }
-.cb-chip { display: inline-block; font-size: 12px; font-weight: 600; color: #1a0b3d; background: var(--gold); padding: 4px 10px; border-radius: 999px; text-decoration: none; margin-bottom: 12px; }
+.cb-chip { display: inline-block; font-size: 12px; font-weight: 600; color: #062A2E; background: var(--gold); padding: 4px 10px; border-radius: 999px; text-decoration: none; margin-bottom: 12px; }
 .hero-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
 .hero-action { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px; border-radius: 14px; background: rgba(255,255,255,0.12); color: #fff; text-decoration: none; font-size: 12px; font-weight: 600; transition: transform .12s ease, background .15s ease; }
 .hero-action:active { transform: scale(0.95); }
-.hero-action.primary { background: var(--gold); color: #1a0b3d; }
+.hero-action.primary { background: var(--gold); color: #062A2E; }
 
 .service-grid.four { grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .service-grid.four .service-tile { padding: 12px 4px 10px; font-size: 12px; gap: 8px; border: 1px solid var(--slate-700); transition: transform .12s ease, border-color .15s ease; }
 .service-grid.four .service-tile:active { transform: scale(0.95); }
 .service-grid.four .service-icon { width: 42px; height: 42px; border-radius: 14px; box-shadow: 0 6px 14px rgba(0,0,0,0.22); }
 .service-label { line-height: 1.2; }
-.off-badge { position: absolute; top: 4px; right: 4px; background: var(--gold); color: #1a0b3d; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 6px; line-height: 1.2; }
+.off-badge { position: absolute; top: 4px; right: 4px; background: var(--gold); color: #062A2E; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 6px; line-height: 1.2; }
 
 .chip-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 6px; margin-bottom: 14px; scrollbar-width: none; }
 .chip-scroll::-webkit-scrollbar { display: none; }
@@ -820,29 +825,29 @@ html[data-lite] *::after {
 .light-helper { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255,184,48,0.10); border: 1px solid rgba(255,184,48,0.45); }
 .light-token { font-size: 17px; font-weight: 800; letter-spacing: 1px; margin-top: 4px; word-break: break-all; }
 .mini-btn { background: none; border: 1px solid var(--purple); color: var(--purple); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
-.card-pay { margin-top: 10px; padding: 12px; border-radius: 14px; background: linear-gradient(135deg, rgba(134,59,255,0.14), rgba(255,184,48,0.10)); border: 1px solid rgba(134,59,255,0.45); }
+.card-pay { margin-top: 10px; padding: 12px; border-radius: 14px; background: linear-gradient(135deg, rgba(13, 148, 136,0.14), rgba(255,184,48,0.10)); border: 1px solid rgba(13, 148, 136,0.45); }
 .payout-card { border-color: rgba(34,197,94,0.45); }
 
 /* Data plan / airtime amount cards (components/PlanGrid.jsx) */
 .plan-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .plan-tabs::-webkit-scrollbar { display: none; }
 .plan-tab { flex: 0 0 auto; background: none; border: 1px solid var(--slate-700, #334155); color: var(--slate-300, #cbd5e1); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
-.plan-tab.on { background: linear-gradient(135deg, #863bff, #5b1fc4); border-color: transparent; color: #fff; box-shadow: 0 4px 12px rgba(134, 59, 255, .35); }
+.plan-tab.on { background: linear-gradient(135deg, #0D9488, #0B5F66); border-color: transparent; color: #fff; box-shadow: 0 4px 12px rgba(13, 148, 136, .35); }
 .plan-search { width: 100%; margin-bottom: 10px; }
 .plan-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .plan-card { position: relative; overflow: hidden; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0)) , var(--slate-800, #1e293b); border: 1.5px solid var(--slate-700, #334155); border-radius: 14px; padding: 18px 4px 10px; text-align: center; cursor: pointer; color: inherit; min-height: 96px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: transform .12s, border-color .15s, box-shadow .15s; }
 .plan-card:active { transform: scale(.97); }
-.plan-card.on { border-color: var(--purple, #863bff); background: rgba(134, 59, 255, .16); box-shadow: 0 0 0 1px var(--purple, #863bff) inset, 0 6px 16px rgba(134, 59, 255, .25); }
+.plan-card.on { border-color: var(--purple, #0D9488); background: rgba(13, 148, 136, .16); box-shadow: 0 0 0 1px var(--purple, #0D9488) inset, 0 6px 16px rgba(13, 148, 136, .25); }
 .plan-save { position: absolute; top: 0; left: 0; right: 0; font-size: 10px; font-weight: 800; letter-spacing: .2px; color: #1a1300; background: linear-gradient(90deg, #ffb830, #ffd36b); padding: 2px 0; }
-.plan-check { position: absolute; bottom: 6px; right: 6px; width: 18px; height: 18px; border-radius: 50%; background: var(--purple, #863bff); color: #fff; font-size: 11px; line-height: 18px; font-weight: 800; }
+.plan-check { position: absolute; bottom: 6px; right: 6px; width: 18px; height: 18px; border-radius: 50%; background: var(--purple, #0D9488); color: #fff; font-size: 11px; line-height: 18px; font-weight: 800; }
 .plan-size { font-size: clamp(16px, 4.6vw, 20px); font-weight: 800; line-height: 1.1; white-space: nowrap; }
 .plan-size small { font-size: .62em; font-weight: 700; margin-left: 1px; }
 .plan-size-text { font-size: 12px; font-weight: 700; white-space: normal; }
 .plan-valid { font-size: 12px; color: var(--slate-400, #94a3b8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.plan-price { font-size: clamp(12px, 3.6vw, 14px); font-weight: 800; color: var(--purple, #a777ff); white-space: nowrap; margin-top: 2px; }
+.plan-price { font-size: clamp(12px, 3.6vw, 14px); font-weight: 800; color: var(--purple, #2DD4BF); white-space: nowrap; margin-top: 2px; }
 .plan-old { font-size: 11px; color: var(--slate-500, #64748b); white-space: nowrap; line-height: 1; }
-.plan-more { width: 100%; margin-top: 10px; background: none; border: 1px dashed var(--slate-600, #475569); color: var(--purple, #a777ff); border-radius: 12px; padding: 10px; font-weight: 700; cursor: pointer; }
-.plan-picked { position: sticky; bottom: 8px; z-index: 5; margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(20, 16, 40, .92); backdrop-filter: blur(8px); border: 1px solid var(--purple, #863bff); box-shadow: 0 8px 24px rgba(0,0,0,.35); font-size: 14px; }
+.plan-more { width: 100%; margin-top: 10px; background: none; border: 1px dashed var(--slate-600, #475569); color: var(--purple, #2DD4BF); border-radius: 12px; padding: 10px; font-weight: 700; cursor: pointer; }
+.plan-picked { position: sticky; bottom: 8px; z-index: 5; margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(8, 30, 34, .94); backdrop-filter: blur(8px); border: 1px solid var(--purple, #0D9488); box-shadow: 0 8px 24px rgba(0,0,0,.35); font-size: 14px; }
 .plan-picked-name { font-size: 11px; color: var(--slate-400, #94a3b8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.plan-picked-go { flex: 0 0 auto; background: linear-gradient(135deg, #863bff, #5b1fc4); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.plan-picked-go { flex: 0 0 auto; background: linear-gradient(135deg, #0D9488, #0B5F66); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 800; cursor: pointer; white-space: nowrap; }
 @media (max-width: 340px) { .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

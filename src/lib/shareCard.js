@@ -45,8 +45,8 @@ async function qrImage(link) {
 function background(ctx, t = 0) {
   const g = ctx.createRadialGradient(W * (0.8 - 0.1 * t), H * 0.1, 60, W * 0.5, H * 0.5, H);
   g.addColorStop(0, '#a46bff');
-  g.addColorStop(0.35, '#863bff');
-  g.addColorStop(0.75, '#5b1fc4');
+  g.addColorStop(0.35, '#0D9488');
+  g.addColorStop(0.75, '#0B5F66');
   g.addColorStop(1, '#2a0b66');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);

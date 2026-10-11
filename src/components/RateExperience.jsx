@@ -104,7 +104,7 @@ export default function RateExperience({ order, flush = false, maxAgeMs = 24 * 3
     }
   }
 
-  const box = { margin: flush ? '0 0 16px' : '0 16px 16px', border: '1px solid var(--purple)', background: 'rgba(134,59,255,0.08)' };
+  const box = { margin: flush ? '0 0 16px' : '0 16px 16px', border: '1px solid var(--purple)', background: 'rgba(13, 148, 136,0.08)' };
   const chip = { width: 'auto', padding: '8px 12px', fontSize: 13, textDecoration: 'none' };
   const brand = (bg) => ({ ...chip, background: bg, color: '#fff', border: 'none' });
 

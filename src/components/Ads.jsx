@@ -5,7 +5,7 @@ import { useLite } from '../lib/lite';
 import { cached } from '../lib/cache';
 import { useAppInfo } from './ServiceNotices';
 
-const FEST_BG = { green: 'linear-gradient(135deg, #10b981, #047857)', red: 'linear-gradient(135deg, #ef4444, #991b1b)', gold: 'linear-gradient(135deg, #f59e0b, #b45309)', dark: 'linear-gradient(135deg, #334155, #0f172a)', blue: 'linear-gradient(135deg, #2563eb, #1e40af)', purple: 'linear-gradient(135deg, #863bff, #5b1fc4)' };
+const FEST_BG = { green: 'linear-gradient(135deg, #10b981, #047857)', red: 'linear-gradient(135deg, #ef4444, #991b1b)', gold: 'linear-gradient(135deg, #f59e0b, #b45309)', dark: 'linear-gradient(135deg, #334155, #0f172a)', blue: 'linear-gradient(135deg, #2563eb, #1e40af)', purple: 'linear-gradient(135deg, #0D9488, #0B5F66)' };
 
 const SEEN_KEY = 'zappipay_popup_ads_seen';
 
@@ -56,7 +56,7 @@ function AdSlide({ ad, onOpen }) {
       ) : ad.hasImage ? (
         <img src={adImageUrl(ad)} alt={ad.title} loading="lazy" style={{ display: 'block', width: '100%', aspectRatio: '2 / 1', objectFit: 'cover' }} />
       ) : (
-        <div style={{ padding: 16, background: ad.bg || 'linear-gradient(135deg, #863bff, #5b1fc4)', color: '#fff', minHeight: 110, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ padding: 16, background: ad.bg || 'linear-gradient(135deg, #0D9488, #0B5F66)', color: '#fff', minHeight: 110, position: 'relative', overflow: 'hidden' }}>
           {ad.emoji && <span aria-hidden="true" style={{ position: 'absolute', right: 14, bottom: 6, fontSize: 64, opacity: 0.9 }}>{ad.emoji}</span>}
           <b style={{ fontSize: 16, display: 'block', paddingRight: ad.emoji ? 70 : 0 }}>{ad.title}</b>
           {ad.body && <div style={{ fontSize: 13, marginTop: 4, opacity: 0.95, paddingRight: ad.emoji ? 70 : 0 }}>{ad.body}</div>}
@@ -170,7 +170,7 @@ export function AdPopup() {
 
 // Shown in the bottom slider until the admin adds BOTTOM adverts.
 export const DEFAULT_BOTTOM_SLIDES = [
-  { id: 'tip-refer', builtIn: true, title: 'Invite friends, earn cash', body: 'Share your code — you earn when they join and buy.', buttonText: 'Refer & Earn', linkUrl: '/refer', emoji: '🎁', bg: 'linear-gradient(135deg, #863bff, #5b1fc4)' },
+  { id: 'tip-refer', builtIn: true, title: 'Invite friends, earn cash', body: 'Share your code — you earn when they join and buy.', buttonText: 'Refer & Earn', linkUrl: '/refer', emoji: '🎁', bg: 'linear-gradient(135deg, #0D9488, #0B5F66)' },
   { id: 'tip-a2c', builtIn: true, title: 'Airtime to Cash', body: 'Bought too much airtime? Turn it back into wallet money.', buttonText: 'Convert now', linkUrl: '/airtime-cash', emoji: '🔁', bg: 'linear-gradient(135deg, #0ea5a4, #0f766e)' },
   { id: 'tip-bulk', builtIn: true, title: 'Bulk airtime & data', body: 'Top up up to 50 numbers at once — family, staff, customers.', buttonText: 'Try bulk', linkUrl: '/bulk', emoji: '📶', bg: 'linear-gradient(135deg, #f59e0b, #d97706)' },
   { id: 'tip-gift', builtIn: true, title: 'Gift data or airtime', body: 'Send data or airtime to someone with a nice gift card and your message.', buttonText: 'Send a gift', linkUrl: '/buy/data', emoji: '🎁', bg: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },

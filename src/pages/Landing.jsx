@@ -9,7 +9,7 @@ import { SUPPORT_EMAIL, WHATSAPP_NUMBER } from '../assistant/knowledge';
 import './landing.css';
 
 const SERVICES = [
-  { label: 'Airtime', desc: 'MTN, Airtel, Glo & 9mobile top-up', Icon: PhoneIcon, bg: '#863bff' },
+  { label: 'Airtime', desc: 'MTN, Airtel, Glo & 9mobile top-up', Icon: PhoneIcon, bg: '#0D9488' },
   { label: 'Data', desc: 'Daily, weekly & monthly bundles', Icon: WifiIcon, bg: '#7a5a10' },
   { label: 'Electricity', desc: 'Prepaid tokens & postpaid bills', Icon: BoltIcon, bg: '#1f6b4a' },
   { label: 'Cable TV', desc: 'DStv, GOtv, StarTimes, Showmax', Icon: TvIcon, bg: '#2955a3' },
@@ -38,7 +38,7 @@ const FAQ = [
 
 function PhoneMockup() {
   const tiles = [
-    ['Airtime', PhoneIcon, '#863bff'],
+    ['Airtime', PhoneIcon, '#0D9488'],
     ['Data', WifiIcon, '#7a5a10'],
     ['Power', BoltIcon, '#1f6b4a'],
     ['Cable', TvIcon, '#2955a3'],

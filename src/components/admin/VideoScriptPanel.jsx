@@ -41,7 +41,7 @@ export default function VideoScriptPanel({ onHeygen }) {
   }
 
   const all = s ? [s.title && `🎬 ${s.title}`, '', ...s.scenes.map((x) => `[${x.time}] ${x.visual}\n🗣 ${x.line}${x.onScreen ? `\n🔤 ${x.onScreen}` : ''}`), '', `Caption: ${s.caption}`, s.hashtags.join(' '), s.music && `Music: ${s.music}`].filter((x) => x !== false && x !== undefined).join('\n') : '';
-  const chip = (on) => ({ padding: '5px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(134,59,255,0.18)' : 'transparent', color: 'var(--slate-100)' });
+  const chip = (on) => ({ padding: '5px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', border: `1px solid ${on ? 'var(--purple)' : 'var(--slate-700)'}`, background: on ? 'rgba(13, 148, 136,0.18)' : 'transparent', color: 'var(--slate-100)' });
 
   return (
     <div className="card" style={{ margin: '16px 0 0' }}>

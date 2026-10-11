@@ -25,7 +25,7 @@ import { BellIcon, FundIcon, PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, Bui
 import { homeServices } from '../lib/homeTiles';
 
 const SERVICES = [
-  { slug: 'airtime', service: 'AIRTIME', label: 'Airtime', Icon: PhoneIcon, bg: '#863bff' },
+  { slug: 'airtime', service: 'AIRTIME', label: 'Airtime', Icon: PhoneIcon, bg: '#0D9488' },
   { slug: 'data', service: 'DATA', label: 'Data', Icon: WifiIcon, bg: '#7a5a10' },
   { slug: 'electricity', service: 'ELECTRICITY', label: 'Electricity', Icon: BoltIcon, bg: '#1f6b4a' },
   { slug: 'cable', service: 'CABLE', label: 'Cable TV', Icon: TvIcon, bg: '#2955a3' },
@@ -71,7 +71,7 @@ function txLabel(t) {
 }
 
 const BANNER_STYLES = {
-  INFO: { bg: 'rgba(134,59,255,0.15)', border: 'var(--purple)', icon: 'ℹ️' },
+  INFO: { bg: 'rgba(13, 148, 136,0.15)', border: 'var(--purple)', icon: 'ℹ️' },
   WARNING: { bg: 'rgba(255,184,48,0.15)', border: 'var(--gold)', icon: '⚠️' },
   MAINTENANCE: { bg: 'rgba(239,68,68,0.15)', border: '#ef4444', icon: '🛠️' },
 };
@@ -102,7 +102,7 @@ export default function Dashboard() {
   const info = useAppInfo();
   // "Send Money" only shows when sending to users or to banks is switched on.
   // Up to 7 services, then More last. A service from More fills any gap.
-  const FILLER_LOOK = { 'print-cards': { Icon: PrinterIcon, bg: '#0f6d8c' }, bulk: { Icon: PhoneIcon, bg: '#863bff' }, deals: { Icon: WifiIcon, bg: '#7a5a10' } };
+  const FILLER_LOOK = { 'print-cards': { Icon: PrinterIcon, bg: '#0f6d8c' }, bulk: { Icon: PhoneIcon, bg: '#0D9488' }, deals: { Icon: WifiIcon, bg: '#7a5a10' } };
   const home = homeServices(SERVICES.filter((s) => s.slug !== 'more'), feat, info);
   const services = [...home.tiles.map((t) => (t.to && FILLER_LOOK[t.slug] ? { ...t, ...FILLER_LOOK[t.slug] } : t)), SERVICES.find((s) => s.slug === 'more')];
   const lite = useLite();
@@ -196,7 +196,7 @@ export default function Dashboard() {
             <Link to="/wallet" className="cb-chip">🎁 {cashback > 0 ? `₦${Number(cashback).toLocaleString()} cashback to spend` : ''}{cashback > 0 && monthCashback > 0 ? ' · ' : ''}{monthCashback > 0 ? `₦${Number(monthCashback).toLocaleString()} earned this month` : ''}</Link>
           )}
           <div className="hero-actions">
-            <Link to="/wallet" className="hero-action primary"><FundIcon size={18} color="#1a0b3d" /><span>Add money</span></Link>
+            <Link to="/wallet" className="hero-action primary"><FundIcon size={18} color="#062A2E" /><span>Add money</span></Link>
             <Link to="/buy/airtime" className="hero-action"><PhoneIcon size={18} color="#fff" /><span>{t('Airtime')}</span></Link>
             <Link to="/buy/data" className="hero-action"><WifiIcon size={18} color="#fff" /><span>{t('Data')}</span></Link>
             <Link to="/orders" className="hero-action"><GridIcon size={18} color="#fff" /><span>History</span></Link>
@@ -290,7 +290,7 @@ export default function Dashboard() {
         <Link
           to="/refer"
           className="card"
-          style={{ display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: 'inherit', border: '1px solid var(--purple, #863bff)', background: 'rgba(134,59,255,0.08)', marginTop: 16 }}
+          style={{ display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: 'inherit', border: '1px solid var(--purple, #0D9488)', background: 'rgba(13, 148, 136,0.08)', marginTop: 16 }}
         >
           <span style={{ fontSize: 22 }}>🏷️</span>
           <span style={{ flex: 1 }}>
@@ -338,7 +338,7 @@ export default function Dashboard() {
         <Link
           to="/refer"
           className="card"
-          style={{ display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: '#fff', border: 'none', background: 'linear-gradient(135deg, #863bff, #5b1fc4)', marginTop: 16 }}
+          style={{ display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: '#fff', border: 'none', background: 'linear-gradient(135deg, #0D9488, #0B5F66)', marginTop: 16 }}
         >
           <span style={{ fontSize: 22 }}>🎁</span>
           <span style={{ flex: 1 }}>

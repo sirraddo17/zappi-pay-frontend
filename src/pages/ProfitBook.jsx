@@ -31,7 +31,7 @@ function Bars({ days }) {
       <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Profit per day</div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 90 }} role="img" aria-label="Profit per day chart">
         {days.map((d) => (
-          <div key={d.date} title={`${d.date}: ${naira(d.profit)} (${d.sales} sales)`} style={{ flex: 1, minWidth: 2, height: `${Math.max(2, (Math.abs(d.profit) / max) * 100)}%`, background: d.profit < 0 ? 'var(--red-500)' : '#863bff', borderRadius: '3px 3px 0 0', opacity: d.profit === 0 ? 0.25 : 1 }} />
+          <div key={d.date} title={`${d.date}: ${naira(d.profit)} (${d.sales} sales)`} style={{ flex: 1, minWidth: 2, height: `${Math.max(2, (Math.abs(d.profit) / max) * 100)}%`, background: d.profit < 0 ? 'var(--red-500)' : '#0D9488', borderRadius: '3px 3px 0 0', opacity: d.profit === 0 ? 0.25 : 1 }} />
         ))}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--slate-400)', marginTop: 4 }}>
@@ -127,7 +127,7 @@ export default function ProfitBook() {
       </div>
       <div style={{ display: 'flex', gap: 6, padding: '0 16px 12px', overflowX: 'auto' }}>
         {RANGES.map(([k, l]) => (
-          <button key={k} type="button" aria-pressed={rangeKey === k} onClick={() => setRangeKey(k)} style={{ padding: '6px 12px', borderRadius: 999, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', border: `1px solid ${rangeKey === k ? 'var(--purple)' : 'var(--slate-700)'}`, background: rangeKey === k ? 'rgba(134,59,255,0.18)' : 'transparent', color: 'var(--slate-100)' }}>{l}</button>
+          <button key={k} type="button" aria-pressed={rangeKey === k} onClick={() => setRangeKey(k)} style={{ padding: '6px 12px', borderRadius: 999, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', border: `1px solid ${rangeKey === k ? 'var(--purple)' : 'var(--slate-700)'}`, background: rangeKey === k ? 'rgba(13, 148, 136,0.18)' : 'transparent', color: 'var(--slate-100)' }}>{l}</button>
         ))}
       </div>
       {err && <p className="error-text" style={{ margin: '0 16px 8px' }}>{err}</p>}

@@ -17,7 +17,7 @@ export default function LanguagePicker({ style }) {
             role="radio"
             aria-checked={lang === l.code}
             onClick={() => { setLang(l.code); updateMe({ language: l.code }).catch(() => {}); }}
-            style={{ padding: '8px 14px', borderRadius: 999, fontSize: 14, cursor: 'pointer', border: `1px solid ${lang === l.code ? 'var(--purple)' : 'var(--slate-700)'}`, background: lang === l.code ? 'rgba(134,59,255,0.18)' : 'transparent', color: 'var(--slate-100)', fontWeight: lang === l.code ? 700 : 400 }}
+            style={{ padding: '8px 14px', borderRadius: 999, fontSize: 14, cursor: 'pointer', border: `1px solid ${lang === l.code ? 'var(--purple)' : 'var(--slate-700)'}`, background: lang === l.code ? 'rgba(13, 148, 136,0.18)' : 'transparent', color: 'var(--slate-100)', fontWeight: lang === l.code ? 700 : 400 }}
           >
             {l.label}
           </button>

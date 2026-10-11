@@ -9,7 +9,7 @@ export const FORMATS = {
 };
 
 export const THEMES = {
-  purple: { stops: ['#a46bff', '#863bff', '#5b1fc4', '#2a0b66'], accent: '#FFB830', ink: '#2a0b66' },
+  purple: { stops: ['#a46bff', '#0D9488', '#0B5F66', '#2a0b66'], accent: '#FFB830', ink: '#2a0b66' },
   gold: { stops: ['#fcd34d', '#f59e0b', '#b45309', '#78350f'], accent: '#ffffff', ink: '#78350f' },
   green: { stops: ['#34d399', '#10b981', '#047857', '#064e3b'], accent: '#FFE27A', ink: '#064e3b' },
   blue: { stops: ['#60a5fa', '#2563eb', '#1e40af', '#1e1b4b'], accent: '#FFB830', ink: '#1e1b4b' },

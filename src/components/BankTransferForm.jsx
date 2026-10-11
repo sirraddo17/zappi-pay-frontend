@@ -149,7 +149,7 @@ export default function BankTransferForm({ onDone }) {
     onDone?.();
   }
 
-  const box = { background: 'rgba(134,59,255,0.1)', border: '1px solid var(--purple, var(--orange))', borderRadius: 10, padding: 12, marginBottom: 16 };
+  const box = { background: 'rgba(13, 148, 136,0.1)', border: '1px solid var(--purple, var(--orange))', borderRadius: 10, padding: 12, marginBottom: 16 };
 
   return (
     <>

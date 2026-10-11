@@ -47,7 +47,7 @@ export default function ChatActionCard({ card }) {
   if (state?.ok) return <div style={{ marginTop: 6, padding: 10, borderRadius: 12, border: '1px solid var(--green-500)', fontSize: 13 }}>✅ {card.doneText || 'Done.'}</div>;
 
   return (
-    <div style={{ marginTop: 6, padding: 12, borderRadius: 12, border: `1px solid ${card.danger ? 'var(--red-500)' : 'var(--purple)'}`, background: card.danger ? 'rgba(239,68,68,0.08)' : 'rgba(134,59,255,0.08)' }}>
+    <div style={{ marginTop: 6, padding: 12, borderRadius: 12, border: `1px solid ${card.danger ? 'var(--red-500)' : 'var(--purple)'}`, background: card.danger ? 'rgba(239,68,68,0.08)' : 'rgba(13, 148, 136,0.08)' }}>
       <div style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 4 }}>Please check before you confirm</div>
       <div style={{ fontWeight: 700, fontSize: 14 }}>{card.icon} {card.title}</div>
       {(card.lines || []).map(([k, v], i) => (

@@ -37,7 +37,7 @@ export default function ChatTransferCard({ draft, onClose }) {
   }
 
   return (
-    <div style={{ marginTop: 6, padding: 12, borderRadius: 12, border: '1px solid var(--purple)', background: 'rgba(134,59,255,0.08)' }}>
+    <div style={{ marginTop: 6, padding: 12, borderRadius: 12, border: '1px solid var(--purple)', background: 'rgba(13, 148, 136,0.08)' }}>
       <div style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 4 }}>Please check before you send</div>
       <div style={{ fontSize: 22, fontWeight: 800 }}>{naira(draft.amount)}</div>
       <div style={{ fontSize: 14, marginTop: 4 }}>
