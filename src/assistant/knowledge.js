@@ -196,14 +196,14 @@ export const TOPICS = [
     title: 'Electricity / token',
     keywords: ['electricity', 'light', 'nepa', 'token', 'meter', 'prepaid', 'postpaid', 'disco', 'ikedc', 'ekedc', 'aedc', 'phed'],
     answer:
-      'Tap Electricity, pick your disco and meter type, enter your meter number and tap Verify to confirm the name, then pay. Your token is on the order receipt under Orders.',
+      'Tap Electricity, tap your disco’s tile (IBEDC, EKO, AEDC…), choose Prepaid or Postpaid, enter your meter number and Verify the name, tap a quick amount or type one, then pay. Your token is on the order receipt under Orders.',
     actions: [{ label: 'Pay Electricity', to: '/buy/electricity' }],
   },
   {
     id: 'cable',
     title: 'Cable TV',
     keywords: ['cable', 'dstv', 'gotv', 'startimes', 'showmax', 'smartcard', 'iuc', 'decoder', 'tv'],
-    answer: 'Tap Cable TV, choose the provider, enter your smartcard/IUC number and Verify it, pick a package, then pay.',
+    answer: 'Tap Cable TV, tap your TV (DStv, GOtv, Startimes…), enter your smartcard/IUC number and Verify it, tap a package card (filter by Monthly, Quarterly or Yearly), then pay.',
     actions: [{ label: 'Pay Cable TV', to: '/buy/cable' }],
   },
   {

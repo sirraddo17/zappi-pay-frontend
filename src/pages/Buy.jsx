@@ -6,6 +6,7 @@ import GiftForm from '../components/GiftForm';
 import { currentShop, forgetShop } from '../lib/shopRef';
 import { useAuth } from '../context/AuthContext';
 import PlanGrid, { AmountGrid } from '../components/PlanGrid';
+import { ProviderGrid, Segmented, PackageList, QuickAmounts } from '../components/BillPickers';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo, createPayForMe, getOrders, request as apiRequest } from '../api';
 import { extractToken } from '../lib/receipt';
 import { cached } from '../lib/cache';
@@ -558,7 +559,13 @@ export default function Buy() {
             })}
           </div>
         )}
-        <div className="field" style={isPhoneService && providers.length > 0 && providers.length <= 8 ? { display: 'none' } : undefined}>
+        {!isPhoneService && providers.length > 0 && (
+          <div className="field">
+            <label>{t(slug === 'electricity' ? 'Your electricity company' : slug === 'cable' ? 'Choose your TV' : slug === 'education' ? 'Choose an exam' : '{service} provider', { service: config.label })}</label>
+            <ProviderGrid providers={providers} value={providerId} onChange={(id) => { manualProvider.current = true; setProviderId(id); }} label={config.label} />
+          </div>
+        )}
+        <div className="field" style={(isPhoneService && providers.length > 0 && providers.length <= 8) || (!isPhoneService && providers.length > 0) ? { display: 'none' } : undefined}>
           <label htmlFor="provider">{t('{service} provider', { service: config.label })}</label>
           <select id="provider" value={providerId} onChange={(e) => { manualProvider.current = true; setProviderId(e.target.value); }} required>
             <option value="">{t('Select…')}</option>
@@ -570,11 +577,8 @@ export default function Buy() {
 
         {config.needsType && (
           <div className="field">
-            <label htmlFor="billType">{t('Meter type')}</label>
-            <select id="billType" value={billType} onChange={(e) => setBillType(e.target.value)}>
-              <option value="prepaid">Prepaid</option>
-              <option value="postpaid">Postpaid</option>
-            </select>
+            <label>{t('Meter type')}</label>
+            <Segmented label="Meter type" value={billType} onChange={setBillType} options={[['prepaid', 'Prepaid', 'Token meter'], ['postpaid', 'Postpaid', 'Monthly bill']]} />
           </div>
         )}
 
@@ -642,7 +646,12 @@ export default function Buy() {
             <label>{t('Data plan')}</label>
             <PlanGrid variations={variations} value={variationCode} onChange={setVariationCode} priceOf={(base) => ({ base: Number(base), total: priceFor(base, config.backendService, pricing).total })} />
           </div>
-        ) : config.needsVariation ? (
+        ) : config.needsVariation && providerId ? (
+          <div className="field">
+            <label>{t(slug === 'internet' ? 'Data plan' : slug === 'cable' ? 'Package' : 'Exam type')}</label>
+            <PackageList kind={slug} variations={variations} value={variationCode} onChange={setVariationCode} priceOf={(base) => ({ base: Number(base), total: priceFor(base, config.backendService, pricing).total })} />
+          </div>
+        ) : config.needsVariation && false ? (
           <div className="field">
             <label htmlFor="variation">{t(slug === 'data' || slug === 'internet' ? 'Data plan' : slug === 'cable' ? 'Package' : 'Exam type')}</label>
             <select id="variation" value={variationCode} onChange={(e) => setVariationCode(e.target.value)} required>
@@ -659,7 +668,10 @@ export default function Buy() {
             {slug === 'airtime' && (
               <AmountGrid amounts={[100, 200, 500, 1000, 2000, 5000]} value={customAmount} onPick={setCustomAmount} priceOf={(base) => ({ base, total: priceFor(base, config.backendService, pricing).total })} />
             )}
-            <label htmlFor="amount">{t(slug === 'airtime' ? 'Or enter an amount (₦)' : 'Amount (₦)')}</label>
+            {(slug === 'electricity' || slug === 'betting') && (
+              <QuickAmounts amounts={slug === 'electricity' ? [1000, 2000, 3000, 5000, 10000, 20000] : [500, 1000, 2000, 5000, 10000, 20000]} value={customAmount} onPick={setCustomAmount} priceOf={(base) => ({ base, total: priceFor(base, config.backendService, pricing).total })} />
+            )}
+            <label htmlFor="amount">{t(['airtime', 'electricity', 'betting'].includes(slug) ? 'Or enter an amount (₦)' : 'Amount (₦)')}</label>
             <input id="amount" type="number" min="50" value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} required />
           </div>
         )}

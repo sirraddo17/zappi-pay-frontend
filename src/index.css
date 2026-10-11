@@ -851,3 +851,28 @@ html[data-lite] *::after {
 .plan-picked-name { font-size: 11px; color: var(--slate-400, #94a3b8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .plan-picked-go { flex: 0 0 auto; background: linear-gradient(135deg, #0D9488, #0B5F66); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 800; cursor: pointer; white-space: nowrap; }
 @media (max-width: 340px) { .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Bill service pickers (components/BillPickers.jsx) */
+.prov-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.prov-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px 10px; min-width: 0; border-radius: 14px; border: 1.5px solid var(--slate-700, #1E4650); background: var(--slate-800, #12313A); color: inherit; cursor: pointer; transition: transform .12s, border-color .15s, box-shadow .15s; }
+.prov-card:active { transform: scale(.97); }
+.prov-card.on { border-color: var(--purple, #2DD4BF); box-shadow: 0 0 0 1px var(--purple, #2DD4BF) inset, 0 6px 16px rgba(13,148,136,.25); }
+.prov-badge { min-width: 44px; height: 44px; padding: 0 6px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 12px; letter-spacing: .2px; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
+.prov-name { font-size: 12px; font-weight: 600; text-align: center; line-height: 1.25; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.prov-card .plan-check { top: 6px; bottom: auto; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--slate-900, #0B1F24); border: 1px solid var(--slate-700, #1E4650); }
+.seg-btn { border: none; background: none; color: var(--slate-300, #C9DEDD); padding: 9px 6px; border-radius: 9px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.seg-btn small { font-weight: 500; font-size: 11px; opacity: .8; }
+.seg-btn.on { background: linear-gradient(135deg, var(--orange, #0D9488), var(--brand-2, #0B5F66)); color: #fff; box-shadow: 0 3px 10px rgba(13,148,136,.3); }
+.pkg-list { display: flex; flex-direction: column; gap: 8px; }
+.pkg-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--slate-700, #1E4650); background: var(--slate-800, #12313A); color: inherit; cursor: pointer; text-align: left; transition: border-color .15s, box-shadow .15s; }
+.pkg-card.on { border-color: var(--purple, #2DD4BF); box-shadow: 0 0 0 1px var(--purple, #2DD4BF) inset, 0 6px 16px rgba(13,148,136,.22); background: rgba(13,148,136,.12); }
+.pkg-radio { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--slate-400, #8FB3B6); position: relative; }
+.pkg-radio.on { border-color: var(--purple, #2DD4BF); }
+.pkg-radio.on::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--purple, #2DD4BF); }
+.pkg-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkg-name { font-weight: 700; font-size: 15px; line-height: 1.25; }
+.pkg-sub { font-size: 12px; color: var(--slate-400, #8FB3B6); }
+.pkg-price { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; font-weight: 800; color: var(--purple, #2DD4BF); font-size: 15px; white-space: nowrap; }
+.pkg-price s { font-size: 11px; font-weight: 400; color: var(--slate-500, #64748b); }
+.pkg-price small { font-size: 10px; font-weight: 500; color: var(--slate-400, #8FB3B6); }
