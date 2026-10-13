@@ -58,7 +58,7 @@ export default function Bills() {
       {!cat && (
         !cats ? <div style={{ margin: '0 16px' }}><SkeletonRows rows={3} /></div> : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10, margin: '0 16px 16px' }}>
-            {cats.map((c) => <button key={c.code} type="button" className="veh-tile" onClick={() => pickCat(c)}><span aria-hidden>{iconFor(c)}</span><span style={{ minWidth: 0 }}><b>{c.name}</b><small style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: 11 }}>Tap to choose</small></span></button>)}
+            {cats.map((c) => <button key={c.code} type="button" className="veh-tile" onClick={() => pickCat(c)}><span aria-hidden>{iconFor(c)}</span><span style={{ minWidth: 0 }}><b>{c.name}</b></span></button>)}
           </div>
         )
       )}

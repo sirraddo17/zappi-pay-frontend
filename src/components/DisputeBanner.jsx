@@ -15,7 +15,6 @@ export default function DisputeBanner() {
       <div style={{ fontSize: 13, color: 'var(--slate-300)', marginTop: 4 }}>
         Someone says ₦{Number(x.amount).toLocaleString()} they sent you was a mistake{x.held > 0 ? ` — ₦${Number(x.held).toLocaleString()} is on hold` : ''}. Please answer by {new Date(x.holdUntil).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}.
       </div>
-      <span style={{ color: 'var(--gold)', fontWeight: 700, fontSize: 13 }}>Answer now ›</span>
     </Link>
   );
 }

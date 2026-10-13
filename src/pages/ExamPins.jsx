@@ -121,7 +121,6 @@ function Buy() {
               <Link key={o.id} to={`/exam-pins/${o.id}`} className="hist-row">
                 <span className="hist-ico" style={{ background: '#15803d', color: '#fff' }}>WAEC</span>
                 <span className="hist-main"><b>{o.quantity || 1} × result checker</b><small>{new Date(o.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })} · {naira(o.amount)}</small></span>
-                <span className="pill ok">Print ›</span>
               </Link>
             ))}
           </div>

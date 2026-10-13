@@ -38,7 +38,7 @@ function List() {
       {d?.waiting?.length > 0 && (
         <div className="card" style={{ border: '1px solid var(--gold)' }}>
           <b>⚠️ Someone says they sent you money by mistake</b>
-          {d.waiting.map((w) => <Link key={w.id} to={`/disputes/${w.id}`} className="hist-row" style={{ padding: '10px 0' }}><span className="hist-main"><b>{naira(w.amount)}</b><small>{w.held > 0 ? `${naira(w.held)} on hold` : 'Nothing on hold'} · answer by {new Date(w.holdUntil).toLocaleDateString('en-NG')}</small></span><span className="pill wait">Answer ›</span></Link>)}
+          {d.waiting.map((w) => <Link key={w.id} to={`/disputes/${w.id}`} className="hist-row" style={{ padding: '10px 0' }}><span className="hist-main"><b>{naira(w.amount)}</b><small>{w.held > 0 ? `${naira(w.held)} on hold` : 'Nothing on hold'} · answer by {new Date(w.holdUntil).toLocaleDateString('en-NG')}</small></span></Link>)}
         </div>
       )}
       <div className="section-label">My reports and requests</div>

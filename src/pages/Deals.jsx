@@ -106,7 +106,7 @@ export default function Deals() {
                     <span className="prov-badge" style={{ background: st?.bg || 'var(--slate-700)', color: st?.fg || '#fff', minWidth: 34, height: 34, borderRadius: '50%', fontSize: 9 }}>{(st?.name || p.network).slice(0, 4)}</span>
                     <span><span className="vplan-gb">{size(p.mb).replace(/(GB|MB)$/, '')}<small>{/GB$/.test(size(p.mb)) ? 'GB' : 'MB'}</small></span><span className="vplan-valid">{days(p.days)}</span></span>
                   </div>
-                  <div className="vplan-price">{naira(p.price)}<s style={{ textDecoration: 'none', color: 'var(--purple)', fontWeight: 700 }}>Buy ›</s></div>
+                  <div className="vplan-price">{naira(p.price)}</div>
                 </div>
                 <div className="vplan-meta">{naira(p.perGb)} per GB{best && <> · <b>🏆 Best value</b></>}</div>
                 {bestPer > 0 && p.perGb > 0 && <div className="vplan-bar" aria-hidden><i style={{ width: `${Math.min(100, Math.max(8, Math.round((bestPer / p.perGb) * 100)))}%` }} /></div>}
