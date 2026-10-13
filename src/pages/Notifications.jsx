@@ -197,7 +197,6 @@ export default function Notifications() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ color: 'var(--slate-100)', fontSize: 14, fontWeight: 600 }}>{n.title}</div>
                 <div style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 2 }}>{n.message}</div>
-                {linkFor(n) && <div style={{ color: 'var(--gold)', fontSize: 12, fontWeight: 700, marginTop: 4 }}>{/\/disputes/.test(linkFor(n)) ? 'Open the request ›' : 'Open ›'}</div>}
                 <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>{fmtDate(n.createdAt)}</div>
               </div>
             </div>
