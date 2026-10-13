@@ -7,7 +7,7 @@ import BottomNav from '../../components/BottomNav';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { naira } from '../../components/circles/shared';
 import PayoutAccount, { goToCheckout } from '../../components/PayoutAccount';
-import { SvcHero } from '../../components/ServiceKit';
+import { SvcHero, NoReverseNote } from '../../components/ServiceKit';
 
 const OFTEN = { WEEKLY: 'weekly', MONTHLY: 'monthly', YEARLY: 'yearly' };
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -136,7 +136,7 @@ export function DuesDetail() {
           </div>
         </div>
       )}
-      <PinConfirm open={Boolean(pin)} summary={pin?.type === 'pay' ? `Pay ${naira(g.amount)} dues to “${g.name}” for ${pin.label}` : `${pin?.on ? 'Turn on' : 'Turn off'} auto-pay for “${g.name}”`}
+      <PinConfirm open={Boolean(pin)} notice={pin?.type === 'pay' ? <NoReverseNote /> : undefined} summary={pin?.type === 'pay' ? `Pay ${naira(g.amount)} dues to “${g.name}” for ${pin.label}` : `${pin?.on ? 'Turn on' : 'Turn off'} auto-pay for “${g.name}”`}
         onSubmit={async (auth) => { if (pin.type === 'pay') { const r = await payDues(id, { period: pin.period, ...auth }); if (goToCheckout(r)) return; setMsg('Paid ✓'); } else { await setDuesAutoPay(id, { on: pin.on, ...auth }); setMsg(pin.on ? 'Auto-pay is on ✓' : 'Auto-pay is off'); } setPin(null); load(); }}
         onError={(e) => setErr(e.message)} onClose={() => setPin(null)} />
       <BottomNav />

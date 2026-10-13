@@ -26,6 +26,36 @@ function payoutFor(amount, feePercent) {
   return Math.max(0, Math.floor(Number(amount || 0) * (1 - Number(feePercent || 0) / 100)));
 }
 
+
+// Step-by-step airtime transfer instructions for one network, with the
+// code filled in (their PIN stays with them — they type it themselves).
+function TransferHow({ net, amount }) {
+  const t = net?.transfer;
+  const [copied, setCopied] = useState(false);
+  if (!t) return null;
+  const amt = Number(amount) > 0 ? String(Math.round(Number(amount))) : 'AMOUNT';
+  const filled = t.code ? t.code.replace('{to}', net.receivingNumber).replace('{amount}', amt) : null;
+  // Dial button pre-types everything up to the PIN (only when the PIN comes last).
+  const pre = filled && filled.endsWith('*{pin}#') ? filled.replace('{pin}#', '') : null;
+  const shown = filled ? filled.replace('{pin}', 'PIN') : null;
+  return (
+    <div className="xfer-how">
+      <div className="xfer-h"><b>How to send on {net.label}</b><span>{t.name}</span></div>
+      {shown ? (
+        <>
+          <div className="xfer-code">{shown}</div>
+          <div className="xfer-btns">
+            {pre && Number(amount) > 0 && <a className="btn" href={`tel:${pre}`} style={{ textDecoration: 'none', textAlign: 'center' }}>📞 Dial now</a>}
+            <button type="button" className="btn btn-secondary" onClick={() => navigator.clipboard?.writeText(shown).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); })}>{copied ? 'Copied ✓' : 'Copy code'}</button>
+          </div>
+          <p>Replace <b>PIN</b> with your {net.label} transfer PIN{pre ? ' — “Dial now” types the rest for you, just add your PIN and #' : ''}. {t.menu}</p>
+        </>
+      ) : <p style={{ marginTop: 0 }}>{t.menu} Send to <b style={{ color: 'var(--gold)' }}>{net.receivingNumber}</b>.</p>}
+      <p className="xfer-small">First time? Your default transfer PIN is <b>{t.defaultPin}</b> — change it first: {t.changePin}. Limits: {t.limits}. Never share your PIN with anyone, including us.</p>
+    </div>
+  );
+}
+
 export default function AirtimeCash() {
   const { customer } = useAuth();
   const [searchParams] = useSearchParams();
@@ -131,9 +161,9 @@ export default function AirtimeCash() {
           </p>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: 1, margin: '0 0 8px' }}>{submitted.receivingNumber}</div>
           <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: 0 }}>
-            Use your network's Share &amp; Sell / airtime transfer option. Once we confirm it has arrived,{' '}
-            <strong>{naira(submitted.payoutAmount)}</strong> will be added to your wallet and you'll get a notification.
+            Once we confirm it has arrived, <strong>{naira(submitted.payoutAmount)}</strong> will be added to your wallet and you'll get a notification.
           </p>
+          {(() => { const n = config?.networks?.find((x) => x.key === submitted.network); return n ? <TransferHow net={{ ...n, receivingNumber: submitted.receivingNumber || n.receivingNumber }} amount={submitted.amount} /> : null; })()}
         </div>
       )}
 
@@ -161,6 +191,8 @@ export default function AirtimeCash() {
             <NetChips items={config.networks.map((n) => ({ key: n.key, net: n.key, label: n.label }))} value={network} onChange={setNetwork} />
           </Step>
 
+          {selectedNetwork?.transfer && <div style={{ margin: '-6px 0 14px' }}><TransferHow net={selectedNetwork} amount={amount} /></div>}
+
           <Step n={2} title="Phone number the airtime is on">
             <input id="senderPhone" type="tel" inputMode="numeric" maxLength={11} value={senderPhone} onChange={(e) => setSenderPhone(e.target.value)} placeholder="080…" required style={{ fontSize: 18, fontWeight: 700, letterSpacing: 0.5 }} />
           </Step>
@@ -184,7 +216,7 @@ export default function AirtimeCash() {
               total={naira(payout)}
             />
           )}
-          {selectedNetwork && Number(amount) > 0 && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '0 0 4px' }}>Next you’ll transfer the airtime to our {selectedNetwork.label} line: <b style={{ color: 'var(--gold)' }}>{selectedNetwork.receivingNumber}</b></p>}
+          {selectedNetwork && Number(amount) > 0 && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '0 0 4px' }}>After you submit, you’ll transfer the airtime to our {selectedNetwork.label} line: <b style={{ color: 'var(--gold)' }}>{selectedNetwork.receivingNumber}</b> — we’ll show you the exact code.</p>}
 
           <button className="btn" type="submit" disabled={submitting} style={{ marginTop: 10 }}>
             {submitting ? 'Submitting…' : Number(amount) > 0 ? `Submit · get ${naira(payout)}` : 'Submit request'}

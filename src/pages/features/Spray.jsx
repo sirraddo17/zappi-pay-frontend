@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { clearAfterLogin } from '../../lib/afterLogin';
 import { naira } from '../../components/circles/shared';
 import { qrDataUrl } from '../../lib/shareCard';
-import { SvcHero } from '../../components/ServiceKit';
+import { SvcHero, NoReverseNote } from '../../components/ServiceKit';
 
 function Qr({ link, size, style }) {
   const [src, setSrc] = useState('');
@@ -138,7 +138,7 @@ export function SprayEvent() {
         {d.top.length ? d.top.map((t, i) => <div key={t.name + i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '5px 0', borderTop: '1px solid var(--slate-800)' }}><span>{['🥇', '🥈', '🥉'][i] || `${i + 1}.`} {t.name}</span><b>{naira(t.amount)}</b></div>) : <p className="empty-state">Be the first to spray!</p>}
       </div>
       <Notes notes={notes} />
-      <PinConfirm open={pin} summary={`Spray budget ${naira(budget)} for “${d.event.title}”`} onSubmit={async (auth) => { const s = await startSpraySession(code, { budget: Number(budget), ...auth }); if (goToCheckout(s)) return; setSession(s); setPin(false); refreshCustomer?.(); }} onError={(e) => setErr(e.message)} onClose={() => setPin(false)} />
+      <PinConfirm open={pin} notice={<NoReverseNote />} summary={`Spray budget ${naira(budget)} for “${d.event.title}”`} onSubmit={async (auth) => { const s = await startSpraySession(code, { budget: Number(budget), ...auth }); if (goToCheckout(s)) return; setSession(s); setPin(false); refreshCustomer?.(); }} onError={(e) => setErr(e.message)} onClose={() => setPin(false)} />
       <BottomNav />
     </div>
   );

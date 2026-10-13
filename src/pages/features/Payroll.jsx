@@ -5,7 +5,7 @@ import { getPayroll, addPayrollStaff, updatePayrollStaff, runPayroll, getBankLis
 import PinConfirm from '../../components/PinConfirm';
 import BottomNav from '../../components/BottomNav';
 import { naira } from '../../components/circles/shared';
-import { SvcHero } from '../../components/ServiceKit';
+import { SvcHero, NoReverseNote } from '../../components/ServiceKit';
 
 export default function Payroll() {
   const [d, setD] = useState(null);
@@ -80,7 +80,7 @@ export default function Payroll() {
           {d.runs.length > 0 && <div className="card"><b>Past payrolls</b>{d.runs.map((r) => <details key={r.id} style={{ padding: '6px 0', borderTop: '1px solid var(--slate-800)', fontSize: 14 }}><summary style={{ cursor: 'pointer' }}>{r.label} · {naira(r.total)} · {r.paid} paid{r.failed ? `, ${r.failed} failed` : ''} <small style={{ color: 'var(--slate-400)' }}>{new Date(r.createdAt).toLocaleDateString('en-NG')}</small></summary>{(r.items || []).map((i, n) => <div key={n} style={{ fontSize: 13, color: i.ok ? 'var(--slate-400)' : 'var(--red-500)' }}>{i.ok ? '✅' : '❌'} {i.name} · {naira(i.amount)} · {i.to}</div>)}</details>)}</div>}
         </>
       )}
-      <PinConfirm open={pin} summary={`Pay ${d?.staff.length} staff a total of ${naira(d?.total || 0)}${d?.staff.some((s) => s.payTo === 'BANK') ? ' (plus bank fees)' : ''}`}
+      <PinConfirm open={pin} notice={<NoReverseNote bank={d?.staff.some((x) => x.payTo === 'BANK')} />} summary={`Pay ${d?.staff.length} staff a total of ${naira(d?.total || 0)}${d?.staff.some((s) => s.payTo === 'BANK') ? ' (plus bank fees)' : ''}`}
         onSubmit={async (auth) => { const r = await runPayroll({ label, ...auth }); setPin(false); setResult(r); setMsg(''); load(); }}
         onError={(e) => setErr(e.message)} onClose={() => setPin(false)} />
       <BottomNav />

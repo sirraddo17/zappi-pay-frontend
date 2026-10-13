@@ -9,6 +9,7 @@ import BankTransferForm from '../components/BankTransferForm';
 import QrScanner, { usernameFromQr } from '../components/QrScanner';
 import { useFeatures } from '../components/ServiceNotices';
 import MyQr from '../components/MyQr';
+import { NoReverseNote } from '../components/ServiceKit';
 
 export default function Transfer() {
   const { refreshCustomer } = useAuth();
@@ -218,6 +219,7 @@ export default function Transfer() {
       <PinConfirm
         open={confirmOpen}
         summary={recipient ? `Send ₦${Number(amount || 0).toLocaleString()} to ${recipient.name}` : ''}
+        notice={<NoReverseNote />}
         onSubmit={doSend}
         onError={(err) => setError(err.message || 'Could not complete transfer.')}
         onClose={() => setConfirmOpen(false)}

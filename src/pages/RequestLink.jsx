@@ -6,6 +6,7 @@ import PinConfirm from '../components/PinConfirm';
 import { goToCheckout } from '../components/PayoutAccount';
 import { setAfterLogin, clearAfterLogin } from '../lib/afterLogin';
 import { shareRequest } from './Requests';
+import { NoReverseNote } from '../components/ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const EMOJI = { REQUEST: '💸', SPLIT: '🍽️', POOL: '🎁' };
@@ -156,6 +157,7 @@ export default function RequestLink() {
       )}
 
       <PinConfirm
+        notice={<NoReverseNote />}
         open={confirm}
         summary={`Pay ${naira(payAmount)} to ${r.owner.name} · ${r.title}`}
         onSubmit={pay}

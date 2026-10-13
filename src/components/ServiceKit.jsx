@@ -101,3 +101,13 @@ export function Summary({ rows, total, totalLabel = 'You pay', note }) {
 export function Trust({ children }) {
   return <p className="svc-trust"><span aria-hidden>🔒</span> {children}</p>;
 }
+
+// Shown on every money-sending PIN sheet (to users or banks).
+export function NoReverseNote({ bank }) {
+  return (
+    <div className="noreverse" role="alert">
+      <b>⚠️ Check before you confirm</b>
+      <span>A successful transfer can’t be reversed. Make sure the {bank ? 'account name, bank and' : 'name and'} amount are correct — only send to people you know and trust.</span>
+    </div>
+  );
+}

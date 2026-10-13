@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { sendTransfer, sendBankTransfer } from '../api';
 import { useAuth } from '../context/AuthContext';
 import PinConfirm from './PinConfirm';
+import { NoReverseNote } from './ServiceKit';
 
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 
@@ -56,6 +57,7 @@ export default function ChatTransferCard({ draft, onClose }) {
         open={open}
         title="Confirm transfer"
         summary={`Send ${naira(draft.amount)} to ${draft.kind === 'BANK' ? `${draft.accountName} (${draft.bankName})` : draft.recipientName}${draft.fee ? ` · fee ${naira(draft.fee)}` : ''}`}
+        notice={<NoReverseNote bank={draft.kind === 'BANK'} />}
         onSubmit={send}
         onError={(err) => { setOpen(false); setState({ error: err.message || 'Transfer failed.' }); }}
         onClose={() => setOpen(false)}

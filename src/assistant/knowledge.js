@@ -302,7 +302,7 @@ export const TOPICS = [
     title: 'Airtime to Cash',
     keywords: ['airtime to cash', 'convert airtime', 'wrong number', 'mistake', 'mistakenly', 'sell airtime', 'swap airtime'],
     answer:
-      'Bought airtime by mistake? Use Airtime to Cash: submit the request, transfer the airtime to the number shown, and once we confirm it the value (minus a small fee) is added to your wallet.',
+      'Bought airtime by mistake? Use Airtime to Cash: pick the network and amount, submit, then transfer the airtime to our number using the code shown (e.g. MTN *321*number*amount*PIN#, Glo *131*number*amount*PIN#, Airtel dial *321#, T2 *223*PIN*amount*number#) — “Dial now” fills it in for you. Once we confirm it, the value (minus a small fee) is added to your wallet. Never share your transfer PIN.',
     actions: [{ label: 'Airtime to Cash', to: '/airtime-cash' }],
   },
   {

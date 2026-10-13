@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import PinConfirm from './PinConfirm';
 import ShowMore, { FIRST_COUNT } from './ShowMore';
 import { shareReceipt } from '../lib/receipt';
+import { NoReverseNote } from './ServiceKit';
 
 function money(n) {
   return `₦${Number(n || 0).toLocaleString()}`;
@@ -289,6 +290,7 @@ export default function BankTransferForm({ onDone }) {
       <PinConfirm
         open={confirmOpen}
         summary={account ? `Send ${money(amt)} to ${account.accountName} (${bank?.name}). Total ${money(total)}.` : ''}
+        notice={<NoReverseNote bank />}
         onSubmit={doSend}
         onError={(err) => setError(err.message || 'Could not send the transfer.')}
         onClose={() => setConfirmOpen(false)}

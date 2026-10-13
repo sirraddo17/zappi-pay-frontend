@@ -1017,3 +1017,15 @@ html[data-lite] *::after {
 /* Section titles inside cards on service pages */
 .app-shell .card > b:first-child, .app-shell .card > strong:first-child { display: block; font-size: 15px; margin-bottom: 8px; }
 .svc-hero + .card, .svc-hero + p + .card { margin-top: 8px; }
+.noreverse { display: flex; flex-direction: column; gap: 3px; background: rgba(245,184,46,.1); border: 1px solid rgba(245,184,46,.45); border-radius: 12px; padding: 9px 11px; font-size: 12.5px; line-height: 1.4; color: var(--slate-200, #DCEBEC); }
+.noreverse b { color: var(--gold, #F5B82E); font-size: 13px; }
+.xfer-how { background: var(--slate-900, #0B1F24); border: 1px solid var(--slate-700, #1E4650); border-radius: 14px; padding: 12px; margin-top: 10px; font-size: 12.5px; color: var(--slate-300, #B9D3D5); }
+.xfer-how p { margin: 8px 0 0; line-height: 1.45; }
+.xfer-h { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.xfer-h b { font-size: 13.5px; color: var(--slate-100, #EEF7F7); }
+.xfer-h span { font-size: 11px; color: var(--slate-400, #8FB3B6); }
+.xfer-code { margin-top: 8px; font-family: ui-monospace, Menlo, monospace; font-size: 15px; font-weight: 800; letter-spacing: .5px; color: var(--gold, #F5B82E); background: rgba(245,184,46,.08); border: 1px dashed rgba(245,184,46,.5); border-radius: 10px; padding: 10px; text-align: center; word-break: break-all; }
+.xfer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.xfer-btns .btn { padding: 9px 0; font-size: 13px; margin: 0; }
+.xfer-btns .btn:only-child { grid-column: span 2; }
+.xfer-small { font-size: 11px; color: var(--slate-400, #8FB3B6); }
