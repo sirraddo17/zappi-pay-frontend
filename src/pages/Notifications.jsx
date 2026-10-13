@@ -45,6 +45,38 @@ function RenewalReminderToggle() {
   );
 }
 
+// Same rules as the server (lib/notify.js), for notifications saved before links existed.
+const LINK_RULES_UI = [
+  [/mistake|on hold|hold released|hold ended|recall|money returned|asked them to return|review finished/i, '/disputes'],
+  [/ajo circle/i, '/circles'],
+  [/dues/i, '/dues'],
+  [/safebuy/i, '/safebuy'],
+  [/shared light|light token/i, '/shared-light'],
+  [/spray/i, '/spray'],
+  [/ticket sale|your tickets/i, '/tickets'],
+  [/family|allowance/i, '/family'],
+  [/airtime to cash/i, '/airtime-cash'],
+  [/recharge cards/i, '/print-cards'],
+  [/bill pa|bill payment/i, '/bills'],
+  [/payroll|salary/i, '/payroll'],
+  [/sender name/i, '/sms'],
+  [/streak|daily reward|quiz/i, '/rewards'],
+  [/referral|milestone|welcome bonus|contest/i, '/refer'],
+  [/shop sale|shop report/i, '/profit-book'],
+  [/agent/i, '/profile'],
+  [/challenge/i, '/'],
+  [/support|request escalated|request update|request approved/i, '/profile'],
+  [/pin|password|login|security|devices|logged out|contact details|email changed|account frozen|account reactivated/i, '/security'],
+  [/subscription expiring|data plan ending|renewal|scheduled top-up|top up before/i, '/saved'],
+  [/time for light/i, '/buy/electricity'],
+  [/wallet funded|funding request|wallet credited|wallet debited|points redeemed|coupon|savings|cashback/i, '/wallet'],
+  [/money received|money sent|payment made|bank transfer|transfer under review|transfer update|purchase|bulk purchase|delivery promise|partial refund|issue reported|on zappi pay$/i, '/orders'],
+];
+function notifLink(title) {
+  const hit = LINK_RULES_UI.find(([re]) => re.test(title));
+  return hit ? hit[1] : null;
+}
+
 export default function Notifications() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState(null);
@@ -66,8 +98,8 @@ export default function Notifications() {
   useEffect(load, []);
   useAutoRefresh(load, false);
 
-  // Older wrong-transfer notifications were saved without a link.
-  const linkFor = (n) => n.link || (/mistake|on hold|hold released|hold ended|recall|money returned|returned 🎉|asked them to return|say the money is theirs|review finished/i.test(`${n.title} ${n.message}`) ? '/disputes' : null);
+  // Older notifications were saved without a link — work it out from the title.
+  const linkFor = (n) => n.link || notifLink(`${n.title}`);
   async function handleOpen(n) {
     const to = linkFor(n);
     if (to) navigate(to);
