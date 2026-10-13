@@ -206,6 +206,8 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {customer && <DisputeBanner />}
+
       <div className="service-grid four">
         {services.map((s) => {
           const Icon = s.Icon;
@@ -247,7 +249,6 @@ export default function Dashboard() {
       )}
 
       <ServiceNotices generalOnly />
-      {customer && <DisputeBanner />}
       <RenewalsCard />
       <DailyRewardsHome />
 

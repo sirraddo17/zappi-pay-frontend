@@ -1,7 +1,7 @@
 import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { useShowMore } from '../components/ShowMore';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getNotifications, markNotificationRead, markAllNotificationsRead, getReminders, setRemindersOff } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { BellIcon } from '../components/Icons';
@@ -46,6 +46,7 @@ function RenewalReminderToggle() {
 }
 
 export default function Notifications() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState(null);
   const [tab, setTab] = useState(null);
   const shown = notifications ? notifications.filter((n) => (n.category || 'UPDATE') === (tab || 'TRANSACTION')) : null;
@@ -65,7 +66,11 @@ export default function Notifications() {
   useEffect(load, []);
   useAutoRefresh(load, false);
 
+  // Older wrong-transfer notifications were saved without a link.
+  const linkFor = (n) => n.link || (/mistake|on hold|hold released|hold ended|recall|money returned|returned 🎉|asked them to return|say the money is theirs|review finished/i.test(`${n.title} ${n.message}`) ? '/disputes' : null);
   async function handleOpen(n) {
+    const to = linkFor(n);
+    if (to) navigate(to);
     if (n.read) return;
     setNotifications((list) => list.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
     try {
@@ -149,7 +154,7 @@ export default function Notifications() {
                 gap: 12,
                 padding: '14px 16px',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
-                cursor: n.read ? 'default' : 'pointer',
+                cursor: n.read && !linkFor(n) ? 'default' : 'pointer',
                 background: n.read ? 'transparent' : 'rgba(13, 148, 136,0.08)',
               }}
             >
@@ -160,6 +165,7 @@ export default function Notifications() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ color: 'var(--slate-100)', fontSize: 14, fontWeight: 600 }}>{n.title}</div>
                 <div style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 2 }}>{n.message}</div>
+                {linkFor(n) && <div style={{ color: 'var(--gold)', fontSize: 12, fontWeight: 700, marginTop: 4 }}>{/\/disputes/.test(linkFor(n)) ? 'Open the request ›' : 'Open ›'}</div>}
                 <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>{fmtDate(n.createdAt)}</div>
               </div>
             </div>
