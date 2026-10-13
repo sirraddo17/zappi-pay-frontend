@@ -87,6 +87,8 @@ const Deals = lazy(() => import('./pages/Deals'));
 const Shop = lazy(() => import('./pages/Shop'));
 const ProfitBook = lazy(() => import('./pages/ProfitBook'));
 const Family = lazy(() => import('./pages/Family'));
+const Disputes = lazy(() => import('./pages/Disputes'));
+const AdminDisputes = lazy(() => import('./pages/admin/AdminDisputes'));
 const DeleteAccountInfo = lazy(() => import('./pages/DeleteAccountInfo'));
 const Transfer = lazy(() => import('./pages/Transfer'));
 const PayLink = lazy(() => import('./pages/PayLink'));
@@ -216,6 +218,8 @@ export default function App() {
           <Route path="/shop/:username" element={<Shop />} />
           <Route path="/profit-book" element={<RequireCustomer><ProfitBook /></RequireCustomer>} />
           <Route path="/family" element={<RequireCustomer><Family /></RequireCustomer>} />
+          <Route path="/disputes" element={<RequireCustomer><Disputes /></RequireCustomer>} />
+          <Route path="/disputes/:id" element={<RequireCustomer><Disputes /></RequireCustomer>} />
           <Route path="/deals" element={<RequireCustomer><Deals /></RequireCustomer>} />
           <Route path="/more" element={<RequireCustomer><More /></RequireCustomer>} />
           <Route path="/print-cards" element={<RequireCustomer><PrintCards /></RequireCustomer>} />
@@ -244,6 +248,7 @@ export default function App() {
           <Route path="/admin/escalations" element={<RequireAdmin><AdminEscalations /></RequireAdmin>} />
           <Route path="/admin/staff" element={<RequireAdmin><AdminStaff /></RequireAdmin>} />
           <Route path="/admin/broadcasts" element={<RequireAdmin><AdminBroadcasts /></RequireAdmin>} />
+          <Route path="/admin/disputes" element={<RequireAdmin><AdminDisputes /></RequireAdmin>} />
           <Route path="/admin/airtime-cash" element={<RequireAdmin><AdminAirtimeCash /></RequireAdmin>} />
           <Route path="/admin/bank-transfers" element={<RequireAdmin><AdminBankTransfers /></RequireAdmin>} />
           <Route path="/admin/promos" element={<RequireAdmin><AdminPromos /></RequireAdmin>} />

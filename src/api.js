@@ -360,6 +360,18 @@ export const reviewSmsSender = (id, d) => adminRequest(`/api/admin/sms/senders/$
 export const adminStopTicketEvent = (id) => adminRequest(`/api/admin/tickets/events/${encodeURIComponent(id)}/stop`, { method: 'POST' });
 export const resolveBill = (ref, outcome) => adminRequest(`/api/admin/bills/${encodeURIComponent(ref)}/resolve`, { method: 'POST', body: JSON.stringify({ outcome }) });
 
+// --- Wrong transfers ---
+export const getDisputes = () => request('/api/disputes');
+export const getDisputeSends = () => request('/api/disputes/sends');
+export const getDispute = (id) => request(`/api/disputes/${encodeURIComponent(id)}`);
+export const reportDispute = (data) => request('/api/disputes', { method: 'POST', body: JSON.stringify(data) });
+export const returnDispute = (id, auth) => request(`/api/disputes/${encodeURIComponent(id)}/return`, { method: 'POST', body: JSON.stringify(auth || {}) });
+export const claimDispute = (id, reply) => request(`/api/disputes/${encodeURIComponent(id)}/mine`, { method: 'POST', body: JSON.stringify({ reply }) });
+export const cancelDispute = (id) => request(`/api/disputes/${encodeURIComponent(id)}/cancel`, { method: 'POST' });
+export const getAdminDisputes = (status) => adminRequest(`/api/admin/disputes${status ? `?status=${status}` : ''}`);
+export const resolveDispute = (id, data) => adminRequest(`/api/admin/disputes/${encodeURIComponent(id)}/resolve`, { method: 'POST', body: JSON.stringify(data) });
+export const updateBankDispute = (id, data) => adminRequest(`/api/admin/disputes/${encodeURIComponent(id)}/bank`, { method: 'POST', body: JSON.stringify(data) });
+
 // --- Ajo Circle ---
 export const getCircles = () => request('/api/circles');
 export const createCircle = (data) => request('/api/circles', { method: 'POST', body: JSON.stringify(data) });

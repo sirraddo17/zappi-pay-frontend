@@ -136,7 +136,7 @@ export default function Transfer() {
       </div>}
 
       {shown === 'user' && error && <p className="error-text" style={{ margin: '0 16px 12px' }}>{error}</p>}
-      {shown === 'user' && success && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{success}</p>}
+      {shown === 'user' && success && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '0 16px 12px' }}>{success} <Link to="/disputes/new" style={{ color: 'var(--gold)', fontSize: 12, marginLeft: 6 }}>Sent to the wrong person?</Link></p>}
 
       {shown === 'user' ? (
         <div className="card" style={{ margin: '0 16px 90px' }}>

@@ -23,6 +23,7 @@ const ITEMS = [
   { group: 'pay', to: '/buy/betting', label: 'Bet Funding', note: 'Fund your betting wallet', emoji: '🏆', bg: '#a38a0a' },
   { group: 'pay', to: '/international', label: 'International airtime', note: 'Top up phones abroad, pay in naira', emoji: '🌍', bg: '#0f4c8c' },
   { group: 'pay', to: '/insurance', label: 'Car insurance', note: 'Third-party motor insurance in minutes', emoji: '🚗', bg: '#8c3b0f' },
+  { group: 'pay', to: '/disputes', label: 'Wrong transfer', note: 'Sent money to the wrong person? Report it here', emoji: '↩️', bg: '#b45309', needsSend: true },
   { group: 'pay', to: '/airtime-cash', label: 'Airtime to Cash', note: 'Turn extra airtime into wallet money', Icon: FundIcon, bg: '#0E7490' },
   { group: 'biz', to: '/exam-pins', label: 'Exam PINs (bulk)', note: 'Buy & print many WAEC result checkers at once', emoji: '🎓', bg: '#0b6b3a' },
   { group: 'biz', to: '/print-cards', label: 'Print Cards', note: 'Buy recharge card PINs to print and sell', Icon: PrinterIcon, bg: '#0f6d8c' },
@@ -47,7 +48,7 @@ export default function More() {
   const CORE = ['airtime', 'data', 'electricity', 'cable', 'education', 'transfer', 'internet', 'betting'].map((slug) => ({ slug }));
   const home = homeServices(CORE, features, appInfo);
   const onHomeCore = new Set(home.tiles.filter((t) => !t.to).map((t) => t.slug));
-  const items = ITEMS.filter((s) => !home.onHome.includes(s.to) && (s.to !== '/international' || appInfo?.intlAirtime) && (s.to !== '/buy/betting' || (features.betFunding && !onHomeCore.has('betting'))) && (!s.feature || features[s.feature]));
+  const items = ITEMS.filter((s) => !home.onHome.includes(s.to) && (s.to !== '/international' || appInfo?.intlAirtime) && (s.to !== '/buy/betting' || (features.betFunding && !onHomeCore.has('betting'))) && (!s.feature || features[s.feature]) && (!s.needsSend || features.sendMoney || appInfo?.bankTransfer));
   const [q, setQ] = useState('');
   const s = q.trim().toLowerCase();
   const found = s ? items.filter((x) => `${x.label} ${x.note}`.toLowerCase().includes(s)) : items;

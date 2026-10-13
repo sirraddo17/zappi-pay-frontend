@@ -9,6 +9,7 @@ import useAutoRefresh from '../lib/useAutoRefresh';
 import ContestCard from '../components/ContestCard';
 import ChallengesCard from '../components/ChallengesCard';
 import RenewalsCard from '../components/RenewalsCard';
+import DisputeBanner from '../components/DisputeBanner';
 import GettingStarted, { hiddenBefore as gsHidden } from '../components/GettingStarted';
 import { LiteSuggestion } from '../components/LiteToggle';
 import { useLite } from '../lib/lite';
@@ -59,6 +60,7 @@ function txLabel(t) {
   if (t.type === 'LOYALTY') return t.note || 'Points redeemed';
   if (t.type === 'CONTEST_PRIZE') return t.note || 'Contest prize';
   if (t.type === 'COUPON') return t.note || 'Coupon';
+  if (t.type && t.type.startsWith('DISPUTE_')) return t.note || 'Wrong transfer';
   if (t.type === 'TRANSFER_IN') return t.note || 'Money received';
   if (t.type === 'TRANSFER_OUT') return t.note || 'Money sent';
   if (t.type === 'SAVINGS_IN') return 'Moved to savings';
@@ -245,6 +247,7 @@ export default function Dashboard() {
       )}
 
       <ServiceNotices generalOnly />
+      {customer && <DisputeBanner />}
       <RenewalsCard />
       <DailyRewardsHome />
 
@@ -359,7 +362,7 @@ export default function Dashboard() {
           <div className="empty-hero"><div style={{ fontSize: 34 }}>🧾</div><b>No transactions yet</b><small>Fund your wallet and make your first purchase — it shows up here.</small></div>
         ) : (
           transactions.map((t) => {
-            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD', 'DELIVERY_BONUS', 'SHOP_COMMISSION'].includes(t.type);
+            const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD', 'DELIVERY_BONUS', 'SHOP_COMMISSION', 'DISPUTE_RELEASE', 'DISPUTE_RETURN_IN'].includes(t.type);
             return (
               <div className="tx-row" key={t.id}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>

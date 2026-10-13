@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { getBankTransferConfig, getBanks, lookupBankAccount, sendBankTransfer, getBankTransfers } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
@@ -243,7 +244,7 @@ export default function BankTransferForm({ onDone }) {
       </form>
 
       <div className="card" style={{ margin: '0 16px 90px' }}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Recent bank transfers</h2>
+        <h2 style={{ marginTop: 0, fontSize: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>Recent bank transfers <Link to="/disputes/new" style={{ color: 'var(--gold)', fontSize: 12, fontWeight: 600 }}>Wrong account? Report it</Link></h2>
         {history === null ? (
           <p className="empty-state">Loading…</p>
         ) : history.length === 0 ? (

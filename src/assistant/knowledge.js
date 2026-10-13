@@ -192,6 +192,13 @@ export const TOPICS = [
     actions: [{ label: 'Bulk airtime & data', to: '/bulk' }],
   },
   {
+    id: 'wrong-transfer',
+    title: 'I sent money to the wrong person or account',
+    keywords: ['wrong transfer', 'wrong account', 'wrong person', 'sent by mistake', 'mistake transfer', 'reverse transfer', 'recall', 'sent to wrong', 'someone sent me money by mistake', 'money on hold'],
+    answer: 'More → “Wrong transfer” → “Report a wrong transfer”, pick the transfer and say what happened (within 30 days — the sooner the better). To a ZAPPI PAY user: we hold the amount still in their wallet for up to 14 days and ask them to return it; if they say it’s theirs, ZAPPI PAY reviews both sides. To a bank: we ask the receiving bank to recall it — the bank needs its customer’s consent, so it can take a few days. You can print a statement for the police if it isn’t returned. If someone says they sent YOU money by mistake, open the request and tap “Return” or “This money is mine”.',
+    actions: [{ label: 'Wrong transfer', to: '/disputes' }],
+  },
+  {
     id: 'data',
     title: 'Buy data',
     keywords: ['data', 'bundle', 'subscription data', 'gb', 'mb', 'internet data'],
