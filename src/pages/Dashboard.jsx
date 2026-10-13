@@ -352,7 +352,7 @@ export default function Dashboard() {
         </Link>
       )}
 
-      <div className="section-label">{t('Recent Transactions')}</div>
+      <div className="section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{t('Recent Transactions')}<Link to="/orders" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 12, textTransform: 'none', letterSpacing: 0 }}>See all ›</Link></div>
       {/* The bottom slider sits right under this list, so no big gap here;
           the slider keeps the space above the bottom menu instead. */}
       <div className="tx-list" style={{ marginBottom: 0 }}>
@@ -364,7 +364,7 @@ export default function Dashboard() {
           transactions.map((t) => {
             const isCredit = ['FUND', 'REFUND', 'TRANSFER_IN', 'AIRTIME_CASH', 'REFERRAL_BONUS', 'CASHBACK', 'LOYALTY', 'CONTEST_PRIZE', 'COUPON', 'SAVINGS_OUT', 'INTEREST', 'CHALLENGE_REWARD', 'DELIVERY_BONUS', 'SHOP_COMMISSION', 'DISPUTE_RELEASE', 'DISPUTE_RETURN_IN'].includes(t.type);
             return (
-              <div className="tx-row" key={t.id}>
+              <Link to={`/transactions/${t.id}`} className="tx-row" key={t.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div className="tx-icon" style={{ background: isCredit ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>
                   {isCredit ? <FundIcon size={16} color="var(--green-500)" /> : <BoltIcon size={16} color="var(--red-500)" />}
                 </div>
@@ -375,7 +375,7 @@ export default function Dashboard() {
                 <div className={`tx-amount ${isCredit ? 'credit' : 'debit'}`}>
                   {isCredit ? '+' : '−'}₦{Number(t.amount).toLocaleString()}
                 </div>
-              </div>
+              </Link>
             );
           })
         )}

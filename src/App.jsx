@@ -88,6 +88,7 @@ const Shop = lazy(() => import('./pages/Shop'));
 const ProfitBook = lazy(() => import('./pages/ProfitBook'));
 const Family = lazy(() => import('./pages/Family'));
 const Disputes = lazy(() => import('./pages/Disputes'));
+const TxReceipt = lazy(() => import('./pages/TxReceipt'));
 const AdminDisputes = lazy(() => import('./pages/admin/AdminDisputes'));
 const DeleteAccountInfo = lazy(() => import('./pages/DeleteAccountInfo'));
 const Transfer = lazy(() => import('./pages/Transfer'));
@@ -180,6 +181,7 @@ export default function App() {
           <Route path="/statement" element={<RequireCustomer><Statement /></RequireCustomer>} />
           <Route path="/bulk" element={<RequireCustomer><Bulk /></RequireCustomer>} />
           <Route path="/orders" element={<RequireCustomer><Orders /></RequireCustomer>} />
+          <Route path="/transactions/:id" element={<RequireCustomer><TxReceipt /></RequireCustomer>} />
           <Route path="/orders/:id" element={<RequireCustomer><OrderDetail /></RequireCustomer>} />
           <Route path="/notifications" element={<RequireCustomer><Notifications /></RequireCustomer>} />
           <Route path="/legal/:doc" element={<Legal />} />

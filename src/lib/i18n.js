@@ -17,6 +17,7 @@ const ROWS = [
   ['Home', 'Home', 'Ilé', 'Gida', 'Ụlọ'],
   ['Wallet', 'Wallet', 'Àpamọ́wọ́', 'Walat', 'Akpa ego'],
   ['Orders', 'Wetin I Buy', 'Àwọn Rírà', 'Sayayya', 'Ihe m zụrụ'],
+  ['History', 'History', 'Ìtàn ìdúnàádúrà', 'Tarihin ciniki', 'Akụkọ azụmahịa'],
   ['Profile', 'My Profile', 'Profaili', 'Bayanai', 'Profaịlụ'],
   ['Hi, {name} 👋', 'How far, {name} 👋', 'Ẹ n lẹ́, {name} 👋', 'Sannu, {name} 👋', 'Ndeewo, {name} 👋'],
   ['What would you like today?', 'Wetin you wan do today?', 'Kí ni ẹ fẹ́ ṣe lónìí?', 'Me kake so ka yi yau?', 'Gịnị ka ị chọrọ ime taa?'],

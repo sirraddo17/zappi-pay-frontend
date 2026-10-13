@@ -121,7 +121,7 @@ export const TOPICS = [
     id: 'insurance',
     title: 'Car insurance',
     keywords: ['insurance', 'third party', 'car papers', 'vehicle insurance', 'keke insurance', 'okada insurance'],
-    answer: 'More → Car insurance: third-party motor insurance (private car, commercial, keke, motorcycle). Enter the vehicle details, pay, and download the certificate from Orders right away.',
+    answer: 'More → Car insurance: third-party motor insurance (private car, commercial, keke, motorcycle). Enter the vehicle details, pay, and download the certificate from History right away.',
     actions: [{ label: 'Car insurance', to: '/insurance' }],
   },
   {
@@ -162,8 +162,8 @@ export const TOPICS = [
     title: 'Purchase failed / debited',
     keywords: ['failed', 'debited', 'deducted', 'not delivered', 'not received', 'didnt get', "didn't get", 'did not get', 'no value', 'money gone', 'charged'],
     answer:
-      'If a purchase fails, the amount is refunded to your wallet automatically — check Orders and your wallet balance. If an order shows SUCCESS but you did not get the value, open that receipt and tap "Report an Issue" so we can check it with the provider.',
-    actions: [{ label: 'View Orders', to: '/orders' }],
+      'If a purchase fails, the amount is refunded to your wallet automatically — check History and your wallet balance. If an order shows SUCCESS but you did not get the value, open that receipt and tap "Report an Issue" so we can check it with the provider.',
+    actions: [{ label: 'View History', to: '/orders' }],
     escalate: true,
   },
   {
@@ -173,7 +173,7 @@ export const TOPICS = [
     answer:
       'Failed purchases are refunded to your wallet instantly and show as "Refund" in your transactions. Successful purchases cannot be reversed by the network — but for airtime bought by mistake you can use Airtime to Cash.',
     actions: [
-      { label: 'View Orders', to: '/orders' },
+      { label: 'View History', to: '/orders' },
       { label: 'Airtime to Cash', to: '/airtime-cash' },
     ],
   },
@@ -210,7 +210,7 @@ export const TOPICS = [
     title: 'Electricity / token',
     keywords: ['electricity', 'light', 'nepa', 'token', 'meter', 'prepaid', 'postpaid', 'disco', 'ikedc', 'ekedc', 'aedc', 'phed'],
     answer:
-      'Tap Electricity, tap your disco’s tile (IBEDC, EKO, AEDC…), choose Prepaid or Postpaid, enter your meter number and Verify the name, tap a quick amount or type one, then pay. Your token is on the order receipt under Orders.',
+      'Tap Electricity, tap your disco’s tile (IBEDC, EKO, AEDC…), choose Prepaid or Postpaid, enter your meter number and Verify the name, tap a quick amount or type one, then pay. Your token is on the order receipt under History.',
     actions: [{ label: 'Pay Electricity', to: '/buy/electricity' }],
   },
   {
@@ -224,7 +224,7 @@ export const TOPICS = [
     id: 'education',
     title: 'Exam PINs',
     keywords: ['waec', 'neco', 'jamb', 'exam', 'result checker', 'education', 'pin'],
-    answer: 'Tap Education, choose the exam type and pay. Your PIN appears on the order receipt under Orders.',
+    answer: 'Tap Education, choose the exam type and pay. Your PIN appears on the order receipt under History.',
     actions: [{ label: 'Buy Exam PIN', to: '/buy/education' }],
   },
   {
@@ -323,8 +323,8 @@ export const TOPICS = [
     id: 'receipt',
     title: 'Receipts & tokens',
     keywords: ['receipt', 'download', 'print', 'share receipt', 'proof', 'history', 'orders'],
-    answer: 'Open Orders and tap any order to see its receipt. You can Download or Share it from there.',
-    actions: [{ label: 'View Orders', to: '/orders' }],
+    answer: 'Open History (bottom bar) — it lists every purchase and wallet transaction (funding, transfers, refunds, cashback). Tap any line to see its receipt, then Share or Download it again.',
+    actions: [{ label: 'View History', to: '/orders' }],
   },
   {
     id: 'password',

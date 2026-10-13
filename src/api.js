@@ -166,6 +166,7 @@ export const setMyUsername = (username) => request('/api/account/username', { me
 // --- Wallet ---
 export const getWalletBalance = () => request('/api/wallet/balance');
 export const getWalletTransactions = () => request('/api/wallet/transactions');
+export const getWalletTransaction = (id) => request(`/api/wallet/transactions/${encodeURIComponent(id)}`);
 export const submitFundRequest = (data) => request('/api/wallet/fund-request', { method: 'POST', body: JSON.stringify(data) });
 export const getBankAccount = () => request('/api/wallet/bank-account');
 export const createBankAccount = (data) => request('/api/wallet/bank-account', { method: 'POST', body: JSON.stringify(data) });

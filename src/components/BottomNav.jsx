@@ -5,7 +5,7 @@ import { HomeIcon, WalletIcon, ReceiptIcon, ProfileIcon } from './Icons';
 const TABS = [
   { to: '/', end: true, label: 'Home', Icon: HomeIcon },
   { to: '/wallet', label: 'Wallet', Icon: WalletIcon },
-  { to: '/orders', label: 'Orders', Icon: ReceiptIcon },
+  { to: '/orders', label: 'History', Icon: ReceiptIcon },
   { to: '/profile', label: 'Profile', Icon: ProfileIcon },
 ];
 
