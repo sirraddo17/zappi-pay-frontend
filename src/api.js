@@ -373,6 +373,9 @@ export const orderCircle = (id, data) => request(`/api/circles/${encodeURICompon
 export const startCircle = (id, auth) => request(`/api/circles/${encodeURIComponent(id)}/start`, { method: 'POST', body: JSON.stringify(auth || {}) });
 export const cancelCircle = (id) => request(`/api/circles/${encodeURIComponent(id)}/cancel`, { method: 'POST' });
 export const requestCircleRelease = (id, data) => request(`/api/circles/${encodeURIComponent(id)}/release`, { method: 'POST', body: JSON.stringify(data) });
+export const reportCircle = (id, message) => request(`/api/circles/${encodeURIComponent(id)}/report`, { method: 'POST', body: JSON.stringify({ message }) });
+export const getCircleReports = (status) => adminRequest(`/api/admin/circles/reports${status ? `?status=${status}` : ''}`);
+export const reviewCircleReport = (id, data) => adminRequest(`/api/admin/circles/reports/${encodeURIComponent(id)}`, { method: 'POST', body: JSON.stringify(data) });
 export const appealCircleBan = (data) => request('/api/circles/appeal', { method: 'POST', body: JSON.stringify(data) });
 export const getAdminCircles = () => adminRequest('/api/admin/circles');
 export const getAdminCircle = (id) => adminRequest(`/api/admin/circles/${encodeURIComponent(id)}`);

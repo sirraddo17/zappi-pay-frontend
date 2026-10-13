@@ -79,6 +79,7 @@ const INCOME = [
   ['sendToBankFees', 'Send-to-bank fees', 'Fee you charge per transfer'],
   ['bankFundingFees', 'Bank-funding fees', 'Fee you keep from automatic funding'],
   ['airtimeToCashFees', 'Airtime-to-Cash fees', 'Kept as airtime on your line'],
+  ['circleServiceFees', 'Ajo Circle service fees', 'Your fee on each Ajo payout'],
 ];
 const COSTS = [
   ['monnifyFundingFees', 'Monnify: bank funding', '1.5% (max ₦2,000) + VAT on each deposit'],

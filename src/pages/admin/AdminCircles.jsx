@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminFeatures, getAdminCircles, getAdminCircle, reviewCircleRelease, reviewCircleAppeal, unbanCircleMember, stopCircle, getSettings, updateSettings } from '../../api';
+import { getAdminFeatures, getAdminCircles, getAdminCircle, reviewCircleRelease, reviewCircleAppeal, unbanCircleMember, stopCircle, getSettings, updateSettings, getCircleReports, reviewCircleReport } from '../../api';
 import { useShowMore } from '../../components/ShowMore';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { naira, OFTEN, STATUS, fmtDay, RulesSummary } from '../../components/circles/shared';
@@ -27,11 +27,46 @@ function Switch() {
       </div>
       <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 8px' }}>Before turning it on, have a Nigerian lawyer review the member agreement and your terms (rotating savings, automatic debits, fees, spending limits on defaulters).</p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 13 }}>
-        {[['circleMaxAmount', 'Max contribution (₦)'], ['circleMaxMembers', 'Max members'], ['circleBanStrikes', 'Missed payments before block']].map(([k, l]) => (
+        {[['circleMaxAmount', 'Max contribution (₦)'], ['circleMaxMembers', 'Max members'], ['circleBanStrikes', 'Missed payments before block'], ['circleServiceFeePercent', 'Your service fee (% of pot, 0 = off)'], ['circleServiceFeeCap', 'Service fee cap (₦ per payout)']].map(([k, l]) => (
           <label key={k} style={{ display: 'grid', gap: 2 }}>{l}<input type="number" defaultValue={Number(s[k])} onBlur={(e) => Number(e.target.value) !== Number(s[k]) && save({ [k]: Number(e.target.value) }, 'Saved.')} style={{ width: 150 }} /></label>
         ))}
       </div>
+      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '8px 0 0' }}>Your service fee is taken from each payout, separate from the creator’s own fee (which the creator now keeps 100%). It’s locked into each circle when it’s created, so changes apply to new circles only. Suggested: 1% capped at ₦2,000 (0.5% as a launch offer).</p>
       {msg && <p style={{ fontSize: 13, color: 'var(--green-500)', margin: '6px 0 0' }}>{msg}</p>}
+    </div>
+  );
+}
+
+// "Asked to pay outside the app" reports + automatic flags.
+function Reports({ onView }) {
+  const [rows, setRows] = useState(null);
+  const [msg, setMsg] = useState('');
+  const load = () => getCircleReports('OPEN').then((d) => setRows(d.reports)).catch(() => setRows([]));
+  useEffect(() => { load(); }, []);
+  if (!rows?.length) return null;
+  async function review(r, uphold) {
+    const note = window.prompt(uphold ? `Uphold: ${r.creator} gets a strike (2 strikes = blocked from Ajo Circles). Note (optional):` : 'Dismiss — note (optional):');
+    if (note === null) return;
+    try { const out = await reviewCircleReport(r.id, { uphold, note }); setMsg(uphold ? `Upheld — ${r.creator} now has ${out.strikes} strike${out.strikes === 1 ? '' : 's'}${out.banned ? ' and is blocked' : ''}.` : 'Dismissed.'); load(); } catch (e) { setMsg(e.message); }
+  }
+  return (
+    <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--red-500)' }}>
+      <b>🚫 Off-app fee reports ({rows.length})</b>
+      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 6px' }}>Members who say the creator asked them to pay outside the app, and automatic flags (a member sent the creator money within 72 hours of their payout). Check the circle and the transfers before upholding.</p>
+      {msg && <p style={{ fontSize: 13, color: 'var(--green-500)' }}>{msg}</p>}
+      {rows.map((r) => (
+        <div key={r.id} style={{ padding: '8px 0', borderTop: '1px solid var(--slate-800)', fontSize: 13 }}>
+          <span className={`pill ${r.kind === 'AUTO' ? 'wait' : 'no'}`}>{r.kind === 'AUTO' ? 'Auto flag' : 'Member report'}</span>{' '}
+          “{r.circle}” · creator <b>{r.creator}</b>{r.creatorStrikes ? ` (${r.creatorStrikes} strike${r.creatorStrikes === 1 ? '' : 's'})` : ''} · from {r.reporter}
+          <div style={{ margin: '4px 0' }}>{r.message}</div>
+          <div style={{ fontSize: 11, color: 'var(--slate-400)' }}>{new Date(r.createdAt).toLocaleString('en-NG')}</div>
+          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+            <button type="button" className="btn" style={btn} onClick={() => review(r, true)}>Uphold</button>
+            <button type="button" className="btn btn-secondary" style={btn} onClick={() => review(r, false)}>Dismiss</button>
+            <button type="button" className="btn btn-secondary" style={btn} onClick={() => onView(r.circleId)}>View circle</button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -94,6 +129,8 @@ export default function AdminCircles() {
           {[['Running', d.totals.running], ['Gathering members', d.totals.forming], ['Held in pots', naira(d.totals.inPots)], ['ZAPPI PAY fees earned', naira(d.totals.appFees)]].map(([l, v]) => <div key={l} className="card stat-card" style={{ margin: 0 }}><div className="label">{l}</div><div className="value">{v}</div></div>)}
         </div>
       )}
+
+      <Reports onView={setOpen} />
 
       {d?.releases?.length > 0 && (
         <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--gold)' }}>

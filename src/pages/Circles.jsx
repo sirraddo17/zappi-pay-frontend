@@ -21,7 +21,8 @@ function CreateForm({ limits, onDone }) {
   const pot = amount * size;
   const fee = f.payoutFeeOn ? Number(f.payoutFee) || 0 : 0;
   const maxFee = Math.floor(pot * 0.05);
-  const appFee = Math.round(fee * limits.appShare) / 100;
+  const svcPct = Number(limits.serviceFeePct || 0);
+  const svcFee = Math.round(Math.min(pot * svcPct / 100, Number(limits.serviceFeeCap) > 0 ? Number(limits.serviceFeeCap) : Infinity) * 100) / 100;
   const input = { width: '100%', boxSizing: 'border-box' };
 
   async function review(e) {
@@ -66,7 +67,7 @@ function CreateForm({ limits, onDone }) {
         <div className="field"><label htmlFor="cS">Number of members</label><input id="cS" type="number" min="2" max={limits.maxMembers} value={f.size} onChange={set('size')} required style={input} /></div>
         <div className="field"><label htmlFor="cD">First payment day</label><input id="cD" type="date" min={tomorrow()} value={f.startDate} onChange={set('startDate')} required style={input} /></div>
       </div>
-      {pot > 0 && <p style={{ fontSize: 14, margin: '0 0 12px', background: 'rgba(13, 148, 136,0.1)', borderRadius: 10, padding: 10 }}>Each {PER[f.frequency]} one member receives <b>{naira(pot - fee)}</b>{fee > 0 ? ` (${naira(pot)} − ${naira(fee)} fee)` : ''}. The circle runs for {size} {PER[f.frequency]}s.</p>}
+      {pot > 0 && <p style={{ fontSize: 14, margin: '0 0 12px', background: 'rgba(13, 148, 136,0.1)', borderRadius: 10, padding: 10 }}>Each {PER[f.frequency]} one member receives <b>{naira(pot - fee - svcFee)}</b>{fee + svcFee > 0 ? ` (${naira(pot)}${svcFee > 0 ? ` − ${naira(svcFee)} ZAPPI PAY service fee` : ''}${fee > 0 ? ` − ${naira(fee)} your fee` : ''})` : ''}. The circle runs for {size} {PER[f.frequency]}s.</p>}
 
       <details style={{ marginBottom: 12 }}>
         <summary style={{ cursor: 'pointer', fontSize: 14, color: 'var(--purple)' }}>Fees and late rules (optional)</summary>
@@ -77,7 +78,7 @@ function CreateForm({ limits, onDone }) {
           <div className="field">
             <label htmlFor="cPF">Fee per payout (₦, max {naira(maxFee)})</label>
             <input id="cPF" type="number" min="0" max={maxFee} value={f.payoutFee} onChange={set('payoutFee')} style={input} />
-            {fee > 0 && <small style={{ color: 'var(--slate-400)' }}>You get {naira(fee - appFee)} ({100 - limits.appShare}%), ZAPPI PAY gets {naira(appFee)} ({limits.appShare}%) from each payout. Every member sees this before joining.</small>}
+            {fee > 0 && <small style={{ color: 'var(--slate-400)' }}>You keep all {naira(fee)} from each payout. Every member sees it before joining. Asking members for any other fee outside the app is not allowed and gets you blocked.</small>}
           </div>
         )}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

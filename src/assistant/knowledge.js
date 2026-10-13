@@ -106,8 +106,8 @@ export const TOPICS = [
   {
     id: 'ajo-circle',
     title: 'Ajo Circle (group contributions)',
-    keywords: ['ajo', 'esusu', 'adashe', 'isusu', 'thrift', 'contribution group', 'rotating savings', 'circle', 'packing number', 'my turn', 'payout delayed'],
-    answer: 'More → Ajo Circle: save with people you trust. Everyone pays the same amount every day, week or month — it’s taken from your wallet automatically — and each period one member receives the whole pot, in payout-number order. The pot is locked until everyone has paid; late payments get a late fee and a strike. Read the agreement before you join.',
+    keywords: ['ajo', 'esusu', 'adashe', 'isusu', 'thrift', 'contribution group', 'rotating savings', 'circle', 'packing number', 'my turn', 'payout delayed', 'creator asked me to pay', 'pay the creator', 'commission ajo'],
+    answer: 'More → Ajo Circle: save with people you trust. Everyone pays the same amount every day, week or month — it’s taken from your wallet automatically — and each period one member receives the whole pot, in payout-number order. The pot is locked until everyone has paid; late payments get a late fee and a strike. The only fees are the ones in the circle’s rules — if anyone, even the creator, asks you to pay extra outside the app, tap “Report it to ZAPPI PAY” on the circle page. Read the agreement before you join.',
     actions: [{ label: 'Ajo Circle', to: '/circles' }],
   },
   {

@@ -1,7 +1,7 @@
 import { SkeletonRows } from '../components/Skeleton';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getCircle, inviteToCircle, leaveCircle, orderCircle, startCircle, cancelCircle, requestCircleRelease } from '../api';
+import { getCircle, inviteToCircle, leaveCircle, orderCircle, startCircle, cancelCircle, requestCircleRelease, reportCircle } from '../api';
 import PinConfirm from '../components/PinConfirm';
 import BottomNav from '../components/BottomNav';
 import useAutoRefresh from '../lib/useAutoRefresh';
@@ -27,6 +27,8 @@ export default function CircleDetail() {
   const [relAgree, setRelAgree] = useState(false);
   const [showRel, setShowRel] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [reportText, setReportText] = useState('');
 
   const load = () => getCircle(id).then((x) => { setD(x); setErr(''); }).catch((e) => setErr(e.message));
   useEffect(() => { load(); }, [id]);
@@ -156,6 +158,21 @@ export default function CircleDetail() {
         <button type="button" onClick={() => setShowAgreement(!showAgreement)} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: '10px 0 0', fontSize: 14 }}>📜 {showAgreement ? 'Hide' : 'Read'} the agreement{d.me?.agreedAt ? ` (you accepted it on ${fmtDay(d.me.agreedAt)})` : ''}</button>
         {showAgreement && <div style={{ marginTop: 8 }}><Agreement terms={d.agreement} /></div>}
       </div>
+
+      {!d.isCreator && d.me && (
+        <div className="card" style={{ border: '1px solid rgba(245,184,46,.4)' }}>
+          <b>🚫 Asked to pay outside the app?</b>
+          <p style={{ fontSize: 13, margin: '0 0 8px', color: 'var(--slate-400)' }}>The only fees are the ones in the rules above. Nobody — not even the creator — may ask you for extra money, commission or “settlement” outside ZAPPI PAY, before or after your payout.</p>
+          {!showReport ? (
+            <button type="button" className="btn btn-secondary" onClick={() => setShowReport(true)}>Report it to ZAPPI PAY</button>
+          ) : (
+            <form onSubmit={(e) => { e.preventDefault(); act(() => reportCircle(id, reportText).then(() => { setShowReport(false); setReportText(''); }), 'Thank you — ZAPPI PAY will look into it. The creator isn’t told who reported.'); }}>
+              <textarea value={reportText} onChange={(e) => setReportText(e.target.value)} rows={3} maxLength={500} placeholder="What were you asked? e.g. “Send me ₦500 after your payout”" style={{ width: '100%', boxSizing: 'border-box' }} required />
+              <button type="submit" className="btn" style={{ marginTop: 8 }}>Send report</button>
+            </form>
+          )}
+        </div>
+      )}
 
       {d.rounds.length > 0 && (
         <div className="card">
