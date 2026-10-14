@@ -403,6 +403,7 @@ export const getFundingMethods = () => adminRequest('/api/admin/funding-methods'
 export const saveFundingMethods = (data) => adminRequest('/api/admin/funding-methods', { method: 'PUT', body: JSON.stringify(data) });
 export const getFestivals = () => adminRequest('/api/admin/festivals');
 export const vtpassSelfTest = () => adminRequest('/api/admin/vtpass/selftest');
+export const getVtpassCodes = () => adminRequest('/api/admin/vtpass-codes');
 export const getAdminOrders = (opts = {}) => adminRequest(`/api/admin/orders${opts.status ? `?status=${encodeURIComponent(opts.status)}` : ''}`);
 export const getAuditLog = () => adminRequest('/api/admin/audit-log');
 

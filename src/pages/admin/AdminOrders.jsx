@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminOrders, recheckAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
+import { getAdminOrders, getVtpassCodes, recheckAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { useShowMore } from '../../components/ShowMore';
@@ -40,6 +40,32 @@ const SERVICE_FILTERS = [
   { value: 'INTERNATIONAL', label: 'International airtime' },
   { value: 'INSURANCE', label: 'Car insurance' },
 ];
+
+const WHO = { customer: ['Customer', 'var(--slate-300)'], account: ['Your VTpass account', 'var(--red-500)'], provider: ['VTpass / biller', 'var(--gold)'], app: ['App request', 'var(--orange, #f97316)'], ok: ['Not a failure', 'var(--green-500)'] };
+
+// Admin → Orders: every VTpass code in plain words.
+function VtpassCodes() {
+  const [open, setOpen] = useState(false);
+  const [codes, setCodes] = useState(null);
+  const [q, setQ] = useState('');
+  useEffect(() => { if (open && !codes) getVtpassCodes().then((d) => setCodes(d.codes)).catch(() => setCodes([])); }, [open, codes]);
+  const rows = (codes || []).filter((c) => !q || `${c.code} ${c.text} ${c.meaning}`.toLowerCase().includes(q.toLowerCase()));
+  return (
+    <details className="card" style={{ margin: '0 0 12px', fontSize: 13 }} onToggle={(e) => setOpen(e.currentTarget.open)}>
+      <summary style={{ cursor: 'pointer', fontWeight: 600 }}>📖 What VTpass codes mean</summary>
+      <input type="search" placeholder="Search a code, e.g. 027" value={q} onChange={(e) => setQ(e.target.value)} style={{ margin: '10px 0' }} />
+      {!codes ? <p className="empty-state">Loading…</p> : rows.map((c) => (
+        <div key={c.code} style={{ padding: '8px 0', borderTop: '1px solid var(--slate-700)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+            <b><code>{c.code}</code> {c.text}</b>
+            <span style={{ fontSize: 11, color: WHO[c.who]?.[1] }}>{WHO[c.who]?.[0] || c.who}</span>
+          </div>
+          <div style={{ color: 'var(--slate-300)', marginTop: 2 }}>{c.meaning}{c.fix && <> <b>Fix:</b> {c.fix}</>}</div>
+        </div>
+      ))}
+    </details>
+  );
+}
 
 export default function AdminOrders() {
   const { isOwner } = useAdminAuth();
@@ -104,6 +130,7 @@ export default function AdminOrders() {
         <p>Every purchase across all customers — pick a status, then a service. The newest 5 show first; tap “Show more” for older ones.</p>
       </div>
 
+      <VtpassCodes />
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
       {message && <p style={{ color: 'var(--green-500)', margin: '0 0 12px' }}>{message}</p>}
       {pendingCount > 0 && (
@@ -159,7 +186,7 @@ export default function AdminOrders() {
                   <td>{fmtMoney(o.amount)}</td>
                   <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}><div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, textAlign: 'right', maxWidth: 230, marginLeft: 'auto' }}>
                     <span style={{ whiteSpace: 'nowrap' }}>{o.status}</span>
-                    {o.status === 'FAILED' && o.vtpassReason && <div style={{ fontSize: 11, color: 'var(--slate-400)', marginTop: 2 }}>VTpass: {o.vtpassReason}</div>}
+                    {o.status === 'FAILED' && o.vtpassReason && <div style={{ fontSize: 11, color: o.vtpassWho === 'account' ? 'var(--red-500)' : 'var(--slate-400)', marginTop: 2 }}>VTpass: {o.vtpassReason}</div>}
                     {o.status === 'PENDING' && o.held && <div style={{ fontSize: 11, color: 'var(--red-500)', marginTop: 2 }}>⚠ Held: VTpass gave PINs, then said failed. Not refunded — ask VTpass support first.</div>}
                     {o.status === 'PENDING' && !o.held && o.pinsGiven && <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>PINs/token already given</div>}
                     {o.status === 'SUCCESS' && (
