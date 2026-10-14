@@ -120,6 +120,7 @@ export default function AdminSettings() {
   const [btDaily, setBtDaily] = useState('200000');
   const [minFundingAmount, setMinFundingAmount] = useState('100');
   const [minPurchaseAmount, setMinPurchaseAmount] = useState('50');
+  const [lightMin, setLightMin] = useState('1000');
   const [bankFeePercent, setBankFeePercent] = useState('0');
   const [bankFeeCap, setBankFeeCap] = useState('0');
 
@@ -210,6 +211,7 @@ export default function AdminSettings() {
         setBtDaily(String(s.bankTransferDailyMax ?? 200000));
         setMinFundingAmount(String(s.minFundingAmount ?? 100));
         setMinPurchaseAmount(String(s.minPurchaseAmount ?? 50));
+        setLightMin(String(s.electricityMinAmount ?? 1000));
         setBankFeePercent(String(s.bankFundingFeePercent ?? 0));
         setBankFeeCap(String(s.bankFundingFeeCap ?? 0));
         setA2cEnabled(Boolean(s.airtimeToCashEnabled));
@@ -365,6 +367,7 @@ export default function AdminSettings() {
       {
         minFundingAmount: Number(minFundingAmount || 0),
         minPurchaseAmount: Number(minPurchaseAmount || 0),
+        electricityMinAmount: Number(lightMin || 0),
         bankFundingFeePercent: Number(bankFeePercent || 0),
         bankFundingFeeCap: Number(bankFeeCap || 0),
       },
@@ -814,6 +817,11 @@ export default function AdminSettings() {
           <div className="field">
             <label htmlFor="minPurchaseAmount">Minimum purchase amount (₦)</label>
             <input id="minPurchaseAmount" type="number" step="1" min="0" value={minPurchaseAmount} onChange={(e) => setMinPurchaseAmount(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="lightMin">Minimum electricity purchase (₦)</label>
+            <input id="lightMin" type="number" step="1" min="0" max="100000" value={lightMin} onChange={(e) => setLightMin(e.target.value)} />
+            <small style={{ color: 'var(--slate-400)' }}>Electricity companies reject very small tokens. Customers can’t pay less than this; if the meter check shows a higher minimum for that company, that one is used.</small>
           </div>
           <FundingAccountsPanel />
           <div className="field">

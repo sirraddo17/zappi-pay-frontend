@@ -140,6 +140,7 @@ export default function Buy() {
   const [verifiedName, setVerifiedName] = useState('');
   // Cable only: current subscription expiry from the smartcard check.
   const [verifiedDue, setVerifiedDue] = useState('');
+  const [discoMin, setDiscoMin] = useState(0);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -269,10 +270,12 @@ export default function Buy() {
     if (!canVerify || !providerId || !recipient) return;
     setVerifying(true);
     setVerifiedName('');
+    setDiscoMin(0);
     setError('');
     try {
       const data = await verifyBillersCode(providerId, recipient.trim(), isJamb ? variationCode : config.needsType ? billType : undefined);
       setVerifiedName(data.content?.Customer_Name || data.content?.customerName || 'Verified');
+      { const c = data.content || {}; const m = Number(c.Min_Purchase_Amount ?? c.Minimum_Amount ?? c.MinimumAmount ?? 0); setDiscoMin(Number.isFinite(m) && m > 0 ? m : 0); }
       const due = String(data.content?.Due_Date || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
       setVerifiedDue(due ? new Date(Number(due[1]), Number(due[2]) - 1, Number(due[3])).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
     } catch (err) {
@@ -350,6 +353,10 @@ export default function Buy() {
     }
   }
 
+  // Electricity: admin minimum, or the DisCo's own minimum from the meter check.
+  const lightMin = slug === 'electricity' ? Math.max(Number(pricing?.electricityMinAmount ?? 1000), discoMin) : 0;
+  const lightShort = slug === 'electricity' && Number(amount) > 0 && Number(amount) < lightMin;
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
@@ -369,6 +376,7 @@ export default function Buy() {
       setError('Please fill in every field.');
       return;
     }
+    if (lightShort) { setError(`The minimum electricity purchase is ${naira(lightMin)}.`); return; }
     if (mustVerify && !verifiedName) {
       setError(verifying ? 'Checking the number — one moment.' : `Tap “Verify” first — the ${String(config.recipientLabel || 'number').toLowerCase()} must show the customer’s name before you can pay.`);
       return;
@@ -391,6 +399,7 @@ export default function Buy() {
     setError('');
     const phoneToSend = isPhoneService ? recipient : (customer?.phone || phone);
     if (!providerId || (!recipient.trim() && slug !== 'education') || !amount) { setError('Please fill in every field.'); return; }
+    if (lightShort) { setError(`The minimum electricity purchase is ${naira(lightMin)}.`); return; }
     if (mustVerify && !verifiedName) { setError('Tap “Verify” first so the right name shows.'); return; }
     setCardBusy(true);
     try {
@@ -719,12 +728,15 @@ export default function Buy() {
               </>
             )}
             {(slug === 'electricity' || slug === 'betting') && (
-              <QuickAmounts amounts={slug === 'electricity' ? [1000, 2000, 3000, 5000, 10000, 20000] : [500, 1000, 2000, 5000, 10000, 20000]} value={customAmount} onPick={setCustomAmount} priceOf={(base) => ({ base, total: priceFor(base, config.backendService, pricing).total })} />
+              <QuickAmounts amounts={slug === 'electricity' ? [1000, 2000, 3000, 5000, 10000, 20000].filter((a) => a >= lightMin) : [500, 1000, 2000, 5000, 10000, 20000]} value={customAmount} onPick={setCustomAmount} priceOf={(base) => ({ base, total: priceFor(base, config.backendService, pricing).total })} />
             )}
             {slug !== 'airtime' && (
               <>
                 <label htmlFor="amount">{t(['electricity', 'betting'].includes(slug) ? 'Or enter an amount (₦)' : 'Amount (₦)')}</label>
-                <input id="amount" type="number" min="50" value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} required />
+                <input id="amount" type="number" min={lightMin || 50} value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} className={lightShort ? 'over' : undefined} aria-invalid={lightShort || undefined} required />
+                {slug === 'electricity' && lightMin > 0 && (lightShort
+                  ? <div className="bal-line bal-short" role="alert"><span>⚠️ The minimum for electricity is <b>{naira(lightMin)}</b>.</span></div>
+                  : <div className="bal-line">Minimum {naira(lightMin)}</div>)}
               </>
             )}
           </div>
@@ -841,7 +853,7 @@ export default function Buy() {
             <button type="button" onClick={() => { forgetShop(); setViaShop(null); }} style={{ background: 'none', border: 'none', color: 'var(--purple)', fontSize: 12, padding: 0, cursor: 'pointer' }}>Remove</button>
           </p>
         )}
-        <button className="btn" type="submit" disabled={submitting || !amount || Boolean(pausedFor(appInfo, config.backendService))}>
+        <button className="btn" type="submit" disabled={submitting || !amount || lightShort || Boolean(pausedFor(appInfo, config.backendService))}>
           {pausedFor(appInfo, config.backendService) ? 'Paused for maintenance' : submitting ? t('Processing…') : `${t('Pay {amount}', { amount: naira(payTotal) })}${repeatOn ? ' & schedule' : ''}`}
         </button>
         {features.cardCheckout && cardNeeded > 0 && amount > 0 && !pausedFor(appInfo, config.backendService) && (
