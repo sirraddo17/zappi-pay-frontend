@@ -151,6 +151,7 @@ export default function AdminSettings() {
   const [cbSeparate, setCbSeparate] = useState(true);
   const [cbUsePct, setCbUsePct] = useState('20');
   const [alertsOn, setAlertsOn] = useState(false);
+  const [recoveryOn, setRecoveryOn] = useState(true);
   const [adminPushOn, setAdminPushOn] = useState(true);
   const [adminEmailOn, setAdminEmailOn] = useState(true);
   const [feedbackOn, setFeedbackOn] = useState(true);
@@ -237,6 +238,7 @@ export default function AdminSettings() {
         setCbSeparate(s.cashbackSeparate !== false);
         setCbUsePct(String(s.cashbackUseMaxPercent ?? 20));
         setAlertsOn(Boolean(s.emailAlertsEnabled));
+        setRecoveryOn(s.recoveryNoticesEnabled !== false);
         setAdminPushOn(s.adminAlertPush !== false);
         setAdminEmailOn(s.adminAlertEmail !== false);
         setFeedbackOn(s.feedbackPromptEnabled !== false);
@@ -453,6 +455,7 @@ export default function AdminSettings() {
       'alerts',
       {
         emailAlertsEnabled: alertsOn,
+        recoveryNoticesEnabled: recoveryOn,
         adminAlertPush: adminPushOn,
         adminAlertEmail: adminEmailOn,
         feedbackPromptEnabled: feedbackOn,
@@ -1045,6 +1048,13 @@ export default function AdminSettings() {
           </label>
           <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
             Uses your Resend email setup. Resend's free plan allows 100 emails a day — upgrade Resend before you have many customers.
+          </p>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+            <input type="checkbox" checked={recoveryOn} onChange={(e) => setRecoveryOn(e.target.checked)} style={{ width: 'auto' }} />
+            Tell customers when a failed service is working again
+          </label>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
+            When a purchase, bank transfer or send fails because of a partner or system problem, the customer gets a polite “it’s working again — sorry” notice (with a link to try again) as soon as the next one goes through. Customer mistakes (wrong number, low balance) never trigger it. Once per customer per day, within 48 hours.
           </p>
           <div style={{ fontWeight: 600, margin: '4px 0 6px' }}>Alerts to me (admin)</div>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>

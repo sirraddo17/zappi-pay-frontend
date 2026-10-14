@@ -9,7 +9,7 @@ import BankTransferForm from '../components/BankTransferForm';
 import QrScanner, { usernameFromQr } from '../components/QrScanner';
 import { useFeatures } from '../components/ServiceNotices';
 import MyQr from '../components/MyQr';
-import { NoReverseNote } from '../components/ServiceKit';
+import { NoReverseNote, BalanceCheck, useWalletBalance } from '../components/ServiceKit';
 
 export default function Transfer() {
   const { refreshCustomer } = useAuth();
@@ -30,6 +30,8 @@ export default function Transfer() {
   const [success, setSuccess] = useState('');
   const [sending, setSending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [balance, reloadBalance] = useWalletBalance();
+  const over = balance != null && Number(amount) > balance;
 
   const [scanning, setScanning] = useState(false);
   const [searchParams] = useSearchParams();
@@ -85,6 +87,10 @@ export default function Transfer() {
       setError('Enter an amount to send.');
       return;
     }
+    if (over) {
+      setError('You don’t have enough in your wallet for this amount.');
+      return;
+    }
     setConfirmOpen(true);
   }
 
@@ -99,6 +105,7 @@ export default function Transfer() {
       setAmount('');
       setNote('');
       refreshCustomer();
+      reloadBalance();
     } finally {
       setSending(false);
     }
@@ -197,14 +204,17 @@ export default function Transfer() {
                   step="0.01"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
+                  className={over ? 'over' : undefined}
+                  aria-invalid={over || undefined}
                   required
                 />
+                <BalanceCheck balance={balance} need={Number(amount) || 0} />
               </div>
               <div className="field">
                 <label htmlFor="note">Note (optional)</label>
                 <input id="note" type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="What's this for?" />
               </div>
-              <button className="btn" type="submit" disabled={sending}>
+              <button className="btn" type="submit" disabled={sending || over}>
                 {sending ? 'Sending…' : 'Send Money'}
               </button>
             </form>

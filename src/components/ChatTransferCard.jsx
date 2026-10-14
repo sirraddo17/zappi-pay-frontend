@@ -50,7 +50,7 @@ export default function ChatTransferCard({ draft, onClose }) {
       <div style={{ fontSize: 12, color: 'var(--green-500)', marginTop: 4 }}>✓ Name checked with {draft.kind === 'BANK' ? 'the bank' : 'ZAPPI PAY'}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: 8 }}><span>Fee</span><span>{draft.fee ? naira(draft.fee) : 'Free'}</span></div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}><span>Total</span><b>{naira(draft.total)}</b></div>
-      {short && <div style={{ fontSize: 12, color: 'var(--gold)', marginTop: 4 }}>Your wallet has {naira(balance)}. <Link to="/wallet" onClick={onClose} style={{ color: 'var(--purple)' }}>Fund wallet</Link></div>}
+      {short && <div style={{ fontSize: 12, color: 'var(--red-500)', marginTop: 4 }}>⚠️ Insufficient balance — your wallet has {naira(balance)}. <Link to="/wallet" onClick={onClose} style={{ color: 'var(--purple)' }}>Fund wallet</Link></div>}
       {state?.error && <div className="error-text" style={{ fontSize: 12, marginTop: 6 }}>{state.error}</div>}
       <button type="button" className="btn" style={{ marginTop: 10, padding: '8px 12px', fontSize: 14 }} disabled={short} onClick={() => setOpen(true)}>Send {naira(draft.total)}</button>
       <PinConfirm

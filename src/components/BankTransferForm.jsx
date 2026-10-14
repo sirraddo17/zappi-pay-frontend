@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import PinConfirm from './PinConfirm';
 import ShowMore, { FIRST_COUNT } from './ShowMore';
 import { shareReceipt } from '../lib/receipt';
-import { NoReverseNote } from './ServiceKit';
+import { NoReverseNote, BalanceCheck, useWalletBalance } from './ServiceKit';
 
 function money(n) {
   return `₦${Number(n || 0).toLocaleString()}`;
@@ -36,6 +36,7 @@ export default function BankTransferForm({ onDone }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { refreshCustomer } = useAuth();
+  const [balance, reloadBalance] = useWalletBalance();
 
   function loadHistory() {
     getBankTransfers()
@@ -111,6 +112,7 @@ export default function BankTransferForm({ onDone }) {
   const tiers = config.feeTiers || { base: Number(config.fee || 0), mid: Number(config.fee || 0), high: Number(config.fee || 0) };
   const feeNow = amt >= 50000 ? tiers.high : amt >= 10000 ? tiers.mid : tiers.base;
   const total = amt + Number(feeNow || 0);
+  const over = balance != null && amt > 0 && total > balance;
   const tiered = tiers.mid !== tiers.base || tiers.high !== tiers.base;
 
   function pickRecent(t) {
@@ -130,6 +132,7 @@ export default function BankTransferForm({ onDone }) {
     if (!(amt > 0)) return setError('Enter an amount to send.');
     if (config.min && amt < config.min) return setError(`The minimum transfer is ${money(config.min)}.`);
     if (config.max && amt > config.max) return setError(`The maximum per transfer is ${money(config.max)}.`);
+    if (over) return setError(`You need ${money(total)} (amount + fee) but your wallet has ${money(balance)}.`);
     setConfirmOpen(true);
   }
 
@@ -145,6 +148,7 @@ export default function BankTransferForm({ onDone }) {
     );
     setAmount('');
     setNarration('');
+    reloadBalance();
     setAccountNumber('');
     setAccount(null);
     loadHistory();
@@ -223,11 +227,12 @@ export default function BankTransferForm({ onDone }) {
 
         <div className="field">
           <label htmlFor="bankAmount">Amount (₦)</label>
-          <input id="bankAmount" type="number" min={config.min || 1} step="1" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <input id="bankAmount" type="number" min={config.min || 1} step="1" value={amount} onChange={(e) => setAmount(e.target.value)} className={over ? 'over' : undefined} aria-invalid={over || undefined} required />
           <small style={{ color: 'var(--slate-400)' }}>
             {amt > 0 ? (feeNow > 0 ? `Fee ${money(feeNow)} · ` : 'No fee · ') : tiered ? `Fee ${money(tiers.base)} under ₦10,000, ${money(tiers.mid)} up to ₦49,999, ${money(tiers.high)} from ₦50,000 · ` : tiers.base > 0 ? `Fee ${money(tiers.base)} · ` : 'No fee · '}
             {config.min ? `min ${money(config.min)}` : ''}{config.max ? ` · max ${money(config.max)} per transfer` : ''}
           </small>
+          <BalanceCheck balance={balance} need={total > 0 && amt > 0 ? total : 0} />
         </div>
         <div className="field">
           <label htmlFor="narration">Description (optional)</label>
@@ -235,10 +240,10 @@ export default function BankTransferForm({ onDone }) {
         </div>
         {amt > 0 && (
           <p style={{ fontSize: 14, margin: '0 0 12px' }}>
-            Total from wallet: <strong>{money(total)}</strong>
+            Total from wallet: <strong style={over ? { color: 'var(--red-500)' } : undefined}>{money(total)}</strong>
           </p>
         )}
-        <button className="btn" type="submit" disabled={!account || checking}>
+        <button className="btn" type="submit" disabled={!account || checking || over}>
           Continue
         </button>
       </form>

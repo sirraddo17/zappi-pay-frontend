@@ -1,5 +1,8 @@
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { NETWORK_STYLE } from '../lib/network';
+import { getWalletBalance } from '../api';
+import { useAuth } from '../context/AuthContext';
 
 // Shared pieces for the More services (bulk, print cards, exam PINs,
 // airtime to cash, deals, insurance, international) so they all look
@@ -108,6 +111,34 @@ export function NoReverseNote({ bank }) {
     <div className="noreverse" role="alert">
       <b>⚠️ Check before you confirm</b>
       <span>A successful transfer can’t be reversed. Make sure the {bank ? 'account name, bank and' : 'name and'} amount are correct — only send to people you know and trust.</span>
+    </div>
+  );
+}
+
+// Spendable wallet balance, fresh from the server (falls back to the
+// signed-in customer's last known balance). reload() after a send.
+export function useWalletBalance() {
+  const { customer } = useAuth();
+  const [bal, setBal] = useState(null);
+  const reload = useCallback(() => getWalletBalance().then((d) => setBal(Number(d.walletBalance || 0))).catch(() => {}), []);
+  useEffect(() => { reload(); }, [reload]);
+  const known = bal ?? (customer?.walletBalance != null ? Number(customer.walletBalance) : null);
+  return [known, reload];
+}
+
+// Live "Wallet balance ₦X" line under an amount field. Turns red with
+// a top-up link as soon as what will leave the wallet (amount + any
+// fee) is more than the balance.
+export function BalanceCheck({ balance, need }) {
+  if (balance == null) return null;
+  const short = need > 0 && need > balance + 1e-9;
+  if (!short) {
+    return <div className="bal-line">Wallet balance <b>{naira(balance)}</b>{need > 0 && <span> · {naira(balance - need)} left after</span>}</div>;
+  }
+  return (
+    <div className="bal-line bal-short" role="alert">
+      <span>⚠️ Insufficient balance — you have <b>{naira(balance)}</b>, you need <b>{naira(need - balance)}</b> more.</span>
+      <Link to="/wallet">Fund wallet</Link>
     </div>
   );
 }

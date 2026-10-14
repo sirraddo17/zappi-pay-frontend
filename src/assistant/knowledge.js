@@ -171,7 +171,7 @@ export const TOPICS = [
     title: 'Refunds',
     keywords: ['refund', 'reverse', 'reversal', 'money back', 'return my money'],
     answer:
-      'Failed purchases are refunded to your wallet instantly and show as "Refund" in your transactions. Successful purchases cannot be reversed by the network — but for airtime bought by mistake you can use Airtime to Cash.',
+      'Failed purchases are refunded to your wallet instantly and show as "Refund" in your transactions. If it failed because of a problem on our side or the provider’s, we’ll send you a notification as soon as that service is working again so you can try again. Successful purchases cannot be reversed by the network — but for airtime bought by mistake you can use Airtime to Cash.',
     actions: [
       { label: 'View History', to: '/orders' },
       { label: 'Airtime to Cash', to: '/airtime-cash' },

@@ -57,7 +57,7 @@ export default function ChatPurchaseCard({ draft, onDone, onClose }) {
       {draft.repeat && <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 2 }}>🔁 Then repeats {draft.repeat.frequency.toLowerCase()} from your wallet — pause any time under Saved & Scheduled.</div>}
       {draft.verifiedName && <div style={{ fontSize: 12, color: 'var(--green-500)', marginTop: 2 }}>✓ {draft.service === 'ELECTRICITY' ? 'Meter name' : 'Name on account'}: {draft.verifiedName}</div>}
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginTop: 8 }}><span>Total</span><b>{naira(draft.total)}</b></div>
-      {short && <div style={{ fontSize: 12, color: 'var(--gold)', marginTop: 4 }}>Your wallet has {naira(balance)}. <Link to="/wallet" onClick={onClose} style={{ color: 'var(--purple)' }}>Fund wallet</Link></div>}
+      {short && <div style={{ fontSize: 12, color: 'var(--red-500)', marginTop: 4 }}>⚠️ Insufficient balance — your wallet has {naira(balance)}. <Link to="/wallet" onClick={onClose} style={{ color: 'var(--purple)' }}>Fund wallet</Link></div>}
       {state?.error && <div className="error-text" style={{ fontSize: 12, marginTop: 6 }}>{state.error}</div>}
       <button type="button" className="btn" style={{ marginTop: 10, padding: '8px 12px', fontSize: 14 }} disabled={short} onClick={() => setOpen(true)}>Pay {naira(draft.total)}</button>
       <PinConfirm
