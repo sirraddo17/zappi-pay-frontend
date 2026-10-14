@@ -126,6 +126,7 @@ export default function AdminSettings() {
   const [a2cEnabled, setA2cEnabled] = useState(false);
   const [a2cFee, setA2cFee] = useState('20');
   const [a2cMin, setA2cMin] = useState('500');
+  const [a2cMax, setA2cMax] = useState('50000');
   const [a2cNumbers, setA2cNumbers] = useState({});
 
   const [loyOn, setLoyOn] = useState(false);
@@ -213,6 +214,7 @@ export default function AdminSettings() {
         setA2cEnabled(Boolean(s.airtimeToCashEnabled));
         setA2cFee(String(s.airtimeToCashFeePercent ?? 20));
         setA2cMin(String(s.airtimeToCashMinAmount ?? 500));
+        setA2cMax(String(s.airtimeToCashMaxAmount ?? 50000));
         setA2cNumbers(s.airtimeToCashNumbers || {});
         setLoyOn(Boolean(s.loyaltyEnabled));
         setLoyPer100(String(s.loyaltyPointsPer100 ?? 1));
@@ -386,6 +388,7 @@ export default function AdminSettings() {
         airtimeToCashEnabled: a2cEnabled,
         airtimeToCashFeePercent: fee,
         airtimeToCashMinAmount: Number(a2cMin || 0),
+        airtimeToCashMaxAmount: Number(a2cMax || 0),
         airtimeToCashNumbers: Object.fromEntries(A2C_NETWORKS.map((n) => [n.key, String(a2cNumbers[n.key] || '').trim()])),
       },
       'Airtime to Cash settings saved.'
@@ -842,10 +845,18 @@ export default function AdminSettings() {
               e.g. at {Number(a2cFee || 0)}%, ₦1,000 airtime pays out ₦{Math.floor(1000 * (1 - Number(a2cFee || 0) / 100)).toLocaleString()}.
             </p>
           </div>
-          <div className="field">
-            <label htmlFor="a2cMin">Minimum airtime amount (₦)</label>
-            <input id="a2cMin" type="number" step="1" min="0" value={a2cMin} onChange={(e) => setA2cMin(e.target.value)} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="field">
+              <label htmlFor="a2cMin">Minimum per request (₦)</label>
+              <input id="a2cMin" type="number" step="1" min="50" value={a2cMin} onChange={(e) => setA2cMin(e.target.value)} />
+            </div>
+            <div className="field">
+              <label htmlFor="a2cMax">Maximum per request (₦)</label>
+              <input id="a2cMax" type="number" step="1" min={Number(a2cMin || 0)} max="500000" value={a2cMax} onChange={(e) => setA2cMax(e.target.value)} />
+            </div>
           </div>
+          {Number(a2cMax) < Number(a2cMin) && <p className="error-text" style={{ margin: '-6px 0 10px', fontSize: 12 }}>The maximum must be at least the minimum.</p>}
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '-6px 0 12px' }}>Customers can only request amounts between these. Set the maximum to what you can comfortably pay out (up to ₦500,000).</p>
           <h3 style={{ fontSize: 14, margin: '4px 0 8px' }}>Receiving numbers</h3>
           {A2C_NETWORKS.map((n) => (
             <div className="field" key={n.key}>
