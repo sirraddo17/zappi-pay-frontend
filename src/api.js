@@ -703,3 +703,13 @@ export const getAdminReferralProgress = () => adminRequest('/api/admin/referrals
 export const getSafePricing = () => adminRequest('/api/admin/safe-pricing');
 export const applySafePricing = () => adminRequest('/api/admin/safe-pricing/apply', { method: 'POST', body: '{}' });
 export const setFundsGuard = (enabled) => adminRequest('/api/admin/funds-guard', { method: 'PUT', body: JSON.stringify({ enabled }) });
+
+// Connected business apps (e.g. StoreWatch) and their payment requests.
+export const getConnectedApps = () => request('/api/connected-apps');
+export const createConnectedApp = (data) => request('/api/connected-apps', { method: 'POST', body: JSON.stringify(data) });
+export const updateConnectedApp = (id, data) => request(`/api/connected-apps/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const removeConnectedApp = (id) => request(`/api/connected-apps/${encodeURIComponent(id)}`, { method: 'DELETE' });
+export const getPayoutRequests = () => request('/api/payout-requests');
+export const getPayoutRequest = (id) => request(`/api/payout-requests/${encodeURIComponent(id)}`);
+export const approvePayoutRequest = (id, auth) => request(`/api/payout-requests/${encodeURIComponent(id)}/approve`, { method: 'POST', body: JSON.stringify(auth || {}) });
+export const declinePayoutRequest = (id) => request(`/api/payout-requests/${encodeURIComponent(id)}/decline`, { method: 'POST' });

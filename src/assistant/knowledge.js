@@ -167,6 +167,14 @@ export const TOPICS = [
     escalate: true,
   },
   {
+    id: 'connected-apps',
+    title: 'Connected apps (StoreWatch)',
+    keywords: ['storewatch', 'connected app', 'supplier', 'pay supplier', 'api key', 'approve payment', 'payment request'],
+    answer:
+      'More → Connected apps lets your own business app (like StoreWatch) send supplier payments here — for example what each branch owes, for one or several days together. You get a notification, check each payment (the bank’s account name is shown), then tap “Approve and pay” with your PIN, or Decline. Nothing is paid until you approve, and each payment gets a receipt.',
+    actions: [{ label: 'Connected apps', to: '/connected-apps' }],
+  },
+  {
     id: 'refund',
     title: 'Refunds',
     keywords: ['refund', 'reverse', 'reversal', 'money back', 'return my money'],

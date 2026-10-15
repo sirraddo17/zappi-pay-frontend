@@ -88,6 +88,8 @@ const Shop = lazy(() => import('./pages/Shop'));
 const ProfitBook = lazy(() => import('./pages/ProfitBook'));
 const Family = lazy(() => import('./pages/Family'));
 const Disputes = lazy(() => import('./pages/Disputes'));
+const ConnectedApps = lazy(() => import('./pages/ConnectedApps'));
+const ApprovePayout = lazy(() => import('./pages/ApprovePayout'));
 const TxReceipt = lazy(() => import('./pages/TxReceipt'));
 const AdminDisputes = lazy(() => import('./pages/admin/AdminDisputes'));
 const DeleteAccountInfo = lazy(() => import('./pages/DeleteAccountInfo'));
@@ -221,6 +223,8 @@ export default function App() {
           <Route path="/profit-book" element={<RequireCustomer><ProfitBook /></RequireCustomer>} />
           <Route path="/family" element={<RequireCustomer><Family /></RequireCustomer>} />
           <Route path="/disputes" element={<RequireCustomer><Disputes /></RequireCustomer>} />
+          <Route path="/connected-apps" element={<RequireCustomer><ConnectedApps /></RequireCustomer>} />
+          <Route path="/approve/:id" element={<RequireCustomer><ApprovePayout /></RequireCustomer>} />
           <Route path="/disputes/:id" element={<RequireCustomer><Disputes /></RequireCustomer>} />
           <Route path="/deals" element={<RequireCustomer><Deals /></RequireCustomer>} />
           <Route path="/more" element={<RequireCustomer><More /></RequireCustomer>} />

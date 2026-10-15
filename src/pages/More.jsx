@@ -18,6 +18,7 @@ const ITEMS = [
   { group: 'together', to: '/shared-light', label: 'Shared Light', note: 'Housemates fill one pot — the token buys itself', emoji: '💡', bg: '#a16207', feature: 'sharedLight' },
   { group: 'biz', to: '/safebuy', label: 'SafeBuy', note: 'Buy & sell online — money held till delivery', emoji: '🛡️', bg: '#065f46', feature: 'safeBuy' },
   { group: 'biz', to: '/payroll', label: 'Payroll', note: 'Pay your staff in one tap', emoji: '💼', bg: '#334155', feature: 'payroll' },
+  { group: 'biz', to: '/connected-apps', label: 'Connected apps', note: 'Pay suppliers from StoreWatch', emoji: '🔗', bg: '#0D9488', feature: 'connectedApps' },
   { group: 'earn', to: '/rewards', label: 'Daily rewards', note: 'Check in & answer a question for cashback', emoji: '🎁', bg: '#be185d', feature: 'dailyRewards' },
   { group: 'together', to: '/requests', label: 'Request money', note: 'Pay me links, split bills, group gifts', emoji: '💸', bg: '#1f6b4a', feature: 'requests' },
   { group: 'pay', to: '/buy/betting', label: 'Bet Funding', note: 'Fund your betting wallet', emoji: '🏆', bg: '#a38a0a' },
