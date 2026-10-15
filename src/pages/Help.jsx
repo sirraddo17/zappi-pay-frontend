@@ -11,7 +11,7 @@ export const FAQ = [
   {
     topic: 'Getting started',
     items: [
-      ['What is ZAPPI PAY?', 'ZAPPI PAY is a wallet app for everyday payments in Nigeria. Fund your wallet once, then buy airtime and data, pay electricity (prepaid and postpaid), renew DStv, GOtv and Startimes, buy WAEC, NECO and JAMB PINs, fund betting wallets and more. It is run by Sirraddo Venture, a registered Nigerian business (BN 7524870).'],
+      ['What is ZAPPI PAY?', 'ZAPPI PAY is a wallet app for everyday payments in Nigeria. Fund your wallet once, then buy airtime and data, pay electricity (prepaid and postpaid), renew DStv, GOtv and Startimes, buy WAEC, NECO and JAMB PINs, fund betting wallets and more. It is run by SIRRADDO GLOBAL LIMITED, a company registered in Nigeria (RC 9939920).'],
       ['How do I create an account?', 'Tap “Create free account”, enter your name, phone number, date of birth, a security question and a strong password. You can then choose a username so friends can send you money with it.'],
       ['Is ZAPPI PAY safe?', 'Your password, PIN and security answer are stored scrambled, so not even our staff can see them. Payments need your transaction PIN or fingerprint, the account locks after 5 wrong passwords, you’re logged out after 10 minutes of no activity, and you can see and log out every device that’s logged in from Security. Purchases are delivered through VTpass and bank payments go through Monnify, both licensed Nigerian payment companies.'],
       ['Can I use ZAPPI PAY in Pidgin, Yoruba, Hausa or Igbo?', 'Yes. Go to Profile → Language and pick one. The main screens switch straight away; a few detailed pages are still in English.'],

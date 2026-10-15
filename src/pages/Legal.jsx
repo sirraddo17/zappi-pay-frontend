@@ -9,7 +9,7 @@ const DOCS = {
     body: (
       <>
         <p>ZappiPay is a digital wallet and bill payment platform built for the Nigerian market. We let you fund a wallet and instantly pay for airtime, data, electricity, cable TV subscriptions, education (WAEC/JAMB) pins, internet subscriptions, and bet wallet funding — all from one app.</p>
-        <p>ZappiPay is operated by Sirraddo Venture, a registered business in Nigeria (BN 7524870), and is built on top of VTpass, a licensed payment solution service provider, for the delivery of airtime, data, and utility bill payments.</p>
+        <p>ZappiPay is operated by SIRRADDO GLOBAL LIMITED, a company registered in Nigeria (RC 9939920), and is built on top of VTpass, a licensed payment solution service provider, for the delivery of airtime, data, and utility bill payments.</p>
         <p>Our goal is simple: make everyday bill payments fast, reliable, and available to everyone, whether you're topping up your own line or paying a bill for someone else.</p>
       </>
     ),
@@ -32,7 +32,7 @@ const DOCS = {
     body: (
       <>
         <p style={{ color: 'var(--slate-400)' }}>Last updated: 13 October 2026</p>
-        <p>These Terms & Conditions ("Terms") govern your use of the ZAPPI PAY mobile and web application ("the App"), operated by Sirraddo Venture, a business registered with the Corporate Affairs Commission of Nigeria (BN 7524870) ("we", "us", "our"). By creating an account or using the App, you agree to these Terms and to our <Link to="/legal/privacy" style={{ color: 'var(--purple)' }}>Privacy Policy</Link>.</p>
+        <p>These Terms & Conditions ("Terms") govern your use of the ZAPPI PAY mobile and web application ("the App"), operated by SIRRADDO GLOBAL LIMITED (RC 9939920), a private company limited by shares registered with the Corporate Affairs Commission of Nigeria ("we", "us", "our"). By creating an account or using the App, you agree to these Terms and to our <Link to="/legal/privacy" style={{ color: 'var(--purple)' }}>Privacy Policy</Link>.</p>
         <h3>1. Eligibility</h3>
         <p>You must be at least 18 years old and legally able to enter into a binding agreement. You must give accurate information when you sign up, including your name, phone number and date of birth, and keep it up to date.</p>
         <h3>2. Your account and security</h3>
@@ -73,7 +73,7 @@ const DOCS = {
     body: (
       <>
         <p style={{ color: 'var(--slate-400)' }}>Last updated: 30 September 2026</p>
-        <p>This Privacy Policy explains how Sirraddo Venture ("we", "us", "our"), the operator of ZAPPI PAY, collects, uses, shares and protects your personal data, and your rights under the Nigeria Data Protection Act 2023 (NDPA). We are the data controller for the personal data described here.</p>
+        <p>This Privacy Policy explains how SIRRADDO GLOBAL LIMITED ("we", "us", "our"), the operator of ZAPPI PAY, collects, uses, shares and protects your personal data, and your rights under the Nigeria Data Protection Act 2023 (NDPA). We are the data controller for the personal data described here.</p>
         <h3>1. Data we collect</h3>
         <ul>
           <li><b>Account details:</b> name, phone number, email, username, date of birth, profile photo (if you add one), and a security question with a scrambled (hashed) answer.</li>
@@ -113,7 +113,7 @@ const DOCS = {
         <p>ZAPPI PAY is for people aged 18 and over. We don’t knowingly collect data from children.</p>
         <h3>9. Changes</h3>
         <p>We may update this Policy and will tell you about important changes in the App.</p>
-        <p>Contact for privacy questions: support@zappipay.com.ng · Sirraddo Venture, Ibadan, Nigeria.</p>
+        <p>Contact for privacy questions: support@zappipay.com.ng · SIRRADDO GLOBAL LIMITED (RC 9939920), PLT 106/107 Agbaakin Layout, Iwo Road, Ibadan, Oyo State, Nigeria.</p>
       </>
     ),
   },

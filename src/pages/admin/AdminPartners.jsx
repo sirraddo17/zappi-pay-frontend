@@ -252,8 +252,8 @@ export default function AdminPartners() {
                 <b>{rep.label}</b>: {rep.stats.success.toLocaleString()} successful of {rep.stats.orders.toLocaleString()} ({rep.stats.successRate}%) · {naira(rep.stats.value)} delivered · {rep.stats.funding.count} fundings ({naira(rep.stats.funding.value)}) · {rep.stats.newCustomers} new customers
                 {rep.growth.value !== null && <span style={{ color: rep.growth.value >= 0 ? 'var(--green-500)' : 'var(--red-500)' }}> · {rep.growth.value >= 0 ? '▲' : '▼'} {Math.abs(rep.growth.value)}% value vs last month</span>}
                 <div style={{ ...row, marginTop: 6 }}>
-                  <button type="button" className="btn" style={btn} onClick={() => setDraft({ to: d.partners.find((p) => p.key === 'vtpass')?.email, subject: `Monthly summary — Sirraddo Venture (ZAPPI PAY) — ${rep.label}`, body: rep.drafts.vtpass })}>✉️ Email for VTpass</button>
-                  <button type="button" className="btn" style={btn} onClick={() => setDraft({ to: d.partners.find((p) => p.key === 'monnify')?.email, subject: `Monthly summary — Sirraddo Venture (ZAPPI PAY) — ${rep.label}`, body: rep.drafts.monnify })}>✉️ Email for Monnify</button>
+                  <button type="button" className="btn" style={btn} onClick={() => setDraft({ to: d.partners.find((p) => p.key === 'vtpass')?.email, subject: `Monthly summary — SIRRADDO GLOBAL LIMITED (ZAPPI PAY) — ${rep.label}`, body: rep.drafts.vtpass })}>✉️ Email for VTpass</button>
+                  <button type="button" className="btn" style={btn} onClick={() => setDraft({ to: d.partners.find((p) => p.key === 'monnify')?.email, subject: `Monthly summary — SIRRADDO GLOBAL LIMITED (ZAPPI PAY) — ${rep.label}`, body: rep.drafts.monnify })}>✉️ Email for Monnify</button>
                 </div>
                 {rep.stats.orders === 0 && <p style={small}>No orders that month yet — send it once you have real volume.</p>}
               </div>

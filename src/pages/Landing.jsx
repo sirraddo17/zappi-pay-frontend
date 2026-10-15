@@ -33,7 +33,7 @@ const FAQ = [
   ['How do I fund my wallet?', 'Transfer money to the account shown on the Wallet page, then submit the amount and your reference. Your balance updates once it is confirmed and you get a notification.'],
   ['What happens if a purchase fails?', 'The amount is refunded to your ZappiPay wallet automatically, and you get a notification explaining what happened.'],
   ['Can I use ZappiPay on my phone like an app?', 'Yes. Open zappipay.com.ng in your phone browser and choose “Add to Home Screen” (or “Install app”). It opens full-screen like a normal app.'],
-  ['Who runs ZappiPay?', 'ZappiPay is operated by Sirraddo Venture, a registered business in Nigeria (BN 7524870). Bill payments are delivered through VTpass, a licensed payment service provider.'],
+  ['Who runs ZappiPay?', 'ZappiPay is operated by SIRRADDO GLOBAL LIMITED, a company registered in Nigeria (RC 9939920). Bill payments are delivered through VTpass, a licensed payment service provider.'],
 ];
 
 function PhoneMockup() {
@@ -266,7 +266,7 @@ export default function Landing() {
                 <Wordmark size={15} />
               </div>
               <p style={{ margin: '10px 0 0', lineHeight: 1.5, maxWidth: 380 }}>
-                ZappiPay is operated by Sirraddo Venture (BN 7524870), Ibadan, Nigeria. Bill payments are delivered through VTpass.
+                ZappiPay is operated by SIRRADDO GLOBAL LIMITED (RC 9939920), Ibadan, Nigeria. Bill payments are delivered through VTpass.
               </p>
               <div style={{ marginTop: 14 }}>
                 <SocialLinks />
@@ -296,7 +296,7 @@ export default function Landing() {
               </ul>
             </div>
           </div>
-          <p style={{ marginTop: 24 }}>© {new Date().getFullYear()} Sirraddo Venture. All rights reserved.</p>
+          <p style={{ marginTop: 24 }}>© {new Date().getFullYear()} SIRRADDO GLOBAL LIMITED. All rights reserved.</p>
         </div>
       </footer>
     </div>

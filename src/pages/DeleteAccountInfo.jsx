@@ -8,7 +8,7 @@ export default function DeleteAccountInfo() {
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 20px 60px', lineHeight: 1.6 }}>
       <Link to="/welcome" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>&larr; ZappiPay home</Link>
       <h1 style={{ marginBottom: 4 }}>Delete your ZappiPay account</h1>
-      <p style={{ color: 'var(--slate-400)', marginTop: 0 }}>ZappiPay is operated by Sirraddo Venture (BN 7524870), Nigeria.</p>
+      <p style={{ color: 'var(--slate-400)', marginTop: 0 }}>ZappiPay is operated by SIRRADDO GLOBAL LIMITED (RC 9939920), Nigeria.</p>
 
       <h2 style={{ fontSize: 18 }}>In the app (fastest)</h2>
       <ol>

@@ -194,7 +194,7 @@ export default function Statement() {
           )}
 
           <div className="statement-foot">
-            Generated {new Date().toLocaleString('en-NG')} · ZAPPI PAY by Sirraddo Venture · support@zappipay.com.ng
+            Generated {new Date().toLocaleString('en-NG')} · ZAPPI PAY by SIRRADDO GLOBAL LIMITED (RC 9939920) · support@zappipay.com.ng
           </div>
         </div>
       )}
