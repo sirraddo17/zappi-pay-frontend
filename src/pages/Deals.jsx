@@ -109,6 +109,7 @@ export default function Deals() {
                   <div className="vplan-price">{naira(p.price)}</div>
                 </div>
                 <div className="vplan-meta">{naira(p.perGb)} per GB{best && <> · <b>🏆 Best value</b></>}</div>
+                <div className="vplan-name">{p.name}</div>
                 {bestPer > 0 && p.perGb > 0 && <div className="vplan-bar" aria-hidden><i style={{ width: `${Math.min(100, Math.max(8, Math.round((bestPer / p.perGb) * 100)))}%` }} /></div>}
               </button>
             );

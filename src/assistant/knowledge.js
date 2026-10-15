@@ -167,6 +167,14 @@ export const TOPICS = [
     escalate: true,
   },
   {
+    id: 'plan-conditions',
+    title: 'Weekend, night and social data plans',
+    keywords: ['weekend', 'weekend data', 'saturday', 'sunday', 'night plan', 'night data', 'social plan', 'wrong plan', 'data not working'],
+    answer:
+      'Some data plans only work at certain times or on certain apps. Every plan card shows its full name and a tag: “📅 Weekend only” (Saturday and Sunday), “🌙 Night only” (night hours) or “💬 Social” (only the apps named). They have their own tabs and never appear under Best value. When you pick one, a ⚠️ warning shows before you pay. If you bought one by mistake, the network can’t reverse it — it will start working at the time stated.',
+    actions: [{ label: 'Buy data', to: '/buy/data' }],
+  },
+  {
     id: 'connected-apps',
     title: 'Connected apps (StoreWatch)',
     keywords: ['storewatch', 'connected app', 'supplier', 'pay supplier', 'api key', 'approve payment', 'payment request'],

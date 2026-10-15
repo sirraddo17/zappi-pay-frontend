@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import GiftForm from '../components/GiftForm';
 import { currentShop, forgetShop } from '../lib/shopRef';
 import { useAuth } from '../context/AuthContext';
-import PlanGrid, { AmountGrid } from '../components/PlanGrid';
+import PlanGrid, { AmountGrid, planWarning } from '../components/PlanGrid';
 import { ProviderGrid, Segmented, PackageList, QuickAmounts } from '../components/BillPickers';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo, createPayForMe, getOrders, request as apiRequest } from '../api';
 import { extractToken } from '../lib/receipt';
@@ -896,14 +896,16 @@ export default function Buy() {
           if (cbUse > 0) rows.push(['Cashback used', `−${naira(cbUse)}`, 'good']);
           return { rows, total: naira(payTotal), note: appInfo?.rewardsSplit ? '🎁 This purchase earns you cashback and points' : null };
         })()}
-        notice={slow && (
+        notice={slow ? (
           <div style={{ background: 'rgba(255,184,48,0.1)', border: '1px solid var(--gold)', borderRadius: 10, padding: '10px 12px', fontSize: 13 }}>
             ⏳ The network is taking a little longer than usual. You can leave this page. Your order keeps processing, and if it fails you're refunded automatically.
             <div style={{ marginTop: 8 }}>
               <Link to="/orders" style={{ color: 'var(--purple)', fontWeight: 600 }}>Go to Orders →</Link>
             </div>
           </div>
-        )}
+        ) : selectedVariation && planWarning(selectedVariation.name) ? (
+          <div className="plan-warn-box" role="alert">⚠️ {planWarning(selectedVariation.name)}. Check this is the plan you want.</div>
+        ) : null}
         onSubmit={doPurchase}
         onError={(err) => setError(err.message || 'Purchase failed.')}
         onClose={() => setConfirmOpen(false)}
