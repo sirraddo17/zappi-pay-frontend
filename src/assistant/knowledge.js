@@ -9,6 +9,15 @@
 
 export const WHATSAPP_NUMBER = '2348134209037';
 export const SUPPORT_EMAIL = 'support@zappipay.com.ng';
+// Company contact details shown on the website (payment partners check these).
+export const COMPANY = {
+  name: 'SIRRADDO GLOBAL LIMITED',
+  rc: 'RC 9939920',
+  address: 'PLT 106/107 Agbaakin Layout, Iwo Road, Olowotinfiowosanu Area, Ibadan, Oyo State, Nigeria',
+  phone: '+234 816 755 0937',
+  phoneHref: 'tel:+2348167550937',
+  email: 'support@zappipay.com.ng',
+};
 
 export const TOPICS = [
   {

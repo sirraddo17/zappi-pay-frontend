@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { COMPANY } from '../assistant/knowledge';
 
 const WHATSAPP_LINK = 'https://wa.me/2348134209037?text=' + encodeURIComponent('Hello ZappiPay, I need help with');
 
@@ -131,9 +132,17 @@ const DOCS = {
             <div style={{ color: 'var(--slate-400)', fontSize: 13 }}>WhatsApp</div>
             <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--purple)' }}>Chat with us on WhatsApp</a>
           </div>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ color: 'var(--slate-400)', fontSize: 13 }}>Phone</div>
+            <a href={COMPANY.phoneHref} style={{ color: 'var(--purple)' }}>{COMPANY.phone}</a>
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ color: 'var(--slate-400)', fontSize: 13 }}>Business address</div>
+            <div>{COMPANY.address}</div>
+          </div>
           <div>
-            <div style={{ color: 'var(--slate-400)', fontSize: 13 }}>Address</div>
-            <div>Ibadan, Nigeria</div>
+            <div style={{ color: 'var(--slate-400)', fontSize: 13 }}>Company</div>
+            <div>{COMPANY.name} ({COMPANY.rc})</div>
           </div>
         </div>
       </>

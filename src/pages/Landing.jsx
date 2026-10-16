@@ -5,7 +5,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { LogoIcon, Wordmark } from '../components/Logo';
 import { PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon, FundIcon, PrinterIcon } from '../components/Icons';
 import { getReferralInfo } from '../api';
-import { SUPPORT_EMAIL, WHATSAPP_NUMBER } from '../assistant/knowledge';
+import { SUPPORT_EMAIL, WHATSAPP_NUMBER, COMPANY } from '../assistant/knowledge';
 import './landing.css';
 
 const SERVICES = [
@@ -268,6 +268,11 @@ export default function Landing() {
               <p style={{ margin: '10px 0 0', lineHeight: 1.5, maxWidth: 380 }}>
                 ZappiPay is operated by SIRRADDO GLOBAL LIMITED (RC 9939920), Ibadan, Nigeria. Bill payments are delivered through VTpass.
               </p>
+              <address style={{ fontStyle: 'normal', margin: '10px 0 0', lineHeight: 1.6, maxWidth: 380 }}>
+                📍 {COMPANY.address}<br />
+                📞 <a href={COMPANY.phoneHref}>{COMPANY.phone}</a><br />
+                ✉️ <a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a>
+              </address>
               <div style={{ marginTop: 14 }}>
                 <SocialLinks />
               </div>
@@ -285,6 +290,7 @@ export default function Landing() {
               <h4>Support</h4>
               <ul>
                 <li><a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></li>
+                <li><a href={COMPANY.phoneHref}>{COMPANY.phone}</a></li>
                 <li>
                   <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello ZappiPay, I need help with')}`} target="_blank" rel="noopener noreferrer">
                     WhatsApp us
