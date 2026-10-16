@@ -154,6 +154,85 @@ function CardFunding({ funding }) {
   );
 }
 
+// GTBank account number (through Squad): BVN only, checked strictly
+// against name, date of birth and phone, so we ask for all of them.
+function SquadForm({ info, customerName, onCreated, addOn, onCancel }) {
+  const [bvn, setBvn] = useState('');
+  const [dob, setDob] = useState('');
+  const [gender, setGender] = useState('');
+  const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const ready = bvn.length === 11 && gender && address.trim().length >= 5 && consent && (info.hasDob || dob) && (!phone || phone.replace(/\D/g, '').length >= 10);
+
+  async function create(e) {
+    e.preventDefault();
+    setError('');
+    setBusy(true);
+    try {
+      const res = await createBankAccount({ provider: 'squad', idType: 'BVN', idNumber: bvn, gender, address, consent, ...(phone ? { phone } : {}), ...(info.hasDob ? {} : { dateOfBirth: dob }) });
+      setBvn('');
+      onCreated(res);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form className={addOn ? '' : 'card'} onSubmit={create} style={addOn ? { borderTop: '1px solid var(--slate-800, rgba(255,255,255,0.08))', paddingTop: 12, marginTop: 8 } : undefined}>
+      <h2 style={{ marginTop: 0, fontSize: 16 }}>{addOn ? 'Add a GTBank account number' : 'Get your personal account number'}</h2>
+      <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>
+        A GTBank account number in your name. Any bank transfer to it goes straight into your wallet. It's a one-time setup; banks require your BVN for this.
+      </p>
+      {error && <p className="error-text" style={{ margin: '0 0 10px' }}>{error}</p>}
+      <div className="field">
+        <label htmlFor="sqBvn">Your BVN (11 digits)</label>
+        <input id="sqBvn" inputMode="numeric" autoComplete="off" maxLength={11} value={bvn} onChange={(e) => setBvn(e.target.value.replace(/\D/g, ''))} required />
+      </div>
+      {!info.hasDob && (
+        <div className="field">
+          <label htmlFor="sqDob">Date of birth (as on your BVN)</label>
+          <input id="sqDob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} max={new Date().toISOString().slice(0, 10)} required />
+        </div>
+      )}
+      <div className="field">
+        <label>Gender (as on your BVN)</label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[['male', 'Male'], ['female', 'Female']].map(([v, l]) => (
+            <button key={v} type="button" className={gender === v ? 'btn' : 'btn btn-secondary'} onClick={() => setGender(v)}>{l}</button>
+          ))}
+        </div>
+      </div>
+      <div className="field">
+        <label htmlFor="sqAddr">Home address</label>
+        <input id="sqAddr" autoComplete="street-address" maxLength={200} placeholder="e.g. 12 Iwo Road, Ibadan" value={address} onChange={(e) => setAddress(e.target.value)} required />
+      </div>
+      <div className="field">
+        <label htmlFor="sqPhone">Phone number linked to your BVN</label>
+        <input id="sqPhone" inputMode="tel" autoComplete="tel" maxLength={14} placeholder="Leave empty if it's your ZAPPI PAY number" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d+]/g, ''))} />
+      </div>
+      <p style={{ fontSize: 13, margin: '0 0 8px', padding: '8px 10px', borderRadius: 8, background: 'rgba(13, 148, 136,0.08)' }}>
+        Your name <b>{customerName || 'on your profile'}</b>, date of birth and phone number must match your BVN exactly. If your name is spelt differently, fix it in Profile first.
+      </p>
+      <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginBottom: 10 }}>
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
+        I agree that ZAPPI PAY can check my details with my BVN through its licensed payment partner.
+      </label>
+      <p style={{ color: 'var(--slate-400)', fontSize: 12 }}>
+        Your BVN is sent securely to our licensed payment partner only to create your account. ZappiPay does not store it.
+      </p>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button className="btn" type="submit" disabled={busy || !ready}>{busy ? 'Creating…' : 'Get My Account Number'}</button>
+        {onCancel && <button className="btn btn-secondary" type="button" disabled={busy} onClick={onCancel}>Cancel</button>}
+      </div>
+    </form>
+  );
+}
+
 // Personal account number(s): money sent here is added to the wallet
 // automatically. First time, the customer verifies with BVN or NIN.
 function BankFunding({ info, onCreated, onCredited, customerName }) {
@@ -164,6 +243,7 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [addGtb, setAddGtb] = useState(false);
 
   const feeText = info.feePercent > 0
     ? `A ${info.feePercent}% bank processing fee${info.feeCap > 0 ? ` (max ₦${Number(info.feeCap).toLocaleString()})` : ''} applies to each transfer${info.feeIsPassThrough ? ' — it goes to our licensed payment partner for handling your transfer, not to ZAPPI PAY' : ''}.`
@@ -201,6 +281,10 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (!info.accounts && info.provider === 'squad') {
+    return <SquadForm info={info} customerName={customerName} onCreated={onCreated} />;
   }
 
   if (!info.accounts) {
@@ -287,6 +371,12 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
       {info.accounts.length > 0 && <button className="btn btn-secondary" type="button" style={{ marginTop: 8 }} disabled={busy} onClick={check}>
         {busy ? 'Checking…' : 'I\'ve sent money — check now'}
       </button>}
+      {info.squadAddable && !addGtb && (
+        <button className="btn btn-secondary" type="button" style={{ marginTop: 8, marginLeft: 8 }} onClick={() => setAddGtb(true)}>Add a GTBank account number</button>
+      )}
+      {info.squadAddable && addGtb && (
+        <SquadForm info={info} customerName={customerName} addOn onCancel={() => setAddGtb(false)} onCreated={(res) => { setAddGtb(false); onCreated({ ...res, squadAddable: false }); }} />
+      )}
     </div>
   );
 }
@@ -505,7 +595,7 @@ export default function Wallet() {
       {autoFunding && (
         <BankFunding
           info={bankInfo}
-          onCreated={(res) => { setBankInfo((prev) => ({ ...prev, accounts: res.accounts, kycType: res.kycType })); if (res.verified) refreshCustomer?.(); }}
+          onCreated={(res) => { setBankInfo((prev) => ({ ...prev, accounts: res.accounts, kycType: res.kycType, ...(res.squadAddable === false || prev?.provider === 'squad' ? { squadAddable: false } : {}) })); if (res.verified) refreshCustomer?.(); }}
           onCredited={load}
           customerName={customer?.name}
         />

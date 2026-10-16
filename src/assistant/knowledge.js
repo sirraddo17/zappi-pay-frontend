@@ -158,6 +158,14 @@ export const TOPICS = [
     actions: [{ label: 'Go to Wallet', to: '/wallet' }],
   },
   {
+    id: 'gtbank-account',
+    title: 'GTBank account number',
+    keywords: ['gtbank', 'gtb', 'gtbank account', 'squad', 'bvn mismatch', 'details don’t match', 'gender', 'address', 'bvn phone'],
+    answer:
+      'Some customers can get a personal GTBank account number for funding: Wallet → "Get your personal account number" (or "Add a GTBank account number" if you already have one). It needs your BVN (not NIN), date of birth, gender, home address and the phone number linked to your BVN. Your name, date of birth and phone must be exactly as on your BVN — if it says your details don’t match, check the phone number on your BVN and the spelling of your name in Profile. Money sent to it is added to your wallet automatically.',
+    actions: [{ label: 'Go to Wallet', to: '/wallet' }],
+  },
+  {
     id: 'funding-pending',
     title: 'Funding not credited',
     keywords: ['not credited', 'funding pending', 'wallet not updated', 'money not reflect', 'not reflecting', 'balance not', 'still pending', 'fund not', 'funded but', 'sent money but'],

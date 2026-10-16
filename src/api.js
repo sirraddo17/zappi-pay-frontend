@@ -401,6 +401,11 @@ export const startCardPayment = (amount) => request('/api/wallet/card/start', { 
 export const verifyCardPayment = (txRef) => request('/api/wallet/card/verify', { method: 'POST', quiet: true, body: JSON.stringify({ txRef }) });
 export const getFundingMethods = () => adminRequest('/api/admin/funding-methods');
 export const saveFundingMethods = (data) => adminRequest('/api/admin/funding-methods', { method: 'PUT', body: JSON.stringify(data) });
+export const getSquadSettings = () => adminRequest('/api/admin/squad');
+export const saveSquadSettings = (data) => adminRequest('/api/admin/squad', { method: 'PUT', body: JSON.stringify(data) });
+export const testSquad = () => adminRequest('/api/admin/squad/test', { method: 'POST' });
+export const syncSquad = () => adminRequest('/api/admin/squad/sync', { method: 'POST' });
+export const simulateSquadPayment = (data) => adminRequest('/api/admin/squad/simulate', { method: 'POST', body: JSON.stringify(data) });
 export const getFestivals = () => adminRequest('/api/admin/festivals');
 export const vtpassSelfTest = () => adminRequest('/api/admin/vtpass/selftest');
 export const getVtpassCodes = () => adminRequest('/api/admin/vtpass-codes');
