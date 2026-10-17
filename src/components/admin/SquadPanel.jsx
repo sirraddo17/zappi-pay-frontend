@@ -9,10 +9,11 @@ export default function SquadPanel() {
   const [key, setKey] = useState('');
   const [ben, setBen] = useState('');
   const [mid, setMid] = useState('');
+  const [fee, setFee] = useState({ pct: '', cap: '' });
   const [sim, setSim] = useState({ accountNumber: '', amount: '1000' });
   const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { getSquadSettings().then((x) => { setD(x); setBen(x.beneficiaryAccount || ''); }).catch((e) => setMsg({ ok: false, text: e.message })); }, []);
+  useEffect(() => { getSquadSettings().then((x) => { setD(x); setBen(x.beneficiaryAccount || ''); setFee({ pct: String(x.fundingFeePercent ?? ''), cap: String(x.fundingFeeCap ?? '') }); }).catch((e) => setMsg({ ok: false, text: e.message })); }, []);
   async function run(fn, okText) {
     setBusy(true); setMsg(null);
     try { const x = await fn(); if (x && 'squadFundingEnabled' in x) setD(x); setMsg({ ok: true, text: typeof okText === 'function' ? okText(x) : okText }); return x; } catch (e) { setMsg({ ok: false, text: e.message }); return null; } finally { setBusy(false); }
@@ -67,6 +68,16 @@ export default function SquadPanel() {
           <input inputMode="numeric" maxLength={10} value={ben} onChange={(e) => setBen(e.target.value.replace(/\D/g, ''))} style={{ ...input, flex: 1 }} aria-label="GTBank settlement account" />
           <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: '0 0 auto' }} disabled={busy} onClick={() => run(() => saveSquadSettings({ beneficiaryAccount: ben }), 'Settlement account saved.')}>Save</button>
         </div>
+      </div>
+
+      <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10 }}>
+        <b style={{ fontSize: 14 }}>Funding fee for Squad account numbers</b>
+        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 8px' }}>Taken from each transfer customers send to these account numbers. Leave both empty to use the same fee as Monnify (Settings → Limits). Squad charges you 0.25%, max ₦1,000 (plus VAT) — e.g. 0.5% with a ₦1,000 max keeps funding cheap for customers. The “goes to our payment partner” wording is only shown when your fee isn’t more than Squad’s.</p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="field" style={{ flex: '1 1 140px' }}><label htmlFor="Squad-fpct">Percent</label><input id="Squad-fpct" type="number" step="0.01" min="0" max="10" placeholder="Same as Monnify" value={fee.pct} onChange={(e) => setFee((x) => ({ ...x, pct: e.target.value }))} /></div>
+          <div className="field" style={{ flex: '1 1 140px' }}><label htmlFor="Squad-fcap">Max fee (₦, 0 = no max)</label><input id="Squad-fcap" type="number" min="0" placeholder="Same as Monnify" value={fee.cap} onChange={(e) => setFee((x) => ({ ...x, cap: e.target.value }))} /></div>
+        </div>
+        <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => run(() => saveSquadSettings({ fundingFeePercent: fee.pct === '' ? null : Number(fee.pct), fundingFeeCap: fee.cap === '' ? null : Number(fee.cap) }), 'Funding fee saved.')}>Save fee</button>
       </div>
 
       <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10 }}>

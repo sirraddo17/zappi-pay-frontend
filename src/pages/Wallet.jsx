@@ -52,7 +52,15 @@ function amountToSend(want, info) {
   return n;
 }
 
-function FundingHelper({ info }) {
+// Fee for one account number (each payment partner can have its own).
+function feeOf(account, info) {
+  return info.feeByProvider?.[account?.provider || 'monnify'] || { feePercent: info.feePercent, feeCap: info.feeCap, feeIsPassThrough: info.feeIsPassThrough };
+}
+function feeLabel(f) {
+  return `${f.feePercent}%${f.feeCap > 0 ? ` (max ₦${Number(f.feeCap).toLocaleString()})` : ''}`;
+}
+
+function FundingHelper({ info, bankName }) {
   const [want, setWant] = useState('');
   const w = Number(want);
   const send = w > 0 ? amountToSend(w, info) : 0;
@@ -60,7 +68,7 @@ function FundingHelper({ info }) {
   const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   return (
     <div style={{ background: 'rgba(13, 148, 136,0.08)', border: '1px solid var(--slate-700)', borderRadius: 10, padding: 12, margin: '10px 0' }}>
-      <label htmlFor="want" style={{ fontSize: 13, fontWeight: 600 }}>How much do you want in your wallet?</label>
+      <label htmlFor="want" style={{ fontSize: 13, fontWeight: 600 }}>How much do you want in your wallet?{bankName ? ` (sending to ${bankName})` : ''}</label>
       <input id="want" type="number" inputMode="numeric" min="1" value={want} onChange={(e) => setWant(e.target.value)} placeholder="e.g. 1000" style={{ marginTop: 6 }} />
       {send > 0 && (
         <div style={{ fontSize: 13, marginTop: 10 }}>
@@ -306,9 +314,14 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
   const [addGtb, setAddGtb] = useState(false);
   const [addMore, setAddMore] = useState(false);
 
-  const feeText = info.feePercent > 0
-    ? `A ${info.feePercent}% bank processing fee${info.feeCap > 0 ? ` (max ₦${Number(info.feeCap).toLocaleString()})` : ''} applies to each transfer${info.feeIsPassThrough ? ' — it goes to our licensed payment partner for handling your transfer, not to ZAPPI PAY' : ''}.`
-    : 'No fee.';
+  const accountFees = (info.accounts || []).map((a) => feeOf(a, info));
+  const sameFee = accountFees.every((f) => f.feePercent === accountFees[0]?.feePercent && f.feeCap === accountFees[0]?.feeCap && f.feeIsPassThrough === accountFees[0]?.feeIsPassThrough);
+  const one = accountFees[0] || feeOf(null, info);
+  const feeText = !sameFee
+    ? 'A small bank processing fee applies to each transfer — it’s shown under each account number.'
+    : one.feePercent > 0
+      ? `A ${feeLabel(one)} bank processing fee applies to each transfer${one.feeIsPassThrough ? ' — it goes to our licensed payment partner for handling your transfer, not to ZAPPI PAY' : ''}.`
+      : 'No fee.';
 
   async function create(e) {
     e.preventDefault();
@@ -422,11 +435,12 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
             <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{a.bankName}</div>
             <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1 }}>{a.accountNumber}</div>
             <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{a.accountName}</div>
+            {!sameFee && <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 2 }}>Fee: {feeOf(a, info).feePercent > 0 ? feeLabel(feeOf(a, info)) : 'none'}</div>}
           </div>
           <CopyButton text={a.accountNumber} />
         </div>
       ))}
-      {info.feePercent > 0 && info.accounts.length > 0 && <FundingHelper info={info} />}
+      {info.accounts.length > 0 && feeOf(info.accounts[0], info).feePercent > 0 && <FundingHelper info={{ ...info, ...feeOf(info.accounts[0], info) }} bankName={sameFee ? '' : info.accounts[0].bankName} />}
       {error && <p className="error-text" style={{ margin: '8px 0' }}>{error}</p>}
       {message && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '8px 0' }}>{message}</p>}
       {info.accounts.length > 0 && <button className="btn btn-secondary" type="button" style={{ marginTop: 8 }} disabled={busy} onClick={check}>

@@ -4,7 +4,8 @@ import { getFundingMethods, saveFundingMethods } from '../../api';
 // Settings → Wallet funding: switch bank transfer (Monnify) and card /
 // USSD (Flutterwave) on or off independently, and set Flutterwave up.
 // Keys are never shown back — leave a box empty to keep the saved one.
-export default function FundingMethodsPanel() {
+// only: 'monnify' (just its on/off switch) or 'flutterwave' (card setup).
+export default function FundingMethodsPanel({ only }) {
   const [d, setD] = useState(null);
   const [keys, setKeys] = useState({ publicKey: '', secretKey: '', secretHash: '' });
   const [fee, setFee] = useState({ pct: '', cap: '' });
@@ -24,15 +25,16 @@ export default function FundingMethodsPanel() {
 
   return (
     <div className="card" style={{ margin: '0 0 16px', maxWidth: 640 }}>
-      <b>💰 Wallet funding methods</b>
-      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '4px 0 6px' }}>Turn each one on or off. Both on = customers choose. If one company has problems, switch it off and customers use the other.</p>
-      <p style={{ fontSize: 13, margin: '0 0 6px', color: none ? 'var(--red-500)' : 'var(--green-500)' }}>{none ? '⚠ Both are off — customers can only use manual funding (if set up).' : both ? '✓ Customers can use bank transfer and card / USSD.' : d.monnifyFundingEnabled ? '✓ Bank transfer only.' : '✓ Card / USSD only.'}</p>
+      <b>{only === 'monnify' ? '🏦 Monnify account numbers' : only === 'flutterwave' ? '💳 Card & USSD (Flutterwave)' : '💰 Wallet funding methods'}</b>
+      {!only && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '4px 0 6px' }}>Turn each one on or off. Both on = customers choose. If one company has problems, switch it off and customers use the other.</p>}
+      {!only && <p style={{ fontSize: 13, margin: '0 0 6px', color: none ? 'var(--red-500)' : 'var(--green-500)' }}>{none ? '⚠ Both are off — customers can only use manual funding (if set up).' : both ? '✓ Customers can use bank transfer and card / USSD.' : d.monnifyFundingEnabled ? '✓ Bank transfer only.' : '✓ Card / USSD only.'}</p>}
 
-      <label style={row}>
+      {only !== 'flutterwave' && <label style={row}>
         <input type="checkbox" checked={d.monnifyFundingEnabled} disabled={busy} onChange={(e) => save({ monnifyFundingEnabled: e.target.checked }, e.target.checked ? 'Bank transfer funding is on.' : 'Bank transfer is off — no new account numbers are shown. Money sent to existing account numbers is still credited.')} style={{ width: 'auto', marginTop: 3 }} />
-        <span><b>🏦 Bank transfer (Monnify)</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Personal account numbers. {d.monnifyReady ? 'Keys are set (Monnify tab below).' : 'Monnify keys not set yet.'} When off, money customers still send to their account number is credited anyway.</span></span>
-      </label>
+        <span><b>🏦 Bank transfer (Monnify)</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Personal account numbers. {d.monnifyReady ? 'Keys are set (Monnify tab below).' : 'Monnify keys not set yet.'} When off, money customers still send to their account number is credited anyway. The funding fee for Monnify account numbers is under Settings → Limits.</span></span>
+      </label>}
 
+      {only !== 'monnify' && <>
       <label style={row}>
         <input type="checkbox" checked={d.flutterwaveEnabled} disabled={busy} onChange={(e) => save({ flutterwaveEnabled: e.target.checked }, e.target.checked ? 'Card / USSD funding is on.' : 'Card / USSD funding is off.')} style={{ width: 'auto', marginTop: 3 }} />
         <span><b>💳 Card & USSD (Flutterwave)</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Mode: {d.mode === 'live' ? 'LIVE' : d.mode === 'test' ? 'TEST (no real money)' : 'keys not set'}. Customers pay on Flutterwave’s secure page.</span></span>
@@ -65,9 +67,10 @@ export default function FundingMethodsPanel() {
         <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => save({ cardFundingFeePercent: Number(fee.pct || 0), cardFundingFeeCap: Number(fee.cap || 0) }, 'Fee saved.')}>Save fee</button>
       </div>
 
+      </>}
       {msg && <p style={{ fontSize: 13, margin: '10px 0 0', color: msg.ok ? 'var(--green-500)' : 'var(--red-500)' }}>{msg.text}</p>}
 
-      {d.recent?.length > 0 && (
+      {only !== 'monnify' && d.recent?.length > 0 && (
         <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10, fontSize: 12 }}>
           <b style={{ fontSize: 14 }}>Recent card payments</b>
           {d.recent.map((p) => <div key={p.txRef} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>{new Date(p.createdAt).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · ₦{p.amount.toLocaleString()}</span><span style={{ color: p.status === 'PAID' ? 'var(--green-500)' : p.status === 'FAILED' ? 'var(--slate-400)' : 'var(--gold)' }}>{p.status === 'PAID' ? 'Paid' : p.status === 'FAILED' ? 'Not completed' : 'Waiting'}</span></div>)}

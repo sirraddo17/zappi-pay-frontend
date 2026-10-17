@@ -106,6 +106,7 @@ export default function AdminSettings() {
   const [markupCapByService, setMarkupCapByService] = useState({});
   const [discountByService, setDiscountByService] = useState(toServiceMap({}));
   const [monnifyMode, setMonnifyMode] = useState('sandbox');
+  const [partnerTab, setPartnerTab] = useState('overview');
   const [monnifyApiKey, setMonnifyApiKey] = useState('');
   const [monnifySecretKey, setMonnifySecretKey] = useState('');
   const [monnifyContractCode, setMonnifyContractCode] = useState('');
@@ -592,11 +593,19 @@ export default function AdminSettings() {
       )}
       {!loading && !loadError && tab === 'vtpass' && <><VtpassSelfTest /><IntlAirtimeToggle /></>}
 
-      {!loading && !loadError && tab === 'monnify' && <FundingMethodsPanel />}
-      {!loading && !loadError && tab === 'monnify' && <PaymentPartnersPanel />}
-      {!loading && !loadError && tab === 'monnify' && <SquadPanel />}
-      {!loading && !loadError && tab === 'monnify' && <NombaPanel />}
       {!loading && !loadError && tab === 'monnify' && (
+        <div role="tablist" aria-label="Payment partners" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '0 0 16px', maxWidth: 640 }}>
+          {[['overview', '🤝 Overview'], ['monnify', 'Monnify'], ['squad', 'Squad (GTBank)'], ['nomba', 'Nomba'], ['flutterwave', 'Flutterwave (card)']].map(([k, l]) => (
+            <button key={k} type="button" role="tab" aria-selected={partnerTab === k} className={partnerTab === k ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '8px 14px' }} onClick={() => setPartnerTab(k)}>{l}</button>
+          ))}
+        </div>
+      )}
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'overview' && <PaymentPartnersPanel />}
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'monnify' && <FundingMethodsPanel only="monnify" />}
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'squad' && <SquadPanel />}
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'nomba' && <NombaPanel />}
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'flutterwave' && <FundingMethodsPanel only="flutterwave" />}
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'monnify' && (
         <form className="card" style={cardStyle} onSubmit={saveMonnify}>
           <SectionHeader
             title="Monnify Connection"
@@ -648,11 +657,11 @@ export default function AdminSettings() {
         </form>
       )}
 
-      {!loading && !loadError && tab === 'monnify' && (
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'monnify' && (
         <form className="card" style={{ ...cardStyle, marginTop: 16 }} onSubmit={saveBankTransfers}>
           <SectionHeader
             title="Send to Bank"
-            hint="Customers send money from their wallet to any bank account. It's paid out from your Monnify wallet, so keep that wallet funded."
+            hint="Customers send money from their wallet to any bank account. These switches, fees and limits apply whichever partner sends the transfer (chosen in Overview). The wallet account below is only for Monnify."
           />
           <Status state={status.bankTransfers} />
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
@@ -699,7 +708,7 @@ export default function AdminSettings() {
         </form>
       )}
 
-      {!loading && !loadError && tab === 'monnify' && (
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'monnify' && (
         <div className="card" style={{ ...cardStyle, marginTop: 16, border: '1px solid var(--red-500)' }}>
           <SectionHeader
             title="Going live: reset account numbers"
@@ -831,7 +840,7 @@ export default function AdminSettings() {
           </div>
           <FundingAccountsPanel />
           <div className="field">
-            <label htmlFor="bankFeePercent">Bank transfer funding fee (%)</label>
+            <label htmlFor="bankFeePercent">Bank transfer funding fee (%) — Monnify account numbers</label>
             <input id="bankFeePercent" type="number" step="0.01" min="0" max="10" value={bankFeePercent} onChange={(e) => setBankFeePercent(e.target.value)} />
             <small style={{ color: 'var(--slate-400)' }}>Kept from money customers send to their personal account number. 0 = free.</small>
           </div>
