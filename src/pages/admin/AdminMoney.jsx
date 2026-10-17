@@ -123,6 +123,9 @@ export default function AdminMoney() {
             <h2 style={{ marginTop: 0, fontSize: 16 }}>Money you hold</h2>
             <Row label="VTpass wallet" value={data.have.vtpass === null ? 'Unavailable' : naira(data.have.vtpass)} hint={data.have.vtpassError || 'Pays for every purchase'} color={data.have.vtpass === null ? 'var(--gold)' : undefined} />
             <Row label="Monnify wallet" value={data.have.monnify === null ? 'Unavailable' : naira(data.have.monnify)} hint={data.have.monnifyError || 'Receives funding, pays out bank transfers'} color={data.have.monnify === null ? 'var(--gold)' : undefined} />
+            {(data.have.squad !== undefined && (data.have.squad !== null || data.have.squadError)) && (
+              <Row label="Squad wallet" value={data.have.squad === null ? 'Unavailable' : naira(data.have.squad)} hint={data.have.squadError || 'GTBank account-number payments; pays out bank transfers when Squad is chosen'} color={data.have.squad === null ? 'var(--gold)' : undefined} />
+            )}
             <Row label="Other money (you typed)" value={naira(data.have.other)} hint="e.g. business bank account where manual funding lands" />
             <Row label="Total held" value={naira(data.have.total)} strong />
             <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>

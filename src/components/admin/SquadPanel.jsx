@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { getSquadSettings, saveSquadSettings, testSquad, syncSquad, simulateSquadPayment } from '../../api';
 
-// Settings → Wallet funding → Squad: personal GTBank account numbers.
+// Settings → Wallet funding → Squad: personal GTBank account numbers,
+// and the choice of partner for Send to Bank (Monnify or Squad).
 // The secret key is never shown back — leave the box empty to keep it.
 export default function SquadPanel() {
   const [d, setD] = useState(null);
   const [key, setKey] = useState('');
   const [ben, setBen] = useState('');
+  const [mid, setMid] = useState('');
   const [sim, setSim] = useState({ accountNumber: '', amount: '1000' });
   const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -65,6 +67,24 @@ export default function SquadPanel() {
           <input inputMode="numeric" maxLength={10} value={ben} onChange={(e) => setBen(e.target.value.replace(/\D/g, ''))} style={{ ...input, flex: 1 }} aria-label="GTBank settlement account" />
           <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: '0 0 auto' }} disabled={busy} onClick={() => run(() => saveSquadSettings({ beneficiaryAccount: ben }), 'Settlement account saved.')}>Save</button>
         </div>
+      </div>
+
+      <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10 }}>
+        <b style={{ fontSize: 14 }}>Send to Bank through</b>
+        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 8px' }}>Which partner pays out customer withdrawals and supplier payments. Squad: ₦8 / ₦15 / ₦40 per transfer, no OTP. Transfers already sent are always checked with the partner that sent them. Make sure the chosen partner’s wallet has money.</p>
+        <div className="field">
+          <label htmlFor="sq-mid">Squad merchant ID{d.merchantId ? <span style={{ color: 'var(--green-500)' }}> · saved {d.merchantId}</span> : ''}</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input id="sq-mid" autoComplete="off" placeholder="Top of your Squad dashboard, e.g. SBABCKDY" value={mid} onChange={(e) => setMid(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} style={{ ...input, flex: 1 }} />
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: '0 0 auto' }} disabled={busy || !mid} onClick={async () => { if (await run(() => saveSquadSettings({ merchantId: mid }), 'Merchant ID saved.')) setMid(''); }}>Save</button>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[['monnify', 'Monnify'], ['squad', 'Squad']].map(([v, l]) => (
+            <button key={v} type="button" className={d.payoutProvider === v ? 'btn' : 'btn btn-secondary'} disabled={busy || d.payoutProvider === v || (v === 'squad' && !d.payoutReady)} onClick={() => run(() => saveSquadSettings({ payoutProvider: v }), `Bank transfers now go out through ${l}.`)}>{l}</button>
+          ))}
+        </div>
+        {!d.payoutReady && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>Save the Squad key and merchant ID to allow Squad.</p>}
       </div>
 
       <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10 }}>
