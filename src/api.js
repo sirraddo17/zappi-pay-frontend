@@ -723,3 +723,7 @@ export const getPayoutRequests = () => request('/api/payout-requests');
 export const getPayoutRequest = (id) => request(`/api/payout-requests/${encodeURIComponent(id)}`);
 export const approvePayoutRequest = (id, auth) => request(`/api/payout-requests/${encodeURIComponent(id)}/approve`, { method: 'POST', body: JSON.stringify(auth || {}) });
 export const declinePayoutRequest = (id) => request(`/api/payout-requests/${encodeURIComponent(id)}/decline`, { method: 'POST' });
+
+// Admin → Go-live check
+export const getGoLive = () => adminRequest('/api/admin/go-live');
+export const removeTestNumbers = (provider, confirm) => adminRequest('/api/admin/go-live/remove-test-numbers', { method: 'POST', body: JSON.stringify({ provider, confirm }) });
