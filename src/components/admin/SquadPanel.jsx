@@ -85,6 +85,10 @@ export default function SquadPanel() {
           ))}
         </div>
         {!d.payoutReady && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>Save the Squad key and merchant ID to allow Squad.</p>}
+        <label style={{ ...row, borderTop: 'none', paddingBottom: 0 }}>
+          <input type="checkbox" checked={d.payoutFallback} disabled={busy} onChange={(e) => run(() => saveSquadSettings({ payoutFallback: e.target.checked }), e.target.checked ? 'Automatic backup is on.' : 'Automatic backup is off.')} style={{ width: 'auto', marginTop: 3 }} />
+          <span><b>Use the other partner as automatic backup</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>If the main partner clearly can’t send (refused, account check down, wallet too low), the transfer goes out through the other one. Never on timeouts, so nothing is paid twice. You get an alert each time. Needs both partners set up.</span></span>
+        </label>
       </div>
 
       <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10 }}>
