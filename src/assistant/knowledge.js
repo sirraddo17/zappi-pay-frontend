@@ -158,6 +158,14 @@ export const TOPICS = [
     actions: [{ label: 'Go to Wallet', to: '/wallet' }],
   },
   {
+    id: 'another-account',
+    title: 'Add another account number',
+    keywords: ['another account number', 'second account', 'nombank', 'nomba', 'backup account', 'more account numbers'],
+    answer:
+      'You can have more than one personal account number: Wallet → "Add another account number" (shown when available). Choose BVN or NIN, enter the 11 digits and confirm. Money sent to any of your account numbers goes straight into your wallet — handy if one bank is having network issues.',
+    actions: [{ label: 'Go to Wallet', to: '/wallet' }],
+  },
+  {
     id: 'gtbank-account',
     title: 'GTBank account number',
     keywords: ['gtbank', 'gtb', 'gtbank account', 'squad', 'bvn mismatch', 'details don’t match', 'gender', 'address', 'bvn phone'],

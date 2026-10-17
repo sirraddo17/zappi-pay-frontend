@@ -33,7 +33,7 @@ export default function SquadPanel() {
       </label>
       <label style={row}>
         <input type="checkbox" checked={d.squadPrimary} disabled={busy || !d.squadFundingEnabled} onChange={(e) => run(() => saveSquadSettings({ squadPrimary: e.target.checked }), e.target.checked ? 'New customers now get a GTBank account number.' : 'New customers get Monnify account numbers again.')} style={{ width: 'auto', marginTop: 3 }} />
-        <span><b>Make it the main option for new customers</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Off = new customers get Monnify; customers who already have account numbers can still add a GTBank one.</span></span>
+        <span><b>Make it the main option for new customers</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Used when “New customers get account numbers from” (Payment partners) is on Automatic. Customers who already have account numbers can still add a GTBank one.</span></span>
       </label>
 
       <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10 }}>
@@ -70,8 +70,8 @@ export default function SquadPanel() {
       </div>
 
       <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10 }}>
-        <b style={{ fontSize: 14 }}>Send to Bank through</b>
-        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 8px' }}>Which partner pays out customer withdrawals and supplier payments. Squad: ₦8 / ₦15 / ₦40 per transfer, no OTP. Transfers already sent are always checked with the partner that sent them. Make sure the chosen partner’s wallet has money.</p>
+        <b style={{ fontSize: 14 }}>Squad transfers (Send to Bank)</b>
+        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 8px' }}>₦8 / ₦15 / ₦40 per transfer, no OTP. Needs your merchant ID. Choose who sends transfers in “Payment partners” above.</p>
         <div className="field">
           <label htmlFor="sq-mid">Squad merchant ID{d.merchantId ? <span style={{ color: 'var(--green-500)' }}> · saved {d.merchantId}</span> : ''}</label>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -79,16 +79,6 @@ export default function SquadPanel() {
             <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: '0 0 auto' }} disabled={busy || !mid} onClick={async () => { if (await run(() => saveSquadSettings({ merchantId: mid }), 'Merchant ID saved.')) setMid(''); }}>Save</button>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {[['monnify', 'Monnify'], ['squad', 'Squad']].map(([v, l]) => (
-            <button key={v} type="button" className={d.payoutProvider === v ? 'btn' : 'btn btn-secondary'} disabled={busy || d.payoutProvider === v || (v === 'squad' && !d.payoutReady)} onClick={() => run(() => saveSquadSettings({ payoutProvider: v }), `Bank transfers now go out through ${l}.`)}>{l}</button>
-          ))}
-        </div>
-        {!d.payoutReady && <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>Save the Squad key and merchant ID to allow Squad.</p>}
-        <label style={{ ...row, borderTop: 'none', paddingBottom: 0 }}>
-          <input type="checkbox" checked={d.payoutFallback} disabled={busy} onChange={(e) => run(() => saveSquadSettings({ payoutFallback: e.target.checked }), e.target.checked ? 'Automatic backup is on.' : 'Automatic backup is off.')} style={{ width: 'auto', marginTop: 3 }} />
-          <span><b>Use the other partner as automatic backup</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>If the main partner clearly can’t send (refused, account check down, wallet too low), the transfer goes out through the other one. Never on timeouts, so nothing is paid twice. You get an alert each time. Needs both partners set up.</span></span>
-        </label>
       </div>
 
       <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10 }}>

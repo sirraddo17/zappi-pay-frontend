@@ -233,6 +233,66 @@ function SquadForm({ info, customerName, onCreated, addOn, onCancel }) {
   );
 }
 
+// Another personal account number (BVN or NIN), added next to the ones
+// the customer already has.
+function AddAccountForm({ info, customerName, onCreated, onCancel }) {
+  const [idType, setIdType] = useState('BVN');
+  const [idNumber, setIdNumber] = useState('');
+  const [dob, setDob] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  async function create(e) {
+    e.preventDefault();
+    setError('');
+    setBusy(true);
+    try {
+      const res = await createBankAccount({ provider: 'nomba', idType, idNumber, ...(info.idMatch ? { consent, ...(info.hasDob ? {} : { dateOfBirth: dob }) } : {}) });
+      setIdNumber('');
+      onCreated(res);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <form onSubmit={create} style={{ borderTop: '1px solid var(--slate-800, rgba(255,255,255,0.08))', paddingTop: 12, marginTop: 8 }}>
+      <h2 style={{ marginTop: 0, fontSize: 16 }}>Add another account number</h2>
+      <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>One more personal account number, so you have a backup if a bank is having network issues. Money sent to it goes straight into your wallet.</p>
+      {error && <p className="error-text" style={{ margin: '0 0 10px' }}>{error}</p>}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        {['BVN', 'NIN'].map((t) => (
+          <button key={t} type="button" className={idType === t ? 'btn' : 'btn btn-secondary'} onClick={() => setIdType(t)}>{t}</button>
+        ))}
+      </div>
+      <div className="field">
+        <label htmlFor="addId">Your {idType} (11 digits)</label>
+        <input id="addId" inputMode="numeric" autoComplete="off" maxLength={11} value={idNumber} onChange={(e) => setIdNumber(e.target.value.replace(/\D/g, ''))} required />
+      </div>
+      {info.idMatch && (
+        <>
+          {!info.hasDob && (
+            <div className="field">
+              <label htmlFor="addDob">Date of birth (as on your {idType})</label>
+              <input id="addDob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} max={new Date().toISOString().slice(0, 10)} required />
+            </div>
+          )}
+          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginBottom: 10 }}>
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
+            I agree that ZAPPI PAY can check my name ({customerName || 'on my profile'}) and date of birth with my {idType} through its licensed payment partner.
+          </label>
+        </>
+      )}
+      <p style={{ color: 'var(--slate-400)', fontSize: 12 }}>Your {idType} is sent securely to our licensed payment partner only to create your account. ZappiPay does not store it.</p>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button className="btn" type="submit" disabled={busy || idNumber.length !== 11 || (info.idMatch && (!consent || (!info.hasDob && !dob)))}>{busy ? 'Creating…' : 'Get My Account Number'}</button>
+        <button className="btn btn-secondary" type="button" disabled={busy} onClick={onCancel}>Cancel</button>
+      </div>
+    </form>
+  );
+}
+
 // Personal account number(s): money sent here is added to the wallet
 // automatically. First time, the customer verifies with BVN or NIN.
 function BankFunding({ info, onCreated, onCredited, customerName }) {
@@ -244,6 +304,7 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [addGtb, setAddGtb] = useState(false);
+  const [addMore, setAddMore] = useState(false);
 
   const feeText = info.feePercent > 0
     ? `A ${info.feePercent}% bank processing fee${info.feeCap > 0 ? ` (max ₦${Number(info.feeCap).toLocaleString()})` : ''} applies to each transfer${info.feeIsPassThrough ? ' — it goes to our licensed payment partner for handling your transfer, not to ZAPPI PAY' : ''}.`
@@ -376,6 +437,12 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
       )}
       {info.squadAddable && addGtb && (
         <SquadForm info={info} customerName={customerName} addOn onCancel={() => setAddGtb(false)} onCreated={(res) => { setAddGtb(false); onCreated({ ...res, squadAddable: false }); }} />
+      )}
+      {info.nombaAddable && !addMore && !addGtb && (
+        <button className="btn btn-secondary" type="button" style={{ marginTop: 8, marginLeft: 8 }} onClick={() => setAddMore(true)}>Add another account number</button>
+      )}
+      {info.nombaAddable && addMore && (
+        <AddAccountForm info={info} customerName={customerName} onCancel={() => setAddMore(false)} onCreated={(res) => { setAddMore(false); onCreated({ ...res, nombaAddable: false }); }} />
       )}
     </div>
   );
@@ -595,7 +662,7 @@ export default function Wallet() {
       {autoFunding && (
         <BankFunding
           info={bankInfo}
-          onCreated={(res) => { setBankInfo((prev) => ({ ...prev, accounts: res.accounts, kycType: res.kycType, ...(res.squadAddable === false || prev?.provider === 'squad' ? { squadAddable: false } : {}) })); if (res.verified) refreshCustomer?.(); }}
+          onCreated={(res) => { setBankInfo((prev) => ({ ...prev, accounts: res.accounts, kycType: res.kycType, ...(res.squadAddable === false || prev?.provider === 'squad' ? { squadAddable: false } : {}), ...(res.nombaAddable === false || prev?.provider === 'nomba' ? { nombaAddable: false } : {}) })); if (res.verified) refreshCustomer?.(); }}
           onCredited={load}
           customerName={customer?.name}
         />
