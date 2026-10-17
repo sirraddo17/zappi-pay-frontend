@@ -128,7 +128,14 @@ export default function EpinSettingsPanel() {
           <select id="betSup" value={betSup} onChange={(e) => setBetSup(e.target.value)}>
             <option value="VTPASS">VTpass</option>
             <option value="CLUBKONNECT">ClubKonnect (uses the same wallet as cards)</option>
+            <option value="NOMBA" disabled={!d.nombaReady}>Nomba (paid from your Nomba wallet){d.nombaReady ? '' : ' — connect Nomba first'}</option>
           </select>
+          {d.bettingSupplier === 'NOMBA' && d.bettingList?.at && (
+            <div style={{ fontSize: 12, margin: '6px 0', color: d.bettingList.count ? 'var(--green-500)' : 'var(--gold)' }}>
+              {d.bettingList.count ? `✓ ${d.bettingList.count} betting companies loaded from Nomba.` : `Nomba's list of betting companies could not be read${d.bettingList.error ? `: ${d.bettingList.error}` : ''}. Check the Nomba keys and that Bill Payments API access is approved.`}
+            </div>
+          )}
+          {betSup === 'NOMBA' && <small style={{ display: 'block', color: 'var(--slate-400)', marginBottom: 4 }}>Each payment comes out of your Nomba wallet (Primary account), so keep it topped up. The customer’s betting account name is checked before they pay. Turn the feature on under New features → Bet Funding.</small>}
           {d.bettingSupplier === 'CLUBKONNECT' && d.bettingList?.at && (
             <div style={{ fontSize: 12, margin: '6px 0', color: d.bettingList.source === 'clubkonnect' ? 'var(--green-500)' : 'var(--gold)' }}>
               {d.bettingList.source === 'clubkonnect' ? `✓ ${d.bettingList.count} betting companies loaded from ClubKonnect.` : `Using the built-in list of betting companies (ClubKonnect's list could not be read${d.bettingList.error ? `: ${d.bettingList.error}` : ''}). Account names are still checked before paying.`}

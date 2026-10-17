@@ -49,7 +49,7 @@ const TABS = [
   { key: 'cashback', label: 'Cashback' },
   { key: 'promise', label: '⚡ Delivery promise' },
   { key: 'shops', label: '🏪 Agent shops' },
-  { key: 'epins', label: '🖨️ ClubKonnect' },
+  { key: 'epins', label: '🖨️ ClubKonnect & Bet Funding' },
   { key: 'agents', label: 'Agents' },
   { key: 'loyalty', label: 'Loyalty Points' },
   { key: 'savings', label: 'Savings (interest)' },
