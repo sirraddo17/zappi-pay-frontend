@@ -61,8 +61,8 @@ export default function SquadPanel() {
       </div>
 
       <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10, marginTop: 10 }}>
-        <b style={{ fontSize: 14 }}>GTBank settlement account (optional)</b>
-        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 8px' }}>Your company GTBank account (10 digits). If set, money goes there instantly; if empty, it collects in your Squad balance and settles next working day. Only affects NEW account numbers.</p>
+        <b style={{ fontSize: 14 }}>GTBank settlement account (required)</b>
+        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 8px' }}>Squad needs a GTBank account (10 digits) to pay customer funding into — your company GTBank account in live. Customers can’t get GTBank account numbers until it’s saved. In sandbox any 10-digit number works for testing. Only affects NEW account numbers.</p>
         <div style={{ display: 'flex', gap: 8 }}>
           <input inputMode="numeric" maxLength={10} value={ben} onChange={(e) => setBen(e.target.value.replace(/\D/g, ''))} style={{ ...input, flex: 1 }} aria-label="GTBank settlement account" />
           <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: '0 0 auto' }} disabled={busy} onClick={() => run(() => saveSquadSettings({ beneficiaryAccount: ben }), 'Settlement account saved.')}>Save</button>
