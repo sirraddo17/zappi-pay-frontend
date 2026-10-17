@@ -59,6 +59,19 @@ const TABS = [
   { key: 'password', label: 'My Password' },
 ];
 
+// Sections inside a menu, so long menus show one part at a time.
+const SUBTABS = {
+  vtpass: [['connection', '🔌 Connection'], ['test', '🧪 Self-test'], ['intl', '🌍 International airtime']],
+  monnify: [['overview', '🤝 Overview'], ['monnify', 'Monnify'], ['squad', 'Squad (GTBank)'], ['nomba', 'Nomba'], ['flutterwave', 'Flutterwave (card)']],
+  markup: [['rates', '📈 Markup per service'], ['safe', '✅ Safe pricing check']],
+  discount: [['discounts', '🏷️ Discounts'], ['guard', '🛡️ Giveaway safety limit']],
+  limits: [['amounts', '⬇️ Minimum amounts'], ['manual', '🏦 Manual funding accounts'], ['fees', '💸 Monnify funding fee']],
+  referral: [['settings', '🎁 Referral rewards'], ['receipt', '🧾 Invite on receipts'], ['progress', '👥 Invited friends']],
+  alerts: [['customers', '📣 Customer alerts'], ['admin', '🔔 Alerts to me'], ['helpers', '🤖 Automatic helpers'], ['limits', '🚦 Daily spending limits'], ['support', '💬 Support WhatsApp']],
+  security: [['fraud', '🕵️ Fraud check'], ['login', '🔐 Two-step login'], ['attack', '🛡️ Attack watch'], ['id', '🪪 BVN/NIN check'], ['summary', '📊 Daily summary']],
+  ai: [['assistant', '🤖 AI Assistant'], ['voice', '🎤 Voice notes'], ['openai', '🗣️ Natural voice & pictures'], ['heygen', '🎥 Presenter videos']],
+};
+
 const A2C_NETWORKS = [
   { key: 'mtn', label: 'MTN' },
   { key: 'glo', label: 'Glo' },
@@ -106,7 +119,9 @@ export default function AdminSettings() {
   const [markupCapByService, setMarkupCapByService] = useState({});
   const [discountByService, setDiscountByService] = useState(toServiceMap({}));
   const [monnifyMode, setMonnifyMode] = useState('sandbox');
-  const [partnerTab, setPartnerTab] = useState('overview');
+  const [subTab, setSubTab] = useState({});
+  const sub = (t) => subTab[t] || SUBTABS[t]?.[0][0];
+  const partnerTab = sub('monnify');
   const [monnifyApiKey, setMonnifyApiKey] = useState('');
   const [monnifySecretKey, setMonnifySecretKey] = useState('');
   const [monnifyContractCode, setMonnifyContractCode] = useState('');
@@ -565,7 +580,15 @@ export default function AdminSettings() {
         <p className="error-text" style={{ margin: '0 0 12px' }}>{loadError}</p>
       )}
 
-      {!loading && !loadError && tab === 'vtpass' && (
+      {!loading && !loadError && SUBTABS[tab] && (
+        <div role="tablist" aria-label="Sections" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '0 0 16px', maxWidth: 640, paddingTop: 12, borderTop: '1px solid var(--slate-800)' }}>
+          {SUBTABS[tab].map(([k, l]) => (
+            <button key={k} type="button" role="tab" aria-selected={sub(tab) === k} className={sub(tab) === k ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '8px 14px' }} onClick={() => setSubTab((x) => ({ ...x, [tab]: k }))}>{l}</button>
+          ))}
+        </div>
+      )}
+
+      {!loading && !loadError && tab === 'vtpass' && sub('vtpass') === 'connection' && (
         <form className="card" style={cardStyle} onSubmit={saveVtpass}>
           <SectionHeader title="VTpass Connection" hint="Mode and API keys used for every purchase." />
           <Status state={status.vtpass} />
@@ -591,15 +614,9 @@ export default function AdminSettings() {
           {saveButton('vtpass', 'Save VTpass Settings')}
         </form>
       )}
-      {!loading && !loadError && tab === 'vtpass' && <><VtpassSelfTest /><IntlAirtimeToggle /></>}
+      {!loading && !loadError && tab === 'vtpass' && sub('vtpass') === 'test' && <VtpassSelfTest />}
+      {!loading && !loadError && tab === 'vtpass' && sub('vtpass') === 'intl' && <IntlAirtimeToggle />}
 
-      {!loading && !loadError && tab === 'monnify' && (
-        <div role="tablist" aria-label="Payment partners" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '0 0 16px', maxWidth: 640 }}>
-          {[['overview', '🤝 Overview'], ['monnify', 'Monnify'], ['squad', 'Squad (GTBank)'], ['nomba', 'Nomba'], ['flutterwave', 'Flutterwave (card)']].map(([k, l]) => (
-            <button key={k} type="button" role="tab" aria-selected={partnerTab === k} className={partnerTab === k ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '8px 14px' }} onClick={() => setPartnerTab(k)}>{l}</button>
-          ))}
-        </div>
-      )}
       {!loading && !loadError && tab === 'monnify' && partnerTab === 'overview' && <PaymentPartnersPanel />}
       {!loading && !loadError && tab === 'monnify' && partnerTab === 'monnify' && <FundingMethodsPanel only="monnify" />}
       {!loading && !loadError && tab === 'monnify' && partnerTab === 'squad' && <SquadPanel />}
@@ -728,8 +745,8 @@ export default function AdminSettings() {
         </div>
       )}
 
-      {!loading && !loadError && tab === 'markup' && <SafePricingPanel onApplied={() => window.location.reload()} />}
-      {!loading && !loadError && tab === 'markup' && (
+      {!loading && !loadError && tab === 'markup' && sub('markup') === 'safe' && <SafePricingPanel onApplied={() => window.location.reload()} />}
+      {!loading && !loadError && tab === 'markup' && sub('markup') === 'rates' && (
         <form className="card" style={cardStyle} onSubmit={saveMarkup}>
           <SectionHeader title="Markup per service (%)" hint="Added on top of VTpass's own price for that service. Set a maximum so big bills (e.g. DStv Premium) don't get an expensive charge — e.g. 1% but never more than ₦100." />
           <Status state={status.markup} />
@@ -776,8 +793,8 @@ export default function AdminSettings() {
         </form>
       )}
 
-      {!loading && !loadError && tab === 'discount' && <RewardGuardPanel />}
-      {!loading && !loadError && tab === 'discount' && (
+      {!loading && !loadError && tab === 'discount' && sub('discount') === 'guard' && <RewardGuardPanel />}
+      {!loading && !loadError && tab === 'discount' && sub('discount') === 'discounts' && (
         <form className="card" style={cardStyle} onSubmit={saveDiscount}>
           <SectionHeader
             title="Discount per service (%)"
@@ -821,10 +838,12 @@ export default function AdminSettings() {
         </form>
       )}
 
-      {!loading && !loadError && tab === 'limits' && (
+      {!loading && !loadError && tab === 'limits' && sub('limits') === 'manual' && <div className="card" style={{ margin: 0, maxWidth: 480 }}><FundingAccountsPanel /></div>}
+      {!loading && !loadError && tab === 'limits' && sub('limits') !== 'manual' && (
         <form className="card" style={cardStyle} onSubmit={saveLimits}>
           <SectionHeader title="Limits & fees" hint="Smallest amounts customers can fund or spend, and the fee on automatic bank transfer funding." />
           <Status state={status.limits} />
+{sub('limits') === 'amounts' && <>
           <div className="field">
             <label htmlFor="minFundingAmount">Minimum funding amount (₦)</label>
             <input id="minFundingAmount" type="number" step="1" min="0" value={minFundingAmount} onChange={(e) => setMinFundingAmount(e.target.value)} />
@@ -838,7 +857,8 @@ export default function AdminSettings() {
             <input id="lightMin" type="number" step="1" min="0" max="100000" value={lightMin} onChange={(e) => setLightMin(e.target.value)} />
             <small style={{ color: 'var(--slate-400)' }}>Electricity companies reject very small tokens. Customers can’t pay less than this; if the meter check shows a higher minimum for that company, that one is used.</small>
           </div>
-          <FundingAccountsPanel />
+</>}
+          {sub('limits') === 'fees' && <>
           <div className="field">
             <label htmlFor="bankFeePercent">Bank transfer funding fee (%) — Monnify account numbers</label>
             <input id="bankFeePercent" type="number" step="0.01" min="0" max="10" value={bankFeePercent} onChange={(e) => setBankFeePercent(e.target.value)} />
@@ -849,7 +869,8 @@ export default function AdminSettings() {
             <input id="bankFeeCap" type="number" step="1" min="0" value={bankFeeCap} onChange={(e) => setBankFeeCap(e.target.value)} />
             <small style={{ color: 'var(--slate-400)' }}>0 = no maximum.</small>
           </div>
-          {saveButton('limits', 'Save Limits')}
+</>}
+                    {saveButton('limits', 'Save Limits')}
         </form>
       )}
 
@@ -942,7 +963,7 @@ export default function AdminSettings() {
           <SectionHeader title="Security" />
           <Status state={status.security} />
 
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>Fraud check on bank transfers</div>
+{sub('security') === 'fraud' && <>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
             <input type="checkbox" checked={fraudOn} onChange={(e) => setFraudOn(e.target.checked)} style={{ width: 'auto' }} />
             Hold large transfers for my review
@@ -957,8 +978,9 @@ export default function AdminSettings() {
             <small style={{ color: 'var(--slate-400)' }}>Held transfers wait under Bank Transfers → Held. You'll get an email for each one.</small>
           </div>
 
-          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '14px 0', paddingTop: 14 }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Two-step admin login</div>
+</>}
+                    {sub('security') === 'login' && (
+          <div style={{ margin: '0 0 14px' }}>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
               <input type="checkbox" checked={twoFactor} onChange={(e) => setTwoFactor(e.target.checked)} style={{ width: 'auto' }} />
               Email a 6-digit code on every admin login
@@ -968,9 +990,10 @@ export default function AdminSettings() {
             </p>
             <BackupCodesPanel />
           </div>
+          )}
 
-          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '14px 0', paddingTop: 14 }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Attack watch</div>
+          {sub('security') === 'attack' && (
+          <div style={{ margin: '0 0 14px' }}>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
               <input type="checkbox" checked={attackOn} onChange={(e) => setAttackOn(e.target.checked)} style={{ width: 'auto' }} />
               Automatically block addresses that scan for weak spots, guess passwords or forge logins
@@ -978,7 +1001,10 @@ export default function AdminSettings() {
             <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
               Blocks are short (15 minutes to a day) and you're alerted. Warning signs are always recorded — see 🛡️ Security. When off, you're only alerted. Addresses in SECURITY_ALLOW_IPS on Render are never blocked.
             </p>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Check name & date of birth with BVN/NIN</div>
+          </div>
+          )}
+          {sub('security') === 'id' && (
+          <div style={{ margin: '0 0 14px' }}>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
               <input type="checkbox" checked={idMatch} onChange={(e) => setIdMatch(e.target.checked)} style={{ width: 'auto' }} />
               Before giving an account number, check the customer’s name and date of birth match their BVN/NIN
@@ -987,9 +1013,10 @@ export default function AdminSettings() {
               Uses Monnify verification: about ₦10 per BVN check and ₦60 per NIN check (from your Monnify wallet). Up to 3 tries per customer a day. After a match, the customer can’t change their name or date of birth. Turn this on only with Monnify LIVE keys — test mode can’t check real IDs.
             </p>
           </div>
+          )}
 
-          <div style={{ borderTop: '1px solid var(--slate-700)', margin: '14px 0', paddingTop: 14 }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Daily summary email</div>
+          {sub('security') === 'summary' && (
+          <div style={{ margin: '0 0 14px' }}>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
               <input type="checkbox" checked={summaryOn} onChange={(e) => setSummaryOn(e.target.checked)} style={{ width: 'auto' }} />
               Email admins yesterday's numbers at 7am
@@ -1001,6 +1028,7 @@ export default function AdminSettings() {
               <p style={{ fontSize: 13, margin: '6px 0 0', color: summaryTest.ok ? 'var(--green-500)' : 'var(--red-500)' }}>{summaryTest.text}</p>
             )}
           </div>
+          )}
 
           {saveButton('security', 'Save Security Settings')}
         </form>
@@ -1065,6 +1093,7 @@ export default function AdminSettings() {
         <form className="card" style={cardStyle} onSubmit={saveAlerts}>
           <SectionHeader title="Alerts, limits & support" />
           <Status state={status.alerts} />
+{sub('alerts') === 'customers' && <>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
             <input type="checkbox" checked={alertsOn} onChange={(e) => setAlertsOn(e.target.checked)} style={{ width: 'auto' }} />
             Send email alerts (money in/out, new logins)
@@ -1079,7 +1108,14 @@ export default function AdminSettings() {
           <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
             When a purchase, bank transfer or send fails because of a partner or system problem, the customer gets a polite “it’s working again — sorry” notice (with a link to try again) as soon as the next one goes through. Customer mistakes (wrong number, low balance) never trigger it. Once per customer per day, within 48 hours.
           </p>
-          <div style={{ fontWeight: 600, margin: '4px 0 6px' }}>Alerts to me (admin)</div>
+</>}
+          {sub('alerts') === 'customers' && <>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
+            <input type="checkbox" checked={feedbackOn} onChange={(e) => setFeedbackOn(e.target.checked)} style={{ width: 'auto' }} />
+            Ask customers to rate their purchase (and share their referral link when happy)
+          </label>
+</>}
+{sub('alerts') === 'admin' && <>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
             <input type="checkbox" checked={adminPushOn} onChange={(e) => setAdminPushOn(e.target.checked)} style={{ width: 'auto' }} />
             Push notifications to the admin app
@@ -1091,11 +1127,9 @@ export default function AdminSettings() {
           <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
             For new support messages, transfers needing your Monnify OTP or held for review, funding and Airtime-to-Cash requests, deletion/agent requests, orders stuck over 15 minutes, low ratings and contest results. Turn on push per device with “Turn on alerts” in the menu.
           </p>
-          <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
-            <input type="checkbox" checked={feedbackOn} onChange={(e) => setFeedbackOn(e.target.checked)} style={{ width: 'auto' }} />
-            Ask customers to rate their purchase (and share their referral link when happy)
-          </label>
-          <div style={{ fontWeight: 600, margin: '4px 0 6px' }}>Automatic helpers (free — no AI cost)</div>
+</>}
+          {sub('alerts') === 'helpers' && <>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 8px' }}>Free — no AI cost.</p>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
             <input type="checkbox" checked={spotterOn} onChange={(e) => setSpotterOn(e.target.checked)} style={{ width: 'auto' }} />
             Problem spotter — alert me when a provider keeps failing (and prepare a notice + pause card)
@@ -1108,6 +1142,8 @@ export default function AdminSettings() {
             <input type="checkbox" checked={agentWeeklyOn} onChange={(e) => setAgentWeeklyOn(e.target.checked)} style={{ width: 'auto' }} />
             Weekly shop report to agents (Mondays)
           </label>
+</>}
+          {sub('alerts') === 'limits' && <>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
             <input type="checkbox" checked={limitsOn} onChange={(e) => setLimitsOn(e.target.checked)} style={{ width: 'auto' }} />
             Daily spending limits by verification level
@@ -1121,17 +1157,20 @@ export default function AdminSettings() {
             <input id="limV" type="number" min="0" value={limitVerified} onChange={(e) => setLimitVerified(e.target.value)} />
             <small style={{ color: 'var(--slate-400)' }}>Covers purchases, ZappiPay transfers and bank transfers per day.</small>
           </div>
+</>}
+          {sub('alerts') === 'support' && <>
           <div className="field">
             <label htmlFor="wa">Support WhatsApp number</label>
             <input id="wa" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="e.g. 08012345678" />
             <small style={{ color: 'var(--slate-400)' }}>The number customers reach from "Chat on WhatsApp" in Profile and the help chat. Leave empty to keep the current number (08134209037).</small>
           </div>
-          {saveButton('alerts', 'Save')}
+</>}
+                    {saveButton('alerts', 'Save')}
         </form>
       )}
 
-      {!loading && !loadError && tab === 'referral' && <ReceiptInvitePanel />}
-      {!loading && !loadError && tab === 'referral' && (
+      {!loading && !loadError && tab === 'referral' && sub('referral') === 'receipt' && <ReceiptInvitePanel />}
+      {!loading && !loadError && tab === 'referral' && sub('referral') === 'settings' && (
         <form className="card" style={cardStyle} onSubmit={saveReferral}>
           <SectionHeader
             title="Referral program"
@@ -1262,10 +1301,13 @@ export default function AdminSettings() {
           {saveButton('referral', 'Save Referral Settings')}
         </form>
       )}
-      {!loading && !loadError && tab === 'referral' && <ReferralProgressPanel />}
+      {!loading && !loadError && tab === 'referral' && sub('referral') === 'progress' && <ReferralProgressPanel />}
 
       {!loading && !loadError && tab === 'epins' && <EpinSettingsPanel />}
-      {!loading && !loadError && tab === 'ai' && (<div style={{ display: 'grid', gap: 16 }}><AiSettingsPanel /><VoiceSettingsPanel /><OpenAiExtrasPanel /><HeygenSettingsPanel /></div>)}
+      {!loading && !loadError && tab === 'ai' && sub('ai') === 'assistant' && <AiSettingsPanel />}
+      {!loading && !loadError && tab === 'ai' && sub('ai') === 'voice' && <VoiceSettingsPanel />}
+      {!loading && !loadError && tab === 'ai' && sub('ai') === 'openai' && <OpenAiExtrasPanel />}
+      {!loading && !loadError && tab === 'ai' && sub('ai') === 'heygen' && <HeygenSettingsPanel />}
       {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
       {!loading && !loadError && tab === 'maintenance' && <MaintenancePanel />}
       {!loading && !loadError && tab === 'promise' && <DeliveryPromisePanel />}

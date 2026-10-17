@@ -31,7 +31,7 @@ export default function FundingMethodsPanel({ only }) {
 
       {only !== 'flutterwave' && <label style={row}>
         <input type="checkbox" checked={d.monnifyFundingEnabled} disabled={busy} onChange={(e) => save({ monnifyFundingEnabled: e.target.checked }, e.target.checked ? 'Bank transfer funding is on.' : 'Bank transfer is off — no new account numbers are shown. Money sent to existing account numbers is still credited.')} style={{ width: 'auto', marginTop: 3 }} />
-        <span><b>🏦 Bank transfer (Monnify)</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Personal account numbers. {d.monnifyReady ? 'Keys are set (Monnify tab below).' : 'Monnify keys not set yet.'} When off, money customers still send to their account number is credited anyway. The funding fee for Monnify account numbers is under Settings → Limits.</span></span>
+        <span><b>🏦 Bank transfer (Monnify)</b><br /><span style={{ fontSize: 12, color: 'var(--slate-400)' }}>Personal account numbers. {d.monnifyReady ? 'Keys are set (Monnify tab below).' : 'Monnify keys not set yet.'} When off, money customers still send to their account number is credited anyway. The funding fee for Monnify account numbers is under Settings → Limits → Monnify funding fee.</span></span>
       </label>}
 
       {only !== 'monnify' && <>
