@@ -16,7 +16,7 @@ export default function NombaPanel() {
   }
   if (!d) return <div className="card" style={{ margin: '0 0 16px', maxWidth: 640 }}>{msg ? <p className="error-text">{msg.text}</p> : 'Loading Nomba…'}</div>;
   const input = { width: '100%', boxSizing: 'border-box' };
-  const fields = [['clientId', 'Client ID'], ['clientSecret', 'Client secret'], ['accountId', 'Account ID (parent account)'], ['webhookKey', 'Webhook signature key']];
+  const fields = [['clientId', 'Client ID'], ['clientSecret', 'Client secret'], ['accountId', 'Account ID (parent account)'], ['webhookKey', 'Webhook signature key (make one up)']];
 
   return (
     <div className="card" style={{ margin: '0 0 16px', maxWidth: 640 }}>
@@ -30,7 +30,7 @@ export default function NombaPanel() {
 
       <div style={{ borderTop: '1px solid var(--slate-800)', paddingTop: 10 }}>
         <b style={{ fontSize: 14 }}>Nomba keys</b>
-        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 8px' }}>From the Nomba dashboard → Developer → API keys (sandbox first). The webhook signature key is under Developer → Webhook Setup. Saved keys are never shown again; leave a box empty to keep it.</p>
+        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '2px 0 8px' }}>From the Nomba dashboard → Developer → API keys (sandbox first). For the webhook signature key, make up a long password, save it here, then type the same one in Nomba → Developer → Webhook Setup. Saved keys are never shown again; leave a box empty to keep it.</p>
         <div className="field">
           <label htmlFor="nb-mode">Mode</label>
           <select id="nb-mode" value={d.mode} disabled={busy} onChange={(e) => run(() => saveNombaSettings({ mode: e.target.value }), 'Mode saved.')}>
@@ -51,7 +51,7 @@ export default function NombaPanel() {
         <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 10, background: 'rgba(13, 148, 136,0.08)', borderRadius: 8, padding: 10 }}>
           In Nomba → Developer → <b>Webhook Setup</b>, set the URL to:<br />
           <code style={{ wordBreak: 'break-all' }}>{d.webhookUrl}</code><br />
-          and subscribe to payment_success, payout_success, payout_failed and payout_refund.
+          with the same signature key you saved above, and subscribe to payment_success, payout_success, payout_failed and payout_refund. Do it once under Test and again under Live.
         </div>
       </div>
 
