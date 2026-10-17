@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { providerName } from '../lib/providerName';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getOrder, submitSupportTicket } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
@@ -71,7 +72,7 @@ export default function OrderDetail() {
   function receiptData() {
     const rows = [
       ['Service', order.service],
-      ['Provider', String(order.provider || '').replace(/^ck:/, '')],
+      ['Provider', providerName(order.provider)],
       ['Recipient', order.recipient],
     ];
     if (order.recipientName) rows.push(['Name', order.recipientName]);
@@ -204,7 +205,7 @@ export default function OrderDetail() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--slate-400)' }}>Provider</span>
-            <span>{String(order.provider || '').replace(/^ck:/, '')}</span>
+            <span>{providerName(order.provider)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--slate-400)' }}>Recipient</span>

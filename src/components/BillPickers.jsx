@@ -41,7 +41,7 @@ export function ProviderGrid({ providers, value, onChange, label }) {
   const list = q.trim() ? providers.filter((p) => `${p.name} ${p.serviceID}`.toLowerCase().includes(q.trim().toLowerCase())) : providers;
   return (
     <div>
-      {providers.length > 8 && <input className="plan-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${label.toLowerCase()} (e.g. Ikeja, IBEDC)`} aria-label={`Search ${label}`} />}
+      {providers.length > 8 && <input className="plan-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${label.toLowerCase()}${/bet/i.test(label) ? ' (e.g. Bet9ja, SportyBet)' : /electric|disco|company/i.test(label) ? ' (e.g. Ikeja, IBEDC)' : ''}`} aria-label={`Search ${label}`} />}
       {/* Few providers (TV, exams): compact chips. Many (discos): tile grid. */}
       <div className={providers.length > 6 ? 'prov-grid' : 'prov-chips'} role="radiogroup" aria-label={label}>
         {list.map((p) => {
