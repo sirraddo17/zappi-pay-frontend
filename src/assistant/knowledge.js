@@ -158,6 +158,14 @@ export const TOPICS = [
     actions: [{ label: 'Go to Wallet', to: '/wallet' }],
   },
   {
+    id: 'id-check-tries',
+    title: 'BVN/NIN check blocked for today',
+    keywords: ['tried 3 times', 'try again tomorrow', 'name does not match', 'date of birth does not match', 'bvn not matching', 'nin not matching', 'cannot get account number', 'id check failed'],
+    answer:
+      'Your name in Profile and your date of birth must be exactly as on your BVN/NIN (same spelling, first name and surname). Fix them first: Profile → edit your name; for a wrong date of birth, ask support to reset it. "Could not check" messages never use up a try. If you are blocked for today, contact support — after checking it is you, they can give you fresh tries so you don\'t have to wait until tomorrow.',
+    actions: [{ label: 'Open Profile', to: '/profile' }],
+  },
+  {
     id: 'another-account',
     title: 'Add another account number',
     keywords: ['another account number', 'second account', 'nombank', 'nomba', 'backup account', 'more account numbers'],

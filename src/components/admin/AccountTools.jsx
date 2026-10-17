@@ -55,6 +55,30 @@ export default function AccountTools({ customer, onDone }) {
       {row('Forgot security answer / wrong date of birth', customer.hasDob || customer.hasSecurityAnswer ? 'Clears both. They set them again in Profile → Security details.' : 'Not set yet — nothing to reset.', 'Reset',
         () => run('RESET_SECURITY', `Reset ${first}'s date of birth and security question?`), !(customer.hasDob || customer.hasSecurityAnswer))}
 
+      {customer.idChecks?.length > 0 && (
+        <div style={{ padding: '10px 0', borderTop: '1px solid var(--slate-700)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>BVN/NIN check {customer.idTriesLeft === 0 ? '— blocked for today' : `— ${customer.idTriesLeft} of ${customer.idTriesMax} tries left`}</div>
+              <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Fix the cause first (below), then give fresh tries so they don’t wait until tomorrow.</div>
+            </div>
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: 13, flexShrink: 0 }} disabled={busy !== null || customer.idTriesLeft === customer.idTriesMax}
+              onClick={() => run('RESET_ID_TRIES', `Give ${first} ${customer.idTriesMax} fresh BVN/NIN tries? Each try costs about ₦10 (BVN) or ₦60 (NIN).`)}>Give fresh tries</button>
+          </div>
+          <div style={{ fontSize: 12, marginTop: 6 }}>
+            {customer.idChecks.map((c, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '2px 0' }}>
+                <span style={{ color: 'var(--slate-400)' }}>{new Date(c.at).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}{c.idType !== '-' ? ` · ${c.idType}` : ''}</span>
+                <span style={{ textAlign: 'right', color: c.result === 'PASS' ? 'var(--green-500)' : c.result === 'MISMATCH' || c.result === 'NOT_FOUND' ? 'var(--red-500)' : 'var(--slate-300)' }}>{c.label}{c.detail ? ` — ${c.detail}` : ''}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 6, background: 'rgba(13, 148, 136,0.08)', borderRadius: 8, padding: 8 }}>
+            <b>Name didn’t match:</b> ask them to change their name in Profile to exactly match their ID (first name and surname, same spelling). <b>Date of birth:</b> use “Reset” on the security row above, then they enter it again exactly as on the ID. <b>ID number not found:</b> they mistyped it — ask them to re-check the 11 digits. <b>Could not check:</b> not their fault and no try was used; if it says test mode, switch Monnify to live or turn off the check in Settings → Security.
+          </div>
+        </div>
+      )}
+
       <div style={{ padding: '10px 0', borderTop: '1px solid var(--slate-700)' }}>
         <div style={{ fontWeight: 600, fontSize: 14 }}>New phone number or email</div>
         <div style={{ fontSize: 12, color: 'var(--slate-400)', marginBottom: 6 }}>Now: {customer.phone}{customer.email ? ` · ${customer.email}` : ' · no email'}. They log in with the new phone number afterwards.</div>
