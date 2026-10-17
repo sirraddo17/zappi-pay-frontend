@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PasswordField from '../../components/PasswordField';
 import AdminLayout from '../../components/AdminLayout';
 import AiSettingsPanel from '../../components/AiSettingsPanel';
@@ -120,6 +121,16 @@ export default function AdminSettings() {
   const [discountByService, setDiscountByService] = useState(toServiceMap({}));
   const [monnifyMode, setMonnifyMode] = useState('sandbox');
   const [subTab, setSubTab] = useState({});
+  // Links like /admin/settings?tab=security&sub=login (e.g. from the AI
+  // assistant) open that menu and section.
+  const [params] = useSearchParams();
+  useEffect(() => {
+    const t = params.get('tab');
+    if (!t || !TABS.some((x) => x.key === t)) return;
+    setTab(t);
+    const sb = params.get('sub');
+    if (sb && SUBTABS[t]?.some(([k]) => k === sb)) setSubTab((x) => ({ ...x, [t]: sb }));
+  }, [params]);
   const sub = (t) => subTab[t] || SUBTABS[t]?.[0][0];
   const partnerTab = sub('monnify');
   const [monnifyApiKey, setMonnifyApiKey] = useState('');

@@ -6,8 +6,31 @@ import ImageAttach from '../../components/ImageAttach';
 import AiActionCard from '../../components/admin/AiActionCard';
 import AiDesignCard from '../../components/admin/AiDesignCard';
 
+// "[[go:/admin/…|Label]]" in a reply becomes a button to that screen.
+function ReplyText({ text }) {
+  const parts = String(text || '').split(/(\[\[go:[^\]|]+\|[^\]]+\]\])/g);
+  const links = [];
+  const body = parts.map((p, i) => {
+    const m = /^\[\[go:([^\]|]+)\|([^\]]+)\]\]$/.exec(p);
+    if (!m) return p;
+    if (/^\/admin(\/|\?|$)/.test(m[1])) links.push({ to: m[1], label: m[2], key: i });
+    return '';
+  });
+  return (
+    <>
+      {body.join('').replace(/[ \t]+\n/g, '\n').trim()}
+      {links.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8, whiteSpace: 'normal' }}>
+          {links.map((l) => <Link key={l.key} to={l.to} className="btn btn-secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: 13, textDecoration: 'none' }}>↗ {l.label}</Link>)}
+        </div>
+      )}
+    </>
+  );
+}
+
 const SUGGESTIONS = [
   'How did we do today?',
+  'Where do I turn on two-step login?',
   'Any fraud or risk flags I should look at?',
   'Summarise open support tickets and draft replies',
   'How long will my VTpass balance last?',
@@ -156,7 +179,7 @@ export default function AdminAssistant() {
                     {m.pics.map((src, j) => <img key={j} src={src} alt="" style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 8 }} />)}
                   </div>
                 )}
-                {m.content}
+                {m.role === 'assistant' ? <ReplyText text={m.content} /> : m.content}
               </div>
               {m.actions?.map((a) => <AiActionCard key={a.id} action={a} />)}
               {m.designs?.map((d, j) => <AiDesignCard key={j} design={d} />)}
