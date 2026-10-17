@@ -141,8 +141,9 @@ export default function RequestApproval({ customer, orders, onDone }) {
 }
 
 // Customer says they sent money to their personal account number but
-// the wallet didn't go up. Asks Monnify and credits only what Monnify
-// confirms — safe for support staff.
+// the wallet didn't go up. Asks every partner they have an account number
+// with (Monnify, Squad, Nomba) and credits only what the partner confirms
+// — safe for support staff.
 export function FundingCheck({ customer, onDone }) {
   const [ref, setRef] = useState('');
   const [busy, setBusy] = useState(false);
@@ -164,12 +165,12 @@ export function FundingCheck({ customer, onDone }) {
   }
   return (
     <details className="card" style={{ margin: '0 0 16px' }}>
-      <summary style={{ cursor: 'pointer', fontWeight: 700 }}>🏦 Funding not showing? Check with Monnify</summary>
-      <p style={{ color: 'var(--slate-400)', fontSize: 13 }}>For money sent to the customer’s personal account number (Wema / Sterling). Credits only payments Monnify confirms, never twice. Manual funding to the business account is approved by an owner under Pending Funding.</p>
+      <summary style={{ cursor: 'pointer', fontWeight: 700 }}>🏦 Funding not showing? Check with the bank partners</summary>
+      <p style={{ color: 'var(--slate-400)', fontSize: 13 }}>For money sent to any of the customer’s personal account numbers — Monnify (Wema / Sterling), Squad (GTBank) and Nomba (Nombank). Checks every partner they have an account with and credits only payments the partner confirms, never twice. Manual funding to the business account is approved by an owner under Pending Funding.</p>
       {err && <p className="error-text" style={{ margin: '0 0 8px' }}>{err}</p>}
       {msg && <p style={{ fontSize: 14, margin: '0 0 8px' }}>{msg}</p>}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <input aria-label="Monnify transaction reference" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Monnify transaction reference (optional)" style={{ flex: '1 1 240px' }} />
+        <input aria-label="Transaction reference" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Transaction reference from the alert (optional)" style={{ flex: '1 1 240px' }} />
         <button type="button" className="btn" style={{ width: 'auto' }} disabled={busy} onClick={run}>{busy ? 'Checking…' : 'Check for missing bank funding'}</button>
       </div>
     </details>
