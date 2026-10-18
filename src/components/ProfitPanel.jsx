@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAdminAnalytics } from '../api';
+import { getAdminAnalytics, setProfitCountFrom } from '../api';
 import EarningsCalculator from './admin/EarningsCalculator';
 
 function money(n) {
@@ -123,11 +123,33 @@ export default function ProfitPanel() {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [showTable, setShowTable] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const [reload, setReload] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setData(null);
-    getAdminAnalytics(range).then(setData).catch((err) => setError(err.message));
-  }, [range]);
+    setError('');
+    getAdminAnalytics(range, showAll).then(setData).catch((err) => setError(err.message));
+  }, [range, showAll, reload]);
+
+  // "Start fresh": only hides older records from this panel — nothing is deleted.
+  const changeStart = async (from) => {
+    if (from && !window.confirm('Start counting profit from now? Older records are kept — they just stop showing here. You can show the full history any time.')) return;
+    setSaving(true);
+    try {
+      await setProfitCountFrom(from);
+      setShowAll(false);
+      setReload((n) => n + 1);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+  const countFrom = data?.countFrom ? new Date(data.countFrom) : null;
+  const fromText = countFrom ? countFrom.toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  const linkBtn = { background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', fontSize: 13, padding: 0 };
 
   const t = data?.totals;
   const tile = (label, value, sub) => (
@@ -149,6 +171,23 @@ export default function ProfitPanel() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', fontSize: 13, color: 'var(--slate-400)', margin: '0 0 12px' }}>
+        {countFrom ? (
+          <>
+            <span>{showAll ? `Showing full history (fresh start set for ${fromText})` : `Counting from ${fromText}`}</span>
+            <button type="button" style={linkBtn} onClick={() => setShowAll((v) => !v)}>{showAll ? 'Count from fresh start' : 'Show full history'}</button>
+            <button type="button" style={linkBtn} disabled={saving} onClick={() => changeStart('now')}>Start fresh again from now</button>
+            <button type="button" style={linkBtn} disabled={saving} onClick={() => changeStart(null)}>Remove fresh start</button>
+          </>
+        ) : data ? (
+          <>
+            <span>Showing everything in the last {range} days.</span>
+            <button type="button" style={linkBtn} disabled={saving} onClick={() => changeStart('now')}>Start fresh from now</button>
+            <span>(nothing is deleted — older records just stop counting here)</span>
+          </>
+        ) : null}
       </div>
 
       {error && <p className="error-text">{error}</p>}

@@ -235,7 +235,8 @@ export const requestAccountDeletion = (data) => request('/api/account/delete-req
 export const cancelAccountDeletion = () => request('/api/account/delete-request', { method: 'DELETE' });
 export const checkPromo = (code, service, amount, base, provider) =>
   request(`/api/promo/check?code=${encodeURIComponent(code)}&service=${encodeURIComponent(service)}&amount=${encodeURIComponent(amount)}${base ? `&base=${encodeURIComponent(base)}&provider=${encodeURIComponent(provider || '')}` : ''}`);
-export const getAdminAnalytics = (days) => adminRequest(`/api/admin/analytics?days=${days}`);
+export const getAdminAnalytics = (days, all = false) => adminRequest(`/api/admin/analytics?days=${days}${all ? '&all=1' : ''}`);
+export const setProfitCountFrom = (from) => adminRequest('/api/admin/profit-count-from', { method: 'PUT', body: JSON.stringify({ from }) });
 
 // --- Admin auth ---
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
