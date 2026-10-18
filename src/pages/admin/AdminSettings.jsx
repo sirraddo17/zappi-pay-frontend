@@ -13,6 +13,7 @@ import FundingMethodsPanel from '../../components/admin/FundingMethodsPanel';
 import SquadPanel from '../../components/admin/SquadPanel';
 import NombaPanel from '../../components/admin/NombaPanel';
 import PaymentPartnersPanel from '../../components/admin/PaymentPartnersPanel';
+import PartnerAccountsCard from '../../components/admin/PartnerAccountsCard';
 import ReceiptInvitePanel from '../../components/admin/ReceiptInvitePanel';
 import EpinSettingsPanel from '../../components/admin/EpinSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
@@ -626,9 +627,10 @@ export default function AdminSettings() {
         </form>
       )}
       {!loading && !loadError && tab === 'vtpass' && sub('vtpass') === 'test' && <VtpassSelfTest />}
+      {!loading && !loadError && tab === 'vtpass' && sub('vtpass') === 'connection' && <PartnerAccountsCard partner="vtpass" />}
       {!loading && !loadError && tab === 'vtpass' && sub('vtpass') === 'intl' && <IntlAirtimeToggle />}
 
-      {!loading && !loadError && tab === 'monnify' && partnerTab === 'overview' && <PaymentPartnersPanel />}
+      {!loading && !loadError && tab === 'monnify' && partnerTab === 'overview' && <><PaymentPartnersPanel /><PartnerAccountsCard partner="all" /></>}
       {!loading && !loadError && tab === 'monnify' && partnerTab === 'monnify' && <FundingMethodsPanel only="monnify" />}
       {!loading && !loadError && tab === 'monnify' && partnerTab === 'squad' && <SquadPanel />}
       {!loading && !loadError && tab === 'monnify' && partnerTab === 'nomba' && <NombaPanel />}
@@ -756,6 +758,7 @@ export default function AdminSettings() {
         </div>
       )}
 
+      {!loading && !loadError && tab === 'monnify' && ['monnify', 'squad', 'nomba', 'flutterwave'].includes(partnerTab) && <PartnerAccountsCard key={partnerTab} partner={partnerTab} />}
       {!loading && !loadError && tab === 'markup' && sub('markup') === 'safe' && <SafePricingPanel onApplied={() => window.location.reload()} />}
       {!loading && !loadError && tab === 'markup' && sub('markup') === 'rates' && (
         <form className="card" style={cardStyle} onSubmit={saveMarkup}>
@@ -1315,7 +1318,7 @@ export default function AdminSettings() {
       )}
       {!loading && !loadError && tab === 'referral' && sub('referral') === 'progress' && <ReferralProgressPanel />}
 
-      {!loading && !loadError && tab === 'epins' && <EpinSettingsPanel />}
+      {!loading && !loadError && tab === 'epins' && <><EpinSettingsPanel /><PartnerAccountsCard partner="clubkonnect" /></>}
       {!loading && !loadError && tab === 'ai' && sub('ai') === 'assistant' && <AiSettingsPanel />}
       {!loading && !loadError && tab === 'ai' && sub('ai') === 'voice' && <VoiceSettingsPanel />}
       {!loading && !loadError && tab === 'ai' && sub('ai') === 'openai' && <OpenAiExtrasPanel />}
