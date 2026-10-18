@@ -76,7 +76,7 @@ export default function AdminLayout({ children }) {
         if (!heads.length) return;
         table.querySelectorAll('tbody tr').forEach((tr) => {
           [...tr.children].forEach((td, i) => {
-            const l = heads[i] ?? '';
+            const l = td.hasAttribute('data-nolabel') ? '' : heads[i] ?? ''; // full-width detail rows get no label
             if (td.getAttribute('data-label') !== l) td.setAttribute('data-label', l);
           });
         });
