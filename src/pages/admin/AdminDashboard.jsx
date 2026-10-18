@@ -64,10 +64,10 @@ export default function AdminDashboard() {
             ['Failed Orders', stats.failedOrders, '/admin/orders?status=FAILED'],
             ['Total Revenue', `₦${stats.totalRevenue.toLocaleString()}`, '/admin/money'],
           ].map(([label, value, to, edge]) => (
-            <Link key={label} to={to} className="card stat-card" style={{ margin: 0, textDecoration: 'none', color: 'inherit', border: edge ? `1px solid ${edge}` : undefined }}>
+            <Link key={label} to={to} className="card stat-card" style={{ margin: 0, textDecoration: 'none', color: 'inherit', border: edge ? `1px solid ${edge}` : undefined, gridColumn: String(value).startsWith('₦') ? 'span 2' : undefined }}>
               <div className="label">{label}</div>
-              <div className="value">{value}</div>
-              <div style={{ fontSize: 11, color: 'var(--purple)', marginTop: 4 }}>Open →</div>
+              {/* Long amounts shrink so they stay inside the box. */}
+              <div className="value" style={String(value).length > 14 ? { fontSize: 20 } : String(value).length > 11 ? { fontSize: 24 } : undefined}>{value}</div>
             </Link>
           ))}
         </div>

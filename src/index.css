@@ -97,10 +97,15 @@ body {
   letter-spacing: 0.04em;
 }
 
+.stat-card {
+  min-width: 0;
+}
+
 .stat-card .value {
   font-size: 28px;
   font-weight: 700;
   margin-top: 4px;
+  overflow-wrap: anywhere; /* never spill out of the box */
 }
 
 .grid {
