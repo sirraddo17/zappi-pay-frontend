@@ -14,6 +14,7 @@ import SquadPanel from '../../components/admin/SquadPanel';
 import NombaPanel from '../../components/admin/NombaPanel';
 import PaymentPartnersPanel from '../../components/admin/PaymentPartnersPanel';
 import PartnerAccountsCard from '../../components/admin/PartnerAccountsCard';
+import BackupsPanel from '../../components/admin/BackupsPanel';
 import ReceiptInvitePanel from '../../components/admin/ReceiptInvitePanel';
 import EpinSettingsPanel from '../../components/admin/EpinSettingsPanel';
 import FundingAccountsPanel from '../../components/admin/FundingAccountsPanel';
@@ -57,6 +58,7 @@ const TABS = [
   { key: 'savings', label: 'Savings (interest)' },
   { key: 'alerts', label: 'Alerts & Limits' },
   { key: 'security', label: 'Security' },
+  { key: 'backups', label: '💾 Backups' },
   { key: 'ai', label: 'AI Assistant' },
   { key: 'password', label: 'My Password' },
 ];
@@ -1324,6 +1326,7 @@ export default function AdminSettings() {
       {!loading && !loadError && tab === 'ai' && sub('ai') === 'openai' && <OpenAiExtrasPanel />}
       {!loading && !loadError && tab === 'ai' && sub('ai') === 'heygen' && <HeygenSettingsPanel />}
       {!loading && !loadError && tab === 'savings' && <SavingsPanel />}
+      {!loading && !loadError && tab === 'backups' && <BackupsPanel />}
       {!loading && !loadError && tab === 'maintenance' && <MaintenancePanel />}
       {!loading && !loadError && tab === 'promise' && <DeliveryPromisePanel />}
       {!loading && !loadError && tab === 'shops' && <ShopsPanel />}

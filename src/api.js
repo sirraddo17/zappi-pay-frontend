@@ -730,3 +730,24 @@ export const removeTestNumbers = (provider, confirm) => adminRequest('/api/admin
 // Admin → owner's partner accounts (fund / settlement)
 export const getPartnerAccounts = () => adminRequest('/api/admin/partner-accounts');
 export const savePartnerAccounts = (accounts) => adminRequest('/api/admin/partner-accounts', { method: 'PUT', body: JSON.stringify({ accounts }) });
+// Admin → Settings → Backups
+export const getBackup = () => adminRequest('/api/admin/backup');
+export const saveBackupEmails = (emails) => adminRequest('/api/admin/backup', { method: 'PUT', body: JSON.stringify({ emails }) });
+export const runBackupNow = () => adminRequest('/api/admin/backup/run', { method: 'POST' });
+export async function downloadBackup() {
+  const token = localStorage.getItem('zappipay_admin_token');
+  const r = await fetch(`${API_URL}/api/admin/backup/download`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}));
+    throw new Error(body.error || 'Could not download the backup.');
+  }
+  const name = /filename="([^"]+)"/.exec(r.headers.get('Content-Disposition') || '')?.[1] || `zappipay-backup-${new Date(Date.now() + 3600e3).toISOString().slice(0, 10)}.zpbak`;
+  const url = URL.createObjectURL(await r.blob());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
