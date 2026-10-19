@@ -59,10 +59,17 @@ export default function AdminCustomers() {
   }
 
   async function toggleActive(customer) {
+    let reason = '';
+    if (customer.active) {
+      // Freezing signs them out on every device at once.
+      const r = window.prompt(`Freeze ${customer.name}? They'll be signed out everywhere and can't log in or spend until you unfreeze.\n\nWhy? (only staff see this — e.g. "reported stolen phone")`, '');
+      if (r === null) return;
+      reason = r.trim();
+    }
     setBusyId(customer.id);
     setError('');
     try {
-      await setCustomerActive(customer.id, !customer.active);
+      await setCustomerActive(customer.id, !customer.active, reason);
       load();
     } catch (err) {
       setError(err.message || 'Could not update customer.');
@@ -215,7 +222,7 @@ export default function AdminCustomers() {
                     )}
                     {(isOwner || c.active) && (
                       <button className="btn-secondary btn" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => toggleActive(c)} disabled={busyId === c.id}>
-                        {c.active ? (isOwner ? 'Deactivate' : 'Freeze') : 'Reactivate'}
+                        {c.active ? 'Freeze' : 'Reactivate'}
                       </button>
                     )}
                     </div>

@@ -21,6 +21,20 @@ export const COMPANY = {
 
 export const TOPICS = [
   {
+    id: 'account-paused',
+    title: 'My account is paused / frozen',
+    keywords: ['account paused', 'paused for a safety check', 'account frozen', 'account deactivated', 'cant login account', 'account blocked', 'account locked by support', 'my account was frozen', 'unfreeze'],
+    answer: 'If you see “paused for a safety check”, ZAPPI PAY support paused your account to keep your money safe (for example after a lost phone report or a payment problem). Your money is still there. Contact support from the Help page or WhatsApp — we’ll confirm it’s really you and restore it. If you froze it yourself, support can unfreeze it the same way.',
+    actions: [{ label: 'Help & support', to: '/help' }],
+  },
+  {
+    id: 'sent-to-old-account',
+    title: 'I sent money to an old account number',
+    keywords: ['old account number', 'previous account number', 'sent to old account', 'old wallet number', 'sent money to wrong account number', 'my old account', 'account number changed'],
+    answer: 'Don’t worry — money sent to an account number that is no longer yours is not lost. It’s held for our support team to check. Contact support with your bank receipt (amount, date, reference) and we’ll add it to your wallet once we confirm it’s yours. Always copy your current account numbers from the Wallet page before sending.',
+    actions: [{ label: 'Open Wallet', to: '/wallet' }, { label: 'Help & support', to: '/help' }],
+  },
+  {
     id: 'services',
     title: 'What can ZAPPI PAY do?',
     keywords: ['services', 'service you offer', 'what do you offer', 'what can i do', 'what can zappi', 'what does zappi', 'what is zappi', 'features', 'what you do', 'offers', 'what una dey do', 'wetin una dey do', 'wetin i fit do'],

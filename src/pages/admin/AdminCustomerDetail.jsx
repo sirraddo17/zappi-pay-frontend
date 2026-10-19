@@ -5,6 +5,7 @@ import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
 import { IdentityCheck, AgentPanel } from '../../components/admin/CustomerPanels';
 import RequestApproval, { FundingCheck } from '../../components/admin/RequestApproval';
 import AccountTools from '../../components/admin/AccountTools';
+import MoneyTools from '../../components/admin/MoneyTools';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, adminSetUsername, testCustomerEmailAlert } from '../../api';
 
@@ -188,6 +189,12 @@ export default function AdminCustomerDetail() {
       <div className="page-header" style={{ padding: 0, margin: '12px 0 16px' }}>
         <h1>{customer.name}</h1>
         <p>{customer.phone}{customer.email ? ` · ${customer.email}` : ''} · {customer.active ? 'Active' : 'Deactivated'} · Joined {fmtDate(customer.createdAt)}</p>
+        {!customer.active && (
+          <p style={{ margin: '6px 0 0', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--red-500)', fontSize: 13 }}>
+            🔒 {customer.selfFrozenAt ? `The customer froze this account themselves (${fmtDate(customer.selfFrozenAt)}).` : `Frozen by staff${customer.frozenAt ? ` on ${fmtDate(customer.frozenAt)}` : ''}${customer.frozenReason ? ` — reason: ${customer.frozenReason}` : ''}.`}
+            {' '}They are signed out everywhere and see "paused for a safety check — contact support". Confirm who they are before unfreezing (Customers → Reactivate).
+          </p>
+        )}
         <div style={{ marginTop: 4, color: 'var(--slate-400)', fontSize: 14 }}>
           {customer.username ? `@${customer.username}` : 'No username'}
           {isOwner && <UsernameEditor key={customer.username || ''} customer={customer} onSaved={load} />}
@@ -214,6 +221,7 @@ export default function AdminCustomerDetail() {
       {!customer.deletedAt && <IdentityCheck customer={customer} orders={orders} walletTransactions={walletTransactions} onChanged={load} canReset={isOwner} />}
 
       {isOwner && !customer.deletedAt && <AccountTools customer={customer} onDone={load} />}
+      {isOwner && !customer.deletedAt && <MoneyTools customer={customer} onDone={load} />}
 
       {!customer.deletedAt && <FundingCheck customer={customer} onDone={load} />}
 

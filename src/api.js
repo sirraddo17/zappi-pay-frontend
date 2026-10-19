@@ -273,8 +273,8 @@ export const getCustomerList = ({ view = 'active', q = '', all = false, page = 0
 export const adminSetUsername = (id, username) => adminRequest(`/api/admin/customers/${id}/username`, { method: 'POST', body: JSON.stringify({ username }) });
 export const getCustomerDetail = (id) => adminRequest(`/api/admin/customers/${id}`);
 export const adminResetCustomerPassword = (id) => adminRequest(`/api/admin/customers/${id}/reset-password`, { method: 'POST' });
-export const setCustomerActive = (id, active) =>
-  adminRequest(`/api/admin/customers/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) });
+export const setCustomerActive = (id, active, reason) =>
+  adminRequest(`/api/admin/customers/${id}`, { method: 'PATCH', body: JSON.stringify({ active, reason }) });
 
 // --- Admin: wallet approvals ---
 export const getPendingFunding = () => adminRequest('/api/admin/wallet/pending');
@@ -752,3 +752,12 @@ export async function downloadBackup() {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
+
+// --- Admin: unmatched payments, card payments, manual payout ---
+export const getUnmatchedPayments = (status = 'OPEN') => adminRequest(`/api/admin/unmatched-payments?status=${status}`);
+export const assignUnmatchedPayment = (id, data) => adminRequest(`/api/admin/unmatched-payments/${id}/assign`, { method: 'POST', body: JSON.stringify(data) });
+export const closeUnmatchedPayment = (id, status, note) => adminRequest(`/api/admin/unmatched-payments/${id}/close`, { method: 'POST', body: JSON.stringify({ status, note }) });
+export const getCardPayments = (customerId) => adminRequest(`/api/admin/card-payments${customerId ? `?customerId=${encodeURIComponent(customerId)}` : ''}`);
+export const recheckCardPayment = (txRef) => adminRequest(`/api/admin/card-payments/${encodeURIComponent(txRef)}/recheck`, { method: 'POST' });
+export const chargebackCardPayment = (txRef, note) => adminRequest(`/api/admin/card-payments/${encodeURIComponent(txRef)}/chargeback`, { method: 'POST', body: JSON.stringify({ note }) });
+export const recordManualPayout = (customerId, data) => adminRequest(`/api/admin/customers/${customerId}/manual-payout`, { method: 'POST', body: JSON.stringify(data) });

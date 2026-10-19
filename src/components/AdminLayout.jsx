@@ -18,6 +18,7 @@ const TABS = [
   { to: '/admin/airtime-cash', label: 'Airtime to Cash' },
   { to: '/admin/bank-transfers', label: 'Bank Transfers' },
   { to: '/admin/disputes', label: '↩️ Wrong transfers' },
+  { to: '/admin/unmatched-payments', label: '💸 Unmatched payments' },
   { to: '/admin/customers', label: 'Customers' },
   { to: '/admin/staff', label: 'Staff' },
   { to: '/admin/orders', label: 'Orders' },
