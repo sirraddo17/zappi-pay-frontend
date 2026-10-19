@@ -242,6 +242,7 @@ export const setProfitCountFrom = (from) => adminRequest('/api/admin/profit-coun
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
 export const adminLoginVerify = (data) => adminRequest('/api/admin/login/verify', { method: 'POST', body: JSON.stringify(data) });
 export const recheckAdminOrder = (id) => adminRequest(`/api/admin/orders/${id}/recheck`, { method: 'POST' });
+export const lookupAdminOrder = (id) => adminRequest(`/api/admin/orders/${id}/lookup`, { method: 'POST' });
 export const settleAdminOrder = (id, outcome) => adminRequest(`/api/admin/orders/${id}/settle`, { method: 'POST', body: JSON.stringify({ outcome }) });
 export const getVtpassBalance = () => adminRequest('/api/admin/vtpass/balance');
 export const releaseBankTransfer = (id) => adminRequest(`/api/admin/bank-transfers/${id}/release`, { method: 'POST' });
@@ -761,3 +762,12 @@ export const getCardPayments = (customerId) => adminRequest(`/api/admin/card-pay
 export const recheckCardPayment = (txRef) => adminRequest(`/api/admin/card-payments/${encodeURIComponent(txRef)}/recheck`, { method: 'POST' });
 export const chargebackCardPayment = (txRef, note) => adminRequest(`/api/admin/card-payments/${encodeURIComponent(txRef)}/chargeback`, { method: 'POST', body: JSON.stringify({ note }) });
 export const recordManualPayout = (customerId, data) => adminRequest(`/api/admin/customers/${customerId}/manual-payout`, { method: 'POST', body: JSON.stringify(data) });
+
+// --- Admin: support tools on a customer's page ---
+export const getCustomerSchedules = (id) => adminRequest(`/api/admin/customers/${id}/schedules`);
+export const setScheduleActive = (id, active) => adminRequest(`/api/admin/schedules/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) });
+export const adminDeleteSchedule = (id) => adminRequest(`/api/admin/schedules/${id}`, { method: 'DELETE' });
+export const fixCustomerName = (id, name, reason) => adminRequest(`/api/admin/customers/${id}/name`, { method: 'PATCH', body: JSON.stringify({ name, reason }) });
+export const setCustomerDailyLimit = (id, limit, reason) => adminRequest(`/api/admin/customers/${id}/daily-limit`, { method: 'PUT', body: JSON.stringify({ limit, reason }) });
+export const grantCustomerReward = (id, kind, amount, reason) => adminRequest(`/api/admin/customers/${id}/grant-reward`, { method: 'POST', body: JSON.stringify({ kind, amount, reason }) });
+export const openTicketForCustomer = (id, data) => adminRequest(`/api/admin/customers/${id}/tickets`, { method: 'POST', body: JSON.stringify(data) });

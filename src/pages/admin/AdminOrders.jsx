@@ -1,10 +1,66 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminOrders, getVtpassCodes, recheckAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
+import { getAdminOrders, getVtpassCodes, recheckAdminOrder, lookupAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { useShowMore } from '../../components/ShowMore';
+
+// Bet funding goes through Nomba (nb:) or ClubKonnect (ck:), not VTpass.
+const isBet = (o) => /^(nb|ck):/.test(String(o.provider || ''));
+const providerOf = (o) => (String(o.provider || '').startsWith('nb:') ? 'Nomba' : String(o.provider || '').startsWith('ck:') ? 'ClubKonnect' : 'VTpass');
+// Token / PINs as the provider sent them (admin sees them even on held orders).
+function deliverable(o) {
+  const p = o.responsePayload || {};
+  const token = p.purchased_code || p.mainToken || p.token || p.Token || p.content?.transactions?.purchased_code;
+  if (token) return String(token).replace(/^Token\s*:\s*/i, '').trim();
+  const cards = p.cards || p.tokens;
+  if (Array.isArray(cards) && cards.length) return cards.map((c) => (typeof c === 'string' ? c : [c.Serial && `Serial ${c.Serial}`, c.Pin && `PIN ${c.Pin}`].filter(Boolean).join(' · '))).join('  |  ');
+  return null;
+}
+
+function OrderDetails({ o }) {
+  const [look, setLook] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const p = o.responsePayload || {};
+  const t = p.content?.transactions || {};
+  const code = deliverable(o);
+  async function ask() {
+    setBusy(true); setErr('');
+    try { setLook(await lookupAdminOrder(o.id)); } catch (e) { setErr(e.message); } finally { setBusy(false); }
+  }
+  const row = (k, v) => (v ? <div><span style={{ color: 'var(--slate-400)' }}>{k}:</span> <span style={{ wordBreak: 'break-all' }}>{v}</span></div> : null);
+  return (
+    <div style={{ width: '100%', textAlign: 'left', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {row('Customer', `${o.customer.name} · ${o.customer.phone}`)}
+      {row('Provider', `${providerOf(o)} · ${o.provider}${o.variationCode ? ` · ${o.variationCode}` : ''}`)}
+      {row('Our reference (request ID)', o.vtpassRequestId)}
+      {row(`${providerOf(o)} transaction ID`, t.transactionId || p.id || null)}
+      {row('Name on account', o.recipientName)}
+      {code && <div style={{ padding: '6px 10px', border: '1px solid var(--gold)', borderRadius: 8 }}><strong>{o.service === 'ELECTRICITY' ? 'Token' : 'PINs / code'}:</strong> <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{code}</span>{o.status === 'SUCCESS' && <span style={{ color: 'var(--slate-400)' }}> — the customer also sees this in their order.</span>}</div>}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 4 }}>
+        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} disabled={busy || !o.vtpassRequestId} onClick={ask}>{busy ? 'Asking…' : `Ask ${providerOf(o)} now`}</button>
+        <span style={{ color: 'var(--slate-400)', fontSize: 12 }}>Read-only: shows what {providerOf(o)} says right now. Changes nothing.</span>
+      </div>
+      {err && <p className="error-text" style={{ margin: 0 }}>{err}</p>}
+      {look && (
+        <div style={{ padding: '6px 10px', border: '1px solid var(--slate-700)', borderRadius: 8 }}>
+          <div><strong>{look.who} says: {look.providerStatus}</strong> (ours: {look.ourStatus})</div>
+          {row('Transaction ID', look.transactionId)}
+          {row('Product', look.productName)}
+          {row('Number / meter', look.uniqueElement)}
+          {row('Token', look.token)}
+          {isBet(o) && <div style={{ color: 'var(--gold)' }}>To raise it, contact {look.who} support quoting reference {look.requestId}.</div>}
+        </div>
+      )}
+      <details>
+        <summary style={{ cursor: 'pointer', color: 'var(--slate-400)' }}>Provider's full reply</summary>
+        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 11, maxHeight: 260, overflow: 'auto' }}>{JSON.stringify(look?.raw || p, null, 2)}</pre>
+      </details>
+    </div>
+  );
+}
 
 function fmtMoney(n) {
   return `₦${Number(n).toLocaleString()}`;
@@ -77,6 +133,7 @@ export default function AdminOrders() {
   const [counts, setCounts] = useState(null);
 
   const [busy, setBusy] = useState(null);
+  const [openId, setOpenId] = useState(null);
   const [message, setMessage] = useState('');
 
   function load() {
@@ -179,17 +236,19 @@ export default function AdminOrders() {
             </thead>
             <tbody>
               {page.visible.map((o) => (
-                <tr key={o.id}>
+                <Fragment key={o.id}>
+                <tr>
                   <td>{o.customer.name}</td>
                   <td>{o.service}</td>
                   <td>{o.recipient}</td>
                   <td>{fmtMoney(o.amount)}</td>
                   <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}><div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, textAlign: 'right', maxWidth: 230, marginLeft: 'auto' }}>
                     <span style={{ whiteSpace: 'nowrap' }}>{o.status}</span>
+                    <button type="button" onClick={() => setOpenId(openId === o.id ? null : o.id)} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', fontSize: 11, padding: 0 }}>{openId === o.id ? 'Hide details ▲' : 'Details ▼'}</button>
                     {o.status === 'FAILED' && o.vtpassReason && <div style={{ fontSize: 11, color: o.vtpassWho === 'account' ? 'var(--red-500)' : 'var(--slate-400)', marginTop: 2 }}>VTpass: {o.vtpassReason}</div>}
                     {o.status === 'PENDING' && o.held && <div style={{ fontSize: 11, color: 'var(--red-500)', marginTop: 2 }}>⚠ Held: VTpass gave PINs, then said failed. Not refunded — ask VTpass support first.</div>}
                     {o.status === 'PENDING' && !o.held && o.pinsGiven && <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>PINs/token already given</div>}
-                    {o.status === 'SUCCESS' && (
+                    {o.status === 'SUCCESS' && !isBet(o) && (
                       <div style={{ marginTop: 4 }}>
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>
                           {o.vtpassEscalatedAt ? 'Reported ✓' : 'Report to VTpass'}
@@ -199,7 +258,7 @@ export default function AdminOrders() {
                     {o.status === 'PENDING' && !isOwner && (
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => act(o, () => recheckAdminOrder(o.id), (r) => `status now ${r.status}`)}>Check now</button>
-                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>Report to VTpass</button>
+                        {!isBet(o) && <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>Report to VTpass</button>}
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => askRefund(o)}>Ask admin to refund</button>
                       </div>
                     )}
@@ -214,14 +273,22 @@ export default function AdminOrders() {
                         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => window.confirm(o.pinsGiven ? 'WARNING: VTpass already gave PINs/token for this order. Refund ONLY if VTpass support confirmed in writing that they do not work. Mark as FAILED and refund?' : 'Mark as FAILED and refund the customer? Only do this if VTpass confirmed it was NOT delivered.') && act(o, () => settleAdminOrder(o.id, 'FAILED'), (r) => `marked ${r.status}, customer refunded`)}>
                           Failed + refund
                         </button>
-                        <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>
-                          Report to VTpass
-                        </button>
+                        {!isBet(o) && (
+                          <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '2px 8px', fontSize: 11 }} disabled={busy === o.id} onClick={() => reportVtpass(o)}>
+                            Report to VTpass
+                          </button>
+                        )}
                       </div>
                     )}
                   </div></td>
                   <td>{fmtDate(o.createdAt)}</td>
                 </tr>
+                {openId === o.id && (
+                  <tr>
+                    <td colSpan={6} data-nolabel=""><OrderDetails o={o} /></td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>
