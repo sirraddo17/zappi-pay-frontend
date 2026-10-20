@@ -904,8 +904,8 @@ export default function Buy() {
               <Link to="/orders" style={{ color: 'var(--purple)', fontWeight: 600 }}>Go to Orders →</Link>
             </div>
           </div>
-        ) : selectedVariation && planWarning(selectedVariation.name) ? (
-          <div className="plan-warn-box" role="alert">⚠️ {planWarning(selectedVariation.name)}. Check this is the plan you want.</div>
+        ) : selectedVariation && planWarning(selectedVariation.name, selectedVariation) ? (
+          <div className="plan-warn-box" role="alert">⚠️ {planWarning(selectedVariation.name, selectedVariation)}. Check this is the plan you want.</div>
         ) : null}
         onSubmit={doPurchase}
         onError={(err) => setError(err.message || 'Purchase failed.')}

@@ -243,6 +243,9 @@ export const setProfitCountFrom = (from) => adminRequest('/api/admin/profit-coun
 export const adminLogin = (data) => adminRequest('/api/admin/login', { method: 'POST', body: JSON.stringify(data) });
 export const adminLoginVerify = (data) => adminRequest('/api/admin/login/verify', { method: 'POST', body: JSON.stringify(data) });
 export const recheckAdminOrder = (id) => adminRequest(`/api/admin/orders/${id}/recheck`, { method: 'POST' });
+export const getPlanFixes = () => adminRequest('/api/admin/plan-fixes');
+export const savePlanFix = (data) => adminRequest('/api/admin/plan-fixes', { method: 'PUT', body: JSON.stringify(data) });
+export const deletePlanFix = (id) => adminRequest(`/api/admin/plan-fixes/${id}`, { method: 'DELETE' });
 export const lookupAdminOrder = (id) => adminRequest(`/api/admin/orders/${id}/lookup`, { method: 'POST' });
 export const settleAdminOrder = (id, outcome) => adminRequest(`/api/admin/orders/${id}/settle`, { method: 'POST', body: JSON.stringify({ outcome }) });
 export const getVtpassBalance = () => adminRequest('/api/admin/vtpass/balance');

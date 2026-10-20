@@ -141,6 +141,8 @@ export function PackageList({ variations, value, onChange, priceOf, kind }) {
               {shown.length === 1 && <span className={`pkg-radio${on ? ' on' : ''}`} aria-hidden />}
               <span className="pkg-main" style={shown.length === 1 ? undefined : { flex: '0 0 auto' }}>
                 <span className="pkg-name">{tidy(v.name)}</span>
+                {v.zpHours && v.zpHours < 24 && <span className="pkg-sub" style={{ color: 'var(--gold, #FFB830)' }}>⏱ {v.zpHours} hour{v.zpHours === 1 ? '' : 's'} only</span>}
+                {v.zpNote && <span className="pkg-sub" style={{ color: 'var(--gold, #FFB830)' }}>ℹ️ {v.zpNote}</span>}
                 {(per || save > 0 || callsOnly(v.name)) && <span className="pkg-sub">{per === '2 Months+' ? longLabel(v.name) : per}{callsOnly(v.name) && <b>{per ? ' · ' : ''}📞 Calls only — no data</b>}{save > 4 && <span className="pkg-save"> · save {save}%</span>}</span>}
               </span>
               <span className={shown.length === 1 ? 'pkg-price' : 'pkg-big'}>

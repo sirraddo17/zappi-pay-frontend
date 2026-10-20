@@ -5,6 +5,7 @@ import { getAdminOrders, getVtpassCodes, recheckAdminOrder, lookupAdminOrder, se
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { useShowMore } from '../../components/ShowMore';
+import PlanFixesList, { PlanFixForm } from '../../components/admin/PlanFixes';
 
 // Bet funding goes through Nomba (nb:) or ClubKonnect (ck:), not VTpass.
 const isBet = (o) => /^(nb|ck):/.test(String(o.provider || ''));
@@ -43,6 +44,7 @@ function OrderDetails({ o }) {
         <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} disabled={busy || !o.vtpassRequestId} onClick={ask}>{busy ? 'Asking…' : `Ask ${providerOf(o)} now`}</button>
         <span style={{ color: 'var(--slate-400)', fontSize: 12 }}>Read-only: shows what {providerOf(o)} says right now. Changes nothing.</span>
       </div>
+      {(o.service === 'DATA' || o.service === 'INTERNET') && o.variationCode && !isBet(o) && <PlanFixForm serviceID={o.provider} variationCode={o.variationCode} name={look?.productName || null} />}
       {err && <p className="error-text" style={{ margin: 0 }}>{err}</p>}
       {look && (
         <div style={{ padding: '6px 10px', border: '1px solid var(--slate-700)', borderRadius: 8 }}>
@@ -188,6 +190,7 @@ export default function AdminOrders() {
       </div>
 
       <VtpassCodes />
+      {isOwner && <PlanFixesList />}
       {error && <p className="error-text" style={{ margin: '0 0 12px' }}>{error}</p>}
       {message && <p style={{ color: 'var(--green-500)', margin: '0 0 12px' }}>{message}</p>}
       {pendingCount > 0 && (

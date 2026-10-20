@@ -18,8 +18,21 @@ function size(name) {
   return g ? { value: g[1], unit: 'GB' } : null;
 }
 
+// Plans that last only hours. An owner correction (v.zpHours, from
+// Admin → Orders → "Plan details wrong?") wins over the VTpass name,
+// which is sometimes wrong (e.g. "1 Day" for a 2-hour plan).
+export function hoursOf(name, v) {
+  if (v?.zpHours) return Number(v.zpHours);
+  const n = String(name || '').toLowerCase();
+  const m = /(\d+)\s*-?\s*(?:hrs?|hours?)\b/.exec(n);
+  if (!m || /\d+\s*-?\s*(?:days?|dys?|weeks?|wks?|months?|mnths?)\b|\b(daily|weekly|monthly)\b/.test(n)) return null;
+  return Number(m[1]);
+}
+const isShort = (name, v) => { const h = hoursOf(name, v); return h != null && h < 24; };
+
 // Validity in days (null when the name doesn't say).
-export function validityDays(name) {
+export function validityDays(name, v) {
+  if (v?.zpHours) return v.zpHours < 24 ? 0 : Math.round(v.zpHours / 24);
   // "+ 2GB daily" is a per-day allowance, not a 1-day plan.
   const n = String(name || '').toLowerCase().replace(/\+\s*\d+(?:\.\d+)?\s*(?:gb|mb)\s+(?:daily|per\s+day)/g, ' ');
   // Bundles can mention several periods ("1GB + 1GB night … weekly"); the
@@ -83,9 +96,11 @@ export function planBonuses(name) {
   return CONDITIONS.filter((c) => c.key !== 'Broadband' && c.key !== 'Calls' && !main.includes(c.key) && c.re.test(bonus)).map((c) => c.key);
 }
 // Plain warning for the confirm sheet, or null for an everyday plan.
-export function planWarning(name) {
+export function planWarning(name, v) {
   const c = planConditions(name).filter((k) => k !== 'Broadband');
-  if (!c.length) return null;
+  const h = hoursOf(name, v);
+  const extra = [h != null && h < 24 ? `Lasts only ${h} hour${h === 1 ? '' : 's'} from when you buy it` : null, v?.zpNote || null].filter(Boolean);
+  if (!c.length) return extra.length ? extra.join(' · ') : null;
   const n0 = mainPart(name);
   const time = /(\d{1,2}\s*(?:am|pm)\s*(?:-|–|to)\s*\d{1,2}\s*(?:am|pm))/i.exec(String(name || ''));
   const n = n0;
@@ -93,7 +108,7 @@ export function planWarning(name) {
   const sun = /\bsun(day)?\b/.test(n);
   const only = sun && !sat && !/week\s*-?\s*end/.test(n) ? 'Sunday' : sat && !sun && !/week\s*-?\s*end/.test(n) ? 'Saturday' : null;
   const parts = c.map((k) => (k === 'Night' && time ? `Works only at night (${time[1].replace(/\s+/g, '')})` : k === 'Weekend' && only ? `Works only on ${only}` : NOTE[k]));
-  let text = parts.join(' · ');
+  let text = [...parts, ...extra].join(' · ');
   if (c.includes('Weekend')) {
     const day = new Date().getDay(); // 0 Sun … 6 Sat
     const works = only === 'Sunday' ? day === 0 : only === 'Saturday' ? day === 6 : day === 0 || day === 6;
@@ -106,10 +121,11 @@ function special(name) {
 }
 const ICON = Object.fromEntries(CONDITIONS.map((c) => [c.key, c.icon]));
 
-export function groupOf(name) {
+export function groupOf(name, v) {
   const sp = special(name);
   if (sp) return sp;
-  const d = validityDays(name);
+  if (isShort(name, v)) return 'Hourly';
+  const d = validityDays(name, v);
   if (d == null) return 'Others';
   if (d <= 2) return 'Daily';
   if (d <= 14) return 'Weekly';
@@ -117,9 +133,12 @@ export function groupOf(name) {
   return '2 Months+';
 }
 
-const ORDER = ['Daily', 'Weekly', 'Monthly', '2 Months+', 'Weekend', 'Night', 'Social', 'Broadband', 'Calls', 'Others'];
+const ORDER = ['Hourly', 'Daily', 'Weekly', 'Monthly', '2 Months+', 'Weekend', 'Night', 'Social', 'Broadband', 'Calls', 'Others'];
 
-function validityLabel(name) {
+function validityLabel(name, v) {
+  const h = hoursOf(name, v);
+  if (h != null && h < 24) return `${h} Hour${h === 1 ? '' : 's'}`;
+  if (v?.zpHours) { const dd = Math.round(v.zpHours / 24); return dd === 1 ? '1 Day' : `${dd} Days`; }
   const n = String(name || '').toLowerCase();
   const hrs = /(\d+)\s*-?\s*(?:hrs?|hours?)\b/.exec(n);
   if (hrs && !/(\d+)\s*-?\s*(?:days?|dys?|weeks?|wks?|months?|mnths?)\b|daily|weekly|monthly/.test(n)) return `${hrs[1]} Hour${hrs[1] === '1' ? '' : 's'}`;
@@ -143,7 +162,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
   const groups = useMemo(() => {
     const map = new Map();
     for (const v of variations) {
-      const g = groupOf(v.name);
+      const g = groupOf(v.name, v);
       if (!map.has(g)) map.set(g, []);
       map.get(g).push(v);
     }
@@ -151,7 +170,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
     return ORDER.filter((g) => map.has(g)).map((g) => ({ name: g, plans: map.get(g) }));
   }, [variations]);
   const hot = useMemo(() => {
-    const priced = variations.filter((v) => Number(v.variation_amount) >= 200 && Number(v.variation_amount) <= 5000 && perGb(v) < Infinity && !planConditions(v.name).length);
+    const priced = variations.filter((v) => Number(v.variation_amount) >= 200 && Number(v.variation_amount) <= 5000 && perGb(v) < Infinity && !planConditions(v.name).length && !isShort(v.name, v));
     return [...priced].sort((a, b) => perGb(a) - perGb(b)).slice(0, 6).sort((a, b) => Number(a.variation_amount) - Number(b.variation_amount));
   }, [variations]);
   const tabs = [...(hot.length >= 3 ? [{ name: '🔥 Best value', plans: hot }] : []), ...groups, { name: 'All', plans: [...variations].sort((a, b) => Number(a.variation_amount) - Number(b.variation_amount)) }];
@@ -183,7 +202,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
         const per = (v) => { const g = perGb(v); return g === Infinity ? null : g; };
         // Bars compare against the cheapest everyday plan (≤ ₦10,000), so a
         // ₦200k yearly bundle doesn't make every normal plan look bad.
-        const everyday = shown.filter((v) => Number(v.variation_amount) <= 10000 && !planConditions(v.name).length);
+        const everyday = shown.filter((v) => Number(v.variation_amount) <= 10000 && !planConditions(v.name).length && !isShort(v.name, v));
         const vals = (everyday.length > 1 ? everyday : shown).map(per).filter((x) => x != null);
         const best = vals.length > 1 ? Math.min(...vals) : null;
         return (
@@ -194,26 +213,29 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
               const on = v.variation_code === value;
               const g = per(v);
               const conds = planConditions(v.name);
+              const short = isShort(v.name, v) ? hoursOf(v.name, v) : null;
               const bonus = planBonuses(v.name);
-              const isBest = !conds.length && best != null && g != null && g <= best + 0.01 && (everyday.length <= 1 || Number(v.variation_amount) <= 10000);
+              const isBest = !conds.length && short == null && best != null && g != null && g <= best + 0.01 && (everyday.length <= 1 || Number(v.variation_amount) <= 10000);
               const save = Math.round(p.base - p.total);
               return (
                 <button key={v.variation_code} type="button" role="radio" aria-checked={on} className={`vplan${on ? ' on' : ''}${isBest ? ' best' : ''}`} onClick={() => onChange(v.variation_code)} title={v.name}>
                   <div className="vplan-top">
                     <div style={{ minWidth: 0 }}>
                       {s ? <span className="vplan-gb">{s.value}<small>{s.unit}</small></span> : <span className="vplan-gb" style={{ fontSize: 15 }}>{v.name.replace(/^\w+\s+(data\s+)?/i, '').slice(0, 30)}</span>}
-                      <span className="vplan-valid">{validityLabel(v.name) || ''}</span>
+                      <span className="vplan-valid">{validityLabel(v.name, v) || ''}</span>
                     </div>
                     <div className="vplan-price">{on && '✓ '}{naira(p.total)}{p.total < p.base && <s>{naira(p.base)}</s>}</div>
                   </div>
                   <div className="vplan-meta">
                     {g != null ? <>{naira(p.total / (v.variation_amount / g))} per GB</> : ' '}
                     {conds.map((c) => <span key={c}> · <b className={`vplan-cond${c === 'Weekend' || c === 'Night' ? ' warn' : ''}`}>{ICON[c]} {c === 'Weekend' ? 'Weekend only' : c === 'Night' ? 'Night only' : c === 'Calls' ? 'Calls only' : c}</b></span>)}
+                    {short != null && <> · <b className="vplan-cond warn">⏱ {short} hour{short === 1 ? '' : 's'} only</b></>}
                     {bonus.length > 0 && <> · <b className="vplan-cond">🎁 + {bonus.map((c) => (c === 'Night' ? 'night' : c === 'Social' ? 'app' : c.toLowerCase())).join(' & ')} bonus</b></>}
                     {isBest && <> · <b>🏆 Best deal</b></>}
                     {save >= 5 && <> · save {naira(save)}</>}
                   </div>
                   <div className="vplan-name">{v.name}</div>
+                  {v.zpNote && <div className="vplan-name" style={{ color: 'var(--gold, #FFB830)' }}>ℹ️ {v.zpNote}</div>}
                   {g != null && best != null && <div className="vplan-bar" aria-hidden><i style={{ width: `${Math.min(100, Math.max(8, Math.round((best / g) * 100)))}%` }} /></div>}
                 </button>
               );
@@ -229,9 +251,9 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
         <div className="plan-picked" role="status">
           <div style={{ minWidth: 0 }}>
             <b>{(() => { const z = size(picked.name); return z ? `${z.value}${z.unit}` : 'Plan'; })()}</b>
-            {validityLabel(picked.name) && <span> · {validityLabel(picked.name)}</span>}
+            {validityLabel(picked.name, picked) && <span> · {validityLabel(picked.name, picked)}</span>}
             <div className="plan-picked-name">{picked.name}</div>
-            {planWarning(picked.name) && <div className="plan-picked-warn">⚠️ {planWarning(picked.name)}</div>}
+            {planWarning(picked.name, picked) && <div className="plan-picked-warn">⚠️ {planWarning(picked.name, picked)}</div>}
           </div>
           <button type="button" className="plan-picked-go" onClick={() => document.querySelector('form button[type=submit]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             {naira(priceOf(picked.variation_amount).total)} ›
