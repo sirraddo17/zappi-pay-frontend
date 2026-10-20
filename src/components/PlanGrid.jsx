@@ -42,10 +42,26 @@ const CONDITIONS = [
 ];
 const NOTE = Object.fromEntries(CONDITIONS.map((c) => [c.key, c.note]));
 
+// Bundles read "main allowance + bonus": "N800 1GB + 1GB YouTube Night +
+// 100MB YouTube Music – Weekly" is 1GB of everyday data with night/YouTube
+// extras. Only the main part (before the first "+") decides the plan's
+// conditions; what comes after is a bonus, not a restriction.
+function mainPart(name) {
+  return String(name || '').toLowerCase().split('+')[0];
+}
+
 // Every condition on a plan, e.g. ['Weekend'] or ['Night', 'Social'].
 export function planConditions(name) {
-  const n = String(name || '').toLowerCase();
+  const n = mainPart(name);
   return CONDITIONS.filter((c) => c.re.test(n)).map((c) => c.key);
+}
+// Extras that come on top of the main data, e.g. ['Night', 'Social'].
+export function planBonuses(name) {
+  const full = String(name || '').toLowerCase();
+  if (!full.includes('+')) return [];
+  const extra = full.slice(full.indexOf('+'));
+  const main = planConditions(name);
+  return CONDITIONS.filter((c) => c.key !== 'Broadband' && !main.includes(c.key) && c.re.test(extra)).map((c) => c.key);
 }
 // Plain warning for the confirm sheet, or null for an everyday plan.
 export function planWarning(name) {
@@ -158,6 +174,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
               const on = v.variation_code === value;
               const g = per(v);
               const conds = planConditions(v.name);
+              const bonus = planBonuses(v.name);
               const isBest = !conds.length && best != null && g != null && g <= best + 0.01 && (everyday.length <= 1 || Number(v.variation_amount) <= 10000);
               const save = Math.round(p.base - p.total);
               return (
@@ -172,6 +189,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
                   <div className="vplan-meta">
                     {g != null ? <>{naira(p.total / (v.variation_amount / g))} per GB</> : ' '}
                     {conds.map((c) => <span key={c}> · <b className={`vplan-cond${c === 'Weekend' || c === 'Night' ? ' warn' : ''}`}>{ICON[c]} {c === 'Weekend' ? 'Weekend only' : c === 'Night' ? 'Night only' : c}</b></span>)}
+                    {bonus.length > 0 && <> · <b className="vplan-cond">🎁 + {bonus.map((c) => (c === 'Night' ? 'night' : c === 'Social' ? 'app' : c.toLowerCase())).join(' & ')} bonus</b></>}
                     {isBest && <> · <b>🏆 Best deal</b></>}
                     {save >= 5 && <> · save {naira(save)}</>}
                   </div>
