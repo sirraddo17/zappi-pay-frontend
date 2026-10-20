@@ -75,14 +75,24 @@ export function Segmented({ options, value, onChange, label }) {
 }
 
 // Package / exam cards in one column: name, period, price.
+// null = monthly (the usual TV period). Reads "1 Week", "quarterly",
+// "for 30days", "for 365days" … — a plain "day" no longer means daily
+// ("Smile MIDI 1.5GB for 30days" is a monthly plan).
 function period(name) {
   const n = String(name || '').toLowerCase();
-  if (/year|annual|12\s*months?/.test(n)) return 'Yearly';
-  if (/quarter|3\s*months?/.test(n)) return 'Quarterly';
-  if (/week/.test(n)) return 'Weekly';
-  if (/day/.test(n) && !/monthly/.test(n)) return 'Daily';
+  const num = (re, mul) => { const m = re.exec(n); return m ? Number(m[1]) * mul : null; };
+  const days = num(/(\d+)\s*-?\s*days?\b/, 1) ?? num(/(\d+)\s*-?\s*weeks?\b/, 7) ?? num(/(\d+)\s*-?\s*months?\b/, 30) ?? num(/(\d+)\s*-?\s*years?\b/, 365);
+  if (/\byear(ly)?\b|\bannual\b/.test(n) || days >= 360) return 'Yearly';
+  if (/quarter/.test(n) || (days >= 85 && days <= 95)) return 'Quarterly';
+  if (days > 31) return '2 Months+';
+  if (/\bweekly\b/.test(n) || (days >= 3 && days <= 14)) return 'Weekly';
+  if (/\bdaily\b/.test(n) || (days != null && days <= 2)) return 'Daily';
   return null;
 }
+// "for 120days" → "120 Days"; "6 months" → "6 Months".
+const longLabel = (name) => { const m = /(\d+)\s*-?\s*(days?|weeks?|months?)\b/i.exec(String(name || '')); return m ? `${m[1]} ${m[2][0].toUpperCase()}${m[2].slice(1).toLowerCase().replace(/s?$/, 's')}` : 'Longer'; };
+// Smile "voice only" bundles carry call minutes, no data.
+const callsOnly = (name) => /smilevoice|voice\s*only/i.test(String(name || ''));
 function tidy(name) {
   return String(name || '').replace(/\s*[-–]\s*(monthly|quarterly|yearly)\b/i, '').replace(/\s*N[\d,]+(\.\d+)?\s*$/i, '').replace(/\s+/g, ' ').trim();
 }
@@ -90,7 +100,7 @@ export function PackageList({ variations, value, onChange, priceOf, kind }) {
   const groups = useMemo(() => {
     const m = new Map();
     for (const v of variations) { const g = period(v.name) || 'Monthly'; if (!m.has(g)) m.set(g, []); m.get(g).push(v); }
-    return ['Monthly', 'Quarterly', 'Yearly', 'Weekly', 'Daily'].filter((g) => m.has(g)).map((g) => ({ g, list: m.get(g).sort((a, b) => Number(a.variation_amount) - Number(b.variation_amount)) }));
+    return ['Monthly', 'Quarterly', '2 Months+', 'Yearly', 'Weekly', 'Daily'].filter((g) => m.has(g)).map((g) => ({ g, list: m.get(g).sort((a, b) => Number(a.variation_amount) - Number(b.variation_amount)) }));
   }, [variations]);
   const [tab, setTab] = useState(0);
   const [q, setQ] = useState('');
@@ -131,7 +141,7 @@ export function PackageList({ variations, value, onChange, priceOf, kind }) {
               {shown.length === 1 && <span className={`pkg-radio${on ? ' on' : ''}`} aria-hidden />}
               <span className="pkg-main" style={shown.length === 1 ? undefined : { flex: '0 0 auto' }}>
                 <span className="pkg-name">{tidy(v.name)}</span>
-                {(per || save > 0) && <span className="pkg-sub">{per}{save > 4 && <span className="pkg-save"> · save {save}%</span>}</span>}
+                {(per || save > 0 || callsOnly(v.name)) && <span className="pkg-sub">{per === '2 Months+' ? longLabel(v.name) : per}{callsOnly(v.name) && <b>{per ? ' · ' : ''}📞 Calls only — no data</b>}{save > 4 && <span className="pkg-save"> · save {save}%</span>}</span>}
               </span>
               <span className={shown.length === 1 ? 'pkg-price' : 'pkg-big'}>
                 {naira(p.total)}

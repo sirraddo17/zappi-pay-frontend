@@ -248,7 +248,8 @@ export default function Buy() {
     cached(`plans:${providerId}`, () => getVtpassVariations(providerId), (data) => {
       if (!active) return;
       shown = true;
-      const list = Array.isArray(data.content?.varations || data.content?.variations) ? (data.content?.varations || data.content?.variations) : [];
+      // A ₦0 entry (Smile "Buy Airtime") is a custom-amount item we don't sell here.
+      const list = (Array.isArray(data.content?.varations || data.content?.variations) ? (data.content?.varations || data.content?.variations) : []).filter((v) => Number(v.variation_amount) > 0);
       setVariations(list);
       // Keep the chosen plan if it still exists in the fresh list.
       setVariationCode((code) => (code && list.some((v) => v.variation_code === code) ? code : ''));

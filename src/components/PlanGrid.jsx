@@ -8,13 +8,20 @@ import { useMemo, useState } from 'react';
 const naira = (n) => `₦${Math.round(Number(n || 0)).toLocaleString()}`;
 
 function size(name) {
-  const m = /(\d+(?:\.\d+)?)\s*(TB|GB|MB)\b/i.exec(name);
-  return m ? { value: m[1], unit: m[2].toUpperCase() } : null;
+  const n = String(name || '');
+  // VTpass typo "3GB 5GB - 2,475 Naira": two sizes side by side — the second is the plan.
+  const two = /(\d+(?:\.\d+)?)\s*(TB|GB|MB)\s+(\d+(?:\.\d+)?)\s*(TB|GB|MB)\b/i.exec(n);
+  if (two) return { value: two[3], unit: two[4].toUpperCase() };
+  const m = /(\d+(?:\.\d+)?)\s*(TB|GB|MB)\b/i.exec(n);
+  if (m) return { value: m[1], unit: m[2].toUpperCase() };
+  const g = /(\d+(?:\.\d+)?)\s*G(?=\s*[-–(]|\s*$)/.exec(n); // "T2 6.2G - 3,000 Naira"
+  return g ? { value: g[1], unit: 'GB' } : null;
 }
 
 // Validity in days (null when the name doesn't say).
 export function validityDays(name) {
-  const n = String(name || '').toLowerCase();
+  // "+ 2GB daily" is a per-day allowance, not a 1-day plan.
+  const n = String(name || '').toLowerCase().replace(/\+\s*\d+(?:\.\d+)?\s*(?:gb|mb)\s+(?:daily|per\s+day)/g, ' ');
   // Bundles can mention several periods ("1GB + 1GB night … weekly"); the
   // plan lasts as long as the longest one.
   const found = [];
@@ -37,17 +44,30 @@ export function validityDays(name) {
 const CONDITIONS = [
   { key: 'Weekend', icon: '📅', re: /week\s*-?\s*end|\bsat(urday)?\b|\bsun(day)?\b/, note: 'Works only on Saturday and Sunday' },
   { key: 'Night', icon: '🌙', re: /night|midnight|\b(12|1|2)\s*(am|a\.m)\s*(-|–|to)/, note: 'Works only at night' },
-  { key: 'Social', icon: '💬', re: /social|whatsapp|youtube|tiktok|instagram|facebook|\bfb\b|twitter|\bx\s*only\b/, note: 'Only for the apps named in the plan' },
+  { key: 'Social', icon: '💬', re: /social|whatsapp|youtube|tiktok|instagram|facebook|\bfb\b|twitter|\bx\s*only\b|glo\s*tv|\bvod\b|myg\b|\byt\b/, note: 'Only for the apps named in the plan' },
   { key: 'Broadband', icon: '📶', re: /router|broadband|\bmifi\b|unlimited/, note: 'For routers / MiFi' },
+  { key: 'Calls', icon: '📞', re: /smilevoice|voice\s*only/, note: 'Call minutes only — no data' },
 ];
 const NOTE = Object.fromEntries(CONDITIONS.map((c) => [c.key, c.note]));
 
 // Bundles read "main allowance + bonus": "N800 1GB + 1GB YouTube Night +
 // 100MB YouTube Music – Weekly" is 1GB of everyday data with night/YouTube
-// extras. Only the main part (before the first "+") decides the plan's
-// conditions; what comes after is a bonus, not a restriction.
+// extras. Each "+ …" bonus runs until the next " - ", "(" or ","; what
+// follows (validity, "5G Router Data", "Night plan") is about the whole
+// plan again. Only the main part decides the plan's conditions.
+export function splitPlan(name) {
+  const segs = String(name || '').toLowerCase().split('+');
+  let main = segs[0];
+  let bonus = '';
+  for (const seg of segs.slice(1)) {
+    const cut = seg.search(/\s[-–]|\(|,/);
+    if (cut < 0) bonus += ` ${seg}`;
+    else { bonus += ` ${seg.slice(0, cut)}`; main += ` ${seg.slice(cut)}`; }
+  }
+  return { main, bonus };
+}
 function mainPart(name) {
-  return String(name || '').toLowerCase().split('+')[0];
+  return splitPlan(name).main;
 }
 
 // Every condition on a plan, e.g. ['Weekend'] or ['Night', 'Social'].
@@ -57,18 +77,18 @@ export function planConditions(name) {
 }
 // Extras that come on top of the main data, e.g. ['Night', 'Social'].
 export function planBonuses(name) {
-  const full = String(name || '').toLowerCase();
-  if (!full.includes('+')) return [];
-  const extra = full.slice(full.indexOf('+'));
+  const { bonus } = splitPlan(name);
+  if (!bonus.trim()) return [];
   const main = planConditions(name);
-  return CONDITIONS.filter((c) => c.key !== 'Broadband' && !main.includes(c.key) && c.re.test(extra)).map((c) => c.key);
+  return CONDITIONS.filter((c) => c.key !== 'Broadband' && c.key !== 'Calls' && !main.includes(c.key) && c.re.test(bonus)).map((c) => c.key);
 }
 // Plain warning for the confirm sheet, or null for an everyday plan.
 export function planWarning(name) {
   const c = planConditions(name).filter((k) => k !== 'Broadband');
   if (!c.length) return null;
+  const n0 = mainPart(name);
   const time = /(\d{1,2}\s*(?:am|pm)\s*(?:-|–|to)\s*\d{1,2}\s*(?:am|pm))/i.exec(String(name || ''));
-  const n = String(name || '').toLowerCase();
+  const n = n0;
   const sat = /\bsat(urday)?\b/.test(n);
   const sun = /\bsun(day)?\b/.test(n);
   const only = sun && !sat && !/week\s*-?\s*end/.test(n) ? 'Sunday' : sat && !sun && !/week\s*-?\s*end/.test(n) ? 'Saturday' : null;
@@ -97,7 +117,7 @@ export function groupOf(name) {
   return '2 Months+';
 }
 
-const ORDER = ['Daily', 'Weekly', 'Monthly', '2 Months+', 'Weekend', 'Night', 'Social', 'Broadband', 'Others'];
+const ORDER = ['Daily', 'Weekly', 'Monthly', '2 Months+', 'Weekend', 'Night', 'Social', 'Broadband', 'Calls', 'Others'];
 
 function validityLabel(name) {
   const n = String(name || '').toLowerCase();
@@ -188,7 +208,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
                   </div>
                   <div className="vplan-meta">
                     {g != null ? <>{naira(p.total / (v.variation_amount / g))} per GB</> : ' '}
-                    {conds.map((c) => <span key={c}> · <b className={`vplan-cond${c === 'Weekend' || c === 'Night' ? ' warn' : ''}`}>{ICON[c]} {c === 'Weekend' ? 'Weekend only' : c === 'Night' ? 'Night only' : c}</b></span>)}
+                    {conds.map((c) => <span key={c}> · <b className={`vplan-cond${c === 'Weekend' || c === 'Night' ? ' warn' : ''}`}>{ICON[c]} {c === 'Weekend' ? 'Weekend only' : c === 'Night' ? 'Night only' : c === 'Calls' ? 'Calls only' : c}</b></span>)}
                     {bonus.length > 0 && <> · <b className="vplan-cond">🎁 + {bonus.map((c) => (c === 'Night' ? 'night' : c === 'Social' ? 'app' : c.toLowerCase())).join(' & ')} bonus</b></>}
                     {isBest && <> · <b>🏆 Best deal</b></>}
                     {save >= 5 && <> · save {naira(save)}</>}
