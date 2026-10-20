@@ -14,11 +14,13 @@ export default function FundingAccountsPanel() {
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [rules, setRules] = useState({ verifiedOnly: true, maxAmount: 50000, waitMinutes: 30 });
 
   useEffect(() => {
     getSettings().then((d) => {
       const s = d.settings || d;
       setOn(s.manualFundingEnabled !== false);
+      setRules({ verifiedOnly: s.manualFundingVerifiedOnly !== false, maxAmount: Number(s.manualFundingMaxAmount ?? 50000), waitMinutes: Number(s.manualFundingWaitMinutes || 30) });
       const list = Array.isArray(s.manualAccounts) && s.manualAccounts.length ? s.manualAccounts
         : s.manualAccountNumber ? [{ id: 'main', bankName: s.manualBankName || '', accountNumber: s.manualAccountNumber, accountName: s.manualAccountName || '', enabled: true }] : [];
       setAccounts(list);
@@ -78,6 +80,27 @@ export default function FundingAccountsPanel() {
         <input type="checkbox" checked={on} disabled={busy} onChange={async (e) => { const v = e.target.checked; setOn(v); if (!(await save({ manualFundingEnabled: v }, v ? 'Manual funding is on.' : 'Manual funding is off.'))) setOn(!v); }} style={{ width: 'auto' }} />
         Offer manual funding {on && <span style={{ color: 'var(--slate-400)', fontSize: 12 }}>({shownCount} account{shownCount === 1 ? '' : 's'} showing)</span>}
       </label>
+      {on && (
+        <div style={{ border: '1px solid var(--slate-700)', borderRadius: 10, padding: 10, marginBottom: 10 }}>
+          <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6 }}>🛡️ Safety rules</div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, marginBottom: 8 }}>
+            <input type="checkbox" checked={rules.verifiedOnly} onChange={(e) => setRules((r) => ({ ...r, verifiedOnly: e.target.checked }))} style={{ width: 'auto' }} />
+            Only customers who verified BVN/NIN
+          </label>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <label style={{ fontSize: 12, flex: '1 1 140px' }}>Most per request (₦, 0 = no limit)
+              <input type="number" min="0" value={rules.maxAmount} onChange={(e) => setRules((r) => ({ ...r, maxAmount: e.target.value }))} />
+            </label>
+            <label style={{ fontSize: 12, flex: '1 1 140px' }}>Customer waits up to (minutes)
+              <input type="number" min="5" max="240" value={rules.waitMinutes} onChange={(e) => setRules((r) => ({ ...r, waitMinutes: e.target.value }))} />
+            </label>
+            <button type="button" className="btn" style={{ width: 'auto' }} disabled={busy} onClick={() => save({ manualFundingVerifiedOnly: rules.verifiedOnly, manualFundingMaxAmount: Number(rules.maxAmount), manualFundingWaitMinutes: Number(rules.waitMinutes) }, 'Safety rules saved.')}>Save rules</button>
+          </div>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '8px 0 0' }}>
+            One request at a time per customer, and a bank reference can't be used twice. You get a reminder at half the waiting time; when it runs out you're reminded again and the customer is told it's taking longer. Nothing is ever rejected automatically — approving credits the wallet at once.
+          </p>
+        </div>
+      )}
       {accounts.map((a, i) => (
         <div key={a.id} style={{ border: '1px solid var(--slate-700)', borderRadius: 10, padding: 10, marginBottom: 8, opacity: a.enabled === false ? 0.6 : 1 }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

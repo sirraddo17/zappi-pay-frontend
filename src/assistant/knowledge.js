@@ -200,7 +200,7 @@ export const TOPICS = [
     title: 'Funding not credited',
     keywords: ['not credited', 'funding pending', 'wallet not updated', 'money not reflect', 'not reflecting', 'balance not', 'still pending', 'fund not', 'funded but', 'sent money but'],
     answer:
-      'Transfers to your personal account number are usually credited within a minute — on the Wallet page, tap "I\'ve sent money — check now". Manual funding requests are checked against our bank alerts, so they can take a little while. If it has been a long time, talk to support and include the transfer reference.',
+      'Transfers to your personal account number are usually credited within a minute — on the Wallet page, tap "I\'ve sent money — check now". Manual funding (paying into our business account) is for BVN/NIN-verified customers, with a limit per request. After you submit, the Wallet page shows "Checking your transfer" with a countdown — usually within 30 minutes in working hours — and it is added to your wallet the moment support confirms it. Only one request can wait at a time, so don't send the money again. If it has been a long time, talk to support and include the transfer reference.',
     actions: [{ label: 'Check Wallet', to: '/wallet' }],
     escalate: true,
   },

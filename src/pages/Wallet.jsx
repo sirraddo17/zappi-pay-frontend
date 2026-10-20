@@ -5,7 +5,7 @@ import TestModeBanner from '../components/TestModeBanner';
 import SavingsCard from '../components/SavingsCard';
 import SpendingCard from '../components/SpendingCard';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getWalletBalance, getWalletTransactions, submitFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon, startCardPayment, verifyCardPayment, getCashback } from '../api';
+import { getWalletBalance, getWalletTransactions, submitFundRequest, getPendingFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon, startCardPayment, verifyCardPayment, getCashback } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { useAuth } from '../context/AuthContext';
 import BottomNav from '../components/BottomNav';
@@ -509,6 +509,37 @@ function fmtDate(d) {
   return new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+// Shown while a business-account transfer is being checked by support.
+function ManualWaitCard({ req, waitMinutes }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const end = new Date(req.createdAt).getTime() + waitMinutes * 60000;
+  const left = Math.max(0, end - now);
+  const late = left === 0;
+  const mm = Math.floor(left / 60000);
+  const ss = Math.floor((left % 60000) / 1000);
+  const pct = Math.min(100, Math.round((1 - left / (waitMinutes * 60000)) * 100));
+  return (
+    <div className="card" role="status" style={{ borderLeft: `4px solid ${late ? 'var(--gold, #FFB830)' : 'var(--purple)'}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontWeight: 700 }}>{late ? '⏳ Taking longer than usual' : '🔎 Checking your transfer'}</div>
+          <div style={{ color: 'var(--slate-400)', fontSize: 13 }}>
+            ₦{Number(req.amount).toLocaleString()}{req.reference ? ` · ref ${req.reference}` : ''}
+          </div>
+        </div>
+        {!late && <div style={{ fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{mm}:{String(ss).padStart(2, '0')}</div>}
+      </div>
+      {!late && <div style={{ height: 6, borderRadius: 3, background: 'var(--slate-700, #334155)', marginTop: 10, overflow: 'hidden' }}><i style={{ display: 'block', height: '100%', width: `${pct}%`, background: 'var(--purple)' }} /></div>}
+      <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: '10px 0 0' }}>
+        {late
+          ? 'Support has been alerted and will confirm it as soon as possible. Please don’t send the money again — you’ll get a notification the moment it’s added.'
+          : 'Our team is confirming it in our bank. It’s added to your wallet automatically the moment it’s confirmed — you can leave this page.'}
+      </p>
+    </div>
+  );
+}
+
 export default function Wallet() {
   const t = useLang();
   const { customer, refreshCustomer } = useAuth();
@@ -523,6 +554,7 @@ export default function Wallet() {
   const [bankInfo, setBankInfo] = useState(null);
   const [shownTx, setShownTx] = useState(FIRST_COUNT);
   const [paidTo, setPaidTo] = useState('');
+  const [pendingReq, setPendingReq] = useState(null); // { request, waitMinutes }
 
   function load() {
     Promise.all([getWalletBalance(), getWalletTransactions()])
@@ -531,12 +563,13 @@ export default function Wallet() {
         setTransactions(t.transactions);
       })
       .catch((err) => setError(err.message));
+    getPendingFundRequest().then((d) => setPendingReq(d.request ? d : null)).catch(() => {});
   }
 
   useEffect(load, []);
   // Funding waiting for approval updates on its own; a bank transfer to
   // the personal account shows up when the push arrives or on return.
-  useAutoRefresh(load, Boolean(transactions?.some((t) => t.status === 'PENDING')));
+  useAutoRefresh(load, Boolean(pendingReq || transactions?.some((t) => t.status === 'PENDING')));
   useEffect(() => {
     getBankAccount().then(setBankInfo).catch(() => setBankInfo(null));
   }, []);
@@ -588,7 +621,7 @@ export default function Wallet() {
       setAmount('');
       setReference('');
       setNote('');
-      setSuccessMessage('Funding request submitted. It will reflect once approved.');
+      setSuccessMessage('');
       load();
     } catch (err) {
       setError(err.message || 'Could not submit funding request.');
@@ -599,6 +632,7 @@ export default function Wallet() {
 
   const manualList = appInfo?.manualAccounts?.length ? appInfo.manualAccounts : appInfo?.manualFunding ? [{ id: '', ...appInfo.manualFunding }] : [];
   const manual = manualList[0] || null;
+  const rules = appInfo?.manualRules || null;
   const manualForm = (
       <form onSubmit={handleSubmit} style={autoFunding ? { marginTop: 12 } : undefined}>
           <h2 style={{ marginTop: 0, fontSize: 16 }}>{autoFunding ? 'Manual funding' : 'Fund Wallet'}</h2>
@@ -627,6 +661,11 @@ export default function Wallet() {
               </div>
             );
           })}
+          {rules && (
+            <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 8px' }}>
+              {rules.verifiedOnly ? 'For BVN/NIN-verified customers. ' : ''}{rules.maxAmount > 0 ? `Up to ₦${Number(rules.maxAmount).toLocaleString()} per request. ` : ''}We check our bank and add it — usually within {rules.waitMinutes} minutes in working hours.
+            </p>
+          )}
           <div style={{ height: 4 }} />
           <div className="field">
             <label htmlFor="amount">Amount (₦)</label>
@@ -682,7 +721,9 @@ export default function Wallet() {
         />
       )}
 
-      {!manual ? null : autoFunding && !(bankInfo?.accounts && bankInfo.accounts.length === 0 && bankInfo.pausedCount > 0) ? (
+      {pendingReq?.request && <ManualWaitCard req={pendingReq.request} waitMinutes={pendingReq.waitMinutes} />}
+
+      {!manual || pendingReq?.request ? null : autoFunding && !(bankInfo?.accounts && bankInfo.accounts.length === 0 && bankInfo.pausedCount > 0) ? (
         <details className="card">
           <summary style={{ cursor: 'pointer', fontSize: 14 }}>Other way: send to our business account for manual approval</summary>
           {manualForm}

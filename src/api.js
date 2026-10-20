@@ -167,6 +167,7 @@ export const setMyUsername = (username) => request('/api/account/username', { me
 export const getWalletBalance = () => request('/api/wallet/balance');
 export const getWalletTransactions = () => request('/api/wallet/transactions');
 export const getWalletTransaction = (id) => request(`/api/wallet/transactions/${encodeURIComponent(id)}`);
+export const getPendingFundRequest = () => request('/api/wallet/fund-request/pending');
 export const submitFundRequest = (data) => request('/api/wallet/fund-request', { method: 'POST', body: JSON.stringify(data) });
 export const getBankAccount = () => request('/api/wallet/bank-account');
 export const createBankAccount = (data) => request('/api/wallet/bank-account', { method: 'POST', body: JSON.stringify(data) });
@@ -280,7 +281,7 @@ export const setCustomerActive = (id, active, reason) =>
 // --- Admin: wallet approvals ---
 export const getPendingFunding = () => adminRequest('/api/admin/wallet/pending');
 export const approveFunding = (id) => adminRequest(`/api/admin/wallet/${id}/approve`, { method: 'POST' });
-export const rejectFunding = (id) => adminRequest(`/api/admin/wallet/${id}/reject`, { method: 'POST' });
+export const rejectFunding = (id, reason) => adminRequest(`/api/admin/wallet/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason: reason || undefined }) });
 
 // --- Admin: orders & audit log ---
 // --- New features ---
