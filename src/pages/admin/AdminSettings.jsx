@@ -664,7 +664,7 @@ export default function AdminSettings() {
             <input id="monnifyContractCode" value={monnifyContractCode} onChange={(e) => setMonnifyContractCode(e.target.value)} />
           </div>
           <p style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 0 }}>
-            Webhook URL to set in Monnify (Transaction completion): https://zappi-pay-backend.onrender.com/api/webhooks/monnify
+            Webhook URL to set in Monnify (Transaction completion): https://api.zappipay.com.ng/api/webhooks/monnify
           </p>
           {monnifyTest && !monnifyTest.running && (
             <div style={{ margin: '0 0 12px', fontSize: 14 }}>
@@ -1002,7 +1002,7 @@ export default function AdminSettings() {
               Email a 6-digit code on every admin login
             </label>
             <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: 0 }}>
-              You can switch this off here at any time. Admins can tick “Trust this device for 30 days”. Test that your admin email receives messages (e.g. with the summary test below) before turning this on. If email stops working, log in with a backup code below; last resort: ADMIN_2FA_DISABLED = 1 on Render turns it off.
+              You can switch this off here at any time. Admins can tick “Trust this device for 30 days”. Test that your admin email receives messages (e.g. with the summary test below) before turning this on. If email stops working, log in with a backup code below; last resort: ADMIN_2FA_DISABLED = 1 in the server settings (.env) turns it off.
             </p>
             <BackupCodesPanel />
           </div>
@@ -1015,7 +1015,7 @@ export default function AdminSettings() {
               Automatically block addresses that scan for weak spots, guess passwords or forge logins
             </label>
             <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 14px' }}>
-              Blocks are short (15 minutes to a day) and you're alerted. Warning signs are always recorded — see 🛡️ Security. When off, you're only alerted. Addresses in SECURITY_ALLOW_IPS on Render are never blocked.
+              Blocks are short (15 minutes to a day) and you're alerted. Warning signs are always recorded — see 🛡️ Security. When off, you're only alerted. Addresses in SECURITY_ALLOW_IPS in the server settings (.env) are never blocked.
             </p>
           </div>
           )}

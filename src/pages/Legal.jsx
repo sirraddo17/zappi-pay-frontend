@@ -98,7 +98,7 @@ const DOCS = {
         <ul>
           <li><b>VTpass (Broadshift Technologies)</b> — to deliver airtime, data, bills and PINs.</li>
           <li><b>Monnify (Moniepoint)</b> — personal account numbers, identity verification, bank transfers.</li>
-          <li><b>Service providers</b> that host and run the App for us: database and server hosting (Neon, Render, Vercel), email delivery (Resend), and, if you use the in-app assistant, our AI provider (Anthropic).</li>
+          <li><b>Service providers</b> that host and run the App for us: database and server hosting (Neon, RackNerd, Vercel), email delivery (Resend), and, if you use the in-app assistant, our AI provider (Anthropic).</li>
           <li><b>Authorities</b>, where the law requires it or to prevent fraud or protect users.</li>
         </ul>
         <p>We do not sell your personal data.</p>

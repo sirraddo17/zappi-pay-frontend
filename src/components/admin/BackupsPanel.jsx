@@ -3,7 +3,7 @@ import { getBackup, saveBackupEmails, runBackupNow, downloadBackup } from '../..
 
 // Settings → Backups: nightly database backups emailed to up to 3
 // addresses, plus "Send now" and "Download". The file is locked with
-// BACKUP_PASSWORD (set on Render) — never stored in the app.
+// BACKUP_PASSWORD (set in the server settings (.env)) — never stored in the app.
 export default function BackupsPanel() {
   const [d, setD] = useState(null);
   const [emails, setEmails] = useState(['', '', '']);
@@ -28,7 +28,7 @@ export default function BackupsPanel() {
       <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 0 }}>Every night (about 2am) a full copy of the database — customers, wallets, transactions, orders, transfers and settings — is emailed to the addresses below. The file is locked with your backup password, so it’s useless to anyone without it.</p>
 
       <div style={{ fontSize: 13, background: 'rgba(13, 148, 136,0.08)', borderRadius: 8, padding: 10, margin: '0 0 12px' }}>
-        <div>{d.passwordSet ? '✅' : '🔴'} Backup password {d.passwordSet ? 'is set on the server' : <>not set — on Render → your backend → <b>Environment</b>, add <code>BACKUP_PASSWORD</code> (12+ characters, write it down somewhere safe), then redeploy</>}</div>
+        <div>{d.passwordSet ? '✅' : '🔴'} Backup password {d.passwordSet ? 'is set on the server' : <>not set — on the server, add <code>BACKUP_PASSWORD</code> (12+ characters, write it down somewhere safe) to <code>/opt/zappi-pay-backend/.env</code>, then run <code>pm2 restart zappi-pay-api</code></>}</div>
         <div>{d.emailReady ? '✅' : '🔴'} Email sending {d.emailReady ? 'works' : 'is not set up on the server (RESEND_API_KEY / EMAIL_FROM)'}</div>
         <div>{d.lastOkAt ? '✅' : '🟠'} Last backup sent: <b>{when(d.lastOkAt)}</b>{d.lastStatus ? ` — ${d.lastStatus}` : ''}</div>
       </div>
