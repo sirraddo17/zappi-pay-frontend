@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { adminAiChat, getAdminAiStatus, getAiBriefing } from '../../api';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import ImageAttach from '../../components/ImageAttach';
 import AiActionCard from '../../components/admin/AiActionCard';
 import AiDesignCard from '../../components/admin/AiDesignCard';
@@ -27,6 +28,20 @@ function ReplyText({ text }) {
     </>
   );
 }
+
+// Support staff get a support helper: it walks them through the Support Guide.
+const STAFF_SUGGESTIONS = [
+  'A customer says they sent money but their wallet wasn’t credited — what do I do?',
+  'Customer sent money to an old account number',
+  'Customer lost their phone',
+  'Customer forgot their PIN',
+  'Airtime shows successful but the customer didn’t get it',
+  'Where is the customer’s electricity token?',
+  'Customer’s card was charged but the wallet didn’t go up',
+  'Customer sent money to the wrong bank account',
+  'Customer’s bank transfer is still processing',
+  'Customer wants to close their account',
+];
 
 const SUGGESTIONS = [
   'How did we do today?',
@@ -65,6 +80,7 @@ const SUGGESTIONS = [
 // pricing and promotion changes (applied only when the owner taps Apply)
 // and design adverts at any size.
 export default function AdminAssistant() {
+  const { isOwner } = useAdminAuth();
   const [status, setStatus] = useState(null);
   const [messages, setMessages] = useState([]);
   // /admin/assistant?ask=… (from other admin pages) prefills the question.
@@ -111,10 +127,12 @@ export default function AdminAssistant() {
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
         <div>
-          <h1>AI Assistant</h1>
-          <p>Ask about sales, profit and customers — or tell it to change rewards, discounts and promotions, or design an ad. Changes only happen when you tap Apply. It can't touch keys, bank accounts, payouts, security or customer wallets.</p>
+          <h1>{isOwner ? 'AI Assistant' : '✨ Support helper'}</h1>
+          {isOwner
+            ? <p>Ask about sales, profit and customers — or tell it to change rewards, discounts and promotions, or design an ad. Changes only happen when you tap Apply. It can't touch keys, bank accounts, payouts, security or customer wallets. For customer problems it follows the <Link to="/admin/support-guide">📘 Support guide</Link>.</p>
+            : <p>Tell it the customer's problem and it walks you through the <Link to="/admin/support-guide">📘 Support guide</Link> step by step — with the right screens, what you can do yourself, what needs owner approval, and a reply to send. It looks up the customer's records but can't change anything.</p>}
         </div>
-        {!off && status && (
+        {!off && status && isOwner && (
           <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 14px' }} disabled={busy} onClick={async () => {
             setBusy(true);
             setError('');
@@ -153,7 +171,7 @@ export default function AdminAssistant() {
             <div>
               <p style={{ color: 'var(--slate-400)', fontSize: 14, marginTop: 0 }}>Try one of these:</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {SUGGESTIONS.map((s) => (
+                {(isOwner ? SUGGESTIONS : STAFF_SUGGESTIONS).map((s) => (
                   <button key={s} type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} disabled={off || busy} onClick={() => ask(s)}>
                     {s}
                   </button>
@@ -199,7 +217,7 @@ export default function AdminAssistant() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             maxLength={2000}
-            placeholder="e.g. Raise the delivery promise bonus to ₦15, or design a data promo"
+            placeholder={isOwner ? "e.g. Raise the delivery promise bonus to ₦15, or design a data promo" : "e.g. Ada (0803…) says her ₦5,000 transfer this morning didn’t show"}
             aria-label="Question"
             disabled={off}
           />

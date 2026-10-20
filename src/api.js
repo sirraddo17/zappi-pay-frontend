@@ -771,3 +771,5 @@ export const fixCustomerName = (id, name, reason) => adminRequest(`/api/admin/cu
 export const setCustomerDailyLimit = (id, limit, reason) => adminRequest(`/api/admin/customers/${id}/daily-limit`, { method: 'PUT', body: JSON.stringify({ limit, reason }) });
 export const grantCustomerReward = (id, kind, amount, reason) => adminRequest(`/api/admin/customers/${id}/grant-reward`, { method: 'POST', body: JSON.stringify({ kind, amount, reason }) });
 export const openTicketForCustomer = (id, data) => adminRequest(`/api/admin/customers/${id}/tickets`, { method: 'POST', body: JSON.stringify(data) });
+
+export const getSupportGuide = () => adminRequest('/api/admin/support-guide');

@@ -14,6 +14,7 @@ const TABS = [
   { to: '/admin/money', label: '💰 Money check' },
   { to: '/admin/go-live', label: '🚦 Go-live check' },
   { to: '/admin/assistant', label: '✨ AI Assistant' },
+  { to: '/admin/support-guide', label: '📘 Support guide' },
   { to: '/admin/pending-funding', label: 'Pending Funding' },
   { to: '/admin/airtime-cash', label: 'Airtime to Cash' },
   { to: '/admin/bank-transfers', label: 'Bank Transfers' },
@@ -43,12 +44,12 @@ const TABS = [
 ];
 
 // What support staff (role SUPPORT) can open.
-const SUPPORT_TABS = ['/admin/customers', '/admin/orders', '/admin/bank-transfers', '/admin/support', '/admin/escalations'];
+const SUPPORT_TABS = ['/admin/support-guide', '/admin/assistant', '/admin/customers', '/admin/orders', '/admin/bank-transfers', '/admin/unmatched-payments', '/admin/support', '/admin/escalations'];
 
 export default function AdminLayout({ children }) {
   const { admin, logout, isOwner } = useAdminAuth();
   const { pathname } = useLocation();
-  const tabs = isOwner ? TABS : TABS.filter((t) => SUPPORT_TABS.includes(t.to)).map((t) => (t.to === '/admin/escalations' ? { ...t, label: '✅ My requests' } : t));
+  const tabs = isOwner ? TABS : TABS.filter((t) => SUPPORT_TABS.includes(t.to)).map((t) => (t.to === '/admin/escalations' ? { ...t, label: '✅ My requests' } : t.to === '/admin/assistant' ? { ...t, label: '✨ Support helper' } : t));
   const allowed = isOwner || SUPPORT_TABS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const navigate = useNavigate();
   const mainRef = useRef(null);
