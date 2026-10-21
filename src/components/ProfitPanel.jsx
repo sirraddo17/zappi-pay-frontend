@@ -82,8 +82,8 @@ const INCOME = [
   ['circleServiceFees', 'Ajo Circle service fees', 'Your fee on each Ajo payout'],
 ];
 const COSTS = [
-  ['monnifyFundingFees', 'Monnify: bank funding', '1.5% (max ₦2,000) + VAT on each deposit'],
-  ['monnifyPayoutFees', 'Monnify: send-to-bank', '₦10 / ₦20 / ₦40 + VAT per transfer'],
+  ['monnifyFundingFees', 'Partners: bank funding', 'Monnify 1.5% (max ₦2,000) · Squad 0.25% (max ₦1,000) · Nomba 1% (₦10–₦200), each + VAT'],
+  ['monnifyPayoutFees', 'Partners: send-to-bank', 'Monnify ₦10 / ₦20 / ₦40 · Nomba ₦50 flat, each + VAT per transfer'],
   ['rewards', 'Rewards paid', 'Cashback, referral, loyalty, contest prizes, coupons'],
 ];
 
