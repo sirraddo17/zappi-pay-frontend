@@ -43,14 +43,15 @@ export default function AdminDatabase() {
   useEffect(() => { load(false); }, []);
 
   const db = d?.database;
+  const sv = d?.server;
   const nx = d?.neon;
   const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, maxWidth: 680, margin: '0 0 16px' };
 
   return (
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16 }}>
-        <h1>🗄️ Database</h1>
-        <p>Health, size and usage of your database (Neon). Checked about every hour — you’re alerted if anything needs you.</p>
+        <h1>🗄️ Server &amp; Database</h1>
+        <p>Health of the server the app runs on and of your database (Neon). Checked about every hour — you’re alerted if anything needs you.</p>
       </div>
 
       {err && <p className="error-text">{err}</p>}
@@ -71,6 +72,19 @@ export default function AdminDatabase() {
             <button type="button" className="btn btn-secondary" style={{ width: 'auto', marginTop: 10 }} disabled={busy} onClick={() => load(true)}>{busy ? 'Checking…' : '↻ Check again'}</button>
           </div>
 
+          {sv && (
+            <>
+              <h2 style={{ fontSize: 16, margin: '0 0 10px' }}>Server</h2>
+              <div style={grid}>
+                <Stat label="Memory free" value={`${sv.memory.availableMb} MB`} sub={`of ${sv.memory.totalMb} MB · app uses ${sv.apiMemoryMb} MB`} pct={sv.memory.usedPct} />
+                <Stat label="Swap" value={`${sv.swap.usedMb} MB`} sub={sv.swap.totalMb ? `used of ${Math.round(sv.swap.totalMb / 102.4) / 10} GB` : 'No swap set up'} pct={sv.swap.totalMb ? Math.round((sv.swap.usedMb / sv.swap.totalMb) * 100) : null} />
+                {sv.disk && <Stat label="Disk" value={`${sv.disk.freeGb} GB free`} sub={`of ${sv.disk.totalGb} GB`} pct={sv.disk.usedPct} />}
+                <Stat label="Load" value={`${sv.cpu.load15}`} sub={`15-min average · ${sv.cpu.cores} core${sv.cpu.cores === 1 ? '' : 's'} · up ${sv.uptimeDays} days`} />
+              </div>
+            </>
+          )}
+
+          {db.ok && <h2 style={{ fontSize: 16, margin: '0 0 10px' }}>Database</h2>}
           {db.ok && (
             <>
               <div style={grid}>

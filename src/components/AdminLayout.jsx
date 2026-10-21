@@ -13,7 +13,7 @@ const TABS = [
   { to: '/admin', label: 'Overview', end: true },
   { to: '/admin/money', label: '💰 Money check' },
   { to: '/admin/go-live', label: '🚦 Go-live check' },
-  { to: '/admin/database', label: '🗄️ Database' },
+  { to: '/admin/database', label: '🗄️ Server & Database' },
   { to: '/admin/assistant', label: '✨ AI Assistant' },
   { to: '/admin/support-guide', label: '📘 Support guide' },
   { to: '/admin/pending-funding', label: 'Pending Funding' },

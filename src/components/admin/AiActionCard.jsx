@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { applyAiAction, undoAiAction, dismissAiAction } from '../../api';
 
-const KIND_ICON = { VIDEO: '🎥', SETTINGS: '⚙️', CHALLENGE: '🎯', PROMO: '🏷️', NOTICE: '📢', BROADCAST: '📣' };
+const KIND_ICON = { VIDEO: '🎥', SETTINGS: '⚙️', CHALLENGE: '🎯', PROMO: '🏷️', NOTICE: '📢', BROADCAST: '📣', CODE: '🧑‍💻' };
 
 // A change the admin assistant proposed. Nothing happens until Apply.
 export default function AiActionCard({ action }) {
@@ -11,6 +11,7 @@ export default function AiActionCard({ action }) {
 
   async function run(kind) {
     if (kind === 'apply' && a.kind === 'BROADCAST' && !window.confirm('Send this notification to customers now? This cannot be undone.')) return;
+    if (kind === 'apply' && a.kind === 'CODE' && !window.confirm('Open this pull request on GitHub? It does not change the live app — you review and merge it on GitHub.')) return;
     if (kind === 'apply' && a.kind === 'VIDEO' && !window.confirm('Make this HeyGen video now? It uses your HeyGen credit and cannot be undone.')) return;
     setBusy(kind);
     setErr('');
@@ -49,11 +50,17 @@ export default function AiActionCard({ action }) {
           {a.warnings.map((w, i) => <li key={i}>{w}</li>)}
         </ul>
       )}
+      {a.link && (
+        <p style={{ fontSize: 13, margin: '10px 0 0' }}>
+          <a href={a.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--gold)', fontWeight: 700 }}>Open the pull request on GitHub ↗</a>
+          <span style={{ color: 'var(--slate-400)' }}> — review “Files changed”, test, then Merge. Not live until you merge.</span>
+        </p>
+      )}
       {err && <p className="error-text" style={{ fontSize: 13, margin: '8px 0 0' }}>{err}</p>}
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         {a.status === 'PENDING' && (
           <>
-            <button type="button" className="btn" style={{ width: 'auto', padding: '6px 16px' }} disabled={Boolean(busy)} onClick={() => run('apply')}>{busy === 'apply' ? 'Applying…' : a.kind === 'BROADCAST' ? 'Send now' : a.kind === 'VIDEO' ? 'Make video' : 'Apply'}</button>
+            <button type="button" className="btn" style={{ width: 'auto', padding: '6px 16px' }} disabled={Boolean(busy)} onClick={() => run('apply')}>{busy === 'apply' ? 'Applying…' : a.kind === 'BROADCAST' ? 'Send now' : a.kind === 'VIDEO' ? 'Make video' : a.kind === 'CODE' ? 'Open pull request' : 'Apply'}</button>
             <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 16px' }} disabled={Boolean(busy)} onClick={() => run('dismiss')}>Dismiss</button>
           </>
         )}
