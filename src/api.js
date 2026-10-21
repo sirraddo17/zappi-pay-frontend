@@ -732,6 +732,7 @@ export const declinePayoutRequest = (id) => request(`/api/payout-requests/${enco
 
 // Admin → Go-live check
 export const getGoLive = () => adminRequest('/api/admin/go-live');
+export const getDatabaseHealth = (fresh) => adminRequest(`/api/admin/database${fresh ? '?fresh=1' : ''}`);
 export const removeTestNumbers = (provider, confirm) => adminRequest('/api/admin/go-live/remove-test-numbers', { method: 'POST', body: JSON.stringify({ provider, confirm }) });
 // Admin → owner's partner accounts (fund / settlement)
 export const getPartnerAccounts = () => adminRequest('/api/admin/partner-accounts');
