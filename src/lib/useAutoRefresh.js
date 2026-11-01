@@ -7,6 +7,23 @@ import { isLite } from './lite';
 //   up after 15 minutes (admin screens pass their own timing);
 // - it always reloads when the app comes back to the front, and when a
 //   push notification arrives (see public/push-sw.js).
+// Nobody touching the screen for 10 minutes (an admin page left open
+// all day) → automatic re-checks pause, so the database can sleep. Any
+// tap, key, scroll or coming back to the app starts them again (and
+// reloads straight away).
+const IDLE_MS = 10 * 60 * 1000;
+let lastTouch = Date.now();
+if (typeof window !== 'undefined') {
+  const touch = () => {
+    const wasIdle = Date.now() - lastTouch > IDLE_MS;
+    lastTouch = Date.now();
+    if (wasIdle) window.dispatchEvent(new CustomEvent('zp-refresh'));
+  };
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((e) => window.addEventListener(e, touch, { passive: true }));
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') lastTouch = Date.now(); });
+}
+const idle = () => Date.now() - lastTouch > IDLE_MS;
+
 export default function useAutoRefresh(reload, active, { fastMs = 4000, slowMs = 15000, maxMs = 15 * 60 * 1000 } = {}) {
   const reloadRef = useRef(reload);
   reloadRef.current = reload;
@@ -33,7 +50,7 @@ export default function useAutoRefresh(reload, active, { fastMs = 4000, slowMs =
       const age = Date.now() - started;
       if (age > maxMs) return;
       timer = setTimeout(() => {
-        if (document.visibilityState === 'visible') reloadRef.current();
+        if (document.visibilityState === 'visible' && !idle()) reloadRef.current();
         tick();
       }, (age < 2 * 60 * 1000 ? fastMs : slowMs) * (isLite() ? 3 : 1)); // Lite mode: check less often
     };
