@@ -33,7 +33,7 @@ const FAQ = [
   ['How do I fund my wallet?', 'Transfer money to the account shown on the Wallet page, then submit the amount and your reference. Your balance updates once it is confirmed and you get a notification.'],
   ['What happens if a purchase fails?', 'The amount is refunded to your ZappiPay wallet automatically, and you get a notification explaining what happened.'],
   ['Can I use ZappiPay on my phone like an app?', 'Yes. Open zappipay.com.ng in your phone browser and choose “Add to Home Screen” (or “Install app”). It opens full-screen like a normal app.'],
-  ['Who runs ZappiPay?', 'ZappiPay is operated by SIRRADDO GLOBAL LIMITED, a company registered in Nigeria (RC 9939920). Bill payments are delivered through VTpass, a licensed payment service provider.'],
+  ['Who owns ZAPPI PAY?', 'ZAPPI PAY is owned and operated by SIRRADDO GLOBAL LIMITED, a company registered in Nigeria (RC 9939920). Bill payments are delivered through VTpass, a licensed payment service provider.'],
 ];
 
 function PhoneMockup() {
@@ -84,6 +84,8 @@ function PhoneMockup() {
   );
 }
 
+const OWNERSHIP = 'ZAPPI PAY is owned and operated by SIRRADDO GLOBAL LIMITED (RC 9939920), a company registered in Nigeria.';
+
 export default function Landing() {
   const [searchParams] = useSearchParams();
   const [referral, setReferral] = useState(null);
@@ -126,6 +128,10 @@ export default function Landing() {
           </div>
         </div>
       </nav>
+      {/* Ownership statement (asked for by our payment partner's KYC review). */}
+      <div className="lp-wrap" style={{ fontSize: 13, textAlign: 'center', padding: '8px 0 0', opacity: 0.85 }}>
+        {OWNERSHIP}
+      </div>
       <div className="lp-wrap"><TestModeBanner style={{ margin: '12px 0 0' }} /></div>
 
       <header className="lp-wrap lp-hero">
@@ -266,7 +272,7 @@ export default function Landing() {
                 <Wordmark size={15} />
               </div>
               <p style={{ margin: '10px 0 0', lineHeight: 1.5, maxWidth: 380 }}>
-                ZappiPay is operated by SIRRADDO GLOBAL LIMITED (RC 9939920), Ibadan, Nigeria. Bill payments are delivered through VTpass.
+                <b>{OWNERSHIP}</b> Ibadan, Nigeria. Bill payments are delivered through VTpass.
               </p>
               <address style={{ fontStyle: 'normal', margin: '10px 0 0', lineHeight: 1.6, maxWidth: 380 }}>
                 📍 {COMPANY.address}<br />
@@ -303,7 +309,7 @@ export default function Landing() {
               </ul>
             </div>
           </div>
-          <p style={{ marginTop: 24 }}>© {new Date().getFullYear()} SIRRADDO GLOBAL LIMITED. All rights reserved.</p>
+          <p style={{ marginTop: 24 }}>© {new Date().getFullYear()} SIRRADDO GLOBAL LIMITED. ZAPPI PAY is a product of SIRRADDO GLOBAL LIMITED. All rights reserved.</p>
         </div>
       </footer>
     </div>

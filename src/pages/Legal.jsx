@@ -9,8 +9,8 @@ const DOCS = {
     title: 'About Us',
     body: (
       <>
-        <p>ZappiPay is a digital wallet and bill payment platform built for the Nigerian market. We let you fund a wallet and instantly pay for airtime, data, electricity, cable TV subscriptions, education (WAEC/JAMB) pins, internet subscriptions, and bet wallet funding — all from one app.</p>
-        <p>ZappiPay is operated by SIRRADDO GLOBAL LIMITED, a company registered in Nigeria (RC 9939920), and is built on top of VTpass, a licensed payment solution service provider, for the delivery of airtime, data, and utility bill payments.</p>
+        <p>ZappiPay is a digital wallet and bill payment platform built for the Nigerian market. We let you fund a wallet and instantly pay for airtime, data, electricity, cable TV subscriptions, education (WAEC/JAMB) pins, and internet subscriptions — all from one app.</p>
+        <p><b>ZAPPI PAY is owned and operated by SIRRADDO GLOBAL LIMITED</b>, a company registered in Nigeria (RC 9939920), and is built on top of VTpass, a licensed payment solution service provider, for the delivery of airtime, data, and utility bill payments.</p>
         <p>Our goal is simple: make everyday bill payments fast, reliable, and available to everyone, whether you're topping up your own line or paying a bill for someone else.</p>
       </>
     ),
