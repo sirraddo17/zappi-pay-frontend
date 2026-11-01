@@ -3,6 +3,7 @@ import { lazy as reactLazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext';
+import { FeatureGate } from './components/ServiceNotices';
 
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -239,14 +240,14 @@ export default function App() {
           <Route path="/international" element={<RequireCustomer><International /></RequireCustomer>} />
           <Route path="/exam-pins" element={<RequireCustomer><ExamPins /></RequireCustomer>} />
           <Route path="/exam-pins/:id" element={<RequireCustomer><ExamPins /></RequireCustomer>} />
-          <Route path="/insurance" element={<RequireCustomer><Insurance /></RequireCustomer>} />
+          <Route path="/insurance" element={<RequireCustomer><FeatureGate feature="carInsurance" name="Car insurance"><Insurance /></FeatureGate></RequireCustomer>} />
           <Route path="/requests" element={<RequireCustomer><Requests /></RequireCustomer>} />
           <Route path="/print-cards/:id" element={<RequireCustomer><PrintCards /></RequireCustomer>} />
           <Route path="/delete-account" element={<DeleteAccountInfo />} />
           <Route path="/transfer" element={<RequireCustomer><Transfer /></RequireCustomer>} />
           <Route path="/pay/:username" element={<PayLink />} />
           <Route path="/profile" element={<RequireCustomer><Profile /></RequireCustomer>} />
-          <Route path="/airtime-cash" element={<RequireCustomer><AirtimeCash /></RequireCustomer>} />
+          <Route path="/airtime-cash" element={<RequireCustomer><FeatureGate feature="airtimeToCash" name="Airtime to Cash"><AirtimeCash /></FeatureGate></RequireCustomer>} />
 
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />

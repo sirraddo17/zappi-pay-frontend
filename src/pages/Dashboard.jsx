@@ -382,7 +382,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {!lite && <AdsCarousel placement="BOTTOM" fallback={DEFAULT_BOTTOM_SLIDES} />}
+      {!lite && <AdsCarousel placement="BOTTOM" fallback={DEFAULT_BOTTOM_SLIDES.filter((x) => x.linkUrl !== '/airtime-cash' || feat.airtimeToCash)} />}
 
       <BottomNav />
     </div>

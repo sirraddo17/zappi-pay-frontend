@@ -9,7 +9,7 @@ import ImageAttach from '../components/ImageAttach';
 import { buyAgainLink } from '../lib/repeat';
 import { supportWaLink } from '../lib/whatsapp';
 import { useAuth } from '../context/AuthContext';
-import { useAppInfo } from '../components/ServiceNotices';
+import { useAppInfo, useFeatures } from '../components/ServiceNotices';
 import { shareReceipt, downloadReceipt, extractToken } from '../lib/receipt';
 import Celebrate, { ResultBadge } from '../components/Celebrate';
 import { Skeleton } from '../components/Skeleton';
@@ -49,6 +49,7 @@ export default function OrderDetail() {
   const [reportOpen, setReportOpen] = useState(false);
   const { customer } = useAuth();
   const appInfo = useAppInfo();
+  const features = useFeatures();
   const [reportMessage, setReportMessage] = useState('');
   const [reportImages, setReportImages] = useState([]);
   const [reportError, setReportError] = useState('');
@@ -292,7 +293,7 @@ export default function OrderDetail() {
         </Link>
       )}
 
-      {order.service === 'AIRTIME' && order.status === 'SUCCESS' && (
+      {order.service === 'AIRTIME' && order.status === 'SUCCESS' && features.airtimeToCash && (
         <Link
           to={`/airtime-cash?order=${order.id}`}
           className="btn-secondary btn no-print"

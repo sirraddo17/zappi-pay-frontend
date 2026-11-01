@@ -4,7 +4,7 @@ import { Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import InstallAppButton from './InstallAppButton';
 import AdminAlertsToggle from './AdminAlertsToggle';
-import { getMonnifyOverview, isDemoMode, setDemoMode } from '../api';
+import { getMonnifyOverview, isDemoMode, setDemoMode, getAppInfo, getAdminFeatures } from '../api';
 
 // Remembered while the admin app is open so every page doesn't re-ask.
 let monnifyModeCache = null;
@@ -47,6 +47,38 @@ const TABS = [
   { to: '/admin/my-access', label: '🔒 Access & roles' },
 ];
 
+// Menu items that belong to a feature. While the feature is switched off
+// the item is hidden and its page shows a short "switched off" note (the
+// code stays; switch the feature back on to see it again).
+const GATED = {
+  '/admin/airtime-cash': { what: 'Airtime to Cash', where: '🧩 New features', on: (f) => f.mode('airtimeToCash') },
+  '/admin/bank-transfers': { what: 'Send to Bank', where: 'Settings → Wallet funding & payment partners → Monnify', on: (f) => f.bankTransfer },
+  '/admin/disputes': { what: 'Send money and Send to Bank', where: '🧩 New features / Settings', on: (f) => f.mode('sendMoney') || f.bankTransfer },
+  '/admin/pending-funding': { what: 'Manual funding (pay into our business account)', where: 'Settings → 🏦 Manual funding accounts', on: (f) => f.manualFunding },
+  '/admin/unmatched-payments': { what: 'Bank-transfer wallet funding', where: 'Settings → Wallet funding & payment partners', on: (f) => f.bankFunding },
+};
+let gateCache = null;
+function useFeatureState(isOwner) {
+  const [state, setState] = useState(gateCache);
+  useEffect(() => {
+    if (gateCache) return;
+    Promise.all([getAppInfo(), isOwner ? getAdminFeatures().catch(() => null) : Promise.resolve(null)])
+      .then(([info, admin]) => {
+        const modes = Object.fromEntries((admin?.features || []).map((x) => [x.key, x.mode]));
+        gateCache = {
+          // ON or "Testers only" counts as on for the admin menu.
+          mode: (key) => (modes[key] ? modes[key] !== 'OFF' : Boolean(info?.features?.[key])),
+          bankTransfer: Boolean(info?.bankTransfer),
+          manualFunding: Boolean(info?.manualAccounts?.length),
+          bankFunding: Boolean(info?.funding?.bank),
+        };
+        setState(gateCache);
+      })
+      .catch(() => {});
+  }, []);
+  return state;
+}
+
 // What support staff (role SUPPORT) can open.
 const SUPPORT_TABS = ['/admin/my-access', '/admin/support-guide', '/admin/assistant', '/admin/customers', '/admin/orders', '/admin/bank-transfers', '/admin/unmatched-payments', '/admin/support', '/admin/escalations'];
 
@@ -55,7 +87,10 @@ export default function AdminLayout({ children }) {
   const { pathname } = useLocation();
   const [demo, setDemo] = useState(isDemoMode());
   // Demo / screenshot mode: hides the Server & Database screen too.
-  const visible = demo ? TABS.filter((t) => t.to !== '/admin/database') : TABS;
+  const feat = useFeatureState(isOwner);
+  const featureOn = (to) => !GATED[to] || Boolean(feat && GATED[to].on(feat));
+  const visible = TABS.filter((t) => (!demo || t.to !== '/admin/database') && featureOn(t.to));
+  const offPage = Object.keys(GATED).find((p) => (pathname === p || pathname.startsWith(`${p}/`)) && feat && !GATED[p].on(feat));
   const tabs = isOwner ? visible : visible.filter((t) => SUPPORT_TABS.includes(t.to)).map((t) => (t.to === '/admin/escalations' ? { ...t, label: '✅ My requests' } : t.to === '/admin/assistant' ? { ...t, label: '✨ Support helper' } : t));
   const allowed = isOwner || SUPPORT_TABS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const navigate = useNavigate();
@@ -143,7 +178,13 @@ export default function AdminLayout({ children }) {
             <Link to="/admin/settings" style={{ color: 'inherit', textDecoration: 'underline' }}>Settings → Monnify</Link>
           </div>
         )}
-        {allowed ? children : (
+        {offPage ? (
+          <div className="card" style={{ margin: 0, maxWidth: 520 }}>
+            <h2 style={{ marginTop: 0, fontSize: 18 }}>{GATED[offPage].what} is switched off</h2>
+            <p style={{ color: 'var(--slate-400)' }}>This page is hidden while it’s off, and customers don’t see it either. To use it again, switch it on in {GATED[offPage].where}.</p>
+            <NavLink to="/admin" className="btn" style={{ display: 'inline-block', width: 'auto', textDecoration: 'none' }}>Back to Overview</NavLink>
+          </div>
+        ) : allowed ? children : (
           <div className="card" style={{ margin: 0, maxWidth: 520 }}>
             <h2 style={{ marginTop: 0, fontSize: 18 }}>Not available for support staff</h2>
             <p style={{ color: 'var(--slate-400)' }}>This part of the admin app is for owners. You can help customers from Customers, Orders and Support, and send anything sensitive for approval.</p>

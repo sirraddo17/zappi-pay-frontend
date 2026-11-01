@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getAppInfo, getMyFeatures } from '../api';
 
 // Admin-posted notices, e.g. "MTN data is slow right now".
@@ -36,6 +37,28 @@ export function useFeatures() {
     getMyFeatures().then((r) => { fCache = r.features || {}; fAt = Date.now(); setMine(fCache); }).catch(() => {});
   }, []);
   return { ...(appInfo?.features || {}), ...(mine || {}) };
+}
+
+// A whole page behind a switch (Admin → New features). While the switch
+// is off (and this customer isn't a tester), the page isn't shown — only
+// a short "not available" card — even if someone opens the link directly.
+export function FeatureGate({ feature, name, children }) {
+  const info = useAppInfo();
+  const features = useFeatures();
+  if (!info) return null;
+  if (features[feature]) return children;
+  return (
+    <div className="app-shell">
+      <div className="page-header">
+        <Link to="/" style={{ color: 'var(--purple)', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
+        <h1>{name}</h1>
+      </div>
+      <div className="card">
+        <p style={{ margin: 0 }}>{name} isn’t available on ZAPPI PAY right now. You can still buy airtime, data, electricity, TV and more from your wallet.</p>
+        <Link to="/more" className="btn" style={{ display: 'inline-block', width: 'auto', marginTop: 12, textDecoration: 'none' }}>See what’s available</Link>
+      </div>
+    </div>
+  );
 }
 
 // True (with the message) when this service can't be bought right now.
