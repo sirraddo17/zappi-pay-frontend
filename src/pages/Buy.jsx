@@ -328,7 +328,8 @@ export default function Buy() {
   // Cashback balance (kept apart from the wallet) can pay part of the price.
   const cb = pricing?.cashback || null;
   const [useCb, setUseCb] = useState(true);
-  const cbAvail = cb ? Math.floor(Math.min(cb.balance, (priceAfterPromo * cb.maxPercent) / 100) * 100) / 100 : 0;
+  // Same rule as the server, in whole kobo: min(balance, 20% of the price).
+  const cbAvail = cb ? Math.min(Math.round(Number(cb.balance) * 100), Math.floor((Math.round(Number(priceAfterPromo) * 100) * Math.round(Number(cb.maxPercent) * 100)) / 10000)) / 100 : 0;
   const cbUse = useCb && cbAvail > 0 ? cbAvail : 0;
   const payTotal = Math.max(0, Math.round((priceAfterPromo - cbUse) * 100) / 100);
   const cashbackPct = Number(appInfo?.cashback?.[config?.backendService] || 0);
@@ -502,8 +503,8 @@ export default function Buy() {
         <p>{t('Pay from your wallet balance')}</p>
         {config.backendService === 'DATA' && <Link to="/deals" style={{ display: 'inline-block', marginTop: 4, marginRight: 8, fontSize: 13, color: 'var(--purple)', textDecoration: 'none' }}>🔎 Find the best deal for your budget ›</Link>}
         {appInfo?.deliveryPromise?.services?.includes(config.backendService) && (
-          <span title={`If it takes longer than ${appInfo.deliveryPromise.seconds} seconds, we add ₦${appInfo.deliveryPromise.bonus} to your wallet (purchases from ₦${appInfo.deliveryPromise.minAmount}, once a day).`} style={{ display: 'inline-block', marginTop: 6, padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600, background: 'rgba(245,179,1,0.14)', color: 'var(--gold)', border: '1px solid rgba(245,179,1,0.4)' }}>
-            ⚡ Delivered in {appInfo.deliveryPromise.seconds}s or ₦{appInfo.deliveryPromise.bonus} back
+          <span title={`If it takes longer than ${appInfo.deliveryPromise.seconds} seconds to confirm, we add ₦${appInfo.deliveryPromise.bonus} to your wallet automatically — purchases from ₦${appInfo.deliveryPromise.minAmount}, once a day per customer, while today's bonus budget lasts.`} style={{ display: 'inline-block', marginTop: 6, padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600, background: 'rgba(245,179,1,0.14)', color: 'var(--gold)', border: '1px solid rgba(245,179,1,0.4)' }}>
+            ⚡ Takes over {appInfo.deliveryPromise.seconds}s? ₦{appInfo.deliveryPromise.bonus} back (once a day)
           </span>
         )}
       </div>
@@ -768,7 +769,7 @@ export default function Buy() {
               <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 14, margin: '6px 0', padding: '8px 10px', borderRadius: 10, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)', cursor: 'pointer' }}>
                 <span>
                   Use cashback <span style={{ color: 'var(--slate-400)', fontSize: 12 }}>({naira(cb.balance)} available)</span>
-                  {cbAvail < cb.balance && <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 11 }}>Up to {cb.maxPercent}% of each purchase — the rest stays for next time</span>}
+                  {cbAvail < cb.balance && <span style={{ display: 'block', color: 'var(--slate-400)', fontSize: 11 }}>Cashback can pay up to {cb.maxPercent}% of a purchase — the rest stays for next time</span>}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
                   {useCb && <b style={{ color: 'var(--green-500)' }}>−{naira(cbAvail)}</b>}

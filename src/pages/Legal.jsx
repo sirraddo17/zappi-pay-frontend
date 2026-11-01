@@ -118,6 +118,22 @@ const DOCS = {
       </>
     ),
   },
+  refund: {
+    title: 'Refund Policy',
+    body: (
+      <>
+        <p>This policy explains when and how money comes back to you on ZAPPI PAY, operated by {COMPANY.name} ({COMPANY.rc}).</p>
+        <p><strong>1. Failed purchases are refunded automatically.</strong> If airtime, data, electricity, cable TV, exam PINs, internet or any other purchase fails, the full amount taken from your wallet is returned to your wallet automatically — usually within seconds. You get a notification and the refund shows in History. You don’t need to contact us.</p>
+        <p><strong>2. Pending purchases.</strong> Sometimes a provider takes longer to confirm. We keep checking with the provider: if it is delivered you keep it; if it fails you are refunded in full. Please don’t buy the same thing again while one is pending.</p>
+        <p><strong>3. Exact amounts.</strong> A refund returns exactly what you paid: the cash part goes back to your wallet and any cashback you used goes back to your cashback balance. If only part of an order failed (for example some exam PINs in a bulk order), that part is refunded.</p>
+        <p><strong>4. Delivered purchases.</strong> Airtime, data, tokens and PINs that were delivered can’t be taken back by the network or biller, so they can’t be refunded. If you bought airtime by mistake, you may be able to use Airtime to Cash where it is available. If a delivered token or PIN does not work, report it (see 6) and we will check it with the provider.</p>
+        <p><strong>5. Wrong details.</strong> Please check phone, meter and smartcard numbers before you pay. A purchase delivered to a wrong number you entered can’t be reversed by us, but we will help you contact the provider.</p>
+        <p><strong>6. How to report a problem.</strong> Open the purchase in History and tap <em>Report Issue</em>, or message support from Profile. Include what went wrong; we reply in the app. You can also email support@zappipay.com.ng.</p>
+        <p><strong>7. Wallet balance.</strong> Money in your wallet is yours. Cashback and rewards are not cash: they can only be used to pay for part of a purchase and can’t be withdrawn.</p>
+        <p><strong>8. Test mode.</strong> While the app shows a test-mode notice, some services use test money; nothing real is charged for those.</p>
+      </>
+    ),
+  },
   contact: {
     title: 'Contact Us',
     body: (

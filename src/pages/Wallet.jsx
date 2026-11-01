@@ -5,7 +5,7 @@ import TestModeBanner from '../components/TestModeBanner';
 import SavingsCard from '../components/SavingsCard';
 import SpendingCard from '../components/SpendingCard';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getWalletBalance, getWalletTransactions, submitFundRequest, getPendingFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon, startCardPayment, verifyCardPayment, getCashback } from '../api';
+import { getWalletBalance, getWalletTransactions, submitFundRequest, getPendingFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon, startCardPayment, verifyCardPayment, getCashback, getMyLimits } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { useAuth } from '../context/AuthContext';
 import BottomNav from '../components/BottomNav';
@@ -60,36 +60,69 @@ function feeLabel(f) {
   return `${f.feePercent}%${f.feeCap > 0 ? ` (max ₦${Number(f.feeCap).toLocaleString()})` : ''}`;
 }
 
-function FundingHelper({ info, bankName }) {
+// "I want ₦X in my wallet": the exact amount to send to EACH account
+// number, with that provider's own fee (some are free, e.g. GTBank).
+function FundingHelper({ info, accounts }) {
   const [want, setWant] = useState('');
   const w = Number(want);
-  const send = w > 0 ? amountToSend(w, info) : 0;
-  const fee = send ? fundingFee(send, info) : 0;
   const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  const rows = (accounts || []).map((a) => {
+    const f = feeOf(a, info);
+    const send = w > 0 ? (f.feePercent > 0 ? amountToSend(w, f) : w) : 0;
+    return { a, f, send, fee: send && f.feePercent > 0 ? fundingFee(send, f) : 0 };
+  });
+  const anyPass = rows.some((r) => r.fee > 0 && r.f.feeIsPassThrough);
   return (
     <div style={{ background: 'rgba(13, 148, 136,0.08)', border: '1px solid var(--slate-700)', borderRadius: 10, padding: 12, margin: '10px 0' }}>
-      <label htmlFor="want" style={{ fontSize: 13, fontWeight: 600 }}>How much do you want in your wallet?{bankName ? ` (sending to ${bankName})` : ''}</label>
+      <label htmlFor="want" style={{ fontSize: 13, fontWeight: 600 }}>How much do you want in your wallet?</label>
       <input id="want" type="number" inputMode="numeric" min="1" value={want} onChange={(e) => setWant(e.target.value)} placeholder="e.g. 1000" style={{ marginTop: 6 }} />
-      {send > 0 && (
-        <div style={{ fontSize: 13, marginTop: 10 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Amount for your wallet</span><span>{naira(w)}</span></div>
+      {w > 0 && rows.map(({ a, f, send, fee }) => (
+        <div key={a.accountNumber} style={{ fontSize: 13, marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--slate-700)' }}>
+          <div style={{ color: 'var(--slate-400)' }}>{a.bankName} · {a.accountNumber}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--slate-400)' }}>
-            <span>Bank processing fee{info.feeIsPassThrough ? ' (paid to our payment partner)' : ''}</span><span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>+ {naira(fee)}</span>
+            <span>Bank processing fee{f.feePercent > 0 ? ` (${feeLabel(f)})` : ''}</span><span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>{fee > 0 ? `+ ${naira(fee)}` : 'No fee'}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--slate-700)', marginTop: 6, paddingTop: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <b>Send exactly</b>
             <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}><b style={{ fontSize: 18 }}>{naira(send)}</b><CopyButton text={String(send)} /></span>
           </div>
-          <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '6px 0 0' }}>
-            You'll get at least {naira(w)} in your wallet.{info.feeIsPassThrough ? ' Banks and payment companies charge for receiving transfers — this fee covers that charge; ZAPPI PAY does not keep it.' : ''}
-          </p>
         </div>
+      ))}
+      {w > 0 && (
+        <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '8px 0 0' }}>
+          You'll get at least {naira(w)} in your wallet.{anyPass ? ' Banks and payment companies charge for receiving transfers — the fee covers that charge; ZAPPI PAY does not keep it.' : ''}
+        </p>
       )}
     </div>
   );
 }
 
 // Cashback is kept apart from the wallet and used at checkout.
+// While the real BVN/NIN check is not running (payment partner on test
+// keys), say so plainly: the number is passed on but nothing is verified.
+function IdCheckNotice({ info }) {
+  if (info?.idMatch) return null;
+  return (
+    <p role="note" style={{ fontSize: 12, margin: '0 0 10px', padding: '8px 10px', borderRadius: 8, background: 'rgba(245,158,11,0.12)', border: '1px solid #f59e0b' }}>
+      🧪 <b>Test mode — ID check being integrated.</b> This screen is not verifying your identity yet. Please don’t enter a real BVN or NIN while the app shows test mode.
+    </p>
+  );
+}
+
+// Unverified accounts have a daily spending limit (₦20,000 by default).
+function LimitNotice() {
+  const [l, setL] = useState(null);
+  useEffect(() => { getMyLimits().then(setL).catch(() => setL(null)); }, []);
+  if (!l?.enabled || l.verified || l.custom) return null;
+  const n = (v) => `₦${Number(v).toLocaleString()}`;
+  return (
+    <div className="card" role="note" style={{ border: '1px solid var(--gold)', fontSize: 13 }}>
+      <b>Daily limit: {n(l.limit)}</b> for unverified accounts · {n(l.remaining)} left today.
+      <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>Purchases and transfers count towards it; refunds give the room back. Verify with your BVN or NIN (below) to raise it{l.verifiedLimit ? ` to ${n(l.verifiedLimit)} a day` : ''}.</div>
+    </div>
+  );
+}
+
 function CashbackCard() {
   const [d, setD] = useState(null);
   const [open, setOpen] = useState(false);
@@ -105,10 +138,13 @@ function CashbackCard() {
         </div>
         <button type="button" onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', fontSize: 13 }}>{open ? 'Hide' : 'History'}</button>
       </div>
-      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>Switch on “Use cashback” when you buy to pay less — up to {d.maxPercent}% of each purchase. Cashback can’t be sent or withdrawn.</p>
+      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>{d.rules || `Use cashback to pay up to ${d.maxPercent}% of a purchase. Cashback cannot be sent or withdrawn. It expires after ${d.expiryDays || 90} days.`} Switch on “Use cashback” when you buy.</p>
+      {d.oldestExpiry && d.balance > 0 && (
+        <p style={{ fontSize: 12, color: 'var(--gold)', margin: '4px 0 0' }}>{naira(d.oldestExpiryAmount)} expires on {new Date(d.oldestExpiry).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })} — used first.</p>
+      )}
       {open && d.entries.map((e) => (
         <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '5px 0', borderTop: '1px solid var(--slate-800)' }}>
-          <span>{e.note}<br /><span style={{ fontSize: 11, color: 'var(--slate-400)' }}>{new Date(e.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}</span></span>
+          <span><span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.4, color: { EARNED: 'var(--green-500)', USED: 'var(--slate-400)', RETURNED: 'var(--purple)', EXPIRED: 'var(--red-500)', REVERSED: 'var(--red-500)' }[e.type] || 'var(--slate-400)' }}>{{ EARNED: 'EARNED', USED: 'USED', RETURNED: 'RETURNED', EXPIRED: 'EXPIRED', ADJUSTMENT: 'ADJUSTED', REVERSED: 'TAKEN BACK' }[e.type] || ''}</span> {e.note}<br /><span style={{ fontSize: 11, color: 'var(--slate-400)' }}>{new Date(e.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}{e.expiresAt && e.amount > 0 ? ` · expires ${new Date(e.expiresAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}` : ''}</span></span>
           <b style={{ color: e.amount > 0 ? 'var(--green-500)' : 'var(--slate-300, #cbd5e1)' }}>{e.amount > 0 ? '+' : '−'}{naira(Math.abs(e.amount))}</b>
         </div>
       ))}
@@ -193,6 +229,7 @@ function SquadForm({ info, customerName, onCreated, addOn, onCancel }) {
   return (
     <form className={addOn ? '' : 'card'} onSubmit={create} style={addOn ? { borderTop: '1px solid var(--slate-800, rgba(255,255,255,0.08))', paddingTop: 12, marginTop: 8 } : undefined}>
       <h2 style={{ marginTop: 0, fontSize: 16 }}>{addOn ? 'Add a GTBank account number' : 'Get your personal account number'}</h2>
+      <IdCheckNotice info={info} />
       <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>
         A GTBank account number in your name. Any bank transfer to it goes straight into your wallet. It's a one-time setup; banks require your BVN for this.
       </p>
@@ -267,6 +304,7 @@ function AddAccountForm({ info, customerName, onCreated, onCancel }) {
   return (
     <form onSubmit={create} style={{ borderTop: '1px solid var(--slate-800, rgba(255,255,255,0.08))', paddingTop: 12, marginTop: 8 }}>
       <h2 style={{ marginTop: 0, fontSize: 16 }}>Add another account number</h2>
+      <IdCheckNotice info={info} />
       <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>One more personal account number, so you have a backup if a bank is having network issues. Money sent to it goes straight into your wallet.</p>
       {error && <p className="error-text" style={{ margin: '0 0 10px' }}>{error}</p>}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
@@ -365,6 +403,7 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
     return (
       <form className="card" onSubmit={create}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Get your personal account number</h2>
+        <IdCheckNotice info={info} />
         <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -8 }}>
           Any bank transfer to it goes straight into your wallet — no need to wait for approval. It's a one-time setup; banks require your BVN or NIN for this.
         </p>
@@ -434,13 +473,14 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
           <div>
             <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{a.bankName}</div>
             <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1 }}>{a.accountNumber}</div>
-            <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>{a.accountName}</div>
+            <div style={{ fontSize: 12, color: 'var(--slate-300, #cbd5e1)', fontWeight: 600 }}>{a.displayName || a.accountName}</div>
+            {a.bankShowsName && a.bankShowsName !== a.displayName && <div style={{ fontSize: 11, color: 'var(--slate-400)' }}>Your bank app may show: {a.bankShowsName}</div>}
             {!sameFee && <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 2 }}>Fee: {feeOf(a, info).feePercent > 0 ? feeLabel(feeOf(a, info)) : 'none'}</div>}
           </div>
           <CopyButton text={a.accountNumber} />
         </div>
       ))}
-      {info.accounts.length > 0 && feeOf(info.accounts[0], info).feePercent > 0 && <FundingHelper info={{ ...info, ...feeOf(info.accounts[0], info) }} bankName={sameFee ? '' : info.accounts[0].bankName} />}
+      {info.accounts.length > 0 && accountFees.some((f) => f.feePercent > 0) && <FundingHelper info={info} accounts={info.accounts} />}
       {error && <p className="error-text" style={{ margin: '8px 0' }}>{error}</p>}
       {message && <p style={{ color: 'var(--green-500)', fontSize: 14, margin: '8px 0' }}>{message}</p>}
       {info.accounts.length > 0 && <button className="btn btn-secondary" type="button" style={{ marginTop: 8 }} disabled={busy} onClick={check}>
@@ -699,6 +739,7 @@ export default function Wallet() {
         <div className="value">{fmtMoney(balance)}</div>
       </div>
 
+      <LimitNotice />
       <CashbackCard />
 
       <SavingsCard onChanged={load} />

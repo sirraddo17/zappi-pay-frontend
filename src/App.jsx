@@ -122,6 +122,9 @@ const AdminChallenges = lazy(() => import('./pages/admin/AdminChallenges'));
 const AdminMoney = lazy(() => import('./pages/admin/AdminMoney'));
 const AdminGoLive = lazy(() => import('./pages/admin/AdminGoLive'));
 const AdminDatabase = lazy(() => import('./pages/admin/AdminDatabase'));
+const AdminLedger = lazy(() => import('./pages/admin/AdminLedger'));
+const AdminMyAccess = lazy(() => import('./pages/admin/AdminMyAccess'));
+const AdminSubscriptions = lazy(() => import('./pages/admin/AdminSubscriptions'));
 const AdminUnmatched = lazy(() => import('./pages/admin/AdminUnmatched'));
 const AdminSupportGuide = lazy(() => import('./pages/admin/AdminSupportGuide'));
 const AdminAssistant = lazy(() => import('./pages/admin/AdminAssistant'));
@@ -266,6 +269,9 @@ export default function App() {
           <Route path="/admin/money" element={<RequireAdmin><AdminMoney /></RequireAdmin>} />
           <Route path="/admin/go-live" element={<RequireAdmin><AdminGoLive /></RequireAdmin>} />
           <Route path="/admin/database" element={<RequireAdmin><AdminDatabase /></RequireAdmin>} />
+          <Route path="/admin/ledger" element={<RequireAdmin><AdminLedger /></RequireAdmin>} />
+          <Route path="/admin/my-access" element={<RequireAdmin><AdminMyAccess /></RequireAdmin>} />
+          <Route path="/admin/subscriptions" element={<RequireAdmin><AdminSubscriptions /></RequireAdmin>} />
           <Route path="/admin/unmatched-payments" element={<RequireAdmin><AdminUnmatched /></RequireAdmin>} />
           <Route path="/admin/support-guide" element={<RequireAdmin><AdminSupportGuide /></RequireAdmin>} />
           <Route path="/admin/assistant" element={<RequireAdmin><AdminAssistant /></RequireAdmin>} />

@@ -8,7 +8,7 @@ import Logo from '../components/Logo';
 import PinPad, { FingerprintIcon } from '../components/PinPad';
 import { quickLoginPin, quickLoginBiometricOptions, quickLoginBiometric } from '../api';
 import { idleMessage } from '../lib/useIdleLogout';
-import { getQuickLogin, clearQuickLogin, saveQuickLogin, runBiometricPrompt, biometricErrorMessage } from '../lib/quickLogin';
+import { getQuickLogin, clearQuickLogin, saveQuickLogin, runBiometricPrompt, biometricErrorMessage, biometricOptionsCache } from '../lib/quickLogin';
 
 function QuickLogin({ quick, onUsePassword, onSwitchAccount }) {
   const { startSession } = useAuth();
@@ -17,6 +17,14 @@ function QuickLogin({ quick, onUsePassword, onSwitchAccount }) {
   const [busy, setBusy] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const firstName = (quick.name || '').split(' ')[0] || 'there';
+  // Get the fingerprint challenge ready while the screen shows.
+  const [bioCache] = useState(() => biometricOptionsCache(() => quickLoginBiometricOptions({ deviceToken: quick.deviceToken })));
+  useEffect(() => {
+    if (!quick.biometric) return undefined;
+    bioCache.warm();
+    const t = setInterval(() => bioCache.warm(), 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
 
   function handleFailure(err) {
     if (err.code === 'DEVICE_UNKNOWN') {
@@ -50,7 +58,7 @@ function QuickLogin({ quick, onUsePassword, onSwitchAccount }) {
     setBusy(true);
     setError('');
     try {
-      const { options } = await quickLoginBiometricOptions({ deviceToken: quick.deviceToken });
+      const { options } = await bioCache.take();
       let response;
       try {
         response = await runBiometricPrompt(options);

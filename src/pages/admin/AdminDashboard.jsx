@@ -3,7 +3,8 @@ import AdminLayout from '../../components/AdminLayout';
 import ProfitPanel from '../../components/ProfitPanel';
 import AdminAlertsToggle from '../../components/AdminAlertsToggle';
 import { Link } from 'react-router-dom';
-import { getCustomerList, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance } from '../../api';
+import { getCustomerList, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance, getOverviewTotals, updateSettings } from '../../api';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 export default function AdminDashboard() {
@@ -13,6 +14,19 @@ export default function AdminDashboard() {
   const [deletions, setDeletions] = useState([]);
   const [agentReqs, setAgentReqs] = useState([]);
   const [vtpass, setVtpass] = useState(null);
+  const [totals, setTotals] = useState(null);
+  const [alertBelow, setAlertBelow] = useState('');
+  const [alertMsg, setAlertMsg] = useState('');
+  const { isOwner } = useAdminAuth();
+  async function saveAlert() {
+    setAlertMsg('');
+    try {
+      await updateSettings({ vtpassLowBalanceAlert: Number(alertBelow) });
+      setAlertMsg('Saved.');
+      getVtpassBalance().then((v) => { setVtpass(v); if (v?.alertBelow !== undefined) setAlertBelow(String(v.alertBelow)); }).catch(() => {});
+    getOverviewTotals().then(setTotals).catch(() => setTotals(null));
+    } catch (e) { setAlertMsg(e.message); }
+  }
 
   function loadAll() {
     Promise.all([getCustomerList({ view: 'active' }), getPendingFunding(), getAdminOrders()])
@@ -27,6 +41,7 @@ export default function AdminDashboard() {
           successfulOrders: n.SUCCESS ?? ok.length,
           failedOrders: n.FAILED ?? o.orders.filter((x) => x.status === 'FAILED').length,
           totalRevenue: n.revenue ?? ok.reduce((sum, x) => sum + Number(x.amount), 0),
+          test: o.testCounts && o.testCounts !== o.counts ? o.testCounts : null,
         });
       })
       .catch((err) => setError(err.message));
@@ -72,14 +87,35 @@ export default function AdminDashboard() {
           ))}
         </div>
       )}
+      {totals && (
+        <div className="card" style={{ margin: '0 0 16px' }}>
+          <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>Owed to customers (wallet liabilities)</div>
+          <div style={{ fontSize: 26, fontWeight: 700 }}>₦{Number(totals.owedTotal).toLocaleString()}</div>
+          <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Wallets ₦{Number(totals.wallets).toLocaleString()} · Cashback ₦{Number(totals.cashback).toLocaleString()}{totals.savings > 0 ? ` · Savings ₦${Number(totals.savings).toLocaleString()}` : ''} · {totals.customers} customers · <Link to="/admin/money">Money check</Link></div>
+        </div>
+      )}
+      {stats?.test?.total > 0 && (
+        <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '-8px 0 16px' }}>
+          Real orders only. Test orders (sandbox) not counted: {stats.test.total} ({stats.test.SUCCESS} successful, {stats.test.FAILED} failed, ₦{Number(stats.test.revenue).toLocaleString()}). <Link to="/admin/orders?mode=test">View test orders</Link>
+        </p>
+      )}
 
       {vtpass && (
-        <div className="card" style={{ margin: '0 0 16px', border: vtpass.balance != null && vtpass.balance < 20000 ? '1px solid var(--red-500)' : undefined }}>
+        <div className="card" style={{ margin: '0 0 16px', border: vtpass.low ?? (vtpass.balance != null && vtpass.balance < 20000) ? '1px solid var(--red-500)' : undefined }}>
           <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>VTpass wallet · {vtpass.mode === 'live' ? 'LIVE' : vtpass.mode ? 'SANDBOX (test)' : ''}</div>
           <div style={{ fontSize: 26, fontWeight: 700 }}>{vtpass.balance != null ? `₦${Number(vtpass.balance).toLocaleString()}` : '—'}</div>
           {vtpass.error && <div className="error-text" style={{ fontSize: 12, margin: 0 }}>Could not read balance: {vtpass.error}</div>}
-          {vtpass.balance != null && vtpass.balance < 20000 && (
+          {(vtpass.low ?? (vtpass.balance != null && vtpass.balance < 20000)) && (
             <div style={{ color: 'var(--red-500)', fontSize: 13, marginTop: 4 }}>Low balance — top up your VTpass wallet or customer purchases will start failing (and be refunded).</div>
+          )}
+          {isOwner && (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 10, fontSize: 13 }}>
+              <label htmlFor="vt-alert" style={{ color: 'var(--slate-400)' }}>Low-balance alert below ₦</label>
+              <input id="vt-alert" type="number" min="0" value={alertBelow} onChange={(e) => setAlertBelow(e.target.value)} style={{ width: 120, padding: '4px 8px' }} />
+              <button type="button" className="btn-secondary btn" style={{ width: 'auto', padding: '4px 12px', fontSize: 12 }} onClick={saveAlert}>Save</button>
+              {alertMsg && <span style={{ color: 'var(--slate-400)' }}>{alertMsg}</span>}
+              <div style={{ width: '100%', color: 'var(--slate-400)', fontSize: 12 }}>You're alerted (push + email) once a day when the balance is below this, or when it would last under 2 days at the current pace.</div>
+            </div>
           )}
         </div>
       )}

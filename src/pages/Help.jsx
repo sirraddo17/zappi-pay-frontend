@@ -37,7 +37,7 @@ export const FAQ = [
       ['I bought for the wrong number or meter', 'Once airtime, data or a token is delivered it can’t be reversed, so always check the number before you pay. If you bought airtime by mistake, you may be able to use Airtime to Cash to turn it back into wallet money for a small fee.'],
       ['Something is wrong with a purchase', 'Open the purchase in Orders and tap “Report Issue”. The purchase details are attached automatically, so we know exactly which one you mean.'],
       ['Can I schedule top-ups?', 'Yes. When buying, tick “Repeat this purchase automatically” to renew daily, weekly or monthly. We remind you the day before if your wallet can’t cover it.'],
-      ['What is the delivery promise?', 'When you see “⚡ Delivered in 60s or ₦20 back” on the Buy page, it means that if that purchase takes longer than the time shown to arrive, we add the bonus to your wallet automatically. It applies to purchases from the minimum amount shown, once per customer per day. If a slow purchase fails, you get your refund plus the bonus.'],
+      ['What is the delivery promise?', 'When you see “⚡ Takes over 60s? ₦20 back (once a day)” on the Buy page: if that purchase takes longer than the time shown to confirm, we add the bonus to your wallet automatically. It applies to purchases from the minimum amount shown, once per customer per day, while that day’s bonus budget lasts — the badge disappears when it’s used up. If a slow purchase fails, you get your refund plus the bonus.'],
       ['Can I send airtime or data as a gift?', 'Yes. When buying airtime or data for someone else, tick “Send as a gift with a message”, pick a style and write a note. You get a gift card link to send on WhatsApp. You can also turn a past purchase into a gift from its receipt in Orders.'],
       ['Will you remind me before my DStv or data runs out?', 'Yes. After you renew DStv, GOtv or Startimes we remind you 3 days before it expires, and after a data plan we remind you a day before it ends. Turn this off in Notifications.'],
       ['Can I buy for many numbers at once?', 'Yes. Use Bulk airtime & data on the Home page to send to up to 50 numbers in one go.'],
@@ -54,7 +54,7 @@ export const FAQ = [
   {
     topic: 'Rewards',
     items: [
-      ['How do referral bonuses work?', 'Share your referral code from Refer & Earn. When a friend signs up with it and makes their first qualifying purchase, you get the bonus shown in the app.'],
+      ['How do referral bonuses work?', 'Share your referral code from Refer & Earn. The page shows the exact rule and your progress for each friend — usually you get the bonus once a friend who signed up with your code has spent the amount shown in total on airtime, data, internet, TV or light (not on their very first purchase). It lands in your wallet automatically.'],
       ['What are challenges?', 'Challenges reward you for buying — for example “buy data 5 times this month, get ₦50”. Your progress shows on the Home page and the reward is added to your wallet automatically once you finish.'],
       ['How do I use a promo code or coupon?', 'Discount codes are entered when you buy. Wallet coupons are redeemed on the Wallet page under “Have a coupon code?”. Each code has its own rules, such as a minimum amount or expiry date.'],
     ],

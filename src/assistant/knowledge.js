@@ -137,7 +137,7 @@ export const TOPICS = [
     id: 'cashback-balance',
     title: 'Using my cashback',
     keywords: ['cashback', 'use cashback', 'cash back balance', 'where is my cashback'],
-    answer: 'Cashback is kept in its own balance (Wallet → 🎁 Cashback). When you buy, switch on “Use cashback” to pay less — up to a set % of each purchase; the rest stays for next time. Cashback can’t be sent or withdrawn.',
+    answer: 'Cashback is kept in its own balance (Wallet → 🎁 Cashback). You earn it only after a purchase succeeds. Use cashback to pay up to 20% of a purchase — switch on “Use cashback” when you buy; the rest stays for next time. Cashback cannot be sent or withdrawn. It expires after 90 days (the oldest is used first). If a purchase fails, the cashback you used comes back.',
     actions: [{ label: 'Wallet', to: '/wallet' }],
   },
   {

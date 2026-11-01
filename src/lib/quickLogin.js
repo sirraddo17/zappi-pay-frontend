@@ -75,6 +75,30 @@ export function deviceLabel() {
   return 'This device';
 }
 
+// Fingerprint / Face ID needs a one-time challenge from the server. Asking
+// for it only after the tap made the prompt slow (a round trip, longer if
+// the database was asleep). So screens fetch it as soon as they open
+// ("warm") and the tap uses it straight away ("take"). A challenge is
+// good for 5 minutes on the server; we refresh it after 4.
+export function biometricOptionsCache(fetcher, maxAgeMs = 4 * 60 * 1000) {
+  let pending = null;
+  let at = 0;
+  const load = () => {
+    at = Date.now();
+    pending = fetcher();
+    pending.catch(() => { pending = null; });
+    return pending;
+  };
+  return {
+    warm() { if (!pending || Date.now() - at > maxAgeMs) load().catch(() => {}); },
+    take() {
+      const use = pending && Date.now() - at <= maxAgeMs ? pending : load();
+      pending = null; // single use
+      return use;
+    },
+  };
+}
+
 export function runBiometricPrompt(options) {
   return startAuthentication({ optionsJSON: options });
 }

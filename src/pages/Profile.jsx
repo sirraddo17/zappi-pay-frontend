@@ -369,6 +369,7 @@ export default function Profile() {
           ['how-it-works', 'How It Works'],
           ['terms', 'Terms & Conditions'],
           ['privacy', 'Privacy Policy'],
+          ['refund', 'Refund Policy'],
           ['contact', 'Contact Us'],
         ].map(([slug, label]) => (
           <Link

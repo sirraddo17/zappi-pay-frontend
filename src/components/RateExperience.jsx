@@ -159,7 +159,7 @@ export default function RateExperience({ order, flush = false, maxAgeMs = 24 * 3
     <div className="card" style={box}>
       <b style={{ fontSize: 15 }}>Glad you loved it! 🎉</b>
       <p style={{ fontSize: 13, color: 'var(--slate-300, #cbd5e1)', margin: '4px 0 10px' }}>
-        Share ZAPPI PAY with friends{info.referralEnabled && info.referralBonus > 0 ? ` — you earn ₦${info.referralBonus.toLocaleString()} when they sign up with your code and make their first purchase` : ''}.
+        Share ZAPPI PAY with friends{info.referralEnabled && info.referralBonus > 0 ? ` — you earn ₦${info.referralBonus.toLocaleString()}: ${info.referralRule || 'see Refer & Earn for how it works'}` : ''}.
       </p>
       {!code && (
         <p style={{ fontSize: 13, margin: '0 0 10px' }}>

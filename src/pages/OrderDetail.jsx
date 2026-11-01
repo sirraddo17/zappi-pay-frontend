@@ -69,6 +69,17 @@ export default function OrderDetail() {
   const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
 
+  // Price − discount − promo − cashback = amount paid (what left the wallet).
+  // In kobo so the lines always add up exactly.
+  const kob = (v) => Math.round(Number(v || 0) * 100);
+  const money = order ? (() => {
+    const disc = kob(order.discountAmount);
+    const promo = kob(order.promoDiscount);
+    const cb = kob(order.cashbackUsed);
+    const charged = kob(order.amount);
+    return { price: (charged + disc + promo) / 100, discount: disc / 100, promo: promo / 100, cashback: cb / 100, paid: (charged - cb) / 100 };
+  })() : null;
+
   function receiptData() {
     const rows = [
       ['Service', order.service],
@@ -76,12 +87,15 @@ export default function OrderDetail() {
       ['Recipient', order.recipient],
     ];
     if (order.recipientName) rows.push(['Name', order.recipientName]);
-    if (Number(order.discountAmount) > 0) rows.push(['Discount', fmtMoney(order.discountAmount)]);
-    if (Number(order.cashbackUsed) > 0) rows.push(['Paid with cashback', fmtMoney(order.cashbackUsed)]);
+    if (money.discount > 0 || money.promo > 0 || money.cashback > 0) rows.push(['Price', fmtMoney(money.price)]);
+    if (money.discount > 0) rows.push(['Discount', `−${fmtMoney(money.discount)}`]);
+    if (money.promo > 0) rows.push([`Promo code${order.promoCode ? ` ${order.promoCode}` : ''}`, `−${fmtMoney(money.promo)}`]);
+    if (money.cashback > 0) rows.push(['Cashback used', `−${fmtMoney(money.cashback)}`]);
+    rows.push(['Amount paid', fmtMoney(money.paid)]);
     rows.push(['Date', fmtDate(order.createdAt)], ['Reference', order.vtpassRequestId || order.id]);
     return {
       title: `${order.service.charAt(0)}${order.service.slice(1).toLowerCase()} receipt`,
-      amount: order.amount,
+      amount: money.paid,
       status: order.status,
       rows,
       highlight: token ? { label: order.service === 'ELECTRICITY' ? 'Token' : 'PIN / Code', value: token } : undefined,
@@ -156,7 +170,8 @@ export default function OrderDetail() {
         <h1 style={{ margin: '0 0 4px', fontSize: 18 }}>ZAPPI PAY</h1>
         <p style={{ margin: '0 0 20px', color: 'var(--slate-400)', fontSize: 13 }}>Payment Receipt</p>
 
-        <div style={{ fontSize: 28, fontWeight: 700, margin: '0 0 4px' }}>{fmtMoney(order.amount)}</div>
+        <div style={{ fontSize: 28, fontWeight: 700, margin: '0 0 4px' }}>{fmtMoney(money.paid)}</div>
+        {money.paid !== money.price && <div style={{ fontSize: 12, color: 'var(--slate-400)', margin: '0 0 6px' }}>paid from your wallet · price {fmtMoney(money.price)}</div>}
         <div style={{ color: STATUS_COLORS[order.status] || 'var(--slate-400)', fontWeight: 600, marginBottom: 20 }}>
           {order.status}
         </div>
@@ -211,12 +226,34 @@ export default function OrderDetail() {
             <span style={{ color: 'var(--slate-400)' }}>Recipient</span>
             <span>{order.recipient}</span>
           </div>
-          {Number(order.discountAmount) > 0 && (
+          {(money.discount > 0 || money.promo > 0 || money.cashback > 0) && (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--slate-400)' }}>Discount</span>
-              <span style={{ color: 'var(--green-500)' }}>−{fmtMoney(order.discountAmount)}</span>
+              <span style={{ color: 'var(--slate-400)' }}>Price</span>
+              <span>{fmtMoney(money.price)}</span>
             </div>
           )}
+          {money.discount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--slate-400)' }}>Discount</span>
+              <span style={{ color: 'var(--green-500)' }}>−{fmtMoney(money.discount)}</span>
+            </div>
+          )}
+          {money.promo > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--slate-400)' }}>Promo code{order.promoCode ? ` ${order.promoCode}` : ''}</span>
+              <span style={{ color: 'var(--green-500)' }}>−{fmtMoney(money.promo)}</span>
+            </div>
+          )}
+          {money.cashback > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--slate-400)' }}>Cashback used</span>
+              <span style={{ color: 'var(--green-500)' }}>−{fmtMoney(money.cashback)}</span>
+            </div>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+            <span>Amount paid</span>
+            <span>{fmtMoney(money.paid)}</span>
+          </div>
           {order.recipientName && (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--slate-400)' }}>Name</span>

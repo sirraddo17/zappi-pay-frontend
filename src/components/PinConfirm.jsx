@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { setPin, biometricTxOptions } from '../api';
 import PinPad, { FingerprintIcon } from './PinPad';
 import PasswordField from './PasswordField';
-import { getQuickLogin, runBiometricPrompt, biometricErrorMessage } from '../lib/quickLogin';
+import { getQuickLogin, runBiometricPrompt, biometricErrorMessage, biometricOptionsCache } from '../lib/quickLogin';
 
 const PIN_CODES = ['PIN_WRONG', 'PIN_LOCKED', 'PIN_REQUIRED', 'BIOMETRIC_FAILED'];
 
@@ -23,6 +23,7 @@ export default function PinConfirm({ open, title = 'Confirm payment', summary, d
   const [newPin, setNewPin] = useState('');
   const quick = getQuickLogin();
   const canBiometric = Boolean(quick?.biometric);
+  const [bioCache] = useState(() => biometricOptionsCache(() => biometricTxOptions()));
 
   useEffect(() => {
     if (open) {
@@ -32,6 +33,8 @@ export default function PinConfirm({ open, title = 'Confirm payment', summary, d
       setPassword('');
       setNewPin('');
       setResetKey((k) => k + 1);
+      // Fingerprint challenge fetched now, so the prompt opens instantly on tap.
+      if (canBiometric && customer?.hasPin) bioCache.warm();
     }
   }, [open]);
 
@@ -61,7 +64,7 @@ export default function PinConfirm({ open, title = 'Confirm payment', summary, d
     setError('');
     setBusy(true);
     try {
-      const { options } = await biometricTxOptions();
+      const { options } = await bioCache.take();
       const webauthn = await runBiometricPrompt(options);
       setBusy(false);
       await submit({ webauthn });

@@ -1,9 +1,10 @@
 import { useAppInfo } from './ServiceNotices';
 
-// Shown to everyone while the app runs on test (sandbox) keys, so
-// visitors (e.g. payment partners reviewing the app) know no real
-// money or real airtime moves yet. Disappears automatically when
-// Admin → Settings switches VTpass and Monnify to live.
+// Shown while any partner customers use is still on test (sandbox) keys.
+// The server builds the text from each partner's real state, so it never
+// says a live service is not real (e.g. "Airtime, data and bills are
+// live. Wallet funding … uses test money"). Disappears by itself when
+// everything is live.
 export default function TestModeBanner({ style }) {
   const info = useAppInfo();
   if (!info?.testMode) return null;
@@ -26,7 +27,7 @@ export default function TestModeBanner({ style }) {
     >
       <span aria-hidden="true">🧪</span>
       <span>
-        <b>Test mode.</b> ZAPPI PAY is still being tested — payments, airtime, data and bills here are not real yet, and no real money is charged or sent. We'll announce when we go live.
+        <b>Test mode.</b> {info.testModeText || 'Some parts of ZAPPI PAY still use test money.'}
       </span>
     </div>
   );

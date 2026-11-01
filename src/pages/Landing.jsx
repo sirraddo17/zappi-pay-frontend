@@ -284,6 +284,7 @@ export default function Landing() {
                 <li><Link to="/legal/how-it-works">How it works</Link></li>
                 <li><Link to="/legal/terms">Terms &amp; Conditions</Link></li>
                 <li><Link to="/legal/privacy">Privacy Policy</Link></li>
+                <li><Link to="/legal/refund">Refund Policy</Link></li>
               </ul>
             </div>
             <div>

@@ -92,9 +92,11 @@ function Breakdown({ b, profit, exact, orders }) {
   const row = ([k, label, hint], sign) => {
     const v = Number(b[sign > 0 ? 'income' : 'costs']?.[k] || 0);
     if (!v && k !== 'vtpassCommission') return null;
+    // Discounts bigger than the markup make this line negative: say so.
+    const [shownLabel, shownHint] = k === 'purchaseMarkup' && v < 0 ? ['Discounts given (more than your markup)', 'Discounts & promo codes you gave beyond the markup you charged'] : [label, hint];
     return (
       <tr key={k}>
-        <td>{label}<div style={{ fontSize: 11, color: 'var(--slate-400)' }}>{hint}</div></td>
+        <td>{shownLabel}<div style={{ fontSize: 11, color: 'var(--slate-400)' }}>{shownHint}</div></td>
         <td style={{ textAlign: 'right', color: sign > 0 ? (v < 0 ? 'var(--red-500)' : 'var(--green-500)') : 'var(--red-500)', whiteSpace: 'nowrap' }}>{sign > 0 ? (v < 0 ? '−' : '+') : '−'}{money(Math.abs(v))}</td>
       </tr>
     );

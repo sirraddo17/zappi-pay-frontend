@@ -128,9 +128,30 @@ function AdForm({ initial, onSaved, onCancel }) {
   );
 }
 
+// Subsections of the advert list, by what customers see right now.
+const GROUPS = [
+  { id: 'live', label: '🟢 Showing now' },
+  { id: 'scheduled', label: '🕒 Scheduled' },
+  { id: 'off', label: '⏸️ Off or ended' },
+  { id: 'all', label: 'All' },
+];
+function groupOf(ad, now) {
+  if (!ad.active) return 'off';
+  if (ad.endsAt && new Date(ad.endsAt).getTime() <= now) return 'off';
+  if (ad.startsAt && new Date(ad.startsAt).getTime() > now) return 'scheduled';
+  return 'live';
+}
+
 export default function AdminAds() {
   const [ads, setAds] = useState(null);
-  const listPage = useShowMore(ads, []);
+  const [picked, setGroup] = useState(null);
+  const now = Date.now();
+  const counts = { all: ads?.length || 0, live: 0, scheduled: 0, off: 0 };
+  for (const a of ads || []) counts[groupOf(a, now)] += 1;
+  // Opens on Showing now, or All when nothing is live.
+  const group = picked || (counts.live ? 'live' : 'all');
+  const shown = ads === null ? null : group === 'all' ? ads : ads.filter((a) => groupOf(a, now) === group);
+  const listPage = useShowMore(shown, [group]);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(null); // null | 'new' | ad
   const [videoOn, setVideoOn] = useState(false);
@@ -170,7 +191,6 @@ export default function AdminAds() {
     load();
   }
 
-  const now = Date.now();
   return (
     <AdminLayout>
       <div className="page-header" style={{ padding: 0, marginBottom: 16, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
@@ -190,7 +210,14 @@ export default function AdminAds() {
       {error && <p className="error-text">{error}</p>}
       {editing && <AdForm initial={editing === 'new' ? null : editing} onSaved={() => { setEditing(null); load(); }} onCancel={() => setEditing(null)} />}
 
-      {ads === null ? <p className="empty-state">Loading…</p> : ads.length === 0 ? (!editing && <p className="empty-state">No adverts yet.</p>) : (
+      {ads?.length > 0 && (
+        <div className="admin-actions" role="tablist" aria-label="Adverts" style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+          {GROUPS.map((g) => (
+            <button key={g.id} type="button" role="tab" aria-selected={group === g.id} className={group === g.id ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '6px 14px' }} onClick={() => setGroup(g.id)}>{g.label} ({counts[g.id]})</button>
+          ))}
+        </div>
+      )}
+      {ads === null ? <p className="empty-state">Loading…</p> : ads.length === 0 ? (!editing && <p className="empty-state">No adverts yet.</p>) : shown.length === 0 ? <p className="empty-state">Nothing here — try another tab.</p> : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
           {listPage.visible.map((ad) => {
             const live = ad.active && (!ad.startsAt || new Date(ad.startsAt).getTime() <= now) && (!ad.endsAt || new Date(ad.endsAt).getTime() > now);

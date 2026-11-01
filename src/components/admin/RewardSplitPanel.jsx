@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getRewardSplit, saveRewardSplit } from '../../api';
 
 const naira = (n) => { const v = Number(n || 0); return `₦${v.toLocaleString('en-NG', Number.isInteger(v) ? {} : { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; };
-const TYPE = { CASHBACK: 'Cashback', LOYALTY: 'Loyalty redeemed', REFERRAL_BONUS: 'Referral bonuses', CHALLENGE_REWARD: 'Challenges', DELIVERY_BONUS: 'Delivery promise', SHOP_COMMISSION: 'Shop commission', CONTEST_PRIZE: 'Contest prizes', COUPON: 'Coupons', DAILY_REWARD: 'Daily rewards', WELCOME_BONUS: 'Welcome bonuses' };
+const TYPE = { CASHBACK: 'Cashback', LOYALTY: 'Loyalty points given', REFERRAL_BONUS: 'Referral bonuses', CHALLENGE_REWARD: 'Challenges', DELIVERY_BONUS: 'Delivery promise', SHOP_COMMISSION: 'Shop commission', CONTEST_PRIZE: 'Contest prizes', COUPON: 'Coupons', DAILY_REWARD: 'Daily rewards', WELCOME_BONUS: 'Welcome bonuses' };
 const HOW = {
   CASHBACK: 'Paid to the buyer on every purchase',
   LOYALTY: 'Points for the buyer on every purchase',
@@ -101,10 +101,17 @@ export default function RewardSplitPanel() {
 
       {d.month && (
         <div style={{ fontSize: 13, marginBottom: 12 }}>
-          <b>This month:</b> you earned {naira(d.month.earned)} on purchases · gave back {naira(d.month.rewardsPaid + d.month.discounts)} ({d.month.earned > 0 ? Math.round(((d.month.rewardsPaid + d.month.discounts) / d.month.earned) * 100) : 0}%)
-          <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>
-            {[...(d.month.discounts > 0 ? [`Discounts & promo codes ${naira(d.month.discounts)}`] : []), ...Object.entries(d.month.rewardsByType || {}).filter(([, v]) => v > 0).map(([k, v]) => `${TYPE[k] || k} ${naira(v)}`)].join(' · ') || 'Nothing given yet.'}
+          <b>This month (real orders only):</b> you earned {naira(d.month.earned)} · rewards earned by customers {naira(d.month.rewardsEarned ?? d.month.rewardsPaid)} ({d.month.givenPct ?? 0}% of earnings)
+          <div style={{ margin: '6px 0', display: 'flex', flexWrap: 'wrap', gap: '4px 14px' }}>
+            <span>Monthly cap: {naira(d.month.cap)} ({d.month.capPercent}% of earnings) · <b style={{ color: d.month.capReached ? 'var(--red-500)' : d.month.capUsedPct >= 80 ? 'var(--gold)' : 'var(--green-500)' }}>{d.month.capUsedPct}% used</b>{d.month.capReached ? ' — new cashback and points are paused until the 1st' : ''}</span>
+            <span>Cashback used at checkout: {naira(d.month.cashbackUsed || 0)}</span>
+            <span>Cashback customers still hold: {naira(d.month.cashbackLiability || 0)}</span>
           </div>
+          <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>
+            {Object.entries(d.month.rewardsByType || {}).filter(([, v]) => v > 0).map(([k, v]) => `${TYPE[k] || k} ${naira(v)}`).join(' · ') || 'Nothing given yet.'}
+            {d.month.testOrders?.count > 0 && <div>Not counted: {d.month.testOrders.count} test order{d.month.testOrders.count === 1 ? '' : 's'} ({naira(d.month.testOrders.amount)}) — test orders earn no rewards.</div>}
+          </div>
+          <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>Rewards are counted when earned (points when given, not when turned into cash), so the % can’t go above the cap.</div>
         </div>
       )}
       <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '0 0 12px' }}>

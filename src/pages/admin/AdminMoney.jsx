@@ -113,21 +113,30 @@ export default function AdminMoney() {
 
           <div className="card" style={{ margin: '0 0 16px' }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>What you owe customers</h2>
-            <Row label="Customer wallets" value={naira(data.owed.wallets)} hint={`${data.owed.customers.toLocaleString()} customers`} />
-            {data.owed.savings > 0 && <Row label="Customer savings" value={naira(data.owed.savings)} />}
-            <Row label="Bank transfers not yet paid out" value={naira(data.owed.pendingTransfers)} hint={`${data.owed.pendingTransferCount} waiting (held, OTP or processing) — already taken from wallets`} />
+            {(data.owed.parts || [
+              { key: 'wallets', label: 'Customer wallets', amount: data.owed.wallets },
+              { key: 'cashback', label: 'Unexpired cashback (spendable on purchases)', amount: data.owed.cashback || 0 },
+              { key: 'savings', label: 'Customer savings', amount: data.owed.savings || 0 },
+              { key: 'pendingTransfers', label: 'Bank transfers not yet paid out', amount: data.owed.pendingTransfers },
+              { key: 'heldForDisputes', label: 'Held for wrong-transfer reports', amount: data.owed.heldForDisputes || 0 },
+            ]).map((p) => (
+              <Row key={p.key} label={p.label} value={naira(p.amount)} hint={p.key === 'wallets' ? `${data.owed.customers.toLocaleString()} customers` : p.key === 'pendingTransfers' ? `${data.owed.pendingTransferCount} waiting (held, OTP or processing) — already taken from wallets` : p.key === 'cashback' ? 'Not cash — can only pay part of a purchase' : undefined} />
+            ))}
             <Row label="Total owed" value={naira(data.owed.total)} strong />
           </div>
 
           <div className="card" style={{ margin: '0 0 16px' }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>Money you hold</h2>
-            <Row label="VTpass wallet" value={data.have.vtpass === null ? 'Unavailable' : naira(data.have.vtpass)} hint={data.have.vtpassError || 'Pays for every purchase'} color={data.have.vtpass === null ? 'var(--gold)' : undefined} />
-            <Row label="Monnify wallet" value={data.have.monnify === null ? 'Unavailable' : naira(data.have.monnify)} hint={data.have.monnifyError || 'Receives funding, pays out bank transfers'} color={data.have.monnify === null ? 'var(--gold)' : undefined} />
+            <Row label="VTpass wallet" value={data.have.vtpass === null ? 'Unavailable' : naira(data.have.vtpass)} hint={`${data.have.vtpassError || 'Pays for every purchase'}{data.have.modes && data.have.modes.vtpass !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.vtpass === null ? 'var(--gold)' : undefined} />
+            <Row label="Monnify wallet" value={data.have.monnify === null ? 'Unavailable' : naira(data.have.monnify)} hint={`${data.have.monnifyError || 'Receives funding, pays out bank transfers'}{data.have.modes && data.have.modes.monnify !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.monnify === null ? 'var(--gold)' : undefined} />
             {(data.have.squad !== undefined && (data.have.squad !== null || data.have.squadError)) && (
-              <Row label="Squad wallet" value={data.have.squad === null ? 'Unavailable' : naira(data.have.squad)} hint={data.have.squadError || 'GTBank account-number payments; pays out bank transfers when Squad is chosen'} color={data.have.squad === null ? 'var(--gold)' : undefined} />
+              <Row label="Squad wallet" value={data.have.squad === null ? 'Unavailable' : naira(data.have.squad)} hint={`${data.have.squadError || 'GTBank account-number payments; pays out bank transfers when Squad is chosen'}{data.have.modes && data.have.modes.squad !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.squad === null ? 'var(--gold)' : undefined} />
+            )}
+            {(data.have.nomba !== undefined && (data.have.nomba !== null || data.have.nombaError)) && (
+              <Row label="Nomba wallet" value={data.have.nomba === null ? 'Unavailable' : naira(data.have.nomba)} hint={`${data.have.nombaError || 'Nombank account-number payments; pays out bank transfers when Nomba is chosen'}{data.have.modes && data.have.modes.nomba !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.nomba === null ? 'var(--gold)' : undefined} />
             )}
             <Row label="Other money (you typed)" value={naira(data.have.other)} hint="e.g. business bank account where manual funding lands" />
-            <Row label="Total held" value={naira(data.have.total)} strong />
+            <Row label="Total held" value={naira(data.have.total)} strong hint={data.have.sandboxNote || undefined} />
             <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
               <div className="field" style={{ margin: 0, flex: '1 1 200px' }}>
                 <label htmlFor="mc-other">Money in your business bank account (₦, optional)</label>

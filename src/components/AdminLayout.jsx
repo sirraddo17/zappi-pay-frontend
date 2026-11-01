@@ -4,7 +4,7 @@ import { Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import InstallAppButton from './InstallAppButton';
 import AdminAlertsToggle from './AdminAlertsToggle';
-import { getMonnifyOverview } from '../api';
+import { getMonnifyOverview, isDemoMode, setDemoMode } from '../api';
 
 // Remembered while the admin app is open so every page doesn't re-ask.
 let monnifyModeCache = null;
@@ -12,8 +12,10 @@ let monnifyModeCache = null;
 const TABS = [
   { to: '/admin', label: 'Overview', end: true },
   { to: '/admin/money', label: '💰 Money check' },
+  { to: '/admin/ledger', label: '📒 Ledger & refunds' },
   { to: '/admin/go-live', label: '🚦 Go-live check' },
   { to: '/admin/database', label: '🗄️ Server & Database' },
+  { to: '/admin/subscriptions', label: '🧾 Subscriptions' },
   { to: '/admin/assistant', label: '✨ AI Assistant' },
   { to: '/admin/support-guide', label: '📘 Support guide' },
   { to: '/admin/pending-funding', label: 'Pending Funding' },
@@ -42,15 +44,19 @@ const TABS = [
   { to: '/admin/security', label: '🛡️ Security' },
   { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit-log', label: 'Audit Log' },
+  { to: '/admin/my-access', label: '🔒 Access & roles' },
 ];
 
 // What support staff (role SUPPORT) can open.
-const SUPPORT_TABS = ['/admin/support-guide', '/admin/assistant', '/admin/customers', '/admin/orders', '/admin/bank-transfers', '/admin/unmatched-payments', '/admin/support', '/admin/escalations'];
+const SUPPORT_TABS = ['/admin/my-access', '/admin/support-guide', '/admin/assistant', '/admin/customers', '/admin/orders', '/admin/bank-transfers', '/admin/unmatched-payments', '/admin/support', '/admin/escalations'];
 
 export default function AdminLayout({ children }) {
   const { admin, logout, isOwner } = useAdminAuth();
   const { pathname } = useLocation();
-  const tabs = isOwner ? TABS : TABS.filter((t) => SUPPORT_TABS.includes(t.to)).map((t) => (t.to === '/admin/escalations' ? { ...t, label: '✅ My requests' } : t.to === '/admin/assistant' ? { ...t, label: '✨ Support helper' } : t));
+  const [demo, setDemo] = useState(isDemoMode());
+  // Demo / screenshot mode: hides the Server & Database screen too.
+  const visible = demo ? TABS.filter((t) => t.to !== '/admin/database') : TABS;
+  const tabs = isOwner ? visible : visible.filter((t) => SUPPORT_TABS.includes(t.to)).map((t) => (t.to === '/admin/escalations' ? { ...t, label: '✅ My requests' } : t.to === '/admin/assistant' ? { ...t, label: '✨ Support helper' } : t));
   const allowed = isOwner || SUPPORT_TABS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const navigate = useNavigate();
   const mainRef = useRef(null);
@@ -115,11 +121,22 @@ export default function AdminLayout({ children }) {
         <div className="admin-account" style={{ padding: '16px 20px 0' }}>
           <div className="admin-name" style={{ color: 'var(--slate-400)', fontSize: 13, marginBottom: 8 }}>{admin?.name}{!isOwner && ' · Support staff'}</div>
           {isOwner && <AdminAlertsToggle />}
+          {isOwner && (
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, margin: '0 0 8px', cursor: 'pointer' }} title="For screenshots and showing the app: hides customer names, phone numbers, keys and test-money balances">
+              <input type="checkbox" checked={demo} onChange={(e) => { setDemoMode(e.target.checked); setDemo(e.target.checked); window.location.reload(); }} style={{ width: 'auto' }} />
+              🎭 Demo / screenshot mode
+            </label>
+          )}
           <InstallAppButton admin label="Install admin app" style={{ marginBottom: 8, fontSize: 13 }} />
           <button className="btn-secondary btn" onClick={handleLogout}>Log Out</button>
         </div>
       </div>
       <div className="admin-main" ref={mainRef}>
+        {demo && (
+          <div style={{ background: 'rgba(212,175,55,0.14)', border: '1px solid var(--gold)', borderRadius: 10, padding: '8px 12px', marginBottom: 16, fontSize: 13 }}>
+            <strong>🎭 Demo mode:</strong> names, phone numbers, account numbers, keys and test-money (SANDBOX) balances are hidden. Turn it off in the menu.
+          </div>
+        )}
         {isOwner && monnifyMode === 'sandbox' && (
           <div style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid var(--orange, #f97316)', color: 'var(--orange, #f97316)', borderRadius: 10, padding: '8px 12px', marginBottom: 16, fontSize: 13 }}>
             <strong>Test mode:</strong> Monnify is on Sandbox. Bank-transfer funding and Send to Bank use test money — nothing real moves.{' '}

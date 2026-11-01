@@ -20,12 +20,22 @@ const STATUS_PILL = { SUCCESS: ['Successful', 'ok'], APPROVED: ['Successful', 'o
 const SERVICE_ICON = { AIRTIME: '📞', DATA: '📶', ELECTRICITY: '💡', CABLE: '📺', EDUCATION: '🎓', INTERNET: '🌐', BETTING: '🏆', INTERNATIONAL: '🌍', INSURANCE: '🚗', 'RECHARGE CARDS': '🖨️' };
 const pretty = (s) => String(s || '').charAt(0) + String(s || '').slice(1).toLowerCase();
 const TABS = [['ALL', 'All'], ['BUY', 'Purchases'], ['IN', 'Money in'], ['OUT', 'Money out']];
+// Second filter: by outcome.
+const STATUS_FILTERS = [['ALL', 'Any status'], ['SUCCESS', 'Successful'], ['FAILED', 'Failed'], ['REFUND', 'Refunds'], ['PENDING', 'Pending']];
+function statusMatch(x, f) {
+  if (f === 'ALL') return true;
+  if (f === 'PENDING') return x.status === 'PENDING';
+  if (f === 'FAILED') return ['FAILED', 'REFUNDED', 'REJECTED'].includes(x.status);
+  if (f === 'REFUND') return x.txType === 'REFUND' || x.status === 'REFUNDED';
+  return ['SUCCESS', 'APPROVED'].includes(x.status) && x.txType !== 'REFUND';
+}
 
 export default function Orders() {
   const [items, setItems] = useState(null);
   const [error, setError] = useState('');
   const [shown, setShown] = useState(FIRST_COUNT);
   const [tab, setTab] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [rate, setRate] = useState(null);
 
   // Everything in one list: purchases (with their receipts), recharge
@@ -42,7 +52,7 @@ export default function Orders() {
         }));
         const tx = (wallet.transactions || []).filter((t) => !isPurchaseDebit(t)).map((t) => {
           const credit = isCredit(t.type);
-          return { key: `t${t.id}`, kind: credit ? 'IN' : 'OUT', link: `/transactions/${t.id}`, icon: credit ? '⬇️' : '⬆️', title: typeLabel(t.type), sub: t.type === 'FUND' ? 'Wallet funding' : txLabel(t), amount: Number(t.amount), credit, status: t.status, at: t.createdAt };
+          return { txType: t.type, key: `t${t.id}`, kind: credit ? 'IN' : 'OUT', link: `/transactions/${t.id}`, icon: credit ? '⬇️' : '⬆️', title: typeLabel(t.type), sub: t.type === 'FUND' ? 'Wallet funding' : txLabel(t), amount: Number(t.amount), credit, status: t.status, at: t.createdAt };
         });
         setItems([...orders, ...batches, ...tx].sort((x, y) => new Date(y.at) - new Date(x.at)));
         setRate((data.orders || [])[0] || null);
@@ -54,7 +64,7 @@ export default function Orders() {
   useEffect(load, []);
   // Pending purchases switch to Successful / Refunded on their own.
   useAutoRefresh(load, Boolean(items?.some((o) => o.kind === 'BUY' && o.status === 'PENDING')));
-  const list = (items || []).filter((x) => tab === 'ALL' || x.kind === tab);
+  const list = (items || []).filter((x) => (tab === 'ALL' || x.kind === tab) && statusMatch(x, statusFilter));
 
   return (
     <div className="app-shell">
@@ -70,11 +80,16 @@ export default function Orders() {
       <div className="plan-tabs" role="tablist" style={{ margin: '0 16px 10px' }}>
         {TABS.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={`plan-tab${tab === k ? ' on' : ''}`} onClick={() => { setTab(k); setShown(FIRST_COUNT); }}>{l}</button>)}
       </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '0 16px 10px' }} role="group" aria-label="Filter by status">
+        {STATUS_FILTERS.map(([k, l]) => (
+          <button key={k} type="button" aria-pressed={statusFilter === k} onClick={() => { setStatusFilter(k); setShown(FIRST_COUNT); }} className={statusFilter === k ? 'btn' : 'btn-secondary btn'} style={{ width: 'auto', padding: '4px 12px', fontSize: 12 }}>{l}</button>
+        ))}
+      </div>
 
       {items === null ? (
         <div style={{ margin: '0 16px' }}><SkeletonRows rows={4} /></div>
       ) : list.length === 0 ? (
-        <p className="empty-state">{tab === 'ALL' ? 'No transactions yet. Fund your wallet and make your first purchase — it shows up here.' : 'Nothing here yet.'}</p>
+        <p className="empty-state">{tab === 'ALL' && statusFilter === 'ALL' ? 'No transactions yet. Fund your wallet and make your first purchase — it shows up here.' : 'Nothing here yet.'}</p>
       ) : (
         <>
           <div className="card" style={{ padding: 0 }}>

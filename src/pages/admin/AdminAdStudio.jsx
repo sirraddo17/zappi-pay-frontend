@@ -39,6 +39,14 @@ function Preview({ design, format, photo }) {
 
 // Describe an ad → the AI writes and designs it → download pictures and
 // 3-second videos for social media, or put it straight into the app.
+const SECTIONS = [
+  { id: 'design', label: '🖼️ Design an ad', hint: 'Describe it, let AI suggest 3 options (or edit yourself), then download pictures, make 3-second videos or put it in the app.' },
+  { id: 'festivals', label: '🎉 Festivals & dates', hint: 'Ready-made posts for holidays and milestones — tap one to open it in Design an ad.' },
+  { id: 'week', label: '📅 Week plan', hint: 'AI plans a week of posts — tap a day to open it in Design an ad.', ai: true },
+  { id: 'story', label: '🎬 Story video', hint: 'Longer story-style videos for Status, Reels and TikTok.' },
+  { id: 'presenter', label: '🎥 Scripts & AI presenter', hint: 'Video scripts, and talking-presenter videos made from them (HeyGen).' },
+];
+
 export default function AdminAdStudio() {
   const [ai, setAi] = useState(null);
   const [brief, setBrief] = useState('');
@@ -51,13 +59,23 @@ export default function AdminAdStudio() {
   const [video, setVideo] = useState(null);
   const [hgDraft, setHgDraft] = useState(null);
   const [placement, setPlacement] = useState('HOME');
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const [openId, setOpenId] = useState(params.get('festival') || '');
+  // Subsections: each tool has its own tab. Tabs are hidden, not removed,
+  // so AI results and drafts survive switching between them.
+  const tab = SECTIONS.some((x) => x.id === params.get('tab')) ? params.get('tab') : (params.get('festival') ? 'festivals' : 'design');
+  const go = (id) => {
+    const next = new URLSearchParams(params);
+    if (id === 'design') next.delete('tab'); else next.set('tab', id);
+    setParams(next, { replace: true });
+    (document.querySelector('main') || window).scrollTo({ top: 0, behavior: 'smooth' });
+  };
   function openDesign(x, id) {
     setDesigns([{ ...BLANK, ...x, badges: x.badges || [], link: x.link || '' }]);
     setPick(0);
     if (id) setOpenId(id);
     setMsg(null);
+    go('design');
   }
 
   useEffect(() => { getAdminAiStatus().then(setAi).catch(() => setAi({ adminEnabled: false })); }, []);
@@ -68,7 +86,7 @@ export default function AdminAdStudio() {
 
   async function designWithAi(text) {
     const b = typeof text === 'string' ? text : brief;
-    if (typeof text === 'string') setBrief(text);
+    if (typeof text === 'string') { setBrief(text); go('design'); }
     setBusy('ai');
     setMsg(null);
     try {
@@ -129,6 +147,14 @@ export default function AdminAdStudio() {
         <p>Describe an ad — get ready-to-post pictures, 3-second videos and in-app banners in the ZAPPI PAY style</p>
       </div>
 
+      <div className="admin-actions" role="tablist" aria-label="Ad Studio sections" style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+        {SECTIONS.filter((x) => !x.ai || ai?.adminEnabled).map((x) => (
+          <button key={x.id} type="button" role="tab" aria-selected={tab === x.id} className={tab === x.id ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '6px 14px' }} onClick={() => go(x.id)}>{x.label}</button>
+        ))}
+      </div>
+      <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '-6px 0 14px' }}>{SECTIONS.find((x) => x.id === tab)?.hint}</p>
+
+      <div hidden={tab !== 'design'}>
       <div className="card" style={{ margin: '0 0 16px', maxWidth: 860 }}>
         <label htmlFor="brief" style={{ fontWeight: 600 }}>What do you want to advertise?</label>
         <textarea id="brief" rows={3} maxLength={800} value={brief} onChange={(e) => setBrief(e.target.value)} style={{ ...input, fontFamily: 'inherit', marginTop: 6 }}
@@ -147,8 +173,6 @@ export default function AdminAdStudio() {
         <ImageAttach value={photoData} onChange={setPhotoData} max={1} label="🖼️ Optional: add your own background photo" />
         <AiPictureBox onPicture={(img) => setPhotoData([img])} />
       </div>
-
-      <FestivalPanel onOpen={openDesign} openId={openId} onAi={ai?.adminEnabled ? () => designWithAi(`Write a warm, respectful post for everyone (any religion) for: ${d.headline}. ${d.subtext}. Keep the same occasion and facts; thank customers for trusting ZAPPI PAY.`) : null} />
 
       {msg && <p style={{ color: msg.ok ? 'var(--green-500)' : 'var(--red-500)', margin: '0 0 12px' }}>{msg.text}</p>}
 
@@ -217,10 +241,23 @@ export default function AdminAdStudio() {
         </div>
       </div>
 
-      {ai?.adminEnabled && <WeekPlanPanel onOpen={(x) => { setDesigns([{ ...BLANK, ...x, badges: x.badges?.length ? x.badges : [], link: x.link || '' }]); setPick(0); (document.querySelector('main') || window).scrollTo({ top: 0, behavior: 'smooth' }); }} />}
-      <StoryVideoPanel />
-      <VideoScriptPanel onHeygen={setHgDraft} />
-      <HeygenVideosPanel draft={hgDraft} />
+      </div>
+
+      <div hidden={tab !== 'festivals'}>
+        <FestivalPanel onOpen={openDesign} openId={openId} onAi={ai?.adminEnabled ? () => designWithAi(`Write a warm, respectful post for everyone (any religion) for: ${d.headline}. ${d.subtext}. Keep the same occasion and facts; thank customers for trusting ZAPPI PAY.`) : null} />
+      </div>
+      {ai?.adminEnabled && (
+        <div hidden={tab !== 'week'}>
+          <WeekPlanPanel onOpen={(x) => { setDesigns([{ ...BLANK, ...x, badges: x.badges?.length ? x.badges : [], link: x.link || '' }]); setPick(0); go('design'); }} />
+        </div>
+      )}
+      <div hidden={tab !== 'story'}>
+        <StoryVideoPanel />
+      </div>
+      <div hidden={tab !== 'presenter'}>
+        <VideoScriptPanel onHeygen={(x) => { setHgDraft(x); }} />
+        <HeygenVideosPanel draft={hgDraft} />
+      </div>
 
       {video && (
         <div role="dialog" aria-label="Video" onClick={(e) => e.target === e.currentTarget && setVideo(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>

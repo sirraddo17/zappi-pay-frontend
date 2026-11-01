@@ -101,6 +101,15 @@ export function request(path, options = {}) {
   }).then(handleCustomerResponse);
 }
 
+// Demo / screenshot mode (Admin menu): the server masks names, phone
+// numbers, keys and test-money balances in everything it sends back.
+export function isDemoMode() {
+  try { return localStorage.getItem('zappipay_demo') === '1'; } catch { return false; }
+}
+export function setDemoMode(on) {
+  try { if (on) localStorage.setItem('zappipay_demo', '1'); else localStorage.removeItem('zappipay_demo'); } catch { /* private mode */ }
+}
+
 export function adminRequest(path, options = {}) {
   const token = localStorage.getItem('zappipay_admin_token');
   return trackedFetch(`${API_URL}${path}`, {
@@ -108,6 +117,7 @@ export function adminRequest(path, options = {}) {
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(isDemoMode() ? { 'X-Demo-Mode': '1' } : {}),
       ...options.headers,
     },
   }).then(async (res) => {
@@ -420,7 +430,20 @@ export const simulateSquadPayment = (data) => adminRequest('/api/admin/squad/sim
 export const getFestivals = () => adminRequest('/api/admin/festivals');
 export const vtpassSelfTest = () => adminRequest('/api/admin/vtpass/selftest');
 export const getVtpassCodes = () => adminRequest('/api/admin/vtpass-codes');
-export const getAdminOrders = (opts = {}) => adminRequest(`/api/admin/orders${opts.status ? `?status=${encodeURIComponent(opts.status)}` : ''}`);
+export const getAdminOrders = (opts = {}) => {
+  const q = new URLSearchParams();
+  if (opts.status) q.set('status', opts.status);
+  if (opts.mode) q.set('mode', opts.mode);
+  const s = q.toString();
+  return adminRequest(`/api/admin/orders${s ? `?${s}` : ''}`);
+};
+export const getSubscriptions = () => adminRequest('/api/admin/subscriptions');
+export const saveSubscriptions = (subscriptions) => adminRequest('/api/admin/subscriptions', { method: 'PUT', body: JSON.stringify({ subscriptions }) });
+export const getLedger = (opts = {}) => adminRequest(`/api/admin/ledger?${new URLSearchParams(Object.entries(opts).filter(([, v]) => v)).toString()}`);
+export const getRefunds = (days) => adminRequest(`/api/admin/refunds${days ? `?days=${days}` : ''}`);
+export const getOrderTimeline = (id) => adminRequest(`/api/admin/orders/${id}/timeline`);
+export const getOverviewTotals = () => adminRequest('/api/admin/overview-totals');
+export const markOrdersTest = (data) => adminRequest('/api/admin/orders/mark-test', { method: 'POST', body: JSON.stringify(data) });
 export const getAuditLog = () => adminRequest('/api/admin/audit-log');
 
 // --- Admin: manual wallet adjustments ---

@@ -347,7 +347,7 @@ export default function Dashboard() {
           <span style={{ fontSize: 22 }}>🎁</span>
           <span style={{ flex: 1 }}>
             <b style={{ display: 'block', fontSize: 14 }}>Refer &amp; earn ₦{Number(referral.bonusAmount).toLocaleString()}</b>
-            <span style={{ fontSize: 13, opacity: 0.85 }}>Invite friends — get paid when they make their first purchase.</span>
+            <span style={{ fontSize: 13, opacity: 0.85 }}>Invite friends — {referral.ruleText || (referral.spendTarget > 0 ? `get paid when they spend ₦${Number(referral.spendTarget).toLocaleString()} in total` : 'get paid when they start buying')}.</span>
           </span>
           <span style={{ color: 'var(--gold)' }}>›</span>
         </Link>

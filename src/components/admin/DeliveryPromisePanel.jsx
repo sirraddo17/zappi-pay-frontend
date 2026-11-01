@@ -4,7 +4,7 @@ import { getDeliveryPromise, saveDeliveryPromise } from '../../api';
 const LABEL = { AIRTIME: 'Airtime', DATA: 'Data', ELECTRICITY: 'Electricity', CABLE: 'Cable TV', EDUCATION: 'Exam PINs', INTERNET: 'Internet', BETTING: 'Betting' };
 const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
 
-// Settings → Delivery promise: "Delivered in 60s or ₦20 back".
+// Settings → Delivery promise: "Takes over 60s? ₦20 back (once a day)".
 export default function DeliveryPromisePanel() {
   const [c, setC] = useState(null);
   const [stats, setStats] = useState(null);
@@ -49,7 +49,7 @@ export default function DeliveryPromisePanel() {
     <form className="card" style={{ maxWidth: 640 }} onSubmit={save}>
       <h2 style={{ marginTop: 0, fontSize: 16, marginBottom: 4 }}>⚡ Delivery promise</h2>
       <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 0 }}>
-        Show “Delivered in {c.seconds} seconds or {naira(c.bonus)} back” on the Buy page. If a purchase takes longer than that to confirm, the customer gets the bonus automatically. Quick failures (like a wrong number) don’t count, each customer gets at most one bonus a day, and it stops once the daily budget is used.
+        Show “Takes over {c.seconds}s? {naira(c.bonus)} back (once a day)” on the Buy page. If a purchase takes longer than that to confirm, the customer gets the bonus automatically. Quick failures (like a wrong number) don’t count, each customer gets at most one bonus a day, and it stops once the daily budget is used.
       </p>
       {stats && (
         <p style={{ fontSize: 13, margin: '0 0 12px' }}>

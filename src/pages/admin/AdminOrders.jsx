@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminOrders, getVtpassCodes, recheckAdminOrder, lookupAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
+import { getAdminOrders, getOrderTimeline, markOrdersTest, getVtpassCodes, recheckAdminOrder, lookupAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { useShowMore } from '../../components/ShowMore';
@@ -20,6 +20,25 @@ function deliverable(o) {
   return null;
 }
 
+// Status history from existing records (wallet, cashback, admin actions, tickets).
+function OrderTimeline({ id }) {
+  const [d, setD] = useState(null);
+  const [err, setErr] = useState('');
+  useEffect(() => { getOrderTimeline(id).then(setD).catch((e) => setErr(e.message)); }, [id]);
+  if (err) return <p className="error-text" style={{ margin: 0 }}>{err}</p>;
+  if (!d) return <div style={{ color: 'var(--slate-400)' }}>Loading history…</div>;
+  return (
+    <div style={{ padding: '6px 10px', border: '1px solid var(--slate-700)', borderRadius: 8 }}>
+      <strong>Status history</strong>
+      <ol style={{ margin: '4px 0 0', paddingLeft: 18 }}>
+        {d.events.map((e, i) => (
+          <li key={i}><span style={{ color: 'var(--slate-400)' }}>{e.at ? new Date(e.at).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'medium' }) : ''}</span> {e.what}</li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 function OrderDetails({ o }) {
   const [look, setLook] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -36,6 +55,7 @@ function OrderDetails({ o }) {
     <div style={{ width: '100%', textAlign: 'left', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 4 }}>
       {row('Customer', `${o.customer.name} · ${o.customer.phone}`)}
       {row('Provider', `${providerOf(o)} · ${o.provider}${o.variationCode ? ` · ${o.variationCode}` : ''}`)}
+      {row('Order ID', o.id)}
       {row('Our reference (request ID)', o.vtpassRequestId)}
       {row(`${providerOf(o)} transaction ID`, t.transactionId || p.id || null)}
       {row('Name on account', o.recipientName)}
@@ -46,6 +66,7 @@ function OrderDetails({ o }) {
       </div>
       {(o.service === 'DATA' || o.service === 'INTERNET') && o.variationCode && !isBet(o) && <PlanFixForm serviceID={o.provider} variationCode={o.variationCode} name={look?.productName || null} />}
       {err && <p className="error-text" style={{ margin: 0 }}>{err}</p>}
+      <OrderTimeline id={o.id} />
       {look && (
         <div style={{ padding: '6px 10px', border: '1px solid var(--slate-700)', borderRadius: 8 }}>
           <div><strong>{look.who} says: {look.providerStatus}</strong> (ours: {look.ourStatus})</div>
@@ -83,7 +104,7 @@ const STATUS_TABS = [
   { value: '', label: 'All' },
   { value: 'PENDING', label: '⏳ Pending' },
   { value: 'SUCCESS', label: '✓ Successful' },
-  { value: 'FAILED', label: '✕ Failed' },
+  { value: 'FAILED', label: '✕ Failed (refunded)' },
 ];
 
 const SERVICE_FILTERS = [
@@ -132,6 +153,9 @@ export default function AdminOrders() {
   const [filter, setFilter] = useState('ALL');
   const [params, setParams] = useSearchParams();
   const status = STATUS_TABS.some((t) => t.value === params.get('status')) ? params.get('status') : '';
+  // live = real orders (default), test = sandbox/test orders, all = both.
+  const mode = ['live', 'test', 'all'].includes(params.get('mode')) ? params.get('mode') : 'live';
+  const [testBefore, setTestBefore] = useState('');
   const [counts, setCounts] = useState(null);
 
   const [busy, setBusy] = useState(null);
@@ -139,11 +163,21 @@ export default function AdminOrders() {
   const [message, setMessage] = useState('');
 
   function load() {
-    getAdminOrders({ status })
+    getAdminOrders({ status, mode })
       .then((data) => { setOrders(data.orders); setCounts(data.counts || null); })
       .catch((err) => setError(err.message));
   }
-  useEffect(() => { setOrders(null); load(); }, [status]);
+  useEffect(() => { setOrders(null); load(); }, [status, mode]);
+  const setQuery = (next) => setParams(Object.fromEntries(Object.entries({ status, mode: mode === 'live' ? '' : mode, ...next }).filter(([, v]) => v)));
+  async function markTest() {
+    if (!testBefore) return;
+    if (!window.confirm(`Mark every order before ${testBefore} as a TEST order? They will be left out of earnings, stats and the rewards cap. (You can undo this for one order from its row.)`)) return;
+    try {
+      const r = await markOrdersTest({ before: `${testBefore}T00:00:00+01:00` });
+      setMessage(`${r.updated} order${r.updated === 1 ? '' : 's'} marked as test.`);
+      load();
+    } catch (e) { setError(e.message); }
+  }
   useAutoRefresh(load, true, ADMIN_REFRESH);
 
   async function reportVtpass(o) {
@@ -201,10 +235,19 @@ export default function AdminOrders() {
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
         {STATUS_TABS.map((t) => (
-          <button key={t.label} type="button" onClick={() => setParams(t.value ? { status: t.value } : {})} className={t.value === status ? 'btn' : 'btn-secondary btn'} style={{ width: 'auto', padding: '6px 14px', fontSize: 13 }}>
+          <button key={t.label} type="button" onClick={() => setQuery({ status: t.value })} className={t.value === status ? 'btn' : 'btn-secondary btn'} style={{ width: 'auto', padding: '6px 14px', fontSize: 13 }}>
             {t.label}{tabCount(t.value) != null ? ` (${tabCount(t.value)})` : ''}
           </button>
         ))}
+        {isOwner && <a href="/admin/ledger?tab=refunds" className="btn-secondary btn" style={{ width: 'auto', padding: '6px 14px', fontSize: 13, textDecoration: 'none' }}>↩ Refunds list</a>}
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10, fontSize: 13 }}>
+        {[['live', 'Real orders'], ['test', 'Test orders'], ['all', 'All']].map(([v, label]) => (
+          <button key={v} type="button" onClick={() => setQuery({ mode: v === 'live' ? '' : v })} className={v === mode ? 'btn' : 'btn-secondary btn'} style={{ width: 'auto', padding: '4px 12px', fontSize: 12 }}>{label}</button>
+        ))}
+        <span style={{ color: 'var(--slate-400)' }}>Mark orders before</span>
+        <input type="date" value={testBefore} onChange={(e) => setTestBefore(e.target.value)} style={{ width: 'auto', padding: '4px 8px' }} aria-label="Mark orders before this date as test" />
+        <button type="button" className="btn-secondary btn" style={{ width: 'auto', padding: '4px 12px', fontSize: 12 }} disabled={!testBefore} onClick={markTest}>as test</button>
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
         {SERVICE_FILTERS.map((f) => (
@@ -248,6 +291,7 @@ export default function AdminOrders() {
                   <td style={{ color: STATUS_COLORS[o.status] || 'var(--slate-400)' }}><div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, textAlign: 'right', maxWidth: 230, marginLeft: 'auto' }}>
                     <span style={{ whiteSpace: 'nowrap' }}>{o.status}</span>
                     <button type="button" onClick={() => setOpenId(openId === o.id ? null : o.id)} style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', fontSize: 11, padding: 0 }}>{openId === o.id ? 'Hide details ▲' : 'Details ▼'}</button>
+                    {o.isTest && <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>🧪 TEST order (sandbox) — not counted in earnings or stats · <button type="button" onClick={() => markOrdersTest({ orderId: o.id, isTest: false }).then(load)} style={{ background: 'none', border: 0, color: 'var(--gold)', textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 11 }}>it was real</button></div>}
                     {o.status === 'FAILED' && o.vtpassReason && <div style={{ fontSize: 11, color: o.vtpassWho === 'account' ? 'var(--red-500)' : 'var(--slate-400)', marginTop: 2 }}>VTpass: {o.vtpassReason}</div>}
                     {o.status === 'PENDING' && o.held && <div style={{ fontSize: 11, color: 'var(--red-500)', marginTop: 2 }}>⚠ Held: VTpass gave PINs, then said failed. Not refunded — ask VTpass support first.</div>}
                     {o.status === 'PENDING' && !o.held && o.pinsGiven && <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>PINs/token already given</div>}
