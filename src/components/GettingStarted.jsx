@@ -1,25 +1,31 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+// "Hide" is remembered per customer on this device, so it stays hidden
+// after a reload — and someone new signing in here still sees it.
 const KEY = 'zappipay_getting_started_hidden';
-export function hiddenBefore() {
-  try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
+const keyFor = (id) => (id ? `${KEY}_${id}` : KEY);
+export function hiddenBefore(customerId) {
+  try {
+    const id = typeof customerId === 'string' ? customerId : null;
+    return localStorage.getItem(keyFor(id)) === '1' || (!id && localStorage.getItem(KEY) === '1');
+  } catch { return false; }
 }
 
 // Home → "Getting started" checklist for new customers (until their
 // first purchase). "Ask the assistant" opens the Help chat.
 export default function GettingStarted({ customer, balance, funded, onHide }) {
-  const [hidden, setHidden] = useState(hiddenBefore);
+  const [hidden, setHidden] = useState(() => hiddenBefore(customer?.id));
   if (hidden || !customer) return null;
   const steps = [
     { done: funded || Number(balance) > 0, label: 'Fund your wallet', hint: 'Get your own account number and transfer from any bank.', to: '/wallet' },
     { done: Boolean(customer.hasPin), label: 'Create your transaction PIN', hint: 'You need it to confirm payments.', to: '/security' },
-    { done: Boolean(customer.username), label: 'Choose a username', hint: 'Friends can send you money with it — it’s also your referral code.', to: '/refer' },
+    { done: Boolean(customer.username), label: 'Choose a username', hint: 'It’s also your referral code.', to: '/refer' },
     { done: false, label: 'Make your first purchase', hint: 'Airtime or data is a good start.', to: '/buy/airtime' },
   ];
   const doneCount = steps.filter((s) => s.done).length;
   function hide() {
-    try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+    try { localStorage.setItem(keyFor(customer?.id), '1'); } catch { /* ignore */ }
     setHidden(true);
     onHide?.();
   }
@@ -27,7 +33,7 @@ export default function GettingStarted({ customer, balance, funded, onHide }) {
     <div className="card" style={{ marginTop: 16, border: '1px solid var(--purple, #0D9488)', background: 'rgba(13, 148, 136,0.06)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <b style={{ flex: 1, fontSize: 15 }}>👋 Getting started · {doneCount}/4</b>
-        <button type="button" onClick={hide} style={{ background: 'none', border: 'none', color: 'var(--slate-400)', cursor: 'pointer', fontSize: 12 }}>Hide</button>
+        <button type="button" onClick={hide} style={{ background: 'none', border: 'none', color: 'var(--slate-400)', cursor: 'pointer', fontSize: 12 }} aria-label="Hide Getting started">✕ Hide</button>
       </div>
       <div style={{ height: 6, background: 'var(--slate-800)', borderRadius: 4, margin: '8px 0 10px' }}>
         <div style={{ width: `${(doneCount / 4) * 100}%`, height: '100%', background: 'var(--purple, #0D9488)', borderRadius: 4 }} />

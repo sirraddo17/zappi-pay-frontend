@@ -118,7 +118,8 @@ export default function Dashboard() {
   const [referral, setReferral] = useState(null);
   const [recent, setRecent] = useState([]);
   const [bought, setBought] = useState(null); // null = not loaded yet
-  const [gsOff, setGsOff] = useState(gsHidden);
+  const [gsOff, setGsOff] = useState(false);
+  useEffect(() => { setGsOff(gsHidden(customer?.id)); }, [customer?.id]);
   const [cashback, setCashback] = useState(customer?.cashbackBalance ?? 0);
   const [monthCashback, setMonthCashback] = useState(0);
   const [hide, setHide] = useState(() => { try { return localStorage.getItem('zp_hide_balance') === '1'; } catch { return false; } });

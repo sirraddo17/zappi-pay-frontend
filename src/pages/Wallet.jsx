@@ -268,7 +268,7 @@ function SquadForm({ info, customerName, onCreated, addOn, onCancel }) {
         I agree that ZAPPI PAY can check my details with my BVN through its licensed payment partner.
       </label>
       <p style={{ color: 'var(--slate-400)', fontSize: 12 }}>
-        Your BVN is sent securely to our licensed payment partner only to create your account. ZappiPay does not store it.
+        Your BVN is sent securely to our licensed payment partner only to create your account. ZAPPI PAY doesn’t keep your BVN — only a one-way code, so one BVN can’t open two accounts.
       </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button className="btn" type="submit" disabled={busy || !ready}>{busy ? 'Creating…' : 'Get My Account Number'}</button>
@@ -330,7 +330,7 @@ function AddAccountForm({ info, customerName, onCreated, onCancel }) {
           </label>
         </>
       )}
-      <p style={{ color: 'var(--slate-400)', fontSize: 12 }}>Your {idType} is sent securely to our licensed payment partner only to create your account. ZappiPay does not store it.</p>
+      <p style={{ color: 'var(--slate-400)', fontSize: 12 }}>Your {idType} is sent securely to our licensed payment partner only to create your account. ZAPPI PAY doesn’t keep your {idType} — only a one-way code, so one {idType} can’t open two accounts.</p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button className="btn" type="submit" disabled={busy || idNumber.length !== 11 || (info.idMatch && (!consent || (!info.hasDob && !dob)))}>{busy ? 'Creating…' : 'Get My Account Number'}</button>
         <button className="btn btn-secondary" type="button" disabled={busy} onClick={onCancel}>Cancel</button>
@@ -445,7 +445,7 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
           </>
         )}
         <p style={{ color: 'var(--slate-400)', fontSize: 12 }}>
-          Your {idType} is sent securely to our licensed payment partner only to create your account. ZappiPay does not store it.
+          Your {idType} is sent securely to our licensed payment partner only to create your account. ZAPPI PAY doesn’t keep your {idType} — only a one-way code, so one {idType} can’t open two accounts.
         </p>
         <button className="btn" type="submit" disabled={busy || idNumber.length !== 11 || (info.idMatch && (!consent || (!info.hasDob && !dob)))}>
           {busy ? 'Creating…' : 'Get My Account Number'}
