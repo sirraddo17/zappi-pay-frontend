@@ -234,7 +234,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
                     {isBest && <> · <b>🏆 Best deal</b></>}
                     {save >= 5 && <> · save {naira(save)}</>}
                   </div>
-                  <div className="vplan-name">{v.name}</div>
+                  <div className="vplan-name">{cleanPlanName(v.name)}</div>
                   {v.zpNote && <div className="vplan-name" style={{ color: 'var(--gold, #FFB830)' }}>ℹ️ {v.zpNote}</div>}
                   {g != null && best != null && <div className="vplan-bar" aria-hidden><i style={{ width: `${Math.min(100, Math.max(8, Math.round((best / g) * 100)))}%` }} /></div>}
                 </button>
@@ -280,4 +280,13 @@ export function AmountGrid({ amounts, value, onPick, priceOf }) {
       })}
     </div>
   );
+}
+
+// VTpass names often end with the price ("MTN 1GB - 1,005 Naira", "N1,000"); the price is shown separately.
+export function cleanPlanName(name) {
+  return String(name || '')
+    .replace(/\s*[-–(]?\s*(?:₦|N)\s?[\d,]+(?:\.\d+)?\s*\)?\s*$/i, '')
+    .replace(/\s*[-–(]?\s*[\d,]+(?:\.\d+)?\s*Naira\s*\)?\s*$/i, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim() || String(name || '');
 }

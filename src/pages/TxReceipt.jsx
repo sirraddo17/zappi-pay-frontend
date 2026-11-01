@@ -21,11 +21,16 @@ export default function TxReceipt() {
   if (!d) return <div className="app-shell"><div style={{ margin: 16 }}><SkeletonRows rows={5} /></div><BottomNav /></div>;
   const t = d.transaction;
   const b = d.bank;
+  const f = d.funding;
   const credit = isCredit(t.type);
   const status = t.status === 'APPROVED' ? 'SUCCESS' : t.status;
   const rows = [
     ['Type', typeLabel(t.type)],
     ['Details', txLabel(t)],
+    f && f.sent > 0 && ['Sent', naira(f.sent)],
+    f && ['Bank fee', f.fee > 0 ? naira(f.fee) : 'No fee'],
+    f && ['Credited', naira(f.credited)],
+    f?.via && ['Via', f.via],
     b && ['Beneficiary', b.accountName],
     b && ['Bank', `${b.bankName || ''} ${b.accountNumber}`.trim()],
     b && b.fee > 0 && ['Transfer fee', naira(b.fee)],

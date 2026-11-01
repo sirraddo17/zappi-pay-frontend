@@ -15,18 +15,27 @@ const CREDIT = /^(FUND|REFUND|CASHBACK|REFERRAL_BONUS|LOYALTY|CONTEST_PRIZE|COUP
 function Ledger() {
   const [type, setType] = useState('');
   const [days, setDays] = useState(30);
+  const [mode, setMode] = useState('real');
   const [d, setD] = useState(null);
   const [err, setErr] = useState('');
-  useEffect(() => { setD(null); getLedger({ type, days }).then(setD).catch((e) => setErr(e.message)); }, [type, days]);
+  useEffect(() => { setD(null); getLedger({ type, days, mode }).then(setD).catch((e) => setErr(e.message)); }, [type, days, mode]);
+  // Types for features that are off for customers (circles, transfers, disputes, airtime to cash) are left out.
+  const hidden = d?.hiddenTypes || [];
+  const isHidden = (t) => hidden.some((h) => (h.endsWith('_') ? t.startsWith(h) : t === h));
   return (
     <>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
         <select value={type} onChange={(e) => setType(e.target.value)} style={{ width: 'auto' }} aria-label="Type">
-          {TYPES.map((t) => <option key={t} value={t}>{t ? t.replace(/_/g, ' ').toLowerCase() : 'All types'}</option>)}
+          {TYPES.filter((t) => !t || !isHidden(t)).map((t) => <option key={t} value={t}>{t ? t.replace(/_/g, ' ').toLowerCase() : 'All types'}</option>)}
         </select>
         <select value={days} onChange={(e) => setDays(Number(e.target.value))} style={{ width: 'auto' }} aria-label="Period">
           {[7, 30, 90].map((n) => <option key={n} value={n}>Last {n} days</option>)}
         </select>
+        <div style={{ display: 'flex', gap: 4 }} role="group" aria-label="Real or test">
+          {[['real', 'Real'], ['test', 'Test'], ['all', 'All']].map(([k, l]) => (
+            <button key={k} type="button" className={mode === k ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => setMode(k)}>{l}</button>
+          ))}
+        </div>
       </div>
       {err && <p className="error-text">{err}</p>}
       {!d && !err && <p className="empty-state">Loading…</p>}
@@ -35,9 +44,9 @@ function Ledger() {
           <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '0 0 10px' }}>🔒 {d.note}</p>
           {d.totals.length > 0 && (
             <div className="card" style={{ margin: '0 0 12px', fontSize: 13 }}>
-              <b>Totals (approved, last {d.days} days)</b>
+              <b>Totals ({mode === 'all' ? 'real + test' : mode}, approved, last {d.days} days)</b>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', marginTop: 6 }}>
-                {d.totals.map((t) => <span key={t.type}>{t.type.replace(/_/g, ' ').toLowerCase()}: {naira(t.amount)} ({t.count})</span>)}
+                {d.totals.filter((t) => !isHidden(t.type)).map((t) => <span key={t.type}>{t.type.replace(/_/g, ' ').toLowerCase()}: {naira(t.amount)} ({t.count})</span>)}
               </div>
             </div>
           )}
@@ -49,7 +58,7 @@ function Ledger() {
                   <tr key={r.id} style={{ borderTop: '1px solid var(--slate-800)' }}>
                     <td style={{ padding: 8, whiteSpace: 'nowrap' }}>{when(r.createdAt)}</td>
                     <td>{r.customer ? <Link to={`/admin/customers/${r.customerId}`}>{r.customer.name}</Link> : '—'}</td>
-                    <td>{r.type.replace(/_/g, ' ').toLowerCase()}{r.manual ? ' · manual' : ''}</td>
+                    <td>{r.type.replace(/_/g, ' ').toLowerCase()}{r.manual ? ' · manual' : ''}{r.isTest ? <span style={{ marginLeft: 6, fontSize: 11, padding: '1px 6px', borderRadius: 6, background: 'var(--slate-700, #334155)' }}>test</span> : null}</td>
                     <td style={{ whiteSpace: 'nowrap', color: CREDIT.test(r.type) ? 'var(--green-500)' : undefined }}>{CREDIT.test(r.type) ? '+' : '−'}{naira(r.amount)}</td>
                     <td>{r.status.toLowerCase()}</td>
                     <td style={{ color: 'var(--slate-400)', maxWidth: 280 }}>{r.note || r.reference || ''}</td>

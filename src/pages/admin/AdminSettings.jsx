@@ -878,7 +878,7 @@ export default function AdminSettings() {
           <div className="field">
             <label htmlFor="bankFeePercent">Bank transfer funding fee (%) — Monnify account numbers</label>
             <input id="bankFeePercent" type="number" step="0.01" min="0" max="10" value={bankFeePercent} onChange={(e) => setBankFeePercent(e.target.value)} />
-            <small style={{ color: 'var(--slate-400)' }}>Kept from money customers send to their personal account number. 0 = free.</small>
+            <small style={{ color: 'var(--slate-400)' }}>Kept from money customers send to their personal account number. 0 = free. Monnify’s real charge is 1.5% + 7.5% VAT = <b>1.61%</b> (max ₦2,000 + VAT); customers see exactly the % you type here.{Number(bankFeePercent) > 0 && Math.abs(Number(bankFeePercent) - 1.61) >= 0.005 ? ` You have ${bankFeePercent}% — set 1.61 to match Monnify’s charge.` : ''}</small>
           </div>
           <div className="field">
             <label htmlFor="bankFeeCap">Maximum fee per transfer (₦)</label>

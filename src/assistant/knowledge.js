@@ -21,6 +21,13 @@ export const COMPANY = {
 
 export const TOPICS = [
   {
+    id: 'bvn-entered',
+    title: 'What does "BVN entered (not yet verified)" mean?',
+    keywords: ['bvn entered', 'not yet verified', 'bvn not verified', 'is my bvn verified', 'nin entered', 'bvn status'],
+    answer: 'It means you entered your BVN or NIN to get your personal account number. It is not a verification result and nothing is wrong. ZAPPI PAY does not store the number itself. If your details need changing, contact support.',
+    actions: [{ label: 'Help & support', to: '/help' }],
+  },
+  {
     id: 'account-paused',
     title: 'My account is paused / frozen',
     keywords: ['account paused', 'paused for a safety check', 'account frozen', 'account deactivated', 'cant login account', 'account blocked', 'account locked by support', 'my account was frozen', 'unfreeze'],

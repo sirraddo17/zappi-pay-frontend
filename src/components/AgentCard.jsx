@@ -22,7 +22,12 @@ export default function AgentCard() {
 
   if (!info || (!info.enabled && !info.isAgent)) return null;
   const rates = Object.entries(info.rates || {}).filter(([, v]) => Number(v) > 0);
-  const rateText = rates.map(([s, v]) => `${label(s)} ${v}%`).join(' · ');
+  // Agents get the normal discount everyone gets plus the agent extra (lib/pricing.js).
+  const base = info.base || {};
+  const pct = (n) => Math.round(Number(n || 0) * 100) / 100;
+  const rateText = rates.map(([s, v]) => (Number(base[s]) > 0
+    ? `${label(s)} ${pct(base[s])}% + ${pct(v)}% = ${pct(Number(base[s]) + Number(v))}% off`
+    : `${label(s)} ${pct(v)}% off`)).join(' · ');
 
   async function submit(e) {
     e.preventDefault();
@@ -46,7 +51,7 @@ export default function AgentCard() {
       </div>
       {info.isAgent ? (
         <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>
-          Agent prices are applied automatically when you buy{rateText ? `: extra ${rateText} off` : ''}.
+          Agent prices are applied automatically when you buy{rateText ? `: ${rateText}` : ''}.
         </p>
       ) : info.agentRequestedAt ? (
         <p style={{ color: 'var(--slate-400)', fontSize: 13, margin: 0 }}>
@@ -61,7 +66,7 @@ export default function AgentCard() {
             </p>
           )}
           <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: 0 }}>
-            Sell airtime, data and bills to your customers and buy at cheaper agent prices{rateText ? ` — ${rateText} extra off` : ''}.
+            Sell airtime, data and bills to your customers and buy at cheaper agent prices{rateText ? ` — ${rateText} (normal discount + agent extra)` : ''}.
           </p>
           {!open ? (
             <button type="button" className="btn btn-secondary" onClick={() => setOpen(true)}>Apply to be an agent</button>

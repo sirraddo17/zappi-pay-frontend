@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { naira } from '../../lib/money';
 import { useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import ShowMore, { FIRST_COUNT } from '../../components/ShowMore';
@@ -51,7 +52,7 @@ function UsernameEditor({ customer, onSaved }) {
 }
 
 function fmtMoney(n) {
-  return `₦${Number(n).toLocaleString()}`;
+  return naira(n);
 }
 
 function fmtDate(d) {
@@ -213,7 +214,7 @@ export default function AdminCustomerDetail() {
         </div>
         <p style={{ marginTop: 4 }}>
           {Array.isArray(customer.bankAccounts) && customer.bankAccounts.length > 0
-            ? `Funding account${customer.bankAccounts.length > 1 ? 's' : ''}: ${customer.bankAccounts.map((a) => `${a.bankName} ${a.accountNumber}`).join(', ')} · verified with ${customer.kycType || 'ID'}`
+            ? `Funding account${customer.bankAccounts.length > 1 ? 's' : ''}: ${customer.bankAccounts.map((a) => `${a.bankName} ${a.accountNumber}`).join(', ')} · ${customer.kycType || 'ID'} entered (not yet verified)`
             : 'No funding account number yet'}
         </p>
         {isOwner && !customer.deletedAt && <EmailAlertTest customerId={customer.id} />}
@@ -259,9 +260,19 @@ export default function AdminCustomerDetail() {
         </div>
       )}
 
-      <div className="card stat-card" style={{ margin: '0 0 16px', maxWidth: 260 }}>
-        <div className="label">Wallet Balance</div>
-        <div className="value">{fmtMoney(customer.walletBalance)}</div>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', margin: '0 0 16px' }}>
+        <div className="card stat-card" style={{ margin: 0, flex: '1 1 160px', maxWidth: 260 }}>
+          <div className="label">Wallet Balance</div>
+          <div className="value">{fmtMoney(customer.walletBalance)}</div>
+        </div>
+        <div className="card stat-card" style={{ margin: 0, flex: '1 1 160px', maxWidth: 260 }}>
+          <div className="label">Points</div>
+          <div className="value">{Number(customer.loyaltyPoints || 0).toLocaleString('en-NG')}</div>
+        </div>
+        <div className="card stat-card" style={{ margin: 0, flex: '1 1 160px', maxWidth: 260 }}>
+          <div className="label">Cashback to spend</div>
+          <div className="value">{fmtMoney(customer.cashbackBalance || 0)}</div>
+        </div>
       </div>
 
       {isOwner && (

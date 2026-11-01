@@ -79,7 +79,7 @@ export default function Bulk() {
     setPlans([]);
     setPlan('');
     getVtpassServices(service === 'AIRTIME' ? 'airtime' : 'data')
-      .then((d) => setProviders(Array.isArray(d.content) ? d.content : []))
+      .then((d) => setProviders(onePerNetwork(Array.isArray(d.content) ? d.content : [])))
       .catch((e) => setError(e.message));
   }, [service]);
 
@@ -273,4 +273,17 @@ export default function Bulk() {
       <BottomNav />
     </div>
   );
+}
+
+// One chip per Nigerian network (VTpass lists e.g. glo-data and glo-sme-data);
+// the regular plan list wins. International / non-network entries are left out of bulk.
+function onePerNetwork(list) {
+  const pick = {};
+  for (const p of list) {
+    const net = networkOf(p.serviceID);
+    if (!net) continue;
+    const sme = /sme/i.test(p.serviceID);
+    if (!pick[net] || (pick[net].sme && !sme)) pick[net] = { p, sme };
+  }
+  return Object.values(pick).map((x) => x.p);
 }

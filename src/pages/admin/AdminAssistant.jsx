@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { adminAiChat, getAdminAiStatus, getAiBriefing } from '../../api';
+import { adminAiChat, getAdminAiStatus, getAiBriefing, isDemoMode } from '../../api';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import ImageAttach from '../../components/ImageAttach';
 import AiActionCard from '../../components/admin/AiActionCard';
@@ -161,7 +161,7 @@ export default function AdminAssistant() {
         )}
       </div>
 
-      {off && (
+      {off && isOwner && !isDemoMode() && (
         <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--orange, #f97316)' }}>
           <strong>The AI assistant is off.</strong>
           <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: '4px 0 0' }}>

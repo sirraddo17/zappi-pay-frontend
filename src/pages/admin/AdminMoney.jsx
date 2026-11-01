@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getReconciliation, downloadExport, getFundsGuard, setFundsGuard } from '../../api';
+import { getReconciliation, downloadExport, getFundsGuard, setFundsGuard, isDemoMode } from '../../api';
+import { useAppInfo } from '../../components/ServiceNotices';
 
 const naira = (n) => (n === null || n === undefined ? '—' : `₦${Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
 const LAGOS = 60 * 60 * 1000;
@@ -31,13 +32,16 @@ const EXPORTS = [
 function FundsGuardCard() {
   const [g, setG] = useState(null);
   const [err, setErr] = useState('');
+  const demo = isDemoMode();
+  const appInfo = useAppInfo();
+  const sendToBankOn = Boolean(appInfo?.bankTransfer);
   const load = () => getFundsGuard().then(setG).catch((e) => setErr(e.message));
   useEffect(() => { load(); }, []);
   if (err) return <p className="error-text" style={{ margin: '0 0 12px' }}>{err}</p>;
   if (!g) return null;
   const ok = g.status === 'OK';
   return (
-    <div className="card" style={{ margin: '0 0 16px', border: `1px solid ${!g.enabled ? 'var(--slate-700, #334155)' : ok ? 'var(--green-500)' : 'var(--red-500)'}` }}>
+    <div className="card" style={{ margin: '0 0 16px', border: `1px solid ${!g.enabled || demo ? 'var(--slate-700, #334155)' : ok ? 'var(--green-500)' : 'var(--red-500)'}` }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <h2 style={{ margin: 0, fontSize: 16 }}>🛡️ Customer-funds guard</h2>
         <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 14 }}>
@@ -49,11 +53,16 @@ function FundsGuardCard() {
       {!g.enabled ? <div style={{ fontSize: 14, color: 'var(--gold)' }}>⚠️ The guard is OFF — switch it back on as soon as possible.</div> : (
         <>
           <Row label="Customers are owed" value={naira(g.owed)} hint="Wallets, cashback, savings and transfers on their way" />
-          <Row label="Monnify wallet" value={g.monnify === null ? '—' : naira(g.monnify)} hint="VTpass isn’t counted — it’s funded from your own money" />
-          <Row label="Customer money covered by Monnify" value={ok ? '✅ Yes' : g.status === 'SHORT' ? `❌ Short by ${naira(g.shortBy)}` : '⚠️ Couldn’t read Monnify'} />
-          <Row label="Bank transfers" value={g.transfersPaused ? '⏸️ Paused to protect customers' : '▶️ Running'} />
-          <Row label="Free in Monnify wallet" value={g.monnifyFree === null ? '—' : naira(g.monnifyFree)} hint="Monnify balance minus transfers on their way out" />
-          <Row label="Yours to move out of Monnify" value={<b style={{ color: 'var(--green-500)' }}>{naira(g.safeToWithdraw)}</b>} hint="To your bank or to top up VTpass — never move more than this" />
+          {/* Demo / screenshot mode: sandbox balances and the "Short by" line are left out (they are test money, not real). */}
+          {!demo && <Row label="Monnify wallet" value={g.monnify === null ? '—' : naira(g.monnify)} hint="VTpass isn’t counted — it’s funded from your own money" />}
+          {!demo && <Row label="Customer money covered by Monnify" value={ok ? '✅ Yes' : g.status === 'SHORT' ? `❌ Short by ${naira(g.shortBy)}` : '⚠️ Couldn’t read Monnify'} />}
+          <Row
+            label="Bank transfers (guard)"
+            value={g.transfersPaused ? '⏸️ Paused to protect customers' : '▶️ Not paused'}
+            hint={g.transfersPaused ? 'Payouts are held until customer money is covered again.' : sendToBankOn ? 'The guard is not blocking payouts.' : 'The guard is not blocking anything. Send to Bank is off for customers, so no payouts go out anyway.'}
+          />
+          {!demo && <Row label="Free in Monnify wallet" value={g.monnifyFree === null ? '—' : naira(g.monnifyFree)} hint="Monnify balance minus transfers on their way out" />}
+          {!demo && <Row label="Yours to move out of Monnify" value={<b style={{ color: 'var(--green-500)' }}>{naira(g.safeToWithdraw)}</b>} hint="To your bank or to top up VTpass — never move more than this" />}
           {g.errors?.length > 0 && <div style={{ fontSize: 12, color: 'var(--gold)', marginTop: 6 }}>{g.errors.join(' · ')}</div>}
         </>
       )}
@@ -92,7 +101,11 @@ export default function AdminMoney() {
   }
 
   const st = data?.status;
-  const banner = st === 'OK'
+  const demo = isDemoMode();
+  const sandbox = (k) => Boolean(data?.have?.modes && data.have.modes[k] !== 'live');
+  const banner = demo && st !== 'OK'
+    ? { bg: 'rgba(255,184,48,0.08)', border: 'var(--slate-700, #334155)', text: 'Test mode: payment partners are on sandbox (test money), so their balances are not shown here.' }
+    : st === 'OK'
     ? { bg: 'rgba(34,197,94,0.12)', border: 'var(--green-500)', text: `✅ Covered. You have ${naira(data.difference)} more than you owe customers — that's your earnings and float.` }
     : st === 'SHORT'
       ? { bg: 'rgba(239,68,68,0.12)', border: 'var(--red-500)', text: `⚠️ Short by ${naira(-data.difference)}. Your VTpass + Monnify money is less than what customers have in their wallets. Top up, or check for money held elsewhere (add it below).` }
@@ -128,11 +141,11 @@ export default function AdminMoney() {
           <div className="card" style={{ margin: '0 0 16px' }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>Money you hold</h2>
             <Row label="VTpass wallet" value={data.have.vtpass === null ? 'Unavailable' : naira(data.have.vtpass)} hint={`${data.have.vtpassError || 'Pays for every purchase'}{data.have.modes && data.have.modes.vtpass !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.vtpass === null ? 'var(--gold)' : undefined} />
-            <Row label="Monnify wallet" value={data.have.monnify === null ? 'Unavailable' : naira(data.have.monnify)} hint={`${data.have.monnifyError || 'Receives funding, pays out bank transfers'}{data.have.modes && data.have.modes.monnify !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.monnify === null ? 'var(--gold)' : undefined} />
-            {(data.have.squad !== undefined && (data.have.squad !== null || data.have.squadError)) && (
+            {!(demo && sandbox('monnify')) && <Row label="Monnify wallet" value={data.have.monnify === null ? 'Unavailable' : naira(data.have.monnify)} hint={`${data.have.monnifyError || 'Receives funding, pays out bank transfers'}{data.have.modes && data.have.modes.monnify !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.monnify === null ? 'var(--gold)' : undefined} />}
+            {!(demo && sandbox('squad')) && (data.have.squad !== undefined && (data.have.squad !== null || data.have.squadError)) && (
               <Row label="Squad wallet" value={data.have.squad === null ? 'Unavailable' : naira(data.have.squad)} hint={`${data.have.squadError || 'GTBank account-number payments; pays out bank transfers when Squad is chosen'}{data.have.modes && data.have.modes.squad !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.squad === null ? 'var(--gold)' : undefined} />
             )}
-            {(data.have.nomba !== undefined && (data.have.nomba !== null || data.have.nombaError)) && (
+            {!(demo && sandbox('nomba')) && (data.have.nomba !== undefined && (data.have.nomba !== null || data.have.nombaError)) && (
               <Row label="Nomba wallet" value={data.have.nomba === null ? 'Unavailable' : naira(data.have.nomba)} hint={`${data.have.nombaError || 'Nombank account-number payments; pays out bank transfers when Nomba is chosen'}{data.have.modes && data.have.modes.nomba !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.nomba === null ? 'var(--gold)' : undefined} />
             )}
             <Row label="Other money (you typed)" value={naira(data.have.other)} hint="e.g. business bank account where manual funding lands" />
@@ -146,14 +159,14 @@ export default function AdminMoney() {
             </div>
           </div>
 
-          <div className="card" style={{ margin: '0 0 16px' }}>
+          {!demo && <div className="card" style={{ margin: '0 0 16px' }}>
             <Row label="Difference (held − owed)" value={naira(data.difference)} strong color={data.difference >= 0 ? 'var(--green-500)' : 'var(--red-500)'} />
             <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 8 }}>
               Also good to know: {data.info.pendingOrderCount} purchase(s) still pending with VTpass ({naira(data.info.pendingOrders)}), {data.info.pendingFundingCount} manual funding request(s) waiting ({naira(data.info.pendingFunding)}).
               {data.info.negativeWallets > 0 && <b style={{ color: 'var(--red-500)' }}> {data.info.negativeWallets} wallet(s) are below ₦0 — look into these.</b>}
               {' '}Monnify can take up to a day to settle new funding into your wallet, so a small gap right after busy periods is normal.
             </div>
-          </div>
+          </div>}
         </div>
       )}
       {!data && !err && <p className="empty-state">Checking balances…</p>}

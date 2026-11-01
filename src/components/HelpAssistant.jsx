@@ -46,6 +46,9 @@ export default function HelpAssistant() {
   const { customer } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  // The bubble can be dragged out of the way; where it was left is remembered on this phone.
+  const [pos, setPos] = useState(() => { try { return JSON.parse(localStorage.getItem('zp_help_pos') || 'null'); } catch { return null; } });
+  const drag = useRef(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [misses, setMisses] = useState(0);
@@ -226,24 +229,52 @@ export default function HelpAssistant() {
 
   const bubbleStyle = {
     position: 'fixed',
-    right: 'max(16px, calc(50% - 240px + 16px))',
-    bottom: 84,
-    width: 52,
-    height: 52,
+    right: pos ? pos.right : 'max(12px, calc(50% - 240px + 12px))',
+    bottom: pos ? pos.bottom : 84,
+    width: 40,
+    height: 40,
+    touchAction: 'none',
+    opacity: 0.9,
     borderRadius: '50%',
     background: 'var(--purple)',
     color: '#fff',
     border: '2px solid var(--gold)',
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 700,
-    cursor: 'pointer',
+    cursor: 'grab',
     boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
     zIndex: 50,
   };
 
   if (!open) {
     return (
-      <button type="button" aria-label="Open help" style={bubbleStyle} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        aria-label="Open help (drag to move)"
+        title="Help — drag to move"
+        style={bubbleStyle}
+        onPointerDown={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          drag.current = { x: e.clientX, y: e.clientY, right: window.innerWidth - r.right, bottom: window.innerHeight - r.bottom, moved: false };
+          e.currentTarget.setPointerCapture?.(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          const d = drag.current;
+          if (!d) return;
+          const dx = e.clientX - d.x; const dy = e.clientY - d.y;
+          if (!d.moved && Math.hypot(dx, dy) < 6) return;
+          d.moved = true;
+          const clamp = (v, max) => Math.max(4, Math.min(max, v));
+          setPos({ right: clamp(d.right - dx, window.innerWidth - 44), bottom: clamp(d.bottom - dy, window.innerHeight - 44) });
+        }}
+        onPointerUp={() => {
+          const d = drag.current; drag.current = null;
+          if (d?.moved) { try { localStorage.setItem('zp_help_pos', JSON.stringify(pos)); } catch { /* private mode */ } return; }
+          setOpen(true);
+        }}
+        onPointerCancel={() => { drag.current = null; }}
+        onClick={(e) => { if (e.detail === 0) setOpen(true); }}
+      >
         ?
       </button>
     );

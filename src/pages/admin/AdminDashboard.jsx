@@ -3,7 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import ProfitPanel from '../../components/ProfitPanel';
 import AdminAlertsToggle from '../../components/AdminAlertsToggle';
 import { Link } from 'react-router-dom';
-import { getCustomerList, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance, getOverviewTotals, updateSettings } from '../../api';
+import { getCustomerList, getPendingFunding, getAdminOrders, getMonnifyOverview, getDeletionRequests, getAgentRequests, getVtpassBalance, getOverviewTotals, updateSettings, isDemoMode } from '../../api';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
             ['Total Orders', stats.orders, '/admin/orders'],
             ['Successful Orders', stats.successfulOrders, '/admin/orders?status=SUCCESS'],
             ['Failed Orders', stats.failedOrders, '/admin/orders?status=FAILED'],
-            ['Total Revenue', `₦${stats.totalRevenue.toLocaleString()}`, '/admin/money'],
+            ['Sales', `₦${stats.totalRevenue.toLocaleString()}`, '/admin/money'],
           ].map(([label, value, to, edge]) => (
             <Link key={label} to={to} className="card stat-card" style={{ margin: 0, textDecoration: 'none', color: 'inherit', border: edge ? `1px solid ${edge}` : undefined, gridColumn: String(value).startsWith('₦') ? 'span 2' : undefined }}>
               <div className="label">{label}</div>
@@ -190,7 +190,8 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <ProfitPanel />
+      {/* Profit is internal: left out of demo / screenshot mode. */}
+      {!isDemoMode() && <ProfitPanel />}
 
     </AdminLayout>
   );

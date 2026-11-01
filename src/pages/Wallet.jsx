@@ -1,4 +1,5 @@
 import { SkeletonRows } from '../components/Skeleton';
+import { naira } from '../lib/money';
 import { useEffect, useState } from 'react';
 import { useLang } from '../lib/i18n';
 import TestModeBanner from '../components/TestModeBanner';
@@ -13,7 +14,7 @@ import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
 import { useAppInfo } from '../components/ServiceNotices';
 
 function fmtMoney(n) {
-  return `₦${Number(n).toLocaleString()}`;
+  return naira(n);
 }
 
 function CopyButton({ text }) {
@@ -118,7 +119,7 @@ function LimitNotice() {
   return (
     <div className="card" role="note" style={{ border: '1px solid var(--gold)', fontSize: 13 }}>
       <b>Daily limit: {n(l.limit)}</b> for unverified accounts · {n(l.remaining)} left today.
-      <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>Purchases and transfers count towards it; refunds give the room back. Verify with your BVN or NIN (below) to raise it{l.verifiedLimit ? ` to ${n(l.verifiedLimit)} a day` : ''}.</div>
+      <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 4 }}>Purchases count towards it; refunds give the room back. Verify with your BVN or NIN (below) to raise it{l.verifiedLimit ? ` to ${n(l.verifiedLimit)} a day` : ''}.</div>
     </div>
   );
 }

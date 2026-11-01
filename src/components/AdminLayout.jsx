@@ -4,10 +4,10 @@ import { Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import InstallAppButton from './InstallAppButton';
 import AdminAlertsToggle from './AdminAlertsToggle';
-import { getMonnifyOverview, isDemoMode, setDemoMode, getAppInfo, getAdminFeatures } from '../api';
+import { getPartnerModes, isDemoMode, setDemoMode, getAppInfo, getAdminFeatures } from '../api';
 
 // Remembered while the admin app is open so every page doesn't re-ask.
-let monnifyModeCache = null;
+let partnerCache = null;
 
 const TABS = [
   { to: '/admin', label: 'Overview', end: true },
@@ -97,17 +97,15 @@ export default function AdminLayout({ children }) {
   const allowed = isOwner || SUPPORT_TABS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const navigate = useNavigate();
   const mainRef = useRef(null);
-  const [monnifyMode, setMonnifyMode] = useState(monnifyModeCache);
-
+  // Each payment partner and whether it is on sandbox (test money) or live.
+  const [partners, setPartners] = useState(partnerCache);
   useEffect(() => {
-    if (monnifyModeCache !== null || !isOwner) return;
-    getMonnifyOverview(true)
-      .then((o) => {
-        monnifyModeCache = o.mode || '';
-        setMonnifyMode(monnifyModeCache);
-      })
+    if (partnerCache || !isOwner) return;
+    getPartnerModes()
+      .then((d) => { partnerCache = d; setPartners(d); })
       .catch(() => {});
   }, []);
+  const anySandbox = Boolean(partners?.partners?.some((p) => p.on && p.mode !== 'live'));
 
   // On phones the admin tables are shown as stacked cards (see
   // index.css); each cell needs its column name as data-label for
@@ -174,10 +172,18 @@ export default function AdminLayout({ children }) {
             <strong>🎭 Demo mode:</strong> names, phone numbers, account numbers, keys and test-money (SANDBOX) balances are hidden. Turn it off in the menu.
           </div>
         )}
-        {isOwner && monnifyMode === 'sandbox' && (
+        {isOwner && anySandbox && (
           <div style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid var(--orange, #f97316)', color: 'var(--orange, #f97316)', borderRadius: 10, padding: '8px 12px', marginBottom: 16, fontSize: 13 }}>
-            <strong>Test mode:</strong> Monnify is on Sandbox. Bank-transfer funding{feat?.bankTransfer ? ' and Send to Bank use' : ' uses'} test money — nothing real moves.{' '}
-            <Link to="/admin/settings" style={{ color: 'inherit', textDecoration: 'underline' }}>Settings → Monnify</Link>
+            <strong>Partner modes:</strong>{' '}
+            {partners.partners.map((p, i) => (
+              <span key={p.key}>
+                {i > 0 ? ' · ' : ''}
+                {p.name} — <b>{p.mode === 'live' ? 'LIVE' : 'SANDBOX (test money)'}</b>
+                {!p.on ? ' (off for customers)' : p.what ? ` (${p.what})` : ''}
+              </span>
+            ))}
+            {' · '}Send to Bank — <b>{partners.sendToBank ? 'ON' : 'OFF'}</b>.{' '}
+            <Link to="/admin/go-live" style={{ color: 'inherit', textDecoration: 'underline' }}>Go live</Link>
           </div>
         )}
         {offPage ? (

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminOrders, getOrderTimeline, markOrdersTest, getVtpassCodes, recheckAdminOrder, lookupAdminOrder, settleAdminOrder, reportOrderToVtpass, createEscalation } from '../../api';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { useAppInfo } from '../../components/ServiceNotices';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { useShowMore } from '../../components/ShowMore';
 import PlanFixesList, { PlanFixForm } from '../../components/admin/PlanFixes';
@@ -115,9 +116,9 @@ const SERVICE_FILTERS = [
   { value: 'CABLE', label: 'Cable TV' },
   { value: 'EDUCATION', label: 'Education' },
   { value: 'INTERNET', label: 'Internet' },
-  { value: 'BETTING', label: 'Bet Funding' },
-  { value: 'INTERNATIONAL', label: 'International airtime' },
-  { value: 'INSURANCE', label: 'Car insurance' },
+  { value: 'BETTING', label: 'Bet Funding', on: (i) => i.features?.betFunding },
+  { value: 'INTERNATIONAL', label: 'International airtime', on: (i) => i.intlAirtime },
+  { value: 'INSURANCE', label: 'Car insurance', on: (i) => i.features?.carInsurance },
 ];
 
 const WHO = { customer: ['Customer', 'var(--slate-300)'], account: ['Your VTpass account', 'var(--red-500)'], provider: ['VTpass / biller', 'var(--gold)'], app: ['App request', 'var(--orange, #f97316)'], ok: ['Not a failure', 'var(--green-500)'] };
@@ -148,6 +149,7 @@ function VtpassCodes() {
 
 export default function AdminOrders() {
   const { isOwner } = useAdminAuth();
+  const appInfo = useAppInfo();
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('ALL');
@@ -250,7 +252,7 @@ export default function AdminOrders() {
         <button type="button" className="btn-secondary btn" style={{ width: 'auto', padding: '4px 12px', fontSize: 12 }} disabled={!testBefore} onClick={markTest}>as test</button>
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-        {SERVICE_FILTERS.map((f) => (
+        {SERVICE_FILTERS.filter((f) => !f.on || f.value === filter || (appInfo && f.on(appInfo))).map((f) => (
           <button
             key={f.value}
             type="button"

@@ -1,4 +1,5 @@
 import { SkeletonRows } from '../components/Skeleton';
+import { naira, isEarnedCashback } from '../lib/money';
 import { useEffect, useRef, useState } from 'react';
 import { useLang } from '../lib/i18n';
 import TestModeBanner from '../components/TestModeBanner';
@@ -145,7 +146,7 @@ export default function Dashboard() {
     cached(k('balance'), getWalletBalance, (data) => { setBalance(data.walletBalance); setCashback(Number(data.cashbackBalance || 0)); }).catch(() => {});
     getCashback().then((d) => {
       const m = new Date(); const from = new Date(m.getFullYear(), m.getMonth(), 1);
-      setMonthCashback(Math.round((d.entries || []).filter((e) => e.amount > 0 && new Date(e.createdAt) >= from).reduce((t, e) => t + e.amount, 0) * 100) / 100);
+      setMonthCashback(Math.round((d.entries || []).filter((e) => isEarnedCashback(e) && new Date(e.createdAt) >= from).reduce((t, e) => t + e.amount, 0) * 100) / 100);
     }).catch(() => {});
     cached(k('tx'), getWalletTransactions, (data) => setTransactions((data.transactions || []).slice(0, 5)))
       .catch(() => setTransactions((t) => t || []));
@@ -196,7 +197,7 @@ export default function Dashboard() {
           </div>
           <div className="value">{hide ? '₦ ••••••' : <CountUp value={Number(balance)} />}</div>
           {(cashback > 0 || monthCashback > 0) && !hide && (
-            <Link to="/wallet" className="cb-chip">🎁 {cashback > 0 ? `₦${Number(cashback).toLocaleString()} cashback to spend` : ''}{cashback > 0 && monthCashback > 0 ? ' · ' : ''}{monthCashback > 0 ? `₦${Number(monthCashback).toLocaleString()} earned this month` : ''}</Link>
+            <Link to="/wallet" className="cb-chip">🎁 {cashback > 0 ? `${naira(cashback)} cashback to spend` : ''}{cashback > 0 && monthCashback > 0 ? ' · ' : ''}{monthCashback > 0 ? `${naira(monthCashback)} earned this month` : ''}</Link>
           )}
           <div className="hero-actions">
             <Link to="/wallet" className="hero-action primary"><FundIcon size={18} color="#062A2E" /><span>Add money</span></Link>
@@ -427,5 +428,5 @@ function CountUp({ value }) {
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [value]);
-  return <>₦{Number(shown).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
+  return <>{naira(shown)}</>;
 }

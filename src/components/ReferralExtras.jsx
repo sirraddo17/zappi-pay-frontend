@@ -41,7 +41,7 @@ export function MilestoneLadder({ milestones, rewarded, bonus }) {
     <div className="card">
       <h2 style={{ marginTop: 0, fontSize: 16 }}>🏆 Milestone bonuses</h2>
       <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--slate-400)' }}>
-        {next ? <>Get <b style={{ color: 'var(--gold)' }}>{naira(next.bonus)}</b> {next.base ? 'for your first friend' : 'extra'} when {next.count} friend{next.count > 1 ? 's' : ''} reach the target — you're at {rewarded}.</> : <>You've unlocked every milestone 🎉 Keep inviting — every friend still earns you {naira(bonus)}.</>}
+        {next ? <>Get <b style={{ color: 'var(--gold)' }}>{naira(next.bonus)}</b> {next.base ? 'for your first friend' : 'extra'} when {next.count === 1 ? '1 friend reaches' : `${next.count} friends reach`} the target — you're at {rewarded}.</> : <>You've unlocked every milestone 🎉 Keep inviting — every friend still earns you {naira(bonus)}.</>}
       </p>
       <div style={{ position: 'relative', height: 8, borderRadius: 99, background: 'var(--slate-700, #334155)', margin: '18px 6px 34px' }}>
         <div style={{ position: 'absolute', inset: 0, width: `${pct}%`, borderRadius: 99, background: 'var(--gold, #ffb830)' }} />

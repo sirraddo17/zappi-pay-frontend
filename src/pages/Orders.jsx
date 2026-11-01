@@ -1,4 +1,5 @@
 import { SkeletonRows } from '../components/Skeleton';
+import { naira } from '../lib/money';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getOrders, getEpinBatches, getWalletTransactions } from '../api';
@@ -9,7 +10,7 @@ import BottomNav from '../components/BottomNav';
 import ShowMore, { FIRST_COUNT } from '../components/ShowMore';
 
 function fmtMoney(n) {
-  return `₦${Number(n).toLocaleString()}`;
+  return naira(n);
 }
 
 function fmtDate(d) {

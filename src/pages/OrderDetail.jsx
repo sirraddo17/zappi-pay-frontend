@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { naira } from '../lib/money';
 import { providerName } from '../lib/providerName';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getOrder, submitSupportTicket } from '../api';
@@ -22,7 +23,7 @@ const STATUS_COLORS = {
 };
 
 function fmtMoney(n) {
-  return `₦${Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+  return naira(n);
 }
 
 function fmtDate(d) {
@@ -44,6 +45,7 @@ export default function OrderDetail() {
   const { id } = useParams();
   const [search] = useSearchParams();
   const [order, setOrder] = useState(null);
+  const [refund, setRefund] = useState(null);
   const [error, setError] = useState('');
 
   const [reportOpen, setReportOpen] = useState(false);
@@ -58,7 +60,7 @@ export default function OrderDetail() {
 
   function load() {
     getOrder(id)
-      .then((data) => { setOrder(data.order); setError(''); })
+      .then((data) => { setOrder(data.order); setRefund(data.refund || null); setError(''); })
       .catch((err) => { if (!order) setError(err.message || 'Could not load this receipt.'); });
   }
 
@@ -81,6 +83,8 @@ export default function OrderDetail() {
     return { price: (charged + disc + promo) / 100, discount: disc / 100, promo: promo / 100, cashback: cb / 100, paid: (charged - cb) / 100 };
   })() : null;
 
+  const failed = order && ['FAILED', 'REFUNDED'].includes(order.status);
+
   function receiptData() {
     const rows = [
       ['Service', order.service],
@@ -93,6 +97,8 @@ export default function OrderDetail() {
     if (money.promo > 0) rows.push([`Promo code${order.promoCode ? ` ${order.promoCode}` : ''}`, `−${fmtMoney(money.promo)}`]);
     if (money.cashback > 0) rows.push(['Cashback used', `−${fmtMoney(money.cashback)}`]);
     rows.push(['Amount paid', fmtMoney(money.paid)]);
+    if (failed) rows.push(['Refunded to wallet', refund ? fmtMoney(refund.wallet) : 'Being refunded']);
+    if (failed && refund?.cashback > 0) rows.push(['Cashback returned', fmtMoney(refund.cashback)]);
     rows.push(['Date', fmtDate(order.createdAt)], ['Reference', order.vtpassRequestId || order.id]);
     return {
       title: `${order.service.charAt(0)}${order.service.slice(1).toLowerCase()} receipt`,
@@ -255,6 +261,18 @@ export default function OrderDetail() {
             <span>Amount paid</span>
             <span>{fmtMoney(money.paid)}</span>
           </div>
+          {failed && (
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--slate-400)' }}>Refunded to wallet</span>
+              <span style={{ color: 'var(--green-500)' }}>{refund ? fmtMoney(refund.wallet) : 'Being refunded'}</span>
+            </div>
+          )}
+          {failed && refund?.cashback > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--slate-400)' }}>Cashback returned</span>
+              <span style={{ color: 'var(--green-500)' }}>{fmtMoney(refund.cashback)}</span>
+            </div>
+          )}
           {order.recipientName && (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--slate-400)' }}>Name</span>
