@@ -48,7 +48,7 @@ export default function AdminDashboard() {
     getMonnifyOverview().then(setMonnify).catch(() => setMonnify(null));
     getDeletionRequests().then((d) => setDeletions(d.customers)).catch(() => {});
     getAgentRequests().then((d) => setAgentReqs(d.customers)).catch(() => {});
-    getVtpassBalance().then(setVtpass).catch(() => {});
+    getVtpassBalance().then((v) => { setVtpass(v); if (v?.alertBelow !== undefined) setAlertBelow(String(v.alertBelow)); }).catch(() => {});
   }
 
   useEffect(loadAll, []);

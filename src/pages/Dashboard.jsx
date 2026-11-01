@@ -299,7 +299,7 @@ export default function Dashboard() {
           <span style={{ fontSize: 22 }}>🏷️</span>
           <span style={{ flex: 1 }}>
             <b style={{ display: 'block', fontSize: 14 }}>Choose your username</b>
-            <span style={{ fontSize: 13, color: 'var(--slate-400)' }}>Get your referral code and let friends send you money with it.</span>
+            <span style={{ fontSize: 13, color: 'var(--slate-400)' }}>{feat.sendMoney ? 'Get your referral code and let friends send you money with it.' : 'Get your referral code to invite friends.'}</span>
           </span>
           <span style={{ color: 'var(--slate-400)' }}>›</span>
         </Link>

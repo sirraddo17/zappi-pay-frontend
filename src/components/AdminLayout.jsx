@@ -55,6 +55,8 @@ const GATED = {
   '/admin/bank-transfers': { what: 'Send to Bank', where: 'Settings → Wallet funding & payment partners → Monnify', on: (f) => f.bankTransfer },
   '/admin/disputes': { what: 'Send money and Send to Bank', where: '🧩 New features / Settings', on: (f) => f.mode('sendMoney') || f.bankTransfer },
   '/admin/pending-funding': { what: 'Manual funding (pay into our business account)', where: 'Settings → 🏦 Manual funding accounts', on: (f) => f.manualFunding },
+  '/admin/circles': { what: 'Ajo Circle', where: '🧩 New features', on: (f) => f.mode('circles') },
+  '/admin/extra-services': { what: 'Bulk SMS, Event tickets, More bills and Pay straight to their bank', where: '🧩 New features', on: (f) => ['bulkSms', 'tickets', 'moreBills', 'directPay'].some((k) => f.mode(k)) },
   '/admin/unmatched-payments': { what: 'Bank-transfer wallet funding', where: 'Settings → Wallet funding & payment partners', on: (f) => f.bankFunding },
 };
 let gateCache = null;
@@ -174,7 +176,7 @@ export default function AdminLayout({ children }) {
         )}
         {isOwner && monnifyMode === 'sandbox' && (
           <div style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid var(--orange, #f97316)', color: 'var(--orange, #f97316)', borderRadius: 10, padding: '8px 12px', marginBottom: 16, fontSize: 13 }}>
-            <strong>Test mode:</strong> Monnify is on Sandbox. Bank-transfer funding and Send to Bank use test money — nothing real moves.{' '}
+            <strong>Test mode:</strong> Monnify is on Sandbox. Bank-transfer funding{feat?.bankTransfer ? ' and Send to Bank use' : ' uses'} test money — nothing real moves.{' '}
             <Link to="/admin/settings" style={{ color: 'inherit', textDecoration: 'underline' }}>Settings → Monnify</Link>
           </div>
         )}
