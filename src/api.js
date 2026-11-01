@@ -111,7 +111,15 @@ export function setDemoMode(on) {
 }
 
 export function adminRequest(path, options = {}) {
-  const token = localStorage.getItem('zappipay_admin_token');
+  let token = localStorage.getItem('zappipay_admin_token');
+  // A saved login that isn't plain text (e.g. "••••••" saved while an old
+  // demo mode masked it) can't be sent at all — clear it and log in again.
+  if (token && /[^\x20-\x7e]/.test(token)) {
+    localStorage.removeItem('zappipay_admin_token');
+    localStorage.removeItem('zappipay_admin');
+    token = null;
+    if (!window.location.pathname.startsWith('/admin/login')) window.location.assign('/admin/login?expired=1');
+  }
   return trackedFetch(`${API_URL}${path}`, {
     ...options,
     headers: {
