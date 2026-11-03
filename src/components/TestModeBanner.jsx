@@ -3,7 +3,7 @@ import { useAppInfo } from './ServiceNotices';
 // Shown while any partner customers use is still on test (sandbox) keys.
 // The server builds the text from each partner's real state, so it never
 // says a live service is not real (e.g. "Airtime, data and bills are
-// live. Wallet funding … uses test money"). Disappears by itself when
+// live. Wallet funding is in testing"). Disappears by itself when
 // everything is live.
 export default function TestModeBanner({ style }) {
   const info = useAppInfo();
@@ -27,7 +27,7 @@ export default function TestModeBanner({ style }) {
     >
       <span aria-hidden="true">🧪</span>
       <span>
-        <b>Test mode.</b> {info.testModeText || 'Some parts of ZAPPI PAY still use test money.'}
+        <b>Test mode.</b> {info.testModeText || 'Some parts of ZAPPI PAY are still being tested.'}
       </span>
     </div>
   );

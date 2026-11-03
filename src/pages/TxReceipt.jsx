@@ -26,7 +26,7 @@ export default function TxReceipt() {
   const status = t.status === 'APPROVED' ? 'SUCCESS' : t.status;
   const rows = [
     ['Type', typeLabel(t.type)],
-    ['Details', txLabel(t)],
+    ['Details', f?.source || txLabel(t)],
     f && f.sent > 0 && ['Sent', naira(f.sent)],
     f && ['Bank fee', f.fee > 0 ? naira(f.fee) : 'No fee'],
     f && ['Credited', naira(f.credited)],

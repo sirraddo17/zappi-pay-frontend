@@ -132,7 +132,7 @@ const DOCS = {
         <p><strong>5. Wrong details.</strong> Please check phone, meter and smartcard numbers before you pay. A purchase delivered to a wrong number you entered can’t be reversed by us, but we will help you contact the provider.</p>
         <p><strong>6. How to report a problem.</strong> Open the purchase in History and tap <em>Report Issue</em>, or message support from Profile. Include what went wrong; we reply in the app. You can also email support@zappipay.com.ng.</p>
         <p><strong>7. Wallet balance.</strong> Money in your wallet is yours. Cashback and rewards are not cash: they can only be used to pay for part of a purchase and can’t be withdrawn.</p>
-        <p><strong>8. Test mode.</strong> While the app shows a test-mode notice, some services use test money; nothing real is charged for those.</p>
+        <p><strong>8. Test mode.</strong> While the app shows a test-mode notice, some services are still being tested and may be limited (for example, small wallet funding amounts only). Money that reaches your wallet is real and can be spent or refunded as described above.</p>
       </>
     ),
   },
