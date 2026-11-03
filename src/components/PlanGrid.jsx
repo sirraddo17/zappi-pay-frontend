@@ -150,6 +150,21 @@ function validityLabel(name, v) {
   return `${d} Days`;
 }
 
+// A clean, readable plan name from the size and validity helpers, e.g.
+// "1GB, 1 day", "200MB, 14 days", "6.5GB + 3.5GB, 30 days", plus
+// ", weekend only" / ", night only". Falls back to cleanPlanName(name).
+export function friendlyPlanName(v) {
+  const name = String(v?.name || '');
+  const both = /(\d+(?:\.\d+)?)\s*(TB|GB|MB)\s*\+\s*(\d+(?:\.\d+)?)\s*(TB|GB|MB)\b/i.exec(name);
+  const s = size(name);
+  const sizeText = both ? `${both[1]}${both[2].toUpperCase()} + ${both[3]}${both[4].toUpperCase()}` : s ? `${s.value}${s.unit}` : '';
+  const valid = validityLabel(name, v).toLowerCase();
+  if (!sizeText && !valid) return cleanPlanName(name);
+  const conds = planConditions(name).filter((c) => c !== 'Broadband');
+  const extra = conds.map((c) => (c === 'Weekend' ? 'weekend only' : c === 'Night' ? 'night only' : null)).filter(Boolean);
+  return [sizeText, valid, ...extra].filter(Boolean).join(', ');
+}
+
 // "Best value": cheapest per GB among the popular mid-size plans.
 function perGb(v) {
   const s = size(v.name);
@@ -218,7 +233,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
               const isBest = !conds.length && short == null && best != null && g != null && g <= best + 0.01 && (everyday.length <= 1 || Number(v.variation_amount) <= 10000);
               const save = Math.round(p.base - p.total);
               return (
-                <button key={v.variation_code} type="button" role="radio" aria-checked={on} className={`vplan${on ? ' on' : ''}${isBest ? ' best' : ''}`} onClick={() => onChange(v.variation_code)} title={v.name}>
+                <button key={v.variation_code} type="button" role="radio" aria-checked={on} className={`vplan${on ? ' on' : ''}${isBest ? ' best' : ''}`} onClick={() => onChange(v.variation_code)} title={friendlyPlanName(v)}>
                   <div className="vplan-top">
                     <div style={{ minWidth: 0 }}>
                       {s ? <span className="vplan-gb">{s.value}<small>{s.unit}</small></span> : <span className="vplan-gb" style={{ fontSize: 15 }}>{v.name.replace(/^\w+\s+(data\s+)?/i, '').slice(0, 30)}</span>}
@@ -234,7 +249,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
                     {isBest && <> · <b>🏆 Best deal</b></>}
                     {save >= 5 && <> · save {naira(save)}</>}
                   </div>
-                  <div className="vplan-name">{cleanPlanName(v.name)}</div>
+                  <div className="vplan-name">{friendlyPlanName(v)}</div>
                   {v.zpNote && <div className="vplan-name" style={{ color: 'var(--gold, #FFB830)' }}>ℹ️ {v.zpNote}</div>}
                   {g != null && best != null && <div className="vplan-bar" aria-hidden><i style={{ width: `${Math.min(100, Math.max(8, Math.round((best / g) * 100)))}%` }} /></div>}
                 </button>
@@ -252,7 +267,7 @@ export default function PlanGrid({ variations, value, onChange, priceOf }) {
           <div style={{ minWidth: 0 }}>
             <b>{(() => { const z = size(picked.name); return z ? `${z.value}${z.unit}` : 'Plan'; })()}</b>
             {validityLabel(picked.name, picked) && <span> · {validityLabel(picked.name, picked)}</span>}
-            <div className="plan-picked-name">{picked.name}</div>
+            <div className="plan-picked-name">{friendlyPlanName(picked)}</div>
             {planWarning(picked.name, picked) && <div className="plan-picked-warn">⚠️ {planWarning(picked.name, picked)}</div>}
           </div>
           <button type="button" className="plan-picked-go" onClick={() => document.querySelector('form button[type=submit]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>

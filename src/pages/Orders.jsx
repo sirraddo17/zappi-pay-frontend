@@ -20,6 +20,7 @@ function fmtDate(d) {
 const STATUS_PILL = { SUCCESS: ['Successful', 'ok'], APPROVED: ['Successful', 'ok'], PENDING: ['Pending', 'wait'], FAILED: ['Failed', 'no'], REFUNDED: ['Refunded', 'no'], REJECTED: ['Rejected', 'no'] };
 const SERVICE_ICON = { AIRTIME: '📞', DATA: '📶', ELECTRICITY: '💡', CABLE: '📺', EDUCATION: '🎓', INTERNET: '🌐', BETTING: '🏆', INTERNATIONAL: '🌍', INSURANCE: '🚗', 'RECHARGE CARDS': '🖨️' };
 const pretty = (s) => String(s || '').charAt(0) + String(s || '').slice(1).toLowerCase();
+const kobo = (v) => Math.round(Number(v || 0) * 100); // work in kobo so ₦ maths has no float drift
 const TABS = [['ALL', 'All'], ['BUY', 'Purchases'], ['IN', 'Money in'], ['OUT', 'Money out']];
 // Second filter: by outcome.
 const STATUS_FILTERS = [['ALL', 'Any status'], ['SUCCESS', 'Successful'], ['FAILED', 'Failed'], ['REFUND', 'Refunds'], ['PENDING', 'Pending']];
@@ -45,7 +46,7 @@ export default function Orders() {
   function load() {
     Promise.all([getOrders(), getEpinBatches().catch(() => ({ batches: [] })), getWalletTransactions().catch(() => ({ transactions: [] }))])
       .then(([data, cards, wallet]) => {
-        const orders = (data.orders || []).map((o) => ({ key: `o${o.id}`, kind: 'BUY', link: `/orders/${o.id}`, icon: SERVICE_ICON[o.service] || '🧾', title: pretty(o.service), sub: o.recipient, amount: Number(o.amount), credit: false, status: o.status, at: o.createdAt, raw: o }));
+        const orders = (data.orders || []).map((o) => ({ key: `o${o.id}`, kind: 'BUY', link: `/orders/${o.id}`, icon: SERVICE_ICON[o.service] || '🧾', title: pretty(o.service), sub: o.recipient, amount: (kobo(o.amount) - kobo(o.cashbackUsed)) / 100, cashback: kobo(o.cashbackUsed) / 100, credit: false, status: o.status, at: o.createdAt, raw: o }));
         const batches = (cards.batches || []).map((b) => ({
           key: `b${b.id}`, kind: 'BUY', link: `/print-cards/${b.id}`, icon: '🖨️', title: 'Recharge cards',
           sub: `${b.status === 'SUCCESS' ? b.delivered : b.quantity} × ₦${Number(b.value).toLocaleString()} ${b.networkLabel}`,
@@ -102,6 +103,7 @@ export default function Orders() {
                   <span className="hist-main"><b>{o.title}</b><small>{o.sub ? `${o.sub} · ` : ''}{fmtDate(o.at)}</small></span>
                   <span style={{ textAlign: 'right', flex: '0 0 auto' }}>
                     <b style={{ display: 'block', fontSize: 14, color: o.credit ? 'var(--green-500)' : undefined }}>{o.credit ? '+' : '−'}{fmtMoney(o.amount)}</b>
+                    {o.kind === 'BUY' && o.cashback > 0 && <small style={{ display: 'block', fontSize: 11, color: 'var(--slate-400)' }}>(₦{o.cashback.toFixed(2)} cashback)</small>}
                     {label !== 'Successful' && <span className={`pill ${tone}`} style={{ marginTop: 3 }}>{label}</span>}
                   </span>
                 </Link>

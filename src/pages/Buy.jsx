@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import GiftForm from '../components/GiftForm';
 import { currentShop, forgetShop } from '../lib/shopRef';
 import { useAuth } from '../context/AuthContext';
-import PlanGrid, { AmountGrid, planWarning } from '../components/PlanGrid';
+import PlanGrid, { AmountGrid, planWarning, friendlyPlanName } from '../components/PlanGrid';
 import { ProviderGrid, Segmented, PackageList, QuickAmounts } from '../components/BillPickers';
 import { getVtpassServices, getVtpassVariations, verifyBillersCode, purchase, getPricing, getBeneficiaries, checkPromo, createPayForMe, getOrders, request as apiRequest } from '../api';
 import { extractToken } from '../lib/receipt';
@@ -890,7 +890,7 @@ export default function Buy() {
           if (recipient.trim()) rows.push([t(config.recipientLabel), recipient.trim()]);
           if (verifiedName) rows.push(['Name', verifiedName.replace(/^✓\s*/, '')]);
           if (config.needsType) rows.push(['Meter type', billType === 'postpaid' ? 'Postpaid' : 'Prepaid']);
-          if (selectedVariation) rows.push([slug === 'cable' ? 'Package' : slug === 'education' ? 'Type' : 'Plan', selectedVariation.name]);
+          if (selectedVariation) rows.push([slug === 'cable' ? 'Package' : slug === 'education' ? 'Type' : 'Plan', config.backendService === 'DATA' ? friendlyPlanName(selectedVariation) : selectedVariation.name]);
           rows.push([config.needsVariation ? 'Price' : 'Amount', naira(amount)]);
           if (price.markedUp > amount) rows.push(['Service charge', naira(price.markedUp - amount)]);
           if (price.discount > 0) rows.push([`Discount (${discountPct}%)`, `−${naira(price.discount)}`, 'good']);
