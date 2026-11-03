@@ -449,7 +449,7 @@ export const getSubscriptions = () => adminRequest('/api/admin/subscriptions');
 export const saveSubscriptions = (subscriptions) => adminRequest('/api/admin/subscriptions', { method: 'PUT', body: JSON.stringify({ subscriptions }) });
 export const getPartnerModes = () => adminRequest('/api/admin/partner-modes');
 export const getLedger = (opts = {}) => adminRequest(`/api/admin/ledger?${new URLSearchParams(Object.entries(opts).filter(([, v]) => v)).toString()}`);
-export const getRefunds = (days) => adminRequest(`/api/admin/refunds${days ? `?days=${days}` : ''}`);
+export const getRefunds = (days, mode) => adminRequest(`/api/admin/refunds?${new URLSearchParams(Object.entries({ days, mode }).filter(([, v]) => v)).toString()}`);
 export const getOrderTimeline = (id) => adminRequest(`/api/admin/orders/${id}/timeline`);
 export const getOverviewTotals = () => adminRequest('/api/admin/overview-totals');
 export const markOrdersTest = (data) => adminRequest('/api/admin/orders/mark-test', { method: 'POST', body: JSON.stringify(data) });

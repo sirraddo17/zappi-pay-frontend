@@ -100,15 +100,19 @@ export default function AdminMoney() {
     }
   }
 
-  const st = data?.status;
+  // Test accounts (sandbox money only) are left out of the owed side when
+  // the server sends that view, so test money never looks like a shortfall.
+  const real = data?.real || null;
+  const st = real ? real.status : data?.status;
+  const diff = real ? real.difference : data?.difference;
   const demo = isDemoMode();
   const sandbox = (k) => Boolean(data?.have?.modes && data.have.modes[k] !== 'live');
   const banner = demo && st !== 'OK'
     ? { bg: 'rgba(255,184,48,0.08)', border: 'var(--slate-700, #334155)', text: 'Test mode: payment partners are on sandbox (test money), so their balances are not shown here.' }
     : st === 'OK'
-    ? { bg: 'rgba(34,197,94,0.12)', border: 'var(--green-500)', text: `✅ Covered. You have ${naira(data.difference)} more than you owe customers — that's your earnings and float.` }
+    ? { bg: 'rgba(34,197,94,0.12)', border: 'var(--green-500)', text: `✅ Covered. You have ${naira(diff)} more than you owe customers — that's your earnings and float.` }
     : st === 'SHORT'
-      ? { bg: 'rgba(239,68,68,0.12)', border: 'var(--red-500)', text: `⚠️ Short by ${naira(-data.difference)}. Your VTpass + Monnify money is less than what customers have in their wallets. Top up, or check for money held elsewhere (add it below).` }
+      ? { bg: 'rgba(239,68,68,0.12)', border: 'var(--red-500)', text: `⚠️ Short by ${naira(-diff)}. Your VTpass + Monnify money is less than what customers have in their wallets. Top up, or check for money held elsewhere (add it below).` }
       : { bg: 'rgba(255,184,48,0.12)', border: 'var(--gold)', text: '⚠️ Couldn’t read every balance, so this check isn’t complete — see the errors below.' };
 
   return (
@@ -126,27 +130,30 @@ export default function AdminMoney() {
 
           <div className="card" style={{ margin: '0 0 16px' }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>What you owe customers</h2>
-            {(data.owed.parts || [
+            {((real && real.parts) || data.owed.parts || [
               { key: 'wallets', label: 'Customer wallets', amount: data.owed.wallets },
               { key: 'cashback', label: 'Unexpired cashback (spendable on purchases)', amount: data.owed.cashback || 0 },
               { key: 'savings', label: 'Customer savings', amount: data.owed.savings || 0 },
               { key: 'pendingTransfers', label: 'Bank transfers not yet paid out', amount: data.owed.pendingTransfers },
               { key: 'heldForDisputes', label: 'Held for wrong-transfer reports', amount: data.owed.heldForDisputes || 0 },
             ]).map((p) => (
-              <Row key={p.key} label={p.label} value={naira(p.amount)} hint={p.key === 'wallets' ? `${data.owed.customers.toLocaleString()} customers` : p.key === 'pendingTransfers' ? `${data.owed.pendingTransferCount} waiting (held, OTP or processing) — already taken from wallets` : p.key === 'cashback' ? 'Not cash — can only pay part of a purchase' : undefined} />
+              <Row key={p.key} label={p.label} value={naira(p.amount)} hint={p.key === 'wallets' ? `${(real ? real.customers : data.owed.customers).toLocaleString()} customers` : p.key === 'pendingTransfers' ? `${data.owed.pendingTransferCount} waiting (held, OTP or processing) — already taken from wallets` : p.key === 'cashback' ? 'Not cash — can only pay part of a purchase' : undefined} />
             ))}
-            <Row label="Total owed" value={naira(data.owed.total)} strong />
+            {real && real.testAccounts.count > 0 && (
+              <Row label="Test accounts (sandbox money) — not counted" value={naira(real.testAccounts.total)} hint={`${real.testAccounts.count} test account${real.testAccounts.count === 1 ? '' : 's'} funded only through partners on sandbox keys or test purchases`} color="var(--slate-400)" />
+            )}
+            <Row label={real ? 'Total owed (real customers)' : 'Total owed'} value={naira(real ? real.owed : data.owed.total)} strong />
           </div>
 
           <div className="card" style={{ margin: '0 0 16px' }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>Money you hold</h2>
-            <Row label="VTpass wallet" value={data.have.vtpass === null ? 'Unavailable' : naira(data.have.vtpass)} hint={`${data.have.vtpassError || 'Pays for every purchase'}{data.have.modes && data.have.modes.vtpass !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.vtpass === null ? 'var(--gold)' : undefined} />
-            {!(demo && sandbox('monnify')) && <Row label="Monnify wallet" value={data.have.monnify === null ? 'Unavailable' : naira(data.have.monnify)} hint={`${data.have.monnifyError || 'Receives funding, pays out bank transfers'}{data.have.modes && data.have.modes.monnify !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.monnify === null ? 'var(--gold)' : undefined} />}
+            <Row label="VTpass wallet" value={data.have.vtpass === null ? 'Unavailable' : naira(data.have.vtpass)} hint={`${data.have.vtpassError || 'Pays for every purchase'}${data.have.modes && data.have.modes.vtpass !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.vtpass === null ? 'var(--gold)' : undefined} />
+            {!(demo && sandbox('monnify')) && <Row label="Monnify wallet" value={data.have.monnify === null ? 'Unavailable' : naira(data.have.monnify)} hint={`${data.have.monnifyError || 'Receives funding, pays out bank transfers'}${data.have.modes && data.have.modes.monnify !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.monnify === null ? 'var(--gold)' : undefined} />}
             {!(demo && sandbox('squad')) && (data.have.squad !== undefined && (data.have.squad !== null || data.have.squadError)) && (
-              <Row label="Squad wallet" value={data.have.squad === null ? 'Unavailable' : naira(data.have.squad)} hint={`${data.have.squadError || 'GTBank account-number payments; pays out bank transfers when Squad is chosen'}{data.have.modes && data.have.modes.squad !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.squad === null ? 'var(--gold)' : undefined} />
+              <Row label="Squad wallet" value={data.have.squad === null ? 'Unavailable' : naira(data.have.squad)} hint={`${data.have.squadError || 'GTBank account-number payments; pays out bank transfers when Squad is chosen'}${data.have.modes && data.have.modes.squad !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.squad === null ? 'var(--gold)' : undefined} />
             )}
             {!(demo && sandbox('nomba')) && (data.have.nomba !== undefined && (data.have.nomba !== null || data.have.nombaError)) && (
-              <Row label="Nomba wallet" value={data.have.nomba === null ? 'Unavailable' : naira(data.have.nomba)} hint={`${data.have.nombaError || 'Nombank account-number payments; pays out bank transfers when Nomba is chosen'}{data.have.modes && data.have.modes.nomba !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.nomba === null ? 'var(--gold)' : undefined} />
+              <Row label="Nomba wallet" value={data.have.nomba === null ? 'Unavailable' : naira(data.have.nomba)} hint={`${data.have.nombaError || 'Nombank account-number payments; pays out bank transfers when Nomba is chosen'}${data.have.modes && data.have.modes.nomba !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.nomba === null ? 'var(--gold)' : undefined} />
             )}
             <Row label="Other money (you typed)" value={naira(data.have.other)} hint="e.g. business bank account where manual funding lands" />
             <Row label="Total held" value={naira(data.have.total)} strong hint={data.have.sandboxNote || undefined} />
@@ -160,7 +167,7 @@ export default function AdminMoney() {
           </div>
 
           {!demo && <div className="card" style={{ margin: '0 0 16px' }}>
-            <Row label="Difference (held − owed)" value={naira(data.difference)} strong color={data.difference >= 0 ? 'var(--green-500)' : 'var(--red-500)'} />
+            <Row label="Difference (held − owed)" value={naira(diff)} strong color={diff >= 0 ? 'var(--green-500)' : 'var(--red-500)'} />
             <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 8 }}>
               Also good to know: {data.info.pendingOrderCount} purchase(s) still pending with VTpass ({naira(data.info.pendingOrders)}), {data.info.pendingFundingCount} manual funding request(s) waiting ({naira(data.info.pendingFunding)}).
               {data.info.negativeWallets > 0 && <b style={{ color: 'var(--red-500)' }}> {data.info.negativeWallets} wallet(s) are below ₦0 — look into these.</b>}

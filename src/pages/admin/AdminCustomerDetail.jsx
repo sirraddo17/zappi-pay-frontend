@@ -96,6 +96,9 @@ function EmailAlertTest({ customerId }) {
   );
 }
 
+// Balances stay on one line on a phone ("₦10,047.97", never "₦10,047.9" / "7"): the font shrinks with the screen instead of wrapping.
+const MONEY_VALUE = { whiteSpace: 'nowrap', overflowWrap: 'normal', fontSize: 'clamp(18px, 5.5vw, 28px)' };
+
 export default function AdminCustomerDetail() {
   const { isOwner } = useAdminAuth();
   const { id } = useParams();
@@ -263,7 +266,7 @@ export default function AdminCustomerDetail() {
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', margin: '0 0 16px' }}>
         <div className="card stat-card" style={{ margin: 0, flex: '1 1 160px', maxWidth: 260 }}>
           <div className="label">Wallet Balance</div>
-          <div className="value">{fmtMoney(customer.walletBalance)}</div>
+          <div className="value" style={MONEY_VALUE}>{fmtMoney(customer.walletBalance)}</div>
         </div>
         <div className="card stat-card" style={{ margin: 0, flex: '1 1 160px', maxWidth: 260 }}>
           <div className="label">Points</div>
@@ -271,7 +274,7 @@ export default function AdminCustomerDetail() {
         </div>
         <div className="card stat-card" style={{ margin: 0, flex: '1 1 160px', maxWidth: 260 }}>
           <div className="label">Cashback to spend</div>
-          <div className="value">{fmtMoney(customer.cashbackBalance || 0)}</div>
+          <div className="value" style={MONEY_VALUE}>{fmtMoney(customer.cashbackBalance || 0)}</div>
         </div>
       </div>
 

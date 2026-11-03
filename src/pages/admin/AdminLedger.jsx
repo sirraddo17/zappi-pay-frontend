@@ -12,6 +12,20 @@ const when = (d) => new Date(d).toLocaleString('en-NG', { dateStyle: 'medium', t
 const TYPES = ['', 'FUND', 'DEBIT', 'REFUND', 'CASHBACK', 'REFERRAL_BONUS', 'LOYALTY', 'DELIVERY_BONUS', 'SHOP_COMMISSION', 'TRANSFER_IN', 'TRANSFER_OUT', 'AIRTIME_CASH', 'BILL_PAY'];
 const CREDIT = /^(FUND|REFUND|CASHBACK|REFERRAL_BONUS|LOYALTY|CONTEST_PRIZE|COUPON|CHALLENGE_REWARD|DELIVERY_BONUS|SHOP_COMMISSION|TRANSFER_IN|AIRTIME_CASH|INTEREST|SAVINGS_OUT|.*_IN|DISPUTE_RELEASE|REWARD)$/;
 
+// Real / Test / All switch (default Real) and the note shown on Test.
+function ModeSwitch({ mode, setMode }) {
+  return (
+    <div style={{ display: 'flex', gap: 4 }} role="group" aria-label="Real or test">
+      {[['real', 'Real'], ['test', 'Test'], ['all', 'All']].map(([k, l]) => (
+        <button key={k} type="button" aria-pressed={mode === k} className={mode === k ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => setMode(k)}>{l}</button>
+      ))}
+    </div>
+  );
+}
+function TestNote() {
+  return <div className="card" role="note" style={{ margin: '0 0 12px', fontSize: 13, background: 'rgba(255,184,48,0.08)', border: '1px solid var(--gold, #FFB830)' }}>🧪 These are sandbox (test) rows: test purchases and funding through partners on sandbox keys. They are not real customer money.</div>;
+}
+
 function Ledger() {
   const [type, setType] = useState('');
   const [days, setDays] = useState(30);
@@ -31,12 +45,9 @@ function Ledger() {
         <select value={days} onChange={(e) => setDays(Number(e.target.value))} style={{ width: 'auto' }} aria-label="Period">
           {[7, 30, 90].map((n) => <option key={n} value={n}>Last {n} days</option>)}
         </select>
-        <div style={{ display: 'flex', gap: 4 }} role="group" aria-label="Real or test">
-          {[['real', 'Real'], ['test', 'Test'], ['all', 'All']].map(([k, l]) => (
-            <button key={k} type="button" className={mode === k ? 'btn' : 'btn btn-secondary'} style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => setMode(k)}>{l}</button>
-          ))}
-        </div>
+        <ModeSwitch mode={mode} setMode={setMode} />
       </div>
+      {mode === 'test' && <TestNote />}
       {err && <p className="error-text">{err}</p>}
       {!d && !err && <p className="empty-state">Loading…</p>}
       {d && (
@@ -75,13 +86,21 @@ function Ledger() {
 }
 
 function Refunds() {
+  const [mode, setMode] = useState('real');
   const [d, setD] = useState(null);
   const [err, setErr] = useState('');
-  useEffect(() => { getRefunds(30).then(setD).catch((e) => setErr(e.message)); }, []);
-  if (err) return <p className="error-text">{err}</p>;
-  if (!d) return <p className="empty-state">Loading…</p>;
+  useEffect(() => { setD(null); setErr(''); getRefunds(30, mode).then(setD).catch((e) => setErr(e.message)); }, [mode]);
+  const top = (
+    <>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}><ModeSwitch mode={mode} setMode={setMode} /></div>
+      {mode === 'test' && <TestNote />}
+    </>
+  );
+  if (err) return <>{top}<p className="error-text">{err}</p></>;
+  if (!d) return <>{top}<p className="empty-state">Loading…</p></>;
   return (
     <>
+      {top}
       <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '0 0 10px' }}>Failed purchases are refunded automatically. Manual refunds go through an approval request with a reason (support asks, the owner approves). Each refund returns exactly what the order took: cash to the wallet + any cashback used.</p>
       <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
         <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
