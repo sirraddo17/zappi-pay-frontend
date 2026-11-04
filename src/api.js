@@ -295,6 +295,7 @@ export const getCustomerList = ({ view = 'active', q = '', all = false, page = 0
 };
 export const adminSetUsername = (id, username) => adminRequest(`/api/admin/customers/${id}/username`, { method: 'POST', body: JSON.stringify({ username }) });
 export const getCustomerDetail = (id) => adminRequest(`/api/admin/customers/${id}`);
+export const setTestAccount = (id, isTestAccount) => adminRequest(`/api/admin/customers/${id}/test-account`, { method: 'POST', body: JSON.stringify({ isTestAccount }) });
 export const adminResetCustomerPassword = (id) => adminRequest(`/api/admin/customers/${id}/reset-password`, { method: 'POST' });
 export const setCustomerActive = (id, active, reason) =>
   adminRequest(`/api/admin/customers/${id}`, { method: 'PATCH', body: JSON.stringify({ active, reason }) });

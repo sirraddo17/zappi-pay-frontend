@@ -140,7 +140,7 @@ export default function AdminMoney() {
               <Row key={p.key} label={p.label} value={naira(p.amount)} hint={p.key === 'wallets' ? `${(real ? real.customers : data.owed.customers).toLocaleString()} customers` : p.key === 'pendingTransfers' ? `${data.owed.pendingTransferCount} waiting (held, OTP or processing) — already taken from wallets` : p.key === 'cashback' ? 'Not cash — can only pay part of a purchase' : undefined} />
             ))}
             {real && real.testAccounts.count > 0 && (
-              <Row label="Test accounts (sandbox money) — not counted" value={naira(real.testAccounts.total)} hint={`${real.testAccounts.count} test account${real.testAccounts.count === 1 ? '' : 's'} funded only through partners on sandbox keys or test purchases`} color="var(--slate-400)" />
+              <Row label="Test accounts (sandbox money) — not counted" value={naira(real.testAccounts.total)} hint={`${real.testAccounts.count} account${real.testAccounts.count === 1 ? '' : 's'} marked “Test account” on the customer page`} color="var(--slate-400)" />
             )}
             <Row label={real ? 'Total owed (real customers)' : 'Total owed'} value={naira(real ? real.owed : data.owed.total)} strong />
           </div>

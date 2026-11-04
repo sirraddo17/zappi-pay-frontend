@@ -204,6 +204,7 @@ export default function AdminCustomers() {
                 <tr key={c.id}>
                   <td>
                     <Link to={`/admin/customers/${c.id}`} style={{ color: 'var(--orange)' }}>{c.name}</Link>
+                    {c.isTestAccount && <span title="Test account: its money is counted apart on the Money check" style={{ marginLeft: 6, fontSize: 11, fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(255,184,48,0.15)', border: '1px solid var(--gold, #FFB830)', color: 'var(--gold, #FFB830)', verticalAlign: 'middle' }}>TEST</span>}
                     {c.username && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>@{c.username}</div>}
                   </td>
                   <td>{c.deletedAt ? '—' : c.phone}</td>

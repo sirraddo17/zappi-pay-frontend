@@ -9,7 +9,7 @@ import AccountTools from '../../components/admin/AccountTools';
 import MoneyTools from '../../components/admin/MoneyTools';
 import SupportTools from '../../components/admin/SupportTools';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { getCustomerDetail, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, adminSetUsername, testCustomerEmailAlert } from '../../api';
+import { getCustomerDetail, setTestAccount, adjustWallet, adminResetCustomerPassword, deleteCustomerAccount, adminSetUsername, testCustomerEmailAlert } from '../../api';
 
 // Set a username for older accounts (or correct one). It is the
 // customer's referral code, so changing it breaks links they shared.
@@ -98,6 +98,29 @@ function EmailAlertTest({ customerId }) {
 
 // Balances stay on one line on a phone ("₦10,047.97", never "₦10,047.9" / "7"): the font shrinks with the screen instead of wrapping.
 const MONEY_VALUE = { whiteSpace: 'nowrap', overflowWrap: 'normal', fontSize: 'clamp(18px, 5.5vw, 28px)' };
+
+// Owner only: mark this as a TEST account. The Money check then counts
+// its balances apart from real customers. Only the flag changes — the
+// balance, orders and everything else stay exactly as they are.
+function TestAccountSwitch({ customer, onDone }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const on = Boolean(customer.isTestAccount);
+  async function flip(next) {
+    setBusy(true); setErr('');
+    try { await setTestAccount(customer.id, next); onDone?.(); } catch (e) { setErr(e.message); } finally { setBusy(false); }
+  }
+  return (
+    <div className="card" style={{ margin: '0 0 16px', maxWidth: 520 }}>
+      <label style={{ display: 'flex', gap: 10, alignItems: 'center', fontWeight: 600 }}>
+        <input type="checkbox" checked={on} disabled={busy} onChange={(e) => flip(e.target.checked)} style={{ width: 'auto' }} />
+        🧪 Test account
+      </label>
+      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '6px 0 0' }}>Tick for accounts used for testing. The Money check counts their money separately from real customers. Their balance and orders don’t change.</p>
+      {err && <p className="error-text" style={{ margin: '6px 0 0' }}>{err}</p>}
+    </div>
+  );
+}
 
 export default function AdminCustomerDetail() {
   const { isOwner } = useAdminAuth();
@@ -192,7 +215,7 @@ export default function AdminCustomerDetail() {
       <Link to="/admin/customers" style={{ color: 'var(--orange)', fontSize: 13 }}>← Back to Customers</Link>
 
       <div className="page-header" style={{ padding: 0, margin: '12px 0 16px' }}>
-        <h1>{customer.name}</h1>
+        <h1>{customer.name}{customer.isTestAccount && <span title="Test account: its money is counted apart on the Money check" style={{ marginLeft: 6, fontSize: 12, fontWeight: 700, padding: '1px 6px', borderRadius: 6, background: 'rgba(255,184,48,0.15)', border: '1px solid var(--gold, #FFB830)', color: 'var(--gold, #FFB830)', verticalAlign: 'middle' }}>TEST</span>}</h1>
         <p>{customer.phone}{customer.email ? ` · ${customer.email}` : ''} · {customer.active ? 'Active' : 'Deactivated'} · Joined {fmtDate(customer.createdAt)}</p>
         {!customer.active && (
           <p style={{ margin: '6px 0 0', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--red-500)', fontSize: 13 }}>
@@ -225,6 +248,7 @@ export default function AdminCustomerDetail() {
 
       {!customer.deletedAt && <IdentityCheck customer={customer} orders={orders} walletTransactions={walletTransactions} onChanged={load} canReset={isOwner} />}
 
+      {isOwner && <TestAccountSwitch customer={customer} onDone={load} />}
       {isOwner && !customer.deletedAt && <AccountTools customer={customer} onDone={load} />}
       {isOwner && !customer.deletedAt && <MoneyTools customer={customer} onDone={load} />}
       {!customer.deletedAt && <SupportTools key={customer.id + (customer.name || '')} customer={customer} isOwner={isOwner} onDone={load} />}
