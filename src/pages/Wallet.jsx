@@ -490,10 +490,10 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
             <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 1 }}>{a.accountNumber}</div>
             <div style={{ fontSize: 12, color: 'var(--slate-300, #cbd5e1)', fontWeight: 600 }}>{a.displayName || a.accountName}</div>
             {a.bankShowsName && a.bankShowsName !== a.displayName && (
-              <div style={{ fontSize: 11, color: 'var(--slate-400)' }}>
-                Your bank app shows: <b>{a.bankShowsName}</b>
-                {/sirraddo/i.test(a.bankShowsName) && <> — SIRRADDO GLOBAL is the company that runs ZAPPI PAY, so it’s still your wallet.</>}
-              </div>
+              <div style={{ fontSize: 11, color: 'var(--slate-400)' }}>Your bank app shows: <b>{a.bankShowsName}</b></div>
+            )}
+            {/sirraddo/i.test(a.displayName || a.bankShowsName || '') && (
+              <div style={{ fontSize: 11, color: 'var(--slate-400)' }}>This is the name the sender’s bank app shows. SIRRADDO GLOBAL is the company that runs ZAPPI PAY, so it’s still your wallet.</div>
             )}
             {!sameFee && <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 2 }}>Fee: {feeOf(a, info).feePercent > 0 ? feeLabel(feeOf(a, info)) : 'none'}</div>}
           </div>
