@@ -278,7 +278,7 @@ export const getSettings = () => adminRequest('/api/admin/settings');
 export const getAiStatus = () => request('/api/ai/status');
 export const aiChat = (messages, images) => request('/api/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages, images }) });
 export const getAdminAiStatus = () => adminRequest('/api/admin/ai/status');
-export const adminAiChat = (messages, images) => adminRequest('/api/admin/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages, images }) });
+export const adminAiChat = (messages, images, statement) => adminRequest('/api/admin/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages, images, ...(statement ? { statement: { partner: statement.partner, fileName: statement.fileName, rows: statement.rows } } : {}) }) });
 export const adminAiDraftReply = (ticketId, instructions) => adminRequest('/api/admin/ai/draft-reply', { method: 'POST', quiet: true, body: JSON.stringify({ ticketId, instructions }) });
 export const testAiConnection = (model) => adminRequest('/api/admin/ai/test', { method: 'POST', body: JSON.stringify({ model }) });
 export const getAiUsage = () => adminRequest('/api/admin/ai/usage');

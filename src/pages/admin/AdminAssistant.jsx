@@ -4,6 +4,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { adminAiChat, getAdminAiStatus, getAiBriefing, isDemoMode } from '../../api';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import ImageAttach from '../../components/ImageAttach';
+import StatementAttach from '../../components/admin/StatementAttach';
 import AiActionCard from '../../components/admin/AiActionCard';
 import AiDesignCard from '../../components/admin/AiDesignCard';
 
@@ -92,6 +93,8 @@ export default function AdminAssistant() {
   // /admin/assistant?ask=… (from other admin pages) prefills the question.
   const [input, setInput] = useState(() => { try { return new URLSearchParams(window.location.search).get('ask')?.slice(0, 500) || ''; } catch { return ''; } });
   const [images, setImages] = useState([]);
+  // Partner statement (owner only): stays attached for this chat until removed.
+  const [statement, setStatement] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const endRef = useRef(null);
@@ -105,17 +108,17 @@ export default function AdminAssistant() {
   }, [messages, busy]);
 
   async function ask(text) {
-    const q = text.trim() || (images.length ? 'What does this picture show? Check it against our records if relevant.' : '');
+    const q = text.trim() || (images.length ? 'What does this picture show? Check it against our records if relevant.' : statement ? `Check this ${statement.partner === 'vtpass' ? 'VTpass' : statement.partner.charAt(0).toUpperCase() + statement.partner.slice(1)} statement against our records.` : '');
     if (!q || busy) return;
     const pics = images;
-    const next = [...messages, { role: 'user', content: q, pics }];
+    const next = [...messages, { role: 'user', content: q, pics, file: statement ? `${statement.fileName} (${statement.rows.length} rows)` : null }];
     setMessages(next);
     setInput('');
     setImages([]);
     setBusy(true);
     setError('');
     try {
-      const res = await adminAiChat(next.map(({ role, content }) => ({ role, content })), pics.length ? pics : undefined);
+      const res = await adminAiChat(next.map(({ role, content }) => ({ role, content })), pics.length ? pics : undefined, isOwner ? statement : null);
       setMessages((m) => [...m, { role: 'assistant', content: res.reply, actions: res.actions || [], designs: res.designs || [] }]);
     } catch (err) {
       setError(err.message || 'The assistant could not answer.');
@@ -155,7 +158,7 @@ export default function AdminAssistant() {
           </button>
         )}
         {messages.length > 0 && (
-          <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 14px' }} onClick={() => { setMessages([]); setError(''); }}>
+          <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 14px' }} onClick={() => { setMessages([]); setError(''); setStatement(null); }}>
             New chat
           </button>
         )}
@@ -203,6 +206,7 @@ export default function AdminAssistant() {
                     {m.pics.map((src, j) => <img key={j} src={src} alt="" style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 8 }} />)}
                   </div>
                 )}
+                {m.file && <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 4 }}>📄 {m.file}</div>}
                 {m.role === 'assistant' ? <ReplyText text={m.content} /> : m.content}
               </div>
               {m.actions?.map((a) => <AiActionCard key={a.id} action={a} />)}
@@ -227,11 +231,12 @@ export default function AdminAssistant() {
             aria-label="Question"
             disabled={off}
           />
-          <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 18px' }} disabled={off || busy || (!input.trim() && !images.length)}>
+          <button className="btn" type="submit" style={{ width: 'auto', padding: '8px 18px' }} disabled={off || busy || (!input.trim() && !images.length && !statement)}>
             Ask
           </button>
         </form>
         {!off && <ImageAttach value={images} onChange={setImages} label="📷 Add a picture (e.g. a customer's screenshot)" />}
+        {!off && isOwner && <StatementAttach value={statement} onChange={setStatement} disabled={busy} />}
         <p style={{ color: 'var(--slate-400)', fontSize: 11, margin: '8px 0 0' }}>AI can make mistakes. Double-check numbers on the Overview and Orders pages before acting on them.</p>
       </div>
     </AdminLayout>
