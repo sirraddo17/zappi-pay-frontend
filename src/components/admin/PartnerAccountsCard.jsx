@@ -5,8 +5,10 @@ import { getPartnerAccounts, savePartnerAccounts } from '../../api';
 // partner wallet) and the one the partner PAYS INTO (settlement).
 // partner = 'vtpass' | 'monnify' | … shows just that partner;
 // partner = 'all' shows every partner together (read + edit).
-const ROLE_COLOR = { TOPUP: 'var(--gold)', SETTLEMENT: 'var(--green-500)', BOTH: 'var(--purple, #a78bfa)' };
-const ROLE_ICON = { TOPUP: '⬆️', SETTLEMENT: '⬇️', BOTH: '↕️' };
+// INTERNAL = the Monnify payout wallet: Monnify's internal number for the
+// API, NOT a bank account (its name already starts with 🔒). No Copy button.
+const ROLE_COLOR = { TOPUP: 'var(--gold)', SETTLEMENT: 'var(--green-500)', BOTH: 'var(--purple, #a78bfa)', INTERNAL: 'var(--red-500)' };
+const ROLE_ICON = { TOPUP: '⬆️', SETTLEMENT: '⬇️', BOTH: '↕️', INTERNAL: '' };
 const blank = (partner) => ({ partner: partner === 'all' ? '' : partner, role: '', bankName: '', accountNumber: '', accountName: '', note: '' });
 
 export default function PartnerAccountsCard({ partner = 'all' }) {
@@ -62,16 +64,16 @@ export default function PartnerAccountsCard({ partner = 'all' }) {
           <div key={a.id} style={{ padding: '10px 0', borderTop: '1px solid var(--slate-800)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: ROLE_COLOR[a.role] }}>{ROLE_ICON[a.role]} {a.roleName}{partner === 'all' ? ` · ${a.partnerName}` : ''}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: ROLE_COLOR[a.role] }}>{ROLE_ICON[a.role] ? `${ROLE_ICON[a.role]} ` : ''}{a.roleName}{partner === 'all' ? ` · ${a.partnerName}` : ''}</div>
                 <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>{a.accountNumber}</div>
                 <div style={{ fontSize: 13 }}>{a.bankName}{a.accountName ? ` · ${a.accountName}` : ''}</div>
               </div>
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} onClick={() => copy(a.accountNumber)}>{copied === a.accountNumber ? 'Copied ✓' : 'Copy'}</button>
+                {!a.noCopy && a.role !== 'INTERNAL' && <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} onClick={() => copy(a.accountNumber)}>{copied === a.accountNumber ? 'Copied ✓' : 'Copy'}</button>}
                 {idx >= 0 && <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: 12 }} disabled={busy} onClick={() => { setMsg(null); setForm({ index: idx, ...saved[idx] }); }}>Edit</button>}
               </div>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 4 }}>{a.whatItDoes}</div>
+            <div style={{ fontSize: 12, color: a.role === 'INTERNAL' || a.noCopy ? 'var(--red-500)' : 'var(--slate-400)', marginTop: 4, fontWeight: a.role === 'INTERNAL' || a.noCopy ? 600 : 400 }}>{a.whatItDoes}</div>
             {a.note && <div style={{ fontSize: 12, color: 'var(--slate-300)', marginTop: 2 }}>📝 {a.note}</div>}
           </div>
         );

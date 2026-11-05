@@ -703,6 +703,7 @@ export default function AdminSettings() {
           <div className="field">
             <label htmlFor="walletAccount">Monnify wallet account number</label>
             <input id="walletAccount" inputMode="numeric" value={walletAccount} onChange={(e) => setWalletAccount(e.target.value)} placeholder="From Monnify → Developer → API Keys & Contracts" />
+            <small style={{ color: 'var(--red-500)' }}>🔒 Monnify’s internal number for the app — not a bank account. Never send money to it. To top up Monnify, use the Fund account from Monnify → Balances → Fund Balance.</small>
           </div>
           <div className="field">
             <label htmlFor="btFee">Fee for transfers under ₦10,000 (₦)</label>

@@ -134,7 +134,7 @@ export default function AdminDashboard() {
               {!monnify.walletAccount && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Add your wallet account number in Settings → Monnify.</div>}
               {low && (
                 <div style={{ color: 'var(--red-500)', fontSize: 13, marginTop: 4 }}>
-                  Low balance — fund your Monnify wallet or customer bank transfers will start failing (and be refunded).
+                  Low balance — fund your Monnify wallet (Monnify → Balances → Fund Balance) or customer bank transfers will start failing (and be refunded).
                 </div>
               )}
             </div>
