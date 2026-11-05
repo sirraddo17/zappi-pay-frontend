@@ -160,7 +160,7 @@ export default function AdminCustomers() {
           </div>
           <div className="field">
             <label htmlFor="adjustAmount">Amount (₦)</label>
-            <input id="adjustAmount" type="number" min="1" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} required />
+            <input id="adjustAmount" type="number" min="0.01" step="0.01" inputMode="decimal" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} required />
           </div>
           <div className="field">
             <label htmlFor="adjustNote">Reason (optional)</label>
