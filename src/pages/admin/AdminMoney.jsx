@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getReconciliation, downloadExport, getFundsGuard, setFundsGuard, isDemoMode } from '../../api';
+import { getReconciliation, downloadExport, getFundsGuard, setFundsGuard, isDemoMode, getComplianceSummary, saveComplianceThresholds, downloadCompliance } from '../../api';
 import { useAppInfo } from '../../components/ServiceNotices';
 
 const naira = (n) => (n === null || n === undefined ? '—' : `₦${Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
@@ -66,6 +66,71 @@ function FundsGuardCard() {
           {g.errors?.length > 0 && <div style={{ fontSize: 12, color: 'var(--gold)', marginTop: 6 }}>{g.errors.join(' · ')}</div>}
         </>
       )}
+    </div>
+  );
+}
+
+// Owner: monthly compliance summary (SCUML / NFIU, partner due diligence).
+// A draft to review — nothing is filed or sent. Test orders and test
+// accounts are kept out of the real figures.
+const lastMonth = () => { const d = new Date(Date.now() + LAGOS); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() - 1); return d.toISOString().slice(0, 7); };
+const k2n = (k) => naira((k || 0) / 100);
+function ComplianceCard() {
+  const [month, setMonth] = useState(lastMonth);
+  const [s, setS] = useState(null);
+  const [single, setSingle] = useState('');
+  const [daily, setDaily] = useState('');
+  const [busy, setBusy] = useState('');
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    setS(null); setErr('');
+    getComplianceSummary(month).then((r) => { setS(r); setSingle(String(r.thresholds.singleFundingKobo / 100)); setDaily(String(r.thresholds.dailyFundingKobo / 100)); }).catch((e) => setErr(e.message));
+  }, [month]);
+  async function save() {
+    setBusy('save'); setErr(''); setMsg('');
+    try { await saveComplianceThresholds(Number(single), Number(daily)); setMsg('Saved.'); setS(await getComplianceSummary(month)); } catch (e) { setErr(e.message); } finally { setBusy(''); }
+  }
+  async function download() {
+    setBusy('dl'); setErr('');
+    try { await downloadCompliance(month); } catch (e) { setErr(e.message); } finally { setBusy(''); }
+  }
+  return (
+    <div className="card" style={{ maxWidth: 720, margin: '0 0 16px' }}>
+      <h2 style={{ marginTop: 0, fontSize: 16 }}>🧾 Compliance summary (SCUML / NFIU, partner due diligence)</h2>
+      <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '0 0 10px' }}>A draft for you to review — ZAPPI PAY doesn’t file or send any report. Test orders and test accounts are kept out of the real figures. Ask the AI Assistant “compliance summary for last month” for a written version.</p>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 10 }}>
+        <div className="field" style={{ margin: 0, flex: '1 1 150px' }}>
+          <label htmlFor="cs-month">Month</label>
+          <input id="cs-month" type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} />
+        </div>
+        <button type="button" className="btn btn-secondary" style={{ width: 'auto' }} disabled={Boolean(busy) || !s} onClick={download}>{busy === 'dl' ? 'Preparing…' : 'Download CSV'}</button>
+      </div>
+      {err && <p className="error-text" style={{ margin: '0 0 8px' }}>{err}</p>}
+      {!s && !err && <p style={{ fontSize: 13, color: 'var(--slate-400)' }}>Loading…</p>}
+      {s && (
+        <>
+          <Row label="Funding inflows (real)" value={k2n(s.real.fundingInflows.totalKobo)} hint={`${s.real.fundingInflows.count} payments`} />
+          <Row label="Purchases (real)" value={k2n(s.real.purchases.totalKobo)} hint={`${s.real.purchases.count} successful`} />
+          <Row label="Refunds (real)" value={k2n(s.real.refunds.totalKobo)} hint={`${s.real.refunds.count} refunds`} />
+          <Row label="Large fundings" value={`${s.largeSingleFunding.count} single · ${s.largeDailyFunding.count} daily`} hint="At or above the thresholds below" />
+          <Row label="Freezes · risk flags · scam reports" value={`${s.accountsFrozen.byStaff} · ${s.riskFlags.raised} · ${s.scamReports.count}`} />
+          <Row label="Same BVN/NIN refused · unmatched still open" value={`${s.duplicateIdBlocked.attempts} · ${s.unmatchedPayments.stillOpenNow.count}`} />
+          <Row label="Test (kept apart)" value={k2n(s.test.fundingInflows.totalKobo)} hint={`funding from ${s.test.testAccounts} test accounts; ${s.test.purchases.count} test purchases`} color="var(--slate-400)" />
+        </>
+      )}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end', marginTop: 12 }}>
+        <div className="field" style={{ margin: 0, flex: '1 1 160px' }}>
+          <label htmlFor="cs-single">Single funding at or above (₦)</label>
+          <input id="cs-single" type="number" min="1000" value={single} onChange={(e) => setSingle(e.target.value)} />
+        </div>
+        <div className="field" style={{ margin: 0, flex: '1 1 160px' }}>
+          <label htmlFor="cs-daily">Funding in one day at or above (₦)</label>
+          <input id="cs-daily" type="number" min="1000" value={daily} onChange={(e) => setDaily(e.target.value)} />
+        </div>
+        <button type="button" className="btn" style={{ width: 'auto' }} disabled={Boolean(busy)} onClick={save}>{busy === 'save' ? 'Saving…' : 'Save'}</button>
+      </div>
+      {msg && <p style={{ color: 'var(--green-500)', fontSize: 13, margin: '6px 0 0' }}>{msg}</p>}
     </div>
   );
 }
@@ -177,6 +242,8 @@ export default function AdminMoney() {
         </div>
       )}
       {!data && !err && <p className="empty-state">Checking balances…</p>}
+
+      {!isDemoMode() && <ComplianceCard />}
 
       <div className="card" style={{ maxWidth: 720, margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>📥 Download for your accountant (Excel / CSV)</h2>

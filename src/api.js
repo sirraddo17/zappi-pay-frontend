@@ -538,6 +538,25 @@ export const checkCustomerFunding = (id, reference) => adminRequest(`/api/admin/
 export const setAdminRole = (id, role) => adminRequest(`/api/admin/admins/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
 export const getReconciliation = (other) => adminRequest(`/api/admin/reconciliation${other ? `?other=${encodeURIComponent(other)}` : ''}`);
 // CSV download for the accountant (orders, transactions, bank-transfers, customers).
+export const getComplianceSummary = (month) => adminRequest(`/api/admin/compliance${month ? `?month=${month}` : ''}`);
+export const saveComplianceThresholds = (singleNaira, dailyNaira) => adminRequest('/api/admin/compliance/settings', { method: 'PUT', body: JSON.stringify({ singleNaira, dailyNaira }) });
+export async function downloadCompliance(month) {
+  const token = localStorage.getItem('zappipay_admin_token');
+  const r = await fetch(`${API_URL}/api/admin/compliance/export?month=${month}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}));
+    throw new Error(body.error || 'Could not download the file.');
+  }
+  const url = URL.createObjectURL(await r.blob());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zappipay-compliance-${month}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export async function downloadExport(kind, from, to) {
   const token = localStorage.getItem('zappipay_admin_token');
   const r = await fetch(`${API_URL}/api/admin/export/${kind}?from=${from}&to=${to}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });

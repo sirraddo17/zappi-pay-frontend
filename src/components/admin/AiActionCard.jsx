@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { applyAiAction, undoAiAction, dismissAiAction } from '../../api';
 
-const KIND_ICON = { VIDEO: '🎥', SETTINGS: '⚙️', CHALLENGE: '🎯', PROMO: '🏷️', NOTICE: '📢', BROADCAST: '📣', CODE: '🧑‍💻' };
+const KIND_ICON = { VIDEO: '🎥', SETTINGS: '⚙️', CHALLENGE: '🎯', PROMO: '🏷️', NOTICE: '📢', BROADCAST: '📣', CODE: '🧑‍💻', PARTNER: '🤝' };
 
 // A change the admin assistant proposed. Nothing happens until Apply.
 export default function AiActionCard({ action }) {
