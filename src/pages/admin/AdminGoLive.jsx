@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { getGoLive, removeTestNumbers } from '../../api';
+import { getGoLive, removeTestNumbers, resetKycBeforeLive } from '../../api';
 
 // Admin → Go-live check: everything that must be right before real
 // customers use the app, with a light for each — and a tool to remove
@@ -108,8 +108,52 @@ export default function AdminGoLive() {
             )}
             {msg && <p style={{ fontSize: 13, margin: '10px 0 0', color: msg.ok ? 'var(--green-500)' : 'var(--red-500)' }}>{msg.text}</p>}
           </div>
+          <ResetKycCard />
         </>
       )}
     </AdminLayout>
+  );
+}
+
+// Monnify is live: reset BVN/NIN checks and account numbers made on or
+// before a cutoff date, so the real check runs. Owner only, typed confirm.
+// Wallet balances, orders and history are not touched.
+const todayLagos = () => new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 10);
+function ResetKycCard() {
+  const [cutoff, setCutoff] = useState(todayLagos);
+  const [confirm, setConfirm] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+  async function run() {
+    setBusy(true); setMsg(null);
+    try {
+      const r = await resetKycBeforeLive(cutoff, confirm);
+      setMsg({ ok: true, text: r.message });
+      setConfirm('');
+    } catch (e) {
+      setMsg({ ok: false, text: e.message });
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="card" style={{ margin: '16px 0', maxWidth: 720, border: '1px solid var(--red-500)' }}>
+      <b>🔁 Reset BVN checks made before Monnify went live</b>
+      <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 10px' }}>
+        For everyone whose BVN/NIN check or account numbers are from on or before this date: clears the check and removes all their account numbers (old numbers are remembered, so a later payment to one lands in Unmatched payments). <b>Wallet balances, orders and history are not touched.</b> Each customer re-enters their BVN/NIN on the Wallet page and the real Monnify check runs. Download a backup first, and tell customers with a broadcast.
+      </p>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <div className="field" style={{ margin: 0, flex: '1 1 150px' }}>
+          <label htmlFor="kyc-cutoff">Made on or before</label>
+          <input id="kyc-cutoff" type="date" value={cutoff} max={todayLagos()} onChange={(e) => setCutoff(e.target.value)} />
+        </div>
+        <div className="field" style={{ margin: 0, flex: '1 1 150px' }}>
+          <label htmlFor="kyc-confirm">Type RESET-KYC</label>
+          <input id="kyc-confirm" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="RESET-KYC" autoComplete="off" />
+        </div>
+        <button type="button" className="btn" style={{ width: 'auto', background: 'var(--red-500)' }} disabled={busy || !cutoff || confirm.trim().toUpperCase() !== 'RESET-KYC'} onClick={run}>{busy ? 'Resetting…' : 'Reset'}</button>
+      </div>
+      {msg && <p style={{ fontSize: 13, margin: '10px 0 0', color: msg.ok ? 'var(--green-500)' : 'var(--red-500)' }}>{msg.text}</p>}
+    </div>
   );
 }

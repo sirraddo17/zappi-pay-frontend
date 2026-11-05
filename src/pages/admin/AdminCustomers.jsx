@@ -210,7 +210,7 @@ export default function AdminCustomers() {
                   <td>{c.deletedAt ? '—' : c.phone}</td>
                   {result?.mode === 'top' && <td>{c.orders30d}</td>}
                   <td>{fmtMoney(c.walletBalance)}</td>
-                  <td style={{ fontSize: 12 }}>{c.kycVerifiedAt ? `${c.kycType} entered (not yet verified)` : c.kycType ? `${c.kycType} entered (not yet verified)` : 'Unverified'}</td>
+                  <td style={{ fontSize: 12 }}>{c.kycVerifiedAt ? `✅ ${c.kycType || 'BVN'} verified` : c.kycType ? `${c.kycType} entered (not yet verified)` : 'Unverified'}</td>
                   <td>
                     {c.deletedAt ? `Deleted ${new Date(c.deletedAt).toLocaleDateString('en-NG')}` : c.active ? 'Active' : 'Deactivated'}
                     {!c.deletedAt && c.deletionRequestedAt && <div style={{ fontSize: 12, color: 'var(--red-500)' }}>Wants deletion</div>}

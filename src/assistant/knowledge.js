@@ -22,9 +22,9 @@ export const COMPANY = {
 export const TOPICS = [
   {
     id: 'bvn-entered',
-    title: 'What does "BVN entered (not yet verified)" mean?',
-    keywords: ['bvn entered', 'not yet verified', 'bvn not verified', 'is my bvn verified', 'nin entered', 'bvn status'],
-    answer: 'It means you entered your BVN or NIN to get your personal account number. It is not a verification result and nothing is wrong. ZAPPI PAY does not store the number itself. If your details need changing, contact support.',
+    title: 'Is my BVN verified? ("BVN entered (not yet verified)")',
+    keywords: ['bvn entered', 'not yet verified', 'bvn not verified', 'is my bvn verified', 'nin entered', 'bvn status', 'bvn verified', 'enter bvn again', 'account number gone'],
+    answer: '"✓ Verified with your BVN/NIN" means our payment partner checked your BVN or NIN against your name and date of birth, and it matched. "BVN entered (not yet verified)" means you entered it but the check has not passed yet: open Wallet and enter your BVN or NIN again to get your account number. Your wallet balance is not affected. ZAPPI PAY never stores the number itself. If your details need changing, contact support.',
     actions: [{ label: 'Help & support', to: '/help' }],
   },
   {

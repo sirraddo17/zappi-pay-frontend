@@ -203,7 +203,8 @@ export default function Profile() {
         <div className="field">
           <label htmlFor="name">Name</label>
           <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required readOnly={Boolean(customer?.idVerified)} style={customer?.idVerified ? { opacity: 0.7 } : undefined} />
-          {customer?.idVerified && <small style={{ color: 'var(--green-500)' }}>BVN entered (not yet verified) — contact support if it needs changing.</small>}
+          {customer?.idVerified && <small style={{ color: 'var(--green-500)' }}>✓ Verified with your BVN/NIN — contact support if it needs changing.</small>}
+          {!customer?.idVerified && customer?.verified && <small style={{ color: 'var(--slate-400)' }}>BVN entered (not yet verified)</small>}
         </div>
         <div className="field">
           <label htmlFor="email">Email</label>

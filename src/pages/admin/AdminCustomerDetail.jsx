@@ -240,7 +240,7 @@ export default function AdminCustomerDetail() {
         </div>
         <p style={{ marginTop: 4 }}>
           {Array.isArray(customer.bankAccounts) && customer.bankAccounts.length > 0
-            ? `Funding account${customer.bankAccounts.length > 1 ? 's' : ''}: ${customer.bankAccounts.map((a) => `${a.bankName} ${a.accountNumber}`).join(', ')} · ${customer.kycType || 'ID'} entered (not yet verified)`
+            ? `Funding account${customer.bankAccounts.length > 1 ? 's' : ''}: ${customer.bankAccounts.map((a) => `${a.bankName} ${a.accountNumber}`).join(', ')} · ${customer.kycVerifiedAt ? `✅ ${customer.kycType || 'BVN'} verified` : customer.kycType ? `${customer.kycType} entered (not yet verified)` : 'Unverified'}`
             : 'No funding account number yet'}
         </p>
         {isOwner && !customer.deletedAt && <EmailAlertTest customerId={customer.id} />}
