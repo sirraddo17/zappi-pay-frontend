@@ -200,7 +200,11 @@ function CardFunding({ funding }) {
 }
 
 // GTBank account number (through Squad): BVN only, checked strictly
-// against name, date of birth and phone, so we ask for all of them.
+// against name, date of birth and phone, so we ask for all of them. The
+// phone must be the one registered with the BVN (often not the ZAPPI PAY
+// login number); it is sent to Squad only and doesn't change the login.
+const bvnPhoneOk = (p) => { const d = String(p || '').replace(/\D/g, ''); return /^0[789][01]\d{8}$/.test(d) || /^234[789][01]\d{8}$/.test(d); };
+const SQUAD_MISMATCH = /match your BVN|invalid BVN|validation failure/i;
 function SquadForm({ info, customerName, onCreated, addOn, onCancel }) {
   const [bvn, setBvn] = useState('');
   const [dob, setDob] = useState('');
@@ -210,18 +214,24 @@ function SquadForm({ info, customerName, onCreated, addOn, onCancel }) {
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const ready = bvn.length === 11 && gender && address.trim().length >= 5 && consent && (info.hasDob || dob) && (!phone || phone.replace(/\D/g, '').length >= 10);
+  const ready = bvn.length === 11 && gender && address.trim().length >= 5 && consent && (info.hasDob || dob) && bvnPhoneOk(phone);
 
   async function create(e) {
     e.preventDefault();
     setError('');
     setBusy(true);
     try {
-      const res = await createBankAccount({ provider: 'squad', idType: 'BVN', idNumber: bvn, gender, address, consent, ...(phone ? { phone } : {}), ...(info.hasDob ? {} : { dateOfBirth: dob }) });
+      const res = await createBankAccount({ provider: 'squad', idType: 'BVN', idNumber: bvn, gender, address, consent, phone, ...(info.hasDob ? {} : { dateOfBirth: dob }) });
       setBvn('');
       onCreated(res);
     } catch (err) {
-      setError(err.message);
+      if (SQUAD_MISMATCH.test(err.message || '')) {
+        // Most often the phone isn't the one on the BVN: say so and go to it.
+        setError('Squad couldn’t match your details. Most often the phone number isn’t the one registered with your BVN. Enter that number below (dial *565*0# to check) and try again. Also check your name, date of birth and gender are exactly as on your BVN.');
+        setTimeout(() => document.getElementById('sqPhone')?.focus(), 50);
+      } else {
+        setError(err.message);
+      }
     } finally {
       setBusy(false);
     }
@@ -258,11 +268,15 @@ function SquadForm({ info, customerName, onCreated, addOn, onCancel }) {
         <input id="sqAddr" autoComplete="street-address" maxLength={200} placeholder="e.g. 12 Iwo Road, Ibadan" value={address} onChange={(e) => setAddress(e.target.value)} required />
       </div>
       <div className="field">
-        <label htmlFor="sqPhone">Phone number linked to your BVN</label>
-        <input id="sqPhone" inputMode="tel" autoComplete="tel" maxLength={14} placeholder="Leave empty if it's your ZAPPI PAY number" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d+]/g, ''))} />
+        <label htmlFor="sqPhone">Phone number registered with your BVN</label>
+        <input id="sqPhone" inputMode="tel" autoComplete="off" maxLength={14} placeholder="e.g. 08031234567" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d+]/g, ''))} required aria-describedby="sqPhoneHint" />
+        <small id="sqPhoneHint" style={{ color: 'var(--slate-400)', display: 'block', marginTop: 4 }}>
+          Often <b>different</b> from the number you use for ZAPPI PAY. Not sure which line? Dial <b>*565*0#</b> from it: the line that shows your BVN is the right one. Used only for this check — your ZAPPI PAY number doesn’t change.
+        </small>
+        {phone && !bvnPhoneOk(phone) && <small className="error-text" style={{ display: 'block' }}>Enter an 11-digit Nigerian number, e.g. 08031234567.</small>}
       </div>
       <p style={{ fontSize: 13, margin: '0 0 8px', padding: '8px 10px', borderRadius: 8, background: 'rgba(13, 148, 136,0.08)' }}>
-        Your name <b>{customerName || 'on your profile'}</b>, date of birth and phone number must match your BVN exactly. If your name is spelt differently, fix it in Profile first.
+        Your name <b>{customerName || 'on your profile'}</b>, date of birth, gender and the phone number above must match your BVN exactly. If your name is spelt differently, fix it in Profile first.
       </p>
       <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginBottom: 10 }}>
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
