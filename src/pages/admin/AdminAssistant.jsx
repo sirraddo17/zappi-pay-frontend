@@ -45,6 +45,10 @@ const STAFF_SUGGESTIONS = [
 ];
 
 const SUGGESTIONS = [
+  'Who do the unmatched payments belong to?',
+  'Monnify check for yesterday: any payments not credited?',
+  'How long will the payout wallet last?',
+  'Show me last week\u2019s report',
   'How did we do today?',
   'Where do I turn on two-step login?',
   'Any fraud or risk flags I should look at?',

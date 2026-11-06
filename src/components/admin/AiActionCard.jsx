@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { applyAiAction, undoAiAction, dismissAiAction } from '../../api';
 
-const KIND_ICON = { VIDEO: '🎥', SETTINGS: '⚙️', CHALLENGE: '🎯', PROMO: '🏷️', NOTICE: '📢', BROADCAST: '📣', CODE: '🧑‍💻', PARTNER: '🤝' };
+const KIND_ICON = { VIDEO: '🎥', SETTINGS: '⚙️', CHALLENGE: '🎯', PROMO: '🏷️', NOTICE: '📢', BROADCAST: '📣', CODE: '🧑‍💻', PARTNER: '🤝', FUNDING: '🔎', UNMATCHED: '💸', TRANSFER: '🏦', SCHEDULE: '🔁', ORDER: '🧾' };
 
 // A change the admin assistant proposed. Nothing happens until Apply.
 export default function AiActionCard({ action }) {
@@ -12,6 +12,9 @@ export default function AiActionCard({ action }) {
   async function run(kind) {
     if (kind === 'apply' && a.kind === 'BROADCAST' && !window.confirm('Send this notification to customers now? This cannot be undone.')) return;
     if (kind === 'apply' && a.kind === 'CODE' && !window.confirm('Open this pull request on GitHub? It does not change the live app — you review and merge it on GitHub.')) return;
+    if (kind === 'apply' && a.kind === 'UNMATCHED' && !window.confirm(`${a.summary}? This credits the customer's wallet now.`)) return;
+    if (kind === 'apply' && a.kind === 'TRANSFER' && !window.confirm(`${a.summary}? ${/^Release/.test(a.summary) ? 'The money leaves now and cannot be pulled back.' : 'The customer is refunded.'}`)) return;
+    if (kind === 'apply' && a.kind === 'ORDER' && /^Mark/.test(a.summary) && !window.confirm(`${a.summary}? Only if the provider confirmed it.`)) return;
     if (kind === 'apply' && a.kind === 'VIDEO' && !window.confirm('Make this HeyGen video now? It uses your HeyGen credit and cannot be undone.')) return;
     setBusy(kind);
     setErr('');
