@@ -45,6 +45,10 @@ const STAFF_SUGGESTIONS = [
 ];
 
 const SUGGESTIONS = [
+  'Any server errors in the last hour? Find the cause and propose a fix',
+  'Is my code fix ready? Did the tests pass?',
+  'Why are purchases failing right now?',
+  'How is our support doing this week?',
   'Who do the unmatched payments belong to?',
   'Monnify check for yesterday: any payments not credited?',
   'How long will the payout wallet last?',
