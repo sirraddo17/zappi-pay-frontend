@@ -106,7 +106,7 @@ export function PackageList({ variations, value, onChange, priceOf, kind }) {
   const [q, setQ] = useState('');
   // The best-known mid-range package gets a "POPULAR" tag.
   const popularCode = useMemo(() => {
-    const hit = variations.find((v) => !period(v.name) && /\b(jinja|compact|classic|basic|nova)\b/i.test(v.name));
+    const hit = variations.find((v) => !period(v.name) && /\b(select|jinja|compact|classic|basic|nova)\b/i.test(v.name));
     return hit?.variation_code || null;
   }, [variations]);
   // Only one choice (e.g. WAEC result checker) — pick it for them.
