@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import {
   getPartnerDesk, getPartnerIssues, savePartnerContact, deletePartnerContact, addPartnerTask, updatePartnerTask, deletePartnerTask,
-  makeVtpassDraft, runPartnerCheck, getPartnerReport, setAutoPause, resumeProvider, setAwayMode, sendFollowUp, dismissFollowUp, checkCustomerFunding,
+  makeVtpassDraft, runPartnerCheck, getPartnerReport, setAutoPause, resumeProvider, setProviderHidden, setAwayMode, sendFollowUp, dismissFollowUp, checkCustomerFunding,
 } from '../../api';
 
 const naira = (n) => `₦${Math.round(Number(n || 0)).toLocaleString('en-NG')}`;
@@ -167,6 +167,20 @@ export default function AdminPartners() {
               </div>
             ))}
           </div>
+
+          {d.hiddenProviders && (
+            <div className="card" style={card}>
+              <b>🙈 Hidden on the Buy page</b>
+              <p style={{ ...small, margin: '4px 0 6px' }}>Services customers can’t see or buy until you show them again — for example ones VTpass hasn’t enabled on your account yet (it answers “Service is Not Valid”). Tick to hide, untick to show. Check with VTpass that it works before showing it.</p>
+              {d.hiddenProviders.choices.map((c) => (
+                <label key={c.id} style={{ ...line, ...row, justifyContent: 'space-between', fontSize: 14 }}>
+                  <span>{c.name} {c.hidden ? <span style={{ ...small, color: 'var(--gold)' }}>· hidden</span> : <span style={{ ...small, color: 'var(--green-500)' }}>· showing</span>}</span>
+                  <input type="checkbox" checked={c.hidden} disabled={busy === `hide-${c.id}`} style={{ width: 'auto' }}
+                    onChange={(e) => act(`hide-${c.id}`, () => setProviderHidden(c.id, e.target.checked), e.target.checked ? `${c.name} is hidden on the Buy page.` : `${c.name} is showing on the Buy page again.`)} />
+                </label>
+              ))}
+            </div>
+          )}
 
           <div className="card" style={card}>
             <b>🌙 Away mode — support while you sleep</b>

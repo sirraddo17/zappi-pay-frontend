@@ -762,6 +762,7 @@ export const makeVtpassDraft = (orderIds) => adminRequest('/api/admin/partners/v
 export const runPartnerCheck = () => adminRequest('/api/admin/partners/reconcile', { method: 'POST' });
 export const getPartnerReport = (month) => adminRequest(`/api/admin/partners/report${month ? `?month=${month}` : ''}`);
 export const setAutoPause = (enabled) => adminRequest('/api/admin/partners/auto-pause', { method: 'PUT', body: JSON.stringify({ enabled }) });
+export const setProviderHidden = (provider, hidden) => adminRequest(`/api/admin/partners/hidden/${encodeURIComponent(provider)}`, { method: 'PUT', body: JSON.stringify({ hidden }) });
 export const resumeProvider = (provider) => adminRequest(`/api/admin/partners/auto-pause/${encodeURIComponent(provider)}/resume`, { method: 'POST' });
 export const setAwayMode = (data) => adminRequest('/api/admin/partners/away', { method: 'PUT', body: JSON.stringify(data) });
 export const sendFollowUp = (id, message) => adminRequest(`/api/admin/partners/follow-ups/${id}/send`, { method: 'POST', body: JSON.stringify({ message }) });
