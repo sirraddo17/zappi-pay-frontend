@@ -6,10 +6,10 @@ import { getNombaSettings, saveNombaSettings, testNomba } from '../../api';
 export default function NombaPanel() {
   const [d, setD] = useState(null);
   const [keys, setKeys] = useState({ clientId: '', clientSecret: '', accountId: '', webhookKey: '' });
-  const [fee, setFee] = useState({ pct: '', cap: '' });
+  const [fee, setFee] = useState({ pct: '', cap: '', free: '' });
   const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { getNombaSettings().then((x) => { setD(x); setFee({ pct: String(x.fundingFeePercent ?? ''), cap: String(x.fundingFeeCap ?? '') }); }).catch((e) => setMsg({ ok: false, text: e.message })); }, []);
+  useEffect(() => { getNombaSettings().then((x) => { setD(x); setFee({ pct: String(x.fundingFeePercent ?? ''), cap: String(x.fundingFeeCap ?? ''), free: String(x.fundingFreeFrom ?? '') }); }).catch((e) => setMsg({ ok: false, text: e.message })); }, []);
   async function run(fn, okText) {
     setBusy(true); setMsg(null);
     try { const x = await fn(); if (x && 'nombaFundingEnabled' in x) setD(x); setMsg({ ok: true, text: typeof okText === 'function' ? okText(x) : okText }); return x; } catch (e) { setMsg({ ok: false, text: e.message }); return null; } finally { setBusy(false); }
@@ -61,8 +61,9 @@ export default function NombaPanel() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <div className="field" style={{ flex: '1 1 140px' }}><label htmlFor="Nomba-fpct">Percent</label><input id="Nomba-fpct" type="number" step="0.01" min="0" max="10" placeholder="Same as Monnify" value={fee.pct} onChange={(e) => setFee((x) => ({ ...x, pct: e.target.value }))} /></div>
           <div className="field" style={{ flex: '1 1 140px' }}><label htmlFor="Nomba-fcap">Max fee (₦, 0 = no max)</label><input id="Nomba-fcap" type="number" min="0" placeholder="Same as Monnify" value={fee.cap} onChange={(e) => setFee((x) => ({ ...x, cap: e.target.value }))} /></div>
+          <div className="field" style={{ flex: '1 1 140px' }}><label htmlFor="Nomba-ffree">Free from (₦, empty = off)</label><input id="Nomba-ffree" type="number" min="0" placeholder="e.g. 1000" value={fee.free} onChange={(e) => setFee((x) => ({ ...x, free: e.target.value }))} /></div>
         </div>
-        <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => run(() => saveNombaSettings({ fundingFeePercent: fee.pct === '' ? null : Number(fee.pct), fundingFeeCap: fee.cap === '' ? null : Number(fee.cap) }), 'Funding fee saved.')}>Save fee</button>
+        <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => run(() => saveNombaSettings({ fundingFeePercent: fee.pct === '' ? null : Number(fee.pct), fundingFeeCap: fee.cap === '' ? null : Number(fee.cap), fundingFreeFrom: fee.free === '' ? null : Number(fee.free) }), 'Funding fee saved.')}>Save fee</button>
       </div>
 
       {msg && <p style={{ fontSize: 13, margin: '10px 0 0', color: msg.ok ? 'var(--green-500)' : 'var(--red-500)' }}>{msg.text}</p>}

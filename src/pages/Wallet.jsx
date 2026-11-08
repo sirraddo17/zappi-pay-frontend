@@ -38,6 +38,8 @@ function CopyButton({ text }) {
 
 // Same fee rule as the server (lib/monnify.js computeFee).
 function fundingFee(amount, info) {
+  // "Free from ₦X": deposits of at least X pay no fee.
+  if (info.freeFrom > 0 && amount >= info.freeFrom) return 0;
   let fee = Math.round(amount * info.feePercent) / 100;
   if (info.feeCap > 0) fee = Math.min(fee, info.feeCap);
   return Math.max(0, Math.min(fee, amount));
@@ -46,6 +48,7 @@ function fundingFee(amount, info) {
 // "I want ₦1,000 in my wallet" → how much to send so the fee is added
 // on top instead of coming out of what they wanted.
 function amountToSend(want, info) {
+  if (info.freeFrom > 0 && want >= info.freeFrom) return want;
   const p = info.feePercent / 100;
   let n = Math.ceil(want / (1 - p));
   if (info.feeCap > 0 && fundingFee(n, info) >= info.feeCap) n = Math.ceil(want + info.feeCap);
@@ -58,7 +61,7 @@ function feeOf(account, info) {
   return info.feeByProvider?.[account?.provider || 'monnify'] || { feePercent: info.feePercent, feeCap: info.feeCap, feeIsPassThrough: info.feeIsPassThrough };
 }
 function feeLabel(f) {
-  return `${f.feePercent}%${f.feeCap > 0 ? ` (max ₦${Number(f.feeCap).toLocaleString()})` : ''}`;
+  return `${f.feePercent}%${f.feeCap > 0 ? ` (max ₦${Number(f.feeCap).toLocaleString()})` : ''}${f.freeFrom > 0 ? ` · free from ₦${Number(f.freeFrom).toLocaleString()}` : ''}`;
 }
 
 // "I want ₦X in my wallet": the exact amount to send to EACH account
@@ -81,7 +84,7 @@ function FundingHelper({ info, accounts }) {
         <div key={a.accountNumber} style={{ fontSize: 13, marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--slate-700)' }}>
           <div style={{ color: 'var(--slate-400)' }}>{a.bankName} · {a.accountNumber}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--slate-400)' }}>
-            <span>Bank processing fee{f.feePercent > 0 ? ` (${feeLabel(f)})` : ''}</span><span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>{fee > 0 ? `+ ${naira(fee)}` : 'No fee'}</span>
+            <span>Bank processing fee{f.feePercent > 0 ? ` (${feeLabel(f)})` : ''}</span><span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>{fee > 0 ? `+ ${naira(fee)}` : f.freeFrom > 0 && send >= f.freeFrom ? 'Free 🎉' : 'No fee'}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <b>Send exactly</b>
