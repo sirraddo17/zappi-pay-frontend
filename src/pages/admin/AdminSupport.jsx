@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply, adminImageUrl, checkSupportReply } from '../../api';
+import { getAdminSupportTickets, resolveSupportTicket, replySupportTicket, getAdminAiStatus, adminAiDraftReply, adminImageUrl, checkSupportReply, adminAiPolish } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 import { useShowMore } from '../../components/ShowMore';
 import { CATEGORIES, detectCategory, draftReply } from '../../assistant/replyTemplates';
@@ -29,6 +29,25 @@ function ReplyPanel({ ticket, onSent, onClose, aiOn }) {
   const [aiNote, setAiNote] = useState('');
   const [check, setCheck] = useState(null);
   const [checking, setChecking] = useState(false);
+  // ✨ Polish: fix rough English / rewrite in the customer's language.
+  const [polishLang, setPolishLang] = useState('customer');
+  const [polishing, setPolishing] = useState(false);
+  const [beforePolish, setBeforePolish] = useState(null);
+  async function polishText() {
+    if (!text.trim()) return;
+    setPolishing(true);
+    setError('');
+    try {
+      const r = await adminAiPolish({ text: text.trim(), language: polishLang, ticketId: ticket.id });
+      setBeforePolish(text);
+      setText(r.text);
+      setEdited(true);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setPolishing(false);
+    }
+  }
 
   // AI checks the reply against the order/refund facts before sending.
   async function checkWithAi() {
@@ -141,6 +160,25 @@ function ReplyPanel({ ticket, onSent, onClose, aiOn }) {
           resize: 'vertical',
         }}
       />
+      {aiOn && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 6 }}>
+          <select aria-label="Polish into" value={polishLang} onChange={(e) => setPolishLang(e.target.value)} style={{ width: 'auto', fontSize: 13 }}>
+            <option value="customer">Customer’s language</option>
+            <option value="en">English</option>
+            <option value="pcm">Pidgin</option>
+            <option value="yo">Yoruba</option>
+            <option value="ha">Hausa</option>
+            <option value="ig">Igbo</option>
+          </select>
+          <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} disabled={polishing || sending || !text.trim()} onClick={polishText}>
+            {polishing ? 'Polishing…' : '✨ Polish'}
+          </button>
+          {beforePolish !== null && (
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }} onClick={() => { setText(beforePolish); setBeforePolish(null); }}>Undo</button>
+          )}
+          <span style={{ color: 'var(--slate-400)', fontSize: 12 }}>Type it rough — it fixes the English or rewrites it, keeping your facts.</span>
+        </div>
+      )}
       <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '4px 0 8px' }}>
         Check the facts (amounts, refund status, dates) against the order and wallet before sending. {text.length}/2000
       </p>
