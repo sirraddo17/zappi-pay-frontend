@@ -112,7 +112,7 @@ function TestAccountSwitch({ customer, onDone }) {
     try { await setTestAccount(customer.id, next); onDone?.(); } catch (e) { setErr(e.message); } finally { setBusy(false); }
   }
   return (
-    <div className="card" style={{ margin: '0 0 16px', maxWidth: 520 }}>
+    <div id="test-account" className="card" style={{ margin: '0 0 16px', maxWidth: 520 }}>
       <label style={{ display: 'flex', gap: 10, alignItems: 'center', fontWeight: 600 }}>
         <input type="checkbox" checked={on} disabled={busy} onChange={(e) => flip(e.target.checked)} style={{ width: 'auto' }} />
         🧪 Test account
@@ -381,7 +381,7 @@ export default function AdminCustomerDetail() {
         )}
       </div>
 
-      <form className="card" style={{ margin: '0 0 16px', maxWidth: 400 }} onSubmit={handleAdjustSubmit}>
+      <form id="adjust-wallet" className="card" style={{ margin: '0 0 16px', maxWidth: 400 }} onSubmit={handleAdjustSubmit}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>Adjust Wallet</h2>
         {adjustError && <p className="error-text" style={{ margin: '0 0 12px' }}>{adjustError}</p>}
         <div className="field">

@@ -86,7 +86,26 @@ const SUPPORT_TABS = ['/admin/my-access', '/admin/support-guide', '/admin/assist
 
 export default function AdminLayout({ children }) {
   const { admin, logout, isOwner } = useAdminAuth();
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
+  // "/admin/money#compliance" (e.g. from an AI button): scroll to that card and
+  // highlight it briefly. Retries while the page is still loading its data.
+  useEffect(() => {
+    const id = decodeURIComponent(String(hash || '').slice(1));
+    if (!/^[a-z0-9-]{2,40}$/.test(id)) return undefined;
+    let tries = 0;
+    const t = setInterval(() => {
+      const el = document.getElementById(id);
+      tries += 1;
+      if (el) {
+        clearInterval(t);
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.style.transition = 'box-shadow .3s';
+        el.style.boxShadow = '0 0 0 3px var(--gold, #FFB830)';
+        setTimeout(() => { el.style.boxShadow = ''; }, 2500);
+      } else if (tries > 40) clearInterval(t);
+    }, 150);
+    return () => clearInterval(t);
+  }, [pathname, hash]);
   const [demo, setDemo] = useState(isDemoMode());
   // Demo / screenshot mode: hides the Server & Database screen too.
   const feat = useFeatureState(isOwner);

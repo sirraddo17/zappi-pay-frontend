@@ -41,7 +41,7 @@ function FundsGuardCard() {
   if (!g) return null;
   const ok = g.status === 'OK';
   return (
-    <div className="card" style={{ margin: '0 0 16px', border: `1px solid ${!g.enabled || demo ? 'var(--slate-700, #334155)' : ok ? 'var(--green-500)' : 'var(--red-500)'}` }}>
+    <div id="funds-guard" className="card" style={{ margin: '0 0 16px', border: `1px solid ${!g.enabled || demo ? 'var(--slate-700, #334155)' : ok ? 'var(--green-500)' : 'var(--red-500)'}` }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <h2 style={{ margin: 0, fontSize: 16 }}>🛡️ Customer-funds guard</h2>
         <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 14 }}>
@@ -96,7 +96,7 @@ function ComplianceCard() {
     try { await downloadCompliance(month); } catch (e) { setErr(e.message); } finally { setBusy(''); }
   }
   return (
-    <div className="card" style={{ maxWidth: 720, margin: '0 0 16px' }}>
+    <div id="compliance" className="card" style={{ maxWidth: 720, margin: '0 0 16px' }}>
       <h2 style={{ marginTop: 0, fontSize: 16 }}>🧾 Compliance summary (SCUML / NFIU, partner due diligence)</h2>
       <p style={{ fontSize: 12, color: 'var(--slate-400)', margin: '0 0 10px' }}>A draft for you to review — ZAPPI PAY doesn’t file or send any report. Test orders and test accounts are kept out of the real figures. Ask the AI Assistant “compliance summary for last month” for a written version.</p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 10 }}>
@@ -193,7 +193,7 @@ export default function AdminMoney() {
           <div className="card" style={{ margin: '0 0 16px', background: banner.bg, border: `1px solid ${banner.border}`, fontSize: 14 }}>{banner.text}</div>
           <FundsGuardCard />
 
-          <div className="card" style={{ margin: '0 0 16px' }}>
+          <div id="owed" className="card" style={{ margin: '0 0 16px' }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>What you owe customers</h2>
             {((real && real.parts) || data.owed.parts || [
               { key: 'wallets', label: 'Customer wallets', amount: data.owed.wallets },
@@ -210,7 +210,7 @@ export default function AdminMoney() {
             <Row label={real ? 'Total owed (real customers)' : 'Total owed'} value={naira(real ? real.owed : data.owed.total)} strong />
           </div>
 
-          <div className="card" style={{ margin: '0 0 16px' }}>
+          <div id="held" className="card" style={{ margin: '0 0 16px' }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>Money you hold</h2>
             <Row label="VTpass wallet" value={data.have.vtpass === null ? 'Unavailable' : naira(data.have.vtpass)} hint={`${data.have.vtpassError || 'Pays for every purchase'}${data.have.modes && data.have.modes.vtpass !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.vtpass === null ? 'var(--gold)' : undefined} />
             {!(demo && sandbox('monnify')) && <Row label="Monnify wallet" value={data.have.monnify === null ? 'Unavailable' : naira(data.have.monnify)} hint={`${data.have.monnifyError || 'Receives funding, pays out bank transfers'}${data.have.modes && data.have.modes.monnify !== 'live' ? ' · SANDBOX (test money) — not counted' : ''}`} color={data.have.monnify === null ? 'var(--gold)' : undefined} />}
@@ -245,7 +245,7 @@ export default function AdminMoney() {
 
       {!isDemoMode() && <ComplianceCard />}
 
-      <div className="card" style={{ maxWidth: 720, margin: '0 0 16px' }}>
+      <div id="exports" className="card" style={{ maxWidth: 720, margin: '0 0 16px' }}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>📥 Download for your accountant (Excel / CSV)</h2>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
           <div className="field" style={{ margin: 0, flex: '1 1 150px' }}>

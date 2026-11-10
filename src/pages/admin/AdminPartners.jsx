@@ -154,7 +154,7 @@ export default function AdminPartners() {
             </div>
           )}
 
-          <div className="card" style={card}>
+          <div id="auto-pause" className="card" style={card}>
             <div style={{ ...row, justifyContent: 'space-between' }}>
               <b>🚦 Auto-pause when a partner is failing</b>
               <label style={{ ...row, fontSize: 14 }}><input type="checkbox" checked={d.autoPause.enabled} onChange={(e) => act('ap', () => setAutoPause(e.target.checked), e.target.checked ? 'Auto-pause is on.' : 'Auto-pause is off.')} style={{ width: 'auto' }} /> On</label>
@@ -169,7 +169,7 @@ export default function AdminPartners() {
           </div>
 
           {d.hiddenProviders && (
-            <div className="card" style={card}>
+            <div id="hidden-services" className="card" style={card}>
               <b>🙈 Hidden on the Buy page</b>
               <p style={{ ...small, margin: '4px 0 6px' }}>Services customers can’t see or buy until you show them again — for example ones VTpass hasn’t enabled on your account yet (it answers “Service is Not Valid”). Tick to hide, untick to show. Check with VTpass that it works before showing it.</p>
               {d.hiddenProviders.choices.map((c) => (
@@ -182,7 +182,7 @@ export default function AdminPartners() {
             </div>
           )}
 
-          <div className="card" style={card}>
+          <div id="away-mode" className="card" style={card}>
             <b>🌙 Away mode — support while you sleep</b>
             <p style={{ ...small, margin: '4px 0 8px' }}>While you’re away, each new support message gets an instant, safe reply. Messages about an order get the real status (the app checks VTpass first). Money, refund and account questions only get “a person will check, your money is safe”. Simple how-to questions can get an AI answer from the official guide. Every ticket stays open for you to answer properly.</p>
             {awayDraft && (

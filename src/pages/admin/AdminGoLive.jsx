@@ -81,7 +81,7 @@ export default function AdminGoLive() {
             </div>
           ))}
 
-          <div className="card" style={{ margin: '0 0 16px', maxWidth: 680 }}>
+          <div id="test-numbers" className="card" style={{ margin: '0 0 16px', maxWidth: 680 }}>
             <b style={{ fontSize: 15 }}>🧹 Remove test account numbers</b>
             <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 8px' }}>
               Numbers made while a partner was on sandbox keys. Removing them lets those customers get a real number on the Wallet page. Wallet balances are not touched. Do this before (or right after) you switch that partner to Live. Money sent later to a removed number won’t reach the customer’s wallet automatically, so tell anyone who saved one.
@@ -137,7 +137,7 @@ function ResetKycCard() {
     }
   }
   return (
-    <div className="card" style={{ margin: '16px 0', maxWidth: 720, border: '1px solid var(--red-500)' }}>
+    <div id="reset-kyc" className="card" style={{ margin: '16px 0', maxWidth: 720, border: '1px solid var(--red-500)' }}>
       <b>🔁 Reset BVN checks made before Monnify went live</b>
       <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 10px' }}>
         For everyone whose BVN/NIN check or account numbers are from on or before this date: clears the check and removes all their account numbers (old numbers are remembered, so a later payment to one lands in Unmatched payments). <b>Wallet balances, orders and history are not touched.</b> Each customer re-enters their BVN/NIN on the Wallet page and the real Monnify check runs. Download a backup first, and tell customers with a broadcast.
