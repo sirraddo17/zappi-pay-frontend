@@ -1,3 +1,4 @@
+import MoneyNoteField from '../../components/admin/MoneyNoteField';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
@@ -162,10 +163,7 @@ export default function AdminCustomers() {
             <label htmlFor="adjustAmount">Amount (₦)</label>
             <input id="adjustAmount" type="number" min="0.01" step="0.01" inputMode="decimal" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} required />
           </div>
-          <div className="field">
-            <label htmlFor="adjustNote">Reason (optional)</label>
-            <input id="adjustNote" type="text" value={adjustNote} onChange={(e) => setAdjustNote(e.target.value)} placeholder="e.g. refund for failed order" />
-          </div>
+          <MoneyNoteField customerId={adjustingCustomer.id} type={adjustType} amount={adjustAmount} value={adjustNote} onChange={setAdjustNote} />
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn" type="submit" disabled={adjustSubmitting}>
               {adjustSubmitting ? 'Saving…' : 'Apply Adjustment'}
