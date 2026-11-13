@@ -27,8 +27,8 @@ export default function AiSettingsPanel() {
   const [gKey, setGKey] = useState('');
   const [showG, setShowG] = useState(false);
   const [showC, setShowC] = useState(false);
-  const [gCustModel, setGCustModel] = useState('gemini-2.5-flash');
-  const [gAdminModel, setGAdminModel] = useState('gemini-2.5-flash');
+  const [gCustModel, setGCustModel] = useState('gemini-3.8-flash');
+  const [gAdminModel, setGAdminModel] = useState('gemini-3.8-flash');
   const [custProvider, setCustProvider] = useState('gemini');
   const [adminProvider, setAdminProvider] = useState('gemini');
 
@@ -44,8 +44,8 @@ export default function AiSettingsPanel() {
     setAdminModel(s.aiAdminModel || 'claude-sonnet-5');
     setGKeySet(Boolean(s.geminiApiKeySet || s.geminiFromEnv));
     setGKeyHint(s.geminiApiKeyHint || (s.geminiFromEnv ? 'server settings' : ''));
-    setGCustModel(s.geminiCustomerModel || 'gemini-2.5-flash');
-    setGAdminModel(s.geminiAdminModel || 'gemini-2.5-flash');
+    setGCustModel(s.geminiCustomerModel || 'gemini-3.8-flash');
+    setGAdminModel(s.geminiAdminModel || 'gemini-3.8-flash');
     setCustProvider(s.aiCustomerProvider || 'gemini');
     setAdminProvider(s.aiAdminProvider || 'gemini');
     setDailyLimit(String(s.aiCustomerDailyLimit ?? 20));
@@ -95,7 +95,7 @@ export default function AiSettingsPanel() {
     setTest({ running: true });
     try {
       const r = await testAiConnection(model, provider);
-      setTest({ ok: true, text: `${r.provider === 'gemini' ? 'Gemini' : 'Claude'} connected ✓ (${r.model})` });
+      setTest({ ok: true, text: `${r.provider === 'gemini' ? 'Gemini' : 'Claude'} connected ✓ (${r.model})${r.note ? ` — ${r.note}` : ''}` });
       getAiUsage().then(setUsage).catch(() => {});
     } catch (err) {
       setTest({ ok: false, text: err.message });
@@ -243,7 +243,7 @@ export default function AiSettingsPanel() {
               {Object.entries(usage.byType).map(([k, v]) => `${k === 'CUSTOMER' ? 'Customers' : k === 'ADMIN' ? 'Admin' : k === 'VOICE' ? 'Voice' : 'Tests'}: ${v.messages} ($${v.usd.toFixed(2)})`).join(' · ')}
             </div>
           )}
-          <div style={{ color: 'var(--slate-400)', fontSize: 11, marginTop: 4 }}>Estimate only; your Anthropic console shows the real bill.</div>
+          <div style={{ color: 'var(--slate-400)', fontSize: 11, marginTop: 4 }}>Estimate only; your Google AI Studio / Anthropic console show the real bill.</div>
         </div>
       )}
     </form>
