@@ -176,7 +176,7 @@ export default function AdminAssistant() {
         <div className="card" style={{ margin: '0 0 16px', border: '1px solid var(--orange, #f97316)' }}>
           <strong>The AI assistant is off.</strong>
           <p style={{ color: 'var(--slate-400)', fontSize: 14, margin: '4px 0 0' }}>
-            {status.keySet ? 'Turn on "Admin assistant"' : 'Paste your Claude API key and turn on "Admin assistant"'} in{' '}
+            {status.keySet ? 'Turn on "Admin assistant"' : 'Paste a Gemini or Claude API key and turn on "Admin assistant"'} in{' '}
             <Link to="/admin/settings" style={{ color: 'var(--purple)' }}>Settings → AI Assistant</Link>.
           </p>
         </div>

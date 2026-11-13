@@ -280,7 +280,7 @@ export const aiChat = (messages, images) => request('/api/ai/chat', { method: 'P
 export const getAdminAiStatus = () => adminRequest('/api/admin/ai/status');
 export const adminAiChat = (messages, images, statement) => adminRequest('/api/admin/ai/chat', { method: 'POST', quiet: true, body: JSON.stringify({ messages, images, ...(statement ? { statement: { partner: statement.partner, fileName: statement.fileName, rows: statement.rows } } : {}) }) });
 export const adminAiDraftReply = (ticketId, instructions) => adminRequest('/api/admin/ai/draft-reply', { method: 'POST', quiet: true, body: JSON.stringify({ ticketId, instructions }) });
-export const testAiConnection = (model) => adminRequest('/api/admin/ai/test', { method: 'POST', body: JSON.stringify({ model }) });
+export const testAiConnection = (model, provider) => adminRequest('/api/admin/ai/test', { method: 'POST', body: JSON.stringify({ model, provider }) });
 export const getAiUsage = () => adminRequest('/api/admin/ai/usage');
 export const updateSettings = (data) => adminRequest('/api/admin/settings', { method: 'PATCH', body: JSON.stringify(data) });
 export const testMonnifyConnection = () => adminRequest('/api/admin/monnify/test', { method: 'POST' });

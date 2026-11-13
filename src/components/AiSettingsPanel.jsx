@@ -21,6 +21,14 @@ export default function AiSettingsPanel() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
   const [test, setTest] = useState(null);
+  // Google Gemini: key, models, and which provider each assistant tries first.
+  const [gKeySet, setGKeySet] = useState(false);
+  const [gKeyHint, setGKeyHint] = useState('');
+  const [gKey, setGKey] = useState('');
+  const [gCustModel, setGCustModel] = useState('gemini-2.5-flash');
+  const [gAdminModel, setGAdminModel] = useState('gemini-2.5-flash');
+  const [custProvider, setCustProvider] = useState('gemini');
+  const [adminProvider, setAdminProvider] = useState('gemini');
 
   function apply(s) {
     setKeySet(Boolean(s.aiApiKeySet));
@@ -32,6 +40,12 @@ export default function AiSettingsPanel() {
     setTranslateOn(s.aiTranslateBroadcasts !== false);
     setCustomerModel(s.aiCustomerModel || 'claude-haiku-4-5');
     setAdminModel(s.aiAdminModel || 'claude-sonnet-5');
+    setGKeySet(Boolean(s.geminiApiKeySet || s.geminiFromEnv));
+    setGKeyHint(s.geminiApiKeyHint || (s.geminiFromEnv ? 'server settings' : ''));
+    setGCustModel(s.geminiCustomerModel || 'gemini-2.5-flash');
+    setGAdminModel(s.geminiAdminModel || 'gemini-2.5-flash');
+    setCustProvider(s.aiCustomerProvider || 'gemini');
+    setAdminProvider(s.aiAdminProvider || 'gemini');
     setDailyLimit(String(s.aiCustomerDailyLimit ?? 20));
     setBudget(String(Number(s.aiMonthlyBudgetUsd ?? 10)));
   }
@@ -48,6 +62,11 @@ export default function AiSettingsPanel() {
     try {
       const d = await updateSettings({
         ...(apiKey.trim() ? { aiApiKey: apiKey.trim() } : {}),
+        ...(gKey.trim() ? { geminiApiKey: gKey.trim() } : {}),
+        geminiCustomerModel: gCustModel.trim(),
+        geminiAdminModel: gAdminModel.trim(),
+        aiCustomerProvider: custProvider,
+        aiAdminProvider: adminProvider,
         aiCustomerEnabled: customerOn,
         aiChatBuyEnabled: chatBuyOn,
         aiAdminEnabled: adminOn,
@@ -61,6 +80,7 @@ export default function AiSettingsPanel() {
       });
       apply(d.settings);
       setApiKey('');
+      setGKey('');
       setMsg({ ok: true, text: 'Saved.' });
     } catch (err) {
       setMsg({ ok: false, text: err.message });
@@ -69,11 +89,11 @@ export default function AiSettingsPanel() {
     }
   }
 
-  async function runTest(model) {
+  async function runTest(model, provider) {
     setTest({ running: true });
     try {
-      const r = await testAiConnection(model);
-      setTest({ ok: true, text: `Connected ✓ (${r.model})` });
+      const r = await testAiConnection(model, provider);
+      setTest({ ok: true, text: `${r.provider === 'gemini' ? 'Gemini' : 'Claude'} connected ✓ (${r.model})` });
       getAiUsage().then(setUsage).catch(() => {});
     } catch (err) {
       setTest({ ok: false, text: err.message });
@@ -86,11 +106,47 @@ export default function AiSettingsPanel() {
 
   return (
     <form className="card" style={{ margin: 0, maxWidth: 520 }} onSubmit={save}>
-      <h2 style={{ marginTop: 0, fontSize: 17 }}>AI Assistant (Claude)</h2>
+      <h2 style={{ marginTop: 0, fontSize: 17 }}>AI Assistant (Gemini + Claude)</h2>
       <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -4 }}>
         Answers customer questions in the Help chat (using their own orders and wallet) and your business questions under AI Assistant. It can only look things up; it can never move money or change anything.
       </p>
       {msg && <p style={{ color: msg.ok ? 'var(--green-500)' : 'var(--red-500)', fontSize: 14 }}>{msg.text}</p>}
+
+      <div className="card" style={{ margin: '0 0 12px', padding: 12, background: 'rgba(13,148,136,0.06)' }}>
+        <b style={{ fontSize: 14 }}>Google Gemini</b>
+        <div className="field" style={{ marginTop: 6 }}>
+          <label htmlFor="gKey">Gemini API key</label>
+          <input id="gKey" type="password" autoComplete="off" value={gKey} onChange={(e) => setGKey(e.target.value)} placeholder={gKeySet ? `Saved (${gKeyHint}) — paste a new one to replace` : 'AIza…'} />
+          <small style={{ color: 'var(--slate-400)' }}>
+            From aistudio.google.com → Get API key. Set a budget/limit in Google Cloud billing too.{' '}
+            {gKeySet && !gKeyHint.startsWith('server') && (
+              <button type="button" onClick={(e) => { if (window.confirm('Remove the Gemini key? The assistant will use Claude only.')) save(e, { geminiApiKeyClear: true }); }} style={{ background: 'none', border: 'none', color: 'var(--red-500)', cursor: 'pointer', padding: 0, fontSize: 12 }}>Remove key</button>
+            )}
+          </small>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="field" style={{ flex: '1 1 180px', margin: 0 }}><label htmlFor="gCm">Gemini model — customers</label><input id="gCm" value={gCustModel} onChange={(e) => setGCustModel(e.target.value)} /></div>
+          <div className="field" style={{ flex: '1 1 180px', margin: 0 }}><label htmlFor="gAm">Gemini model — admin</label><input id="gAm" value={gAdminModel} onChange={(e) => setGAdminModel(e.target.value)} /></div>
+        </div>
+        <button type="button" className="btn btn-secondary" style={{ width: 'auto', marginTop: 8 }} disabled={!gKeySet || test?.running} onClick={() => runTest(gCustModel, 'gemini')}>Test Gemini</button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+          <div className="field" style={{ flex: '1 1 200px', margin: 0 }}>
+            <label htmlFor="pCust">Customer chat answers with</label>
+            <select id="pCust" value={custProvider} onChange={(e) => setCustProvider(e.target.value)}>
+              <option value="gemini">Gemini first, Claude if busy</option>
+              <option value="claude">Claude first, Gemini if busy</option>
+            </select>
+          </div>
+          <div className="field" style={{ flex: '1 1 200px', margin: 0 }}>
+            <label htmlFor="pAdmin">Admin &amp; support assistant answers with</label>
+            <select id="pAdmin" value={adminProvider} onChange={(e) => setAdminProvider(e.target.value)}>
+              <option value="gemini">Gemini first, Claude if busy</option>
+              <option value="claude">Claude first, Gemini if busy</option>
+            </select>
+          </div>
+        </div>
+        <small style={{ color: 'var(--slate-400)', display: 'block', marginTop: 6 }}>If the first one is busy, out of credit or failing, the other answers by itself (only providers with a saved key are used). The monthly budget below covers both.</small>
+      </div>
 
       <div className="field">
         <label htmlFor="aiKey">Claude API key</label>
