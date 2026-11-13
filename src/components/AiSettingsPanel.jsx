@@ -25,6 +25,8 @@ export default function AiSettingsPanel() {
   const [gKeySet, setGKeySet] = useState(false);
   const [gKeyHint, setGKeyHint] = useState('');
   const [gKey, setGKey] = useState('');
+  const [showG, setShowG] = useState(false);
+  const [showC, setShowC] = useState(false);
   const [gCustModel, setGCustModel] = useState('gemini-2.5-flash');
   const [gAdminModel, setGAdminModel] = useState('gemini-2.5-flash');
   const [custProvider, setCustProvider] = useState('gemini');
@@ -116,7 +118,10 @@ export default function AiSettingsPanel() {
         <b style={{ fontSize: 14 }}>Google Gemini</b>
         <div className="field" style={{ marginTop: 6 }}>
           <label htmlFor="gKey">Gemini API key</label>
-          <input id="gKey" type="password" autoComplete="off" value={gKey} onChange={(e) => setGKey(e.target.value)} placeholder={gKeySet ? `Saved (${gKeyHint}) — paste a new one to replace` : 'AIza…'} />
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input id="gKey" type={showG ? 'text' : 'password'} autoComplete="off" spellCheck={false} value={gKey} onChange={(e) => setGKey(e.target.value.trim())} placeholder={gKeySet ? `Saved (${gKeyHint}) — paste a new one to replace` : 'AIza… or AQ.…'} style={{ flex: 1 }} />
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 10px', fontSize: 12 }} onClick={() => setShowG((v) => !v)} aria-label={showG ? 'Hide key' : 'Show key'}>{showG ? '🙈 Hide' : '👁 Show'}</button>
+          </div>
           <small style={{ color: 'var(--slate-400)' }}>
             From aistudio.google.com → Get API key. Set a budget/limit in Google Cloud billing too.{' '}
             {gKeySet && !gKeyHint.startsWith('server') && (
@@ -150,7 +155,10 @@ export default function AiSettingsPanel() {
 
       <div className="field">
         <label htmlFor="aiKey">Claude API key</label>
-        <input id="aiKey" type="password" autoComplete="off" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder={keySet ? `Saved (${keyHint}) — paste a new one to replace` : 'sk-ant-…'} />
+        <div style={{ display: 'flex', gap: 6 }}>
+          <input id="aiKey" type={showC ? 'text' : 'password'} autoComplete="off" spellCheck={false} value={apiKey} onChange={(e) => setApiKey(e.target.value.trim())} placeholder={keySet ? `Saved (${keyHint}) — paste a new one to replace` : 'sk-ant-…'} style={{ flex: 1 }} />
+          <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 10px', fontSize: 12 }} onClick={() => setShowC((v) => !v)} aria-label={showC ? 'Hide key' : 'Show key'}>{showC ? '🙈 Hide' : '👁 Show'}</button>
+        </div>
         <small style={{ color: 'var(--slate-400)' }}>
           From console.anthropic.com → API Keys. Set a monthly spend limit there too.{' '}
           {keySet && (
