@@ -188,6 +188,10 @@ export const getWalletTransaction = (id) => request(`/api/wallet/transactions/${
 export const getPendingFundRequest = () => request('/api/wallet/fund-request/pending');
 export const submitFundRequest = (data) => request('/api/wallet/fund-request', { method: 'POST', body: JSON.stringify(data) });
 export const getBankAccount = () => request('/api/wallet/bank-account');
+export const bvnStart = (bvn, consent) => request('/api/wallet/bvn/start', { method: 'POST', body: JSON.stringify({ bvn, consent }) });
+export const bvnConfirm = (sessionId, otp, bvn) => request('/api/wallet/bvn/confirm', { method: 'POST', body: JSON.stringify({ sessionId, otp, bvn }) });
+export const getBvnAutofill = () => adminRequest('/api/admin/bvn-autofill');
+export const saveBvnAutofill = (body) => adminRequest('/api/admin/bvn-autofill', { method: 'PUT', body: JSON.stringify(body) });
 export const createBankAccount = (data) => request('/api/wallet/bank-account', { method: 'POST', body: JSON.stringify(data) });
 export const checkBankPayments = () => request('/api/wallet/bank-account/check', { method: 'POST' });
 

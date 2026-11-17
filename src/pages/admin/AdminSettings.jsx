@@ -26,6 +26,7 @@ import ShopsPanel from '../../components/admin/ShopsPanel';
 import RewardSplitPanel from '../../components/admin/RewardSplitPanel';
 import SafePricingPanel from '../../components/admin/SafePricingPanel';
 import ReferralProgressPanel from '../../components/admin/ReferralProgressPanel';
+import BvnAutofillPanel from '../../components/admin/BvnAutofillPanel';
 import { getSettings, updateSettings, changeAdminPassword, testMonnifyConnection, getMonnifyOverview, resetMonnifyAccounts, sendTestDailySummary } from '../../api';
 
 // Lowest VTpass commission per service (% of the sale) — MTN for airtime
@@ -1030,6 +1031,7 @@ export default function AdminSettings() {
               Uses Monnify verification: about ₦10 per BVN check and ₦60 per NIN check (from your Monnify wallet). Up to 3 tries per customer a day. After a match, the customer can’t change their name or date of birth. Turn this on only with Monnify LIVE keys — test mode can’t check real IDs.
             </p>
             {idMatch && monnifyMode !== 'live' && <p style={{ color: 'var(--red-500)', fontSize: 13, margin: '8px 0 0' }}>⚠ Monnify is in test mode, so every check fails and customers can’t get account numbers. Switch Monnify to live, or untick this and save.</p>}
+            <div id="bvn-autofill"><BvnAutofillPanel /></div>
           </div>
           )}
 

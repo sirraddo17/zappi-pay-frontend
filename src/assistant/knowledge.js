@@ -21,6 +21,13 @@ export const COMPANY = {
 
 export const TOPICS = [
   {
+    id: 'verify-with-bvn',
+    title: 'What is "Verify with BVN"?',
+    keywords: ['verify with bvn', 'bvn code', 'otp bvn', 'code to my bvn phone', 'bvn phone number', 'my name is locked', 'change my name', 'auto fill', 'autofill'],
+    answer: 'When you get your account number, you can verify with your BVN: tick to agree, and our identity partner sends a code to the phone number linked to your BVN. Enter it and your name and date of birth are filled in from your BVN and locked (contact support if they need changing). No code? The code goes to the phone number on your BVN, which may be an old line. ZAPPI PAY never keeps your BVN.',
+    actions: [{ label: 'Wallet', to: '/wallet' }, { label: 'Help & support', to: '/help' }],
+  },
+  {
     id: 'bvn-entered',
     title: 'Is my BVN verified? ("BVN entered (not yet verified)")',
     keywords: ['bvn entered', 'not yet verified', 'bvn not verified', 'is my bvn verified', 'nin entered', 'bvn status', 'bvn verified', 'enter bvn again', 'account number gone'],

@@ -6,7 +6,7 @@ import TestModeBanner from '../components/TestModeBanner';
 import SavingsCard from '../components/SavingsCard';
 import SpendingCard from '../components/SpendingCard';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getWalletBalance, getWalletTransactions, submitFundRequest, getPendingFundRequest, getBankAccount, createBankAccount, checkBankPayments, redeemCoupon, startCardPayment, verifyCardPayment, getCashback, getMyLimits } from '../api';
+import { getWalletBalance, getWalletTransactions, submitFundRequest, getPendingFundRequest, getBankAccount, createBankAccount, checkBankPayments, bvnStart, bvnConfirm, redeemCoupon, startCardPayment, verifyCardPayment, getCashback, getMyLimits } from '../api';
 import useAutoRefresh from '../lib/useAutoRefresh';
 import { useAuth } from '../context/AuthContext';
 import BottomNav from '../components/BottomNav';
@@ -359,6 +359,86 @@ function AddAccountForm({ info, customerName, onCreated, onCancel }) {
 
 // Personal account number(s): money sent here is added to the wallet
 // automatically. First time, the customer verifies with BVN or NIN.
+// "Verify with BVN" (when switched on for this customer): BVN + consent →
+// code sent to the BVN phone → name and date of birth filled in and locked
+// → account number. The BVN stays only in this form (never stored).
+function BvnAutofillForm({ info, onCreated }) {
+  const [step, setStep] = useState(info.bvnVerified ? 'ready' : 'bvn'); // bvn → otp → ready
+  const [bvn, setBvn] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [session, setSession] = useState(null);
+  const [details, setDetails] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  async function run(fn) {
+    setBusy(true); setError('');
+    try { await fn(); } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+  const startCheck = (e) => { e.preventDefault(); run(async () => { setSession(await bvnStart(bvn, consent)); setOtp(''); setStep('otp'); }); };
+  const confirmCode = (e) => { e.preventDefault(); run(async () => { setDetails(await bvnConfirm(session.sessionId, otp, bvn)); setStep('ready'); }); };
+  const getNumber = (e) => { e.preventDefault(); run(async () => { const res = await createBankAccount({ idType: 'BVN', idNumber: bvn, consent: true }); setBvn(''); onCreated(res); }); };
+  const lockRow = (label, value) => value ? <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '6px 0', borderTop: '1px solid var(--slate-700)', fontSize: 14 }}><span style={{ color: 'var(--slate-400)' }}>{label}</span><b>🔒 {value}</b></div> : null;
+  return (
+    <div className="card">
+      <h2 style={{ marginTop: 0, fontSize: 16 }}>Get your personal account number</h2>
+      <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -4 }}>Verify with your BVN and we fill in your details for you. Any bank transfer to your account number goes straight into your wallet.</p>
+      {error && <p className="error-text" style={{ margin: '0 0 10px' }}>{error}</p>}
+      {step === 'bvn' && (
+        <form onSubmit={startCheck}>
+          <div className="field">
+            <label htmlFor="afBvn">Your BVN (11 digits)</label>
+            <input id="afBvn" inputMode="numeric" autoComplete="off" maxLength={11} value={bvn} onChange={(e) => setBvn(e.target.value.replace(/\D/g, ''))} required />
+          </div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginBottom: 10 }}>
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ width: 'auto', marginTop: 3 }} />
+            I agree that ZAPPI PAY may check my BVN details with our identity partner. A code will be sent to the phone number linked to my BVN.
+          </label>
+          <button className="btn" type="submit" disabled={busy || bvn.length !== 11 || !consent}>{busy ? 'Sending code…' : 'Verify with BVN'}</button>
+        </form>
+      )}
+      {step === 'otp' && (
+        <form onSubmit={confirmCode}>
+          <p style={{ fontSize: 14 }}>Enter the code sent to the phone number on your BVN{session?.phoneHint ? ` (ending ${session.phoneHint})` : ''}.</p>
+          <div className="field">
+            <label htmlFor="afOtp">Code</label>
+            <input id="afOtp" inputMode="numeric" autoComplete="one-time-code" maxLength={8} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} required />
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button className="btn" type="submit" disabled={busy || otp.length < 4}>{busy ? 'Checking…' : 'Confirm'}</button>
+            <button className="btn btn-secondary" type="button" disabled={busy} onClick={() => { setStep('bvn'); setSession(null); setError(''); }}>Start again</button>
+          </div>
+          <p style={{ color: 'var(--slate-400)', fontSize: 12 }}>The code expires in {session?.expiresInMinutes || 10} minutes. No code? Check that this is your BVN, then start again.</p>
+        </form>
+      )}
+      {step === 'ready' && (
+        <form onSubmit={getNumber}>
+          {details ? (
+            <div style={{ margin: '0 0 10px' }}>
+              <div style={{ fontSize: 13, color: 'var(--green-500)', marginBottom: 4 }}>✓ Verified with your BVN. These details are now locked.</div>
+              {lockRow('First name', details.firstName)}
+              {lockRow('Middle name', details.middleName)}
+              {lockRow('Last name', details.lastName)}
+              {lockRow('Date of birth', details.dateOfBirth)}
+              <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 4 }}>From your BVN — contact support to change.</div>
+            </div>
+          ) : (
+            <p style={{ fontSize: 13, color: 'var(--green-500)' }}>✓ Your details are verified with your BVN. Enter your BVN once more to get your account number.</p>
+          )}
+          {!details && (
+            <div className="field">
+              <label htmlFor="afBvn2">Your BVN (11 digits)</label>
+              <input id="afBvn2" inputMode="numeric" autoComplete="off" maxLength={11} value={bvn} onChange={(e) => setBvn(e.target.value.replace(/\D/g, ''))} required />
+            </div>
+          )}
+          <button className="btn" type="submit" disabled={busy || bvn.length !== 11}>{busy ? 'Creating…' : 'Get My Account Number'}</button>
+        </form>
+      )}
+      <p style={{ color: 'var(--slate-400)', fontSize: 12, marginBottom: 0 }}>ZAPPI PAY doesn’t keep your BVN — only a one-way code, so one BVN can’t open two accounts.</p>
+    </div>
+  );
+}
+
 function BankFunding({ info, onCreated, onCredited, customerName }) {
   const [idType, setIdType] = useState('BVN');
   const [idNumber, setIdNumber] = useState('');
@@ -415,6 +495,10 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
 
   if (!info.accounts && info.provider === 'squad') {
     return <SquadForm info={info} customerName={customerName} onCreated={onCreated} />;
+  }
+
+  if (!info.accounts && (info.bvnAutofill || info.bvnVerified)) {
+    return <BvnAutofillForm info={info} onCreated={onCreated} />;
   }
 
   if (!info.accounts) {
