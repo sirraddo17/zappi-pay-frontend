@@ -3,7 +3,7 @@ import TestModeBanner from '../components/TestModeBanner';
 import SocialLinks from '../components/SocialLinks';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LogoIcon, Wordmark } from '../components/Logo';
-import { PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, TrophyIcon, FundIcon, PrinterIcon } from '../components/Icons';
+import { PhoneIcon, WifiIcon, BoltIcon, TvIcon, CapIcon, BuildingIcon, GlobeIcon, FundIcon, PrinterIcon } from '../components/Icons';
 import { getReferralInfo } from '../api';
 import { SUPPORT_EMAIL, WHATSAPP_NUMBER, COMPANY } from '../assistant/knowledge';
 import './landing.css';
@@ -15,7 +15,7 @@ const SERVICES = [
   { label: 'Cable TV', desc: 'DStv, GOtv, StarTimes, Showmax', Icon: TvIcon, bg: '#2955a3' },
   { label: 'Education', desc: 'WAEC & JAMB PINs', Icon: CapIcon, bg: '#8c2f4a' },
   { label: 'Internet', desc: 'Smile, Spectranet & more', Icon: GlobeIcon, bg: '#c2540f' },
-  { label: 'Bet Funding', desc: 'Fund your betting wallets', Icon: TrophyIcon, bg: '#a38a0a' },
+  { label: 'Your Account Number', desc: 'Fund your wallet from any bank', Icon: FundIcon, bg: '#a38a0a' },
   { label: 'Print Cards', desc: 'Recharge card PINs to print & sell', Icon: PrinterIcon, bg: '#1a7a72' },
 ];
 
@@ -43,7 +43,7 @@ function PhoneMockup() {
     ['Power', BoltIcon, '#1f6b4a'],
     ['Cable', TvIcon, '#2955a3'],
     ['Exams', CapIcon, '#8c2f4a'],
-    ['Bets', TrophyIcon, '#a38a0a'],
+    ['Print', PrinterIcon, '#a38a0a'],
     ['Internet', GlobeIcon, '#c2540f'],
     ['A2Cash', FundIcon, '#0E7490'],
   ];
