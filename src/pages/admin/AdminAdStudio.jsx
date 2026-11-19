@@ -11,6 +11,7 @@ import HeygenVideosPanel from '../../components/admin/HeygenVideosPanel';
 import WeekPlanPanel from '../../components/admin/WeekPlanPanel';
 import AiPictureBox from '../../components/admin/AiPictureBox';
 import StoryVideoPanel from '../../components/admin/StoryVideoPanel';
+import QuickVideoPanel from '../../components/admin/QuickVideoPanel';
 
 const BLANK = { headline: 'Data finish? No wahala', highlight: 'No wahala', subtext: 'Top up MTN, Airtel, Glo & 9mobile in seconds', cta: 'Buy data', badges: ['Instant', 'Auto refunds'], emoji: '📶', theme: 'teal', caption: 'Data finish? No wahala 😄 Top up any network in seconds with ZAPPI PAY. 👉 www.zappipay.com.ng #ZappiPay #BuyData', link: '/buy/data' };
 
@@ -43,6 +44,7 @@ const SECTIONS = [
   { id: 'design', label: '🖼️ Design an ad', hint: 'Describe it, let AI suggest 3 options (or edit yourself), then download pictures, make 3-second videos or put it in the app.' },
   { id: 'festivals', label: '🎉 Festivals & dates', hint: 'Ready-made posts for holidays and milestones — tap one to open it in Design an ad.' },
   { id: 'week', label: '📅 Week plan', hint: 'AI plans a week of posts — tap a day to open it in Design an ad.', ai: true },
+  { id: 'quick', label: '⚡ Quick video', hint: 'Describe a video — the AI writes it (change any line), then this phone or laptop animates it in the ZAPPI PAY style and records it (about 18 seconds; keep the screen on). Each video has its own QR tag, so you can see which one brought customers.' },
   { id: 'story', label: '🎬 Story video', hint: 'Longer story-style videos for Status, Reels and TikTok.' },
   { id: 'presenter', label: '🎥 Scripts & AI presenter', hint: 'Video scripts, and talking-presenter videos made from them (HeyGen).' },
 ];
@@ -251,6 +253,9 @@ export default function AdminAdStudio() {
           <WeekPlanPanel onOpen={(x) => { setDesigns([{ ...BLANK, ...x, badges: x.badges?.length ? x.badges : [], link: x.link || '' }]); setPick(0); go('design'); }} />
         </div>
       )}
+      <div hidden={tab !== 'quick'}>
+        <QuickVideoPanel />
+      </div>
       <div hidden={tab !== 'story'}>
         <StoryVideoPanel />
       </div>

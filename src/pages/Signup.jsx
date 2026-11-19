@@ -10,6 +10,16 @@ import { getReferralInfo } from '../api';
 
 const REF_KEY = 'zappipay_ref';
 
+// The video ad this person came from (src/main.jsx), for 30 days.
+function videoTag() {
+  try {
+    const v = JSON.parse(localStorage.getItem('zp_video_tag') || 'null');
+    return v && Date.now() - v.at < 30 * 24 * 3600 * 1000 ? v.tag : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export default function Signup() {
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -71,6 +81,7 @@ export default function Signup() {
         securityQuestion: question,
         securityAnswer: answer,
         referralCode: referralCode.trim() || undefined,
+        signupTag: videoTag(),
       });
       try {
         localStorage.removeItem(REF_KEY);

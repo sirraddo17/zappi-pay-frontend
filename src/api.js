@@ -838,3 +838,11 @@ export const grantCustomerReward = (id, kind, amount, reason) => adminRequest(`/
 export const openTicketForCustomer = (id, data) => adminRequest(`/api/admin/customers/${id}/tickets`, { method: 'POST', body: JSON.stringify(data) });
 
 export const getSupportGuide = () => adminRequest('/api/admin/support-guide');
+
+// Ad Studio → ⚡ Quick video
+export const writeQuickVideo = (data) => adminRequest('/api/admin/ai/quick-video', { method: 'POST', body: JSON.stringify(data) });
+export const getQuickVideo = (tag) => adminRequest(`/api/admin/video-tags/${encodeURIComponent(tag)}`);
+export const markQuickVideoMade = (tag, script) => adminRequest(`/api/admin/video-tags/${encodeURIComponent(tag)}/made`, { method: 'POST', body: JSON.stringify({ script }) });
+export const getVideoResults = () => adminRequest('/api/admin/video-tags');
+export const recordVideoVisit = (tag) => request('/api/app/video-visit', { method: 'POST', body: JSON.stringify({ tag }) });
+export const createQuickVideo = (data) => adminRequest('/api/admin/video-tags', { method: 'POST', body: JSON.stringify(data) });
