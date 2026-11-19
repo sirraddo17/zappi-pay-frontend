@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { getShop } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useFeatures } from '../components/ServiceNotices';
 import { rememberShop } from '../lib/shopRef';
 
 const ITEMS = [
@@ -18,6 +19,7 @@ const ITEMS = [
 export default function Shop() {
   const { username } = useParams();
   const { customer } = useAuth();
+  const features = useFeatures();
   const [shop, setShop] = useState(null);
   const [err, setErr] = useState('');
 
@@ -48,7 +50,7 @@ export default function Shop() {
             <div style={{ fontSize: 12, marginTop: 8, opacity: 0.85 }}>Run by {shop.owner} · @{shop.username}</div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, padding: '0 16px' }}>
-            {ITEMS.map(([slug, icon, label]) => (
+            {ITEMS.filter(([slug]) => slug !== 'betting' || features.betFunding).map(([slug, icon, label]) => (
               <Link key={slug} to={go(slug)} className="card" style={{ margin: 0, textAlign: 'center', textDecoration: 'none', color: 'var(--slate-100)', padding: '14px 6px' }}>
                 <div style={{ fontSize: 24 }} aria-hidden="true">{icon}</div>
                 <div style={{ fontSize: 13, marginTop: 4 }}>{label}</div>
