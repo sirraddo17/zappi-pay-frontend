@@ -99,7 +99,7 @@ export default function Transfer() {
     try {
       await sendTransfer({ identifier: identifier.trim(), amount: Number(amount), note: note.trim() || undefined, ...auth });
       setConfirmOpen(false);
-      setSuccess(`₦${Number(amount).toLocaleString()} sent to ${recipient.name}.`);
+      setSuccess(`${Number(amount) < 0 ? '−' : ''}₦${Math.abs(Number(amount)).toLocaleString()} sent to ${recipient.name}.`);
       setIdentifier('');
       setRecipient(null);
       setAmount('');
@@ -228,7 +228,7 @@ export default function Transfer() {
 
       <PinConfirm
         open={confirmOpen}
-        summary={recipient ? `Send ₦${Number(amount || 0).toLocaleString()} to ${recipient.name}` : ''}
+        summary={recipient ? `Send ${Number(amount || 0) < 0 ? '−' : ''}₦${Math.abs(Number(amount || 0)).toLocaleString()} to ${recipient.name}` : ''}
         notice={<NoReverseNote />}
         onSubmit={doSend}
         onError={(err) => setError(err.message || 'Could not complete transfer.')}

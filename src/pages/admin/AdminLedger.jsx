@@ -7,7 +7,7 @@ import { getLedger, getRefunds } from '../../api';
 // are never edited or deleted; corrections are new rows), and Refunds:
 // automatic and manual, showing that cash back + cashback back = what
 // the order took.
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const when = (d) => new Date(d).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' });
 const TYPES = ['', 'FUND', 'DEBIT', 'REFUND', 'CASHBACK', 'REFERRAL_BONUS', 'LOYALTY', 'DELIVERY_BONUS', 'SHOP_COMMISSION', 'TRANSFER_IN', 'TRANSFER_OUT', 'AIRTIME_CASH', 'BILL_PAY'];
 const CREDIT = /^(FUND|REFUND|CASHBACK|REFERRAL_BONUS|LOYALTY|CONTEST_PRIZE|COUPON|CHALLENGE_REWARD|DELIVERY_BONUS|SHOP_COMMISSION|TRANSFER_IN|AIRTIME_CASH|INTEREST|SAVINGS_OUT|.*_IN|DISPUTE_RELEASE|REWARD)$/;

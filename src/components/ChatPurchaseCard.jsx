@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import PinConfirm from './PinConfirm';
 import { currentShop } from '../lib/shopRef';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const ICON = { AIRTIME: '📱', DATA: '📶', ELECTRICITY: '⚡', CABLE: '📺', EDUCATION: '🎓', INTERNET: '🌐', BETTING: '🏆' };
 
 // A purchase the help assistant prepared. Nothing is bought until the

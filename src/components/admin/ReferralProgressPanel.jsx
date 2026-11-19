@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAdminReferralProgress } from '../../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 
 // Friends still working toward the referral bonus, with ₦ spent — so you
 // can see who's close (customers only see a %).

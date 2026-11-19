@@ -48,7 +48,7 @@ export async function drawWinnerCard({ contestTitle, rank, prize, friends, code,
   ctx.fillText(`I came ${ORDINAL(rank)}!`, S / 2, 520);
   ctx.fillStyle = '#FFB830';
   ctx.font = font(700, 110);
-  ctx.fillText(`₦${Number(prize).toLocaleString('en-NG')}`, S / 2, 650);
+  ctx.fillText(`${Number(prize) < 0 ? '−' : ''}₦${Math.abs(Number(prize)).toLocaleString('en-NG')}`, S / 2, 650);
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
   ctx.font = font(500, 36);
   const title = String(contestTitle || '').slice(0, 42);
@@ -74,7 +74,7 @@ export async function drawWinnerCard({ contestTitle, rank, prize, friends, code,
 export async function shareWinnerCard(details) {
   const blob = await drawWinnerCard(details);
   const file = new File([blob], 'zappipay-contest-win.png', { type: 'image/png' });
-  const text = `I won ₦${Number(details.prize).toLocaleString('en-NG')} in the ZAPPI PAY referral contest! 🏆 ${details.code ? `Join with my code ${details.code}: ` : ''}${details.link}`;
+  const text = `I won ${Number(details.prize) < 0 ? '−' : ''}₦${Math.abs(Number(details.prize)).toLocaleString('en-NG')} in the ZAPPI PAY referral contest! 🏆 ${details.code ? `Join with my code ${details.code}: ` : ''}${details.link}`;
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file], text, title: 'ZAPPI PAY' });

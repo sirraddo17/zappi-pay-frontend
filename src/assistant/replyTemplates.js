@@ -84,7 +84,7 @@ const RECIPIENT_LABELS = {
 };
 
 function naira(n) {
-  return `₦${Number(n).toLocaleString()}`;
+  return `${Number(n) < 0 ? '−' : ''}₦${Math.abs(Number(n)).toLocaleString()}`;
 }
 
 function fmtDate(d) {

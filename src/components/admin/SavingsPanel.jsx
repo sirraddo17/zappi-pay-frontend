@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSavingsOverview, updateSettings, runSavingsInterest } from '../../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 
 // Settings → Savings. Off until you name the licence / licensed partner
 // it runs under — paying interest on customer money is regulated.

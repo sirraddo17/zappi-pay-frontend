@@ -7,7 +7,7 @@ import { shareFile } from '../../lib/shareCard';
 
 const LANGS = [['en', 'English'], ['pcm', 'Pidgin'], ['yo', 'Yorùbá'], ['ha', 'Hausa'], ['ig', 'Igbo']];
 const IDEAS = ['Christmas data deals', 'Pay NEPA light bill in seconds', 'Get your own account number', 'Sell recharge cards from your phone', 'Turn extra airtime into cash'];
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const label = { display: 'block', fontSize: 13, color: 'var(--slate-400)', margin: '8px 0 4px' };
 
 function save(blob, name) {

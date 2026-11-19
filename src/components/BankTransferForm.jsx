@@ -9,7 +9,7 @@ import { shareReceipt } from '../lib/receipt';
 import { NoReverseNote, BalanceCheck, useWalletBalance } from './ServiceKit';
 
 function money(n) {
-  return `₦${Number(n || 0).toLocaleString()}`;
+  return `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 }
 
 const STATUS_COLOR = { SUCCESS: 'var(--green-500)', PROCESSING: 'var(--orange, #f97316)', UNDER_REVIEW: 'var(--orange, #f97316)', FAILED: 'var(--red-500)', REVERSED: 'var(--red-500)' };

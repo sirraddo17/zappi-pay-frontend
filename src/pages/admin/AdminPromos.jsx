@@ -6,7 +6,7 @@ import { getAdminPromos, createPromo, updatePromo } from '../../api';
 
 const SERVICES = ['AIRTIME', 'DATA', 'ELECTRICITY', 'CABLE', 'EDUCATION', 'INTERNET', 'BETTING', 'INTERNATIONAL', 'INSURANCE'];
 const label = (s) => s.charAt(0) + s.slice(1).toLowerCase();
-const money = (n) => `₦${Number(n || 0).toLocaleString()}`;
+const money = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 
 const EMPTY = { code: '', description: '', type: 'FLAT', value: '', maxDiscount: '', minAmount: '', services: [], usageLimit: '', perCustomerLimit: '1', newCustomersOnly: false, audience: 'ALL', expiresAt: '' };
 

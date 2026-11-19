@@ -3,7 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { getReconciliation, downloadExport, getFundsGuard, setFundsGuard, isDemoMode, getComplianceSummary, saveComplianceThresholds, downloadCompliance } from '../../api';
 import { useAppInfo } from '../../components/ServiceNotices';
 
-const naira = (n) => (n === null || n === undefined ? '—' : `₦${Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+const naira = (n) => (n === null || n === undefined ? '—' : `${Number(n) < 0 ? '−' : ''}₦${Math.abs(Number(n)).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
 const LAGOS = 60 * 60 * 1000;
 const ymd = (d) => new Date(d.getTime() + LAGOS).toISOString().slice(0, 10);
 

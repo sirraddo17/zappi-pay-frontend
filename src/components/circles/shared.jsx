@@ -1,5 +1,5 @@
 // Shared bits for the Ajo Circle screens.
-export const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+export const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 export const PER = { DAILY: 'day', WEEKLY: 'week', MONTHLY: 'month' };
 export const OFTEN = { DAILY: 'Daily', WEEKLY: 'Weekly', MONTHLY: 'Monthly' };
 export const fmtDay = (d) => (d ? new Date(d).toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : '—');

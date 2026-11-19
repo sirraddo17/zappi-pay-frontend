@@ -6,7 +6,7 @@ import { useShowMore } from '../../components/ShowMore';
 import { getEscalations, approveEscalation, rejectEscalation, getSettings, updateSettings } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 const STATUS = [['PENDING', 'Waiting'], ['APPROVED', 'Approved'], ['REJECTED', 'Rejected'], ['ALL', 'All']];
 
 function dueText(dueAt) {

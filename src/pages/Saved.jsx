@@ -71,7 +71,7 @@ export default function Saved() {
                     {s.nickname || `${SERVICE_LABEL[s.service] || s.service} · ${s.billersCode}`}
                   </div>
                   <div style={{ color: 'var(--slate-400)', fontSize: 12, marginTop: 2 }}>
-                    {FREQUENCY_LABEL[s.frequency]} · {s.variationCode ? 'plan' : `₦${Number(s.amount).toLocaleString()}`} · {s.serviceID}
+                    {FREQUENCY_LABEL[s.frequency]} · {s.variationCode ? 'plan' : `${Number(s.amount) < 0 ? '−' : ''}₦${Math.abs(Number(s.amount)).toLocaleString()}`} · {s.serviceID}
                   </div>
                   <div style={{ fontSize: 12, marginTop: 4, color: s.active ? 'var(--slate-100)' : 'var(--gold)' }}>
                     {s.active ? `Next: ${fmtWhen(s.nextRunAt)}` : 'Paused'}

@@ -13,7 +13,7 @@ const STATUSES = [
 const NETWORK_LABELS = { mtn: 'MTN', glo: 'Glo', airtel: 'Airtel', etisalat: '9mobile' };
 
 function naira(n) {
-  return `₦${Number(n).toLocaleString()}`;
+  return `${Number(n) < 0 ? '−' : ''}₦${Math.abs(Number(n)).toLocaleString()}`;
 }
 
 function fmtDate(d) {

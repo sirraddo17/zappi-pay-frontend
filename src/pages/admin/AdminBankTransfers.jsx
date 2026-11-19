@@ -7,7 +7,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
 function money(n) {
-  return `₦${Number(n || 0).toLocaleString()}`;
+  return `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 }
 
 function fmtDate(d) {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getReferralTicker } from '../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 
 function left(until) {
   const ms = new Date(until).getTime() - Date.now();
@@ -90,6 +90,6 @@ export function LiveTicker() {
 export function remindLink({ friend, progress, link, target }) {
   const first = String(friend || '').split(' ')[0];
   const where = progress != null ? `You're ${progress}% of the way` : 'You joined';
-  const text = `Hi ${first}! ${where} on ZAPPI PAY 🎉 Buy your airtime, data, TV or light there${target ? ` — once you've spent ₦${Number(target).toLocaleString()} in total` : ''}, it helps me earn my invite bonus. Thank you! ${link}`;
+  const text = `Hi ${first}! ${where} on ZAPPI PAY 🎉 Buy your airtime, data, TV or light there${target ? ` — once you've spent ${Number(target) < 0 ? '−' : ''}₦${Math.abs(Number(target)).toLocaleString()} in total` : ''}, it helps me earn my invite bonus. Thank you! ${link}`;
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }

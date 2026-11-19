@@ -18,7 +18,7 @@ export default function Gift() {
   }, [token]);
 
   const t = GIFT_THEMES[g?.theme] || GIFT_THEMES.JUST_BECAUSE;
-  const what = g ? `₦${Number(g.value).toLocaleString()}${g.network ? ` ${g.network}` : ''} ${g.kind}` : '';
+  const what = g ? `${Number(g.value) < 0 ? '−' : ''}₦${Math.abs(Number(g.value)).toLocaleString()}${g.network ? ` ${g.network}` : ''} ${g.kind}` : '';
   const signup = g?.ref ? `/signup?ref=${encodeURIComponent(g.ref)}` : '/signup';
 
   return (

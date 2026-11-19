@@ -8,7 +8,7 @@ import { setAfterLogin, clearAfterLogin } from '../lib/afterLogin';
 import { shareRequest } from './Requests';
 import { NoReverseNote } from '../components/ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const EMOJI = { REQUEST: '💸', SPLIT: '🍽️', POOL: '🎁' };
 
 // zappipay.com.ng/r/<token> — a "Pay me" link, split bill or group gift.

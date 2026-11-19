@@ -13,7 +13,7 @@ const TABS = [
 ];
 
 function fmtMoney(n) {
-  return `₦${Number(n).toLocaleString()}`;
+  return `${Number(n) < 0 ? '−' : ''}₦${Math.abs(Number(n)).toLocaleString()}`;
 }
 
 export default function AdminCustomers() {

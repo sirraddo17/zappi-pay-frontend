@@ -6,7 +6,7 @@ import { useShowMore } from '../../components/ShowMore';
 import { CATEGORIES, detectCategory, draftReply } from '../../assistant/replyTemplates';
 
 function fmtMoney(n) {
-  return `₦${Number(n).toLocaleString()}`;
+  return `${Number(n) < 0 ? '−' : ''}₦${Math.abs(Number(n)).toLocaleString()}`;
 }
 
 function fmtDate(d) {

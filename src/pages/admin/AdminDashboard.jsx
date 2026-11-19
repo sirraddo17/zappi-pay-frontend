@@ -91,7 +91,7 @@ export default function AdminDashboard() {
         <div className="card" style={{ margin: '0 0 16px' }}>
           <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>Owed to customers (wallet liabilities)</div>
           <div style={{ fontSize: 26, fontWeight: 700 }}>₦{Number(totals.owedTotal).toLocaleString()}</div>
-          <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Wallets ₦{Number(totals.wallets).toLocaleString()} · Cashback ₦{Number(totals.cashback).toLocaleString()}{totals.savings > 0 ? ` · Savings ₦${Number(totals.savings).toLocaleString()}` : ''} · {totals.customers} customers · <Link to="/admin/money">Money check</Link></div>
+          <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Wallets ₦{Number(totals.wallets).toLocaleString()} · Cashback ₦{Number(totals.cashback).toLocaleString()}{totals.savings > 0 ? ` · Savings ${Number(totals.savings) < 0 ? '−' : ''}₦${Math.abs(Number(totals.savings)).toLocaleString()}` : ''} · {totals.customers} customers · <Link to="/admin/money">Money check</Link></div>
         </div>
       )}
       {stats?.test?.total > 0 && (
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
       {vtpass && (
         <div className="card" style={{ margin: '0 0 16px', border: vtpass.low ?? (vtpass.balance != null && vtpass.balance < 20000) ? '1px solid var(--red-500)' : undefined }}>
           <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>VTpass wallet · {vtpass.mode === 'live' ? 'LIVE' : vtpass.mode ? 'SANDBOX (test)' : ''}</div>
-          <div style={{ fontSize: 26, fontWeight: 700 }}>{vtpass.balance != null ? `₦${Number(vtpass.balance).toLocaleString()}` : '—'}</div>
+          <div style={{ fontSize: 26, fontWeight: 700 }}>{vtpass.balance != null ? `${Number(vtpass.balance) < 0 ? '−' : ''}₦${Math.abs(Number(vtpass.balance)).toLocaleString()}` : '—'}</div>
           {vtpass.error && <div className="error-text" style={{ fontSize: 12, margin: 0 }}>Could not read balance: {vtpass.error}</div>}
           {(vtpass.low ?? (vtpass.balance != null && vtpass.balance < 20000)) && (
             <div style={{ color: 'var(--red-500)', fontSize: 13, marginTop: 4 }}>Low balance — top up your VTpass wallet or customer purchases will start failing (and be refunded).</div>
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
                 Monnify payout wallet · {monnify.mode === 'live' ? 'LIVE' : 'SANDBOX (test money)'}
               </div>
               <div style={{ fontSize: 26, fontWeight: 700 }}>
-                {monnify.walletBalance != null ? `₦${Number(monnify.walletBalance).toLocaleString()}` : monnify.walletAccount ? '—' : 'Not set up'}
+                {monnify.walletBalance != null ? `${Number(monnify.walletBalance) < 0 ? '−' : ''}₦${Math.abs(Number(monnify.walletBalance)).toLocaleString()}` : monnify.walletAccount ? '—' : 'Not set up'}
               </div>
               {monnify.walletBalanceError && <div className="error-text" style={{ fontSize: 12, margin: 0 }}>Could not read balance: {monnify.walletBalanceError}</div>}
               {!monnify.walletAccount && <div style={{ fontSize: 12, color: 'var(--slate-400)' }}>Add your wallet account number in Settings → Monnify.</div>}

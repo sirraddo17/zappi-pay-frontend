@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getChallenges } from '../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const SERVICE = { AIRTIME: 'airtime', DATA: 'data', ELECTRICITY: 'electricity', CABLE: 'TV', EDUCATION: 'exam PIN', INTERNET: 'internet', BETTING: 'betting' };
 
 function goalText(c) {

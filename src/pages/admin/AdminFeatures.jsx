@@ -3,7 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { getAdminFeatures, switchAdminFeature, saveFeaturesConfig, resolveSafeDeal, addFeatureTester, removeFeatureTester } from '../../api';
 
 const RISK = { low: ['Low risk', 'var(--green-500)'], medium: ['Needs care', 'var(--gold)'], high: ['Licence may be needed', 'var(--red-500)'] };
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const btn = { width: 'auto', padding: '5px 12px', fontSize: 13 };
 const MODES = [['OFF', 'Off'], ['TESTERS', '🧪 Testers only'], ['ON', 'On for everyone']];
 const MODE_TEXT = { OFF: 'OFF — nobody sees it', TESTERS: '🧪 Only your testers can see and use it', ON: 'ON for all customers' };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getMyShop, saveMyShop } from '../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 
 // Profile (agents): shop link on/off, tagline, WhatsApp button, sales.
 export default function MyShopCard() {

@@ -8,7 +8,7 @@ export function orderLine(o) {
   if (!o) return '';
   const what = SERVICE_LABEL[o.service] || o.service || 'Order';
   const ref = o.vtpassRequestId || o.id;
-  return `${what} ₦${Number(o.amount || 0).toLocaleString()}${o.recipient ? ` to ${o.recipient}` : ''} · ${when(o.createdAt)} · ${o.status || ''}${ref ? ` · Ref ${ref}` : ''}`;
+  return `${what} ${Number(o.amount || 0) < 0 ? '−' : ''}₦${Math.abs(Number(o.amount || 0)).toLocaleString()}${o.recipient ? ` to ${o.recipient}` : ''} · ${when(o.createdAt)} · ${o.status || ''}${ref ? ` · Ref ${ref}` : ''}`;
 }
 
 // wa.me link to support with the customer's details already filled in,

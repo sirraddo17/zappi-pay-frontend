@@ -6,7 +6,7 @@ import BottomNav from '../components/BottomNav';
 import PayoutAccount from '../components/PayoutAccount';
 import { SvcHero } from '../components/ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const TABS = [['forme', '📥 For you'], ['REQUEST', '💸 Pay me'], ['SPLIT', '🍽️ Split bill'], ['POOL', '🎁 Group gift'], ['mine', '🔗 My links']];
 const STATUS = { OPEN: ['Open', 'var(--green-500)'], DONE: ['Paid', 'var(--green-500)'], CLOSED: ['Closed', 'var(--slate-400)'], CANCELLED: ['Cancelled', 'var(--slate-400)'], EXPIRED: ['Expired', 'var(--slate-400)'] };
 

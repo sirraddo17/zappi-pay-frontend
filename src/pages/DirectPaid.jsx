@@ -4,7 +4,7 @@ import { getDirectPaid } from '../api';
 import Celebrate, { ResultBadge } from '../components/Celebrate';
 import BottomNav from '../components/BottomNav';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 
 // Where Monnify sends people back after paying dues / spray / a pay-me link by card.
 export default function DirectPaid() {

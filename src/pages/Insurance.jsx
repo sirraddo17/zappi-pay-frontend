@@ -8,7 +8,7 @@ import BottomNav from '../components/BottomNav';
 import { useAppInfo, pausedFor } from '../components/ServiceNotices';
 import { SvcHero, Step, Summary, Trust } from '../components/ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const PLAN_EMOJI = { private: '🚗', commercial: '🚌', tricycle: '🛺', motorcycle: '🏍️' };
 const emojiFor = (name) => PLAN_EMOJI[Object.keys(PLAN_EMOJI).find((k) => String(name).toLowerCase().includes(k.slice(0, 6)))] || '🚘';
 

@@ -9,7 +9,7 @@ const NET_KEY = { MTN: 'mtn', Airtel: 'airtel', Glo: 'glo', '9mobile': 'etisalat
 const BUDGETS = [300, 500, 1000, 2000, 5000];
 const NETWORKS = ['ALL', 'MTN', 'Airtel', 'Glo', '9mobile'];
 const VALIDITY = [['', 'Any length'], ['DAY', '1–2 days'], ['WEEK', 'Week-ish'], ['MONTH', 'Month'], ['LONG', 'Longer']];
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const size = (mb) => (mb >= 1024 ? `${Math.round((mb / 1024) * 10) / 10}GB` : `${mb}MB`);
 const days = (d) => (!d ? '' : d === 1 ? '1 day' : d % 30 === 0 && d >= 30 ? `${d / 30} month${d === 30 ? '' : 's'}` : `${d} days`);
 

@@ -46,7 +46,7 @@ export default function NombaPanel() {
         ))}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button type="button" className="btn btn-secondary" disabled={busy || !Object.values(keys).some((v) => v.trim())} onClick={async () => { const body = Object.fromEntries(Object.entries(keys).filter(([, v]) => v.trim()).map(([k, v]) => [k, v.trim()])); if (await run(() => saveNombaSettings(body), 'Keys saved. Tap Test connection.')) setKeys({ clientId: '', clientSecret: '', accountId: '', webhookKey: '' }); }}>Save keys</button>
-          <button type="button" className="btn btn-secondary" disabled={busy || !d.ready} onClick={() => run(testNomba, (x) => (x.ok ? `Connected to Nomba (${x.mode}).${x.balance !== null && x.balance !== undefined ? ` Balance ₦${Number(x.balance).toLocaleString()}.` : ''}` : `Not connected: ${x.error}`))}>Test connection</button>
+          <button type="button" className="btn btn-secondary" disabled={busy || !d.ready} onClick={() => run(testNomba, (x) => (x.ok ? `Connected to Nomba (${x.mode}).${x.balance !== null && x.balance !== undefined ? ` Balance ${Number(x.balance) < 0 ? '−' : ''}₦${Math.abs(Number(x.balance)).toLocaleString()}.` : ''}` : `Not connected: ${x.error}`))}>Test connection</button>
         </div>
         <div style={{ fontSize: 12, color: 'var(--slate-400)', marginTop: 10, background: 'rgba(13, 148, 136,0.08)', borderRadius: 8, padding: 10 }}>
           In Nomba → Developer → <b>Webhook Setup</b>, set the URL to:<br />

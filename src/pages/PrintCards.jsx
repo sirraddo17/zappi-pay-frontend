@@ -7,7 +7,7 @@ import PinConfirm from '../components/PinConfirm';
 import BottomNav from '../components/BottomNav';
 import { SvcHero, Step, Stepper, Summary, Trust } from '../components/ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const groupPin = (p) => String(p).replace(/(\d{4})(?=\d)/g, '$1 ');
 const QUICK = [5, 10, 20, 50, 100];
 

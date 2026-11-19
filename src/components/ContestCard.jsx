@@ -4,7 +4,7 @@ import { getContest } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { shareWinnerCard } from '../lib/winnerCard';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const ORD = ['1st', '2nd', '3rd'];
 
 function countdown(to) {

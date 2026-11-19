@@ -9,6 +9,6 @@ export const GIFT_THEMES = {
 
 export function giftShareText(gift, { fromName, value, kind }) {
   const t = GIFT_THEMES[gift.theme] || GIFT_THEMES.JUST_BECAUSE;
-  const what = value ? `₦${Number(value).toLocaleString()} ${kind}` : kind;
+  const what = value ? `${Number(value) < 0 ? '−' : ''}₦${Math.abs(Number(value)).toLocaleString()} ${kind}` : kind;
   return `${t.emoji} ${fromName ? `${fromName} sent you` : 'I sent you'} ${what}!${gift.message ? `\n\n“${gift.message}”` : ''}\n\nOpen your gift: ${gift.link}`;
 }

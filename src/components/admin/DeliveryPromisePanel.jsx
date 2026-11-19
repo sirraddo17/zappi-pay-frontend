@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getDeliveryPromise, saveDeliveryPromise } from '../../api';
 
 const LABEL = { AIRTIME: 'Airtime', DATA: 'Data', ELECTRICITY: 'Electricity', CABLE: 'Cable TV', EDUCATION: 'Exam PINs', INTERNET: 'Internet', BETTING: 'Betting' };
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 
 // Settings → Delivery promise: "Takes over 60s? ₦20 back (once a day)".
 export default function DeliveryPromisePanel() {

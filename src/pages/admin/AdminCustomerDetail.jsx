@@ -235,7 +235,7 @@ export default function AdminCustomerDetail() {
               <Link to={`/admin/customers/${customer.referredBy.id}`} style={{ color: 'var(--purple)' }}>
                 {customer.referredBy.name}
               </Link>
-              {customer.referralBonusPaidAt ? ` (bonus ₦${Number(customer.referralBonusAmount || 0).toLocaleString()} paid)` : ' (bonus not paid yet)'}
+              {customer.referralBonusPaidAt ? ` (bonus ${Number(customer.referralBonusAmount || 0) < 0 ? '−' : ''}₦${Math.abs(Number(customer.referralBonusAmount || 0)).toLocaleString()} paid)` : ' (bonus not paid yet)'}
             </>
           )}
         </div>

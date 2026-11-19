@@ -14,7 +14,7 @@ const TYPES = [
   ['REACTIVATE', 'Reactivate their account'],
   ['OTHER', 'Something else'],
 ];
-const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 
 // Support staff: send a sensitive action to an owner for approval.
 // The customer is told automatically and given a time frame.

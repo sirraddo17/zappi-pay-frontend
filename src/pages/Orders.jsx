@@ -49,7 +49,7 @@ export default function Orders() {
         const orders = (data.orders || []).map((o) => ({ key: `o${o.id}`, kind: 'BUY', link: `/orders/${o.id}`, icon: SERVICE_ICON[o.service] || '🧾', title: pretty(o.service), sub: o.recipient, amount: (kobo(o.amount) - kobo(o.cashbackUsed)) / 100, cashback: kobo(o.cashbackUsed) / 100, credit: false, status: o.status, at: o.createdAt, raw: o }));
         const batches = (cards.batches || []).map((b) => ({
           key: `b${b.id}`, kind: 'BUY', link: `/print-cards/${b.id}`, icon: '🖨️', title: 'Recharge cards',
-          sub: `${b.status === 'SUCCESS' ? b.delivered : b.quantity} × ₦${Number(b.value).toLocaleString()} ${b.networkLabel}`,
+          sub: `${b.status === 'SUCCESS' ? b.delivered : b.quantity} × ${Number(b.value) < 0 ? '−' : ''}₦${Math.abs(Number(b.value)).toLocaleString()} ${b.networkLabel}`,
           amount: b.amount - (b.refunded || 0) || b.amount, credit: false, status: b.status === 'FAILED' ? 'REFUNDED' : b.status, at: b.createdAt,
         }));
         const tx = (wallet.transactions || []).filter((t) => !isPurchaseDebit(t)).map((t) => {

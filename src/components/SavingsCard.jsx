@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSavings, saveToSavings, withdrawSavings } from '../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const LABEL = { SAVINGS_IN: 'Moved in', SAVINGS_OUT: 'Moved to wallet', INTEREST: 'Interest' };
 
 // Savings pocket on the Wallet page. Hidden while the owner has savings

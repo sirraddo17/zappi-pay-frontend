@@ -7,7 +7,7 @@ import BottomNav from '../components/BottomNav';
 import { useAppInfo, pausedFor } from '../components/ServiceNotices';
 import { SvcHero, Step, Stepper, Summary, Trust } from '../components/ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const MAX = 50;
 const QUICK = [5, 10, 20, 50];
 const NAME_KEY = 'zappipay_exam_sheet_name';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAdminEpins, updateAdminEpins, resolveAdminEpin } from '../../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 
 // Settings → Recharge Cards: ClubKonnect keys, prices and stuck batches.
 // The API key is never shown again after saving (only its last 4).

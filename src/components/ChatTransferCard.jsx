@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import PinConfirm from './PinConfirm';
 import { NoReverseNote } from './ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 
 // A transfer the help assistant prepared. The name shown is the real
 // name on the account (checked by the server). Nothing is sent until

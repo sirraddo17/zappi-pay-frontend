@@ -34,7 +34,7 @@ export default function ShareHub({ code, link, firstName, bonus, minPurchase, sp
   const [msg, setMsg] = useState('');
   const [preview, setPreview] = useState(null); // { url, blob, fileName, video, app }
 
-  const text = `Join me on ZAPPI PAY — airtime, data, electricity, cable TV & exam PINs in seconds. Sign up with my code ${code}${welcomeBonus > 0 ? ` and get ₦${Number(welcomeBonus).toLocaleString()} cashback after you verify your BVN/NIN` : ''}: ${link}`;
+  const text = `Join me on ZAPPI PAY — airtime, data, electricity, cable TV & exam PINs in seconds. Sign up with my code ${code}${welcomeBonus > 0 ? ` and get ${Number(welcomeBonus) < 0 ? '−' : ''}₦${Math.abs(Number(welcomeBonus)).toLocaleString()} cashback after you verify your BVN/NIN` : ''}: ${link}`;
   const details = { code, link, firstName };
 
   function flash(m) {
@@ -126,7 +126,7 @@ export default function ShareHub({ code, link, firstName, bonus, minPurchase, sp
           <div>
             <b style={{ fontSize: 16 }}>Share. Help a friend. Earn.</b>
             <div style={{ fontSize: 13, color: 'var(--slate-400)' }}>
-              {bonus > 0 ? (spendTarget > 0 ? `You get ₦${Number(bonus).toLocaleString()} when they join and spend ₦${Number(spendTarget).toLocaleString()} in total.` : `You get ₦${Number(bonus).toLocaleString()} when they join and start buying (from ₦${Number(minPurchase || 0).toLocaleString()}).`) : 'Invite friends to ZAPPI PAY.'}
+              {bonus > 0 ? (spendTarget > 0 ? `You get ${Number(bonus) < 0 ? '−' : ''}₦${Math.abs(Number(bonus)).toLocaleString()} when they join and spend ${Number(spendTarget) < 0 ? '−' : ''}₦${Math.abs(Number(spendTarget)).toLocaleString()} in total.` : `You get ${Number(bonus) < 0 ? '−' : ''}₦${Math.abs(Number(bonus)).toLocaleString()} when they join and start buying (from ${Number(minPurchase || 0) < 0 ? '−' : ''}₦${Math.abs(Number(minPurchase || 0)).toLocaleString()}).`) : 'Invite friends to ZAPPI PAY.'}
             </div>
           </div>
         </div>

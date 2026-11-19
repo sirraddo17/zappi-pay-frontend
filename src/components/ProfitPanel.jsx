@@ -3,7 +3,7 @@ import { getAdminAnalytics, setProfitCountFrom } from '../api';
 import EarningsCalculator from './admin/EarningsCalculator';
 
 function money(n) {
-  return `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
+  return `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 }
 
 const RANGES = [7, 30, 90];

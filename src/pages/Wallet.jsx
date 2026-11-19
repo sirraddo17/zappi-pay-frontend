@@ -61,7 +61,7 @@ function feeOf(account, info) {
   return info.feeByProvider?.[account?.provider || 'monnify'] || { feePercent: info.feePercent, feeCap: info.feeCap, feeIsPassThrough: info.feeIsPassThrough };
 }
 function feeLabel(f) {
-  return `${f.feePercent}%${f.feeCap > 0 ? ` (max ₦${Number(f.feeCap).toLocaleString()})` : ''}${f.freeFrom > 0 ? ` · free from ₦${Number(f.freeFrom).toLocaleString()}` : ''}`;
+  return `${f.feePercent}%${f.feeCap > 0 ? ` (max ${Number(f.feeCap) < 0 ? '−' : ''}₦${Math.abs(Number(f.feeCap)).toLocaleString()})` : ''}${f.freeFrom > 0 ? ` · free from ${Number(f.freeFrom) < 0 ? '−' : ''}₦${Math.abs(Number(f.freeFrom)).toLocaleString()}` : ''}`;
 }
 
 // "I want ₦X in my wallet": the exact amount to send to EACH account
@@ -69,7 +69,7 @@ function feeLabel(f) {
 function FundingHelper({ info, accounts }) {
   const [want, setWant] = useState('');
   const w = Number(want);
-  const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  const naira = (n) => `${Number(n) < 0 ? '−' : ''}₦${Math.abs(Number(n)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   const rows = (accounts || []).map((a) => {
     const f = feeOf(a, info);
     const send = w > 0 ? (f.feePercent > 0 ? amountToSend(w, f) : w) : 0;
@@ -118,7 +118,7 @@ function LimitNotice() {
   const [l, setL] = useState(null);
   useEffect(() => { getMyLimits().then(setL).catch(() => setL(null)); }, []);
   if (!l?.enabled || l.verified || l.custom) return null;
-  const n = (v) => `₦${Number(v).toLocaleString()}`;
+  const n = (v) => `${Number(v) < 0 ? '−' : ''}₦${Math.abs(Number(v)).toLocaleString()}`;
   return (
     <div className="card" role="note" style={{ border: '1px solid var(--gold)', fontSize: 13 }}>
       <b>Daily limit: {n(l.limit)}</b> for unverified accounts · {n(l.remaining)} left today.
@@ -132,7 +132,7 @@ function CashbackCard() {
   const [open, setOpen] = useState(false);
   useEffect(() => { getCashback().then(setD).catch(() => setD(null)); }, []);
   if (!d || !d.separate || (!(d.balance > 0) && !d.entries.length)) return null;
-  const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  const naira = (n) => `${Number(n) < 0 ? '−' : ''}₦${Math.abs(Number(n)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   return (
     <div className="card" style={{ border: '1px solid rgba(16,185,129,0.35)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -169,7 +169,7 @@ function CardFunding({ funding }) {
   const [err, setErr] = useState('');
   const a = Number(amount);
   const fee = a > 0 ? cardFee(a, funding) : 0;
-  const naira = (n) => `₦${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  const naira = (n) => `${Number(n) < 0 ? '−' : ''}₦${Math.abs(Number(n)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   async function pay(e) {
     e.preventDefault();
     setErr('');
@@ -189,7 +189,7 @@ function CardFunding({ funding }) {
       {err && <p className="error-text" style={{ margin: '0 0 10px' }}>{err}</p>}
       <div className="field">
         <label htmlFor="cardAmt">Amount to add (₦)</label>
-        <input id="cardAmt" type="number" inputMode="numeric" min={funding.minAmount} max={500000} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={`At least ₦${Number(funding.minAmount).toLocaleString()}`} required />
+        <input id="cardAmt" type="number" inputMode="numeric" min={funding.minAmount} max={500000} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={`At least ${Number(funding.minAmount) < 0 ? '−' : ''}₦${Math.abs(Number(funding.minAmount)).toLocaleString()}`} required />
       </div>
       {a > 0 && fee > 0 && (
         <div style={{ fontSize: 13, margin: '-4px 0 10px' }}>
@@ -481,7 +481,7 @@ function BankFunding({ info, onCreated, onCredited, customerName }) {
     try {
       const res = await checkBankPayments();
       if (res.credited > 0) {
-        setMessage(`₦${Number(res.amount).toLocaleString()} added to your wallet.`);
+        setMessage(`${Number(res.amount) < 0 ? '−' : ''}₦${Math.abs(Number(res.amount)).toLocaleString()} added to your wallet.`);
         onCredited();
       } else {
         setMessage('No new payment yet. Transfers usually arrive within a minute or two — you\'ll get a notification when it lands.');
@@ -623,7 +623,7 @@ function CouponBox({ onRedeemed }) {
     setMsg('');
     try {
       const r = await redeemCoupon(code.trim());
-      setMsg(`🎉 ₦${Number(r.amount).toLocaleString()} added to your wallet!`);
+      setMsg(`🎉 ${Number(r.amount) < 0 ? '−' : ''}₦${Math.abs(Number(r.amount)).toLocaleString()} added to your wallet!`);
       setCode('');
       onRedeemed();
     } catch (error) {
@@ -735,7 +735,7 @@ export default function Wallet() {
     const check = () => verifyCardPayment(txRef).then((r) => {
       if (stop) return;
       if (r.status === 'PAID') {
-        setSuccessMessage(`✅ ₦${Number(r.amount).toLocaleString()} added to your wallet.`);
+        setSuccessMessage(`✅ ${Number(r.amount) < 0 ? '−' : ''}₦${Math.abs(Number(r.amount)).toLocaleString()} added to your wallet.`);
         load();
         refreshCustomer?.();
         setParams({}, { replace: true });
@@ -810,7 +810,7 @@ export default function Wallet() {
           })}
           {rules && (
             <p style={{ color: 'var(--slate-400)', fontSize: 12, margin: '0 0 8px' }}>
-              {rules.verifiedOnly ? 'For BVN/NIN-verified customers. ' : ''}{rules.maxAmount > 0 ? `Up to ₦${Number(rules.maxAmount).toLocaleString()} per request. ` : ''}We check our bank and add it — usually within {rules.waitMinutes} minutes in working hours.
+              {rules.verifiedOnly ? 'For BVN/NIN-verified customers. ' : ''}{rules.maxAmount > 0 ? `Up to ${Number(rules.maxAmount) < 0 ? '−' : ''}₦${Math.abs(Number(rules.maxAmount)).toLocaleString()} per request. ` : ''}We check our bank and add it — usually within {rules.waitMinutes} minutes in working hours.
             </p>
           )}
           <div style={{ height: 4 }} />

@@ -5,7 +5,7 @@ import { getCustomerSchedules, setScheduleActive, adminDeleteSchedule, fixCustom
 // and logging a complaint that came by WhatsApp/email/phone as a ticket.
 // Owner: resume/delete top-ups, fix the name, their own daily limit,
 // and give a reward that didn't arrive.
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const small = { width: 'auto', padding: '4px 10px', fontSize: 12 };
 const h3 = { fontSize: 15, margin: '14px 0 6px' };
 

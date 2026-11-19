@@ -6,7 +6,7 @@ import PasswordField from './PasswordField';
 import PushToggle from './PushToggle';
 
 function money(n) {
-  return `₦${Number(n || 0).toLocaleString()}`;
+  return `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 }
 
 // Profile extras: verification level & limits, email alerts, WhatsApp

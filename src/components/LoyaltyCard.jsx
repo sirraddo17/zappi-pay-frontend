@@ -22,7 +22,7 @@ export default function LoyaltyCard() {
     setMsg('');
     try {
       const r = await redeemLoyalty();
-      setMsg(`₦${Number(r.credit).toLocaleString()} added to your wallet.`);
+      setMsg(`${Number(r.credit) < 0 ? '−' : ''}₦${Math.abs(Number(r.credit)).toLocaleString()} added to your wallet.`);
       load();
       refreshCustomer?.();
     } catch (err) {

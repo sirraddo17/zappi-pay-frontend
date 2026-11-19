@@ -5,7 +5,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { getAdminContests, getAdminContest, createContest, updateContest, contestAction, getContestFriends } from '../../api';
 import useAutoRefresh, { ADMIN_REFRESH } from '../../lib/useAutoRefresh';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const PHASE = { LIVE: ['Live', 'var(--green-500)'], UPCOMING: ['Upcoming', 'var(--purple)'], ENDED: ['Ended — waiting for payout', 'var(--orange, #f97316)'], PAID: ['Paid', 'var(--slate-400)'], CANCELLED: ['Cancelled', 'var(--red-500)'] };
 
 function toLocalInput(d) {

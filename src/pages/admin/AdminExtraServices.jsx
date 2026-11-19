@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { getAdminExtraServices, saveExtraServicesConfig, reviewSmsSender, adminStopTicketEvent, resolveBill } from '../../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const btn = { width: 'auto', padding: '5px 12px', fontSize: 13 };
 const when = (d) => new Date(d).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' });
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { adminVerifyIdentity, adminClearSecurityDetails, setCustomerAgent, rejectAgent } from '../../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 const RESULT = {
   MATCH: ['✅ Matches', 'var(--green-500)'],
   NO_MATCH: ['❌ Does not match', 'var(--red-500)'],

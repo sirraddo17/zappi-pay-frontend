@@ -13,7 +13,7 @@ import { useShowMore } from '../components/ShowMore';
 import { useAuth } from '../context/AuthContext';
 import { SvcHero } from '../components/ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 
 export default function Refer() {
   const [data, setData] = useState(null);

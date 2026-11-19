@@ -5,7 +5,7 @@ import { getCardPayments, recheckCardPayment, chargebackCardPayment, recordManua
 //  • Card payments — "Check again" when the card was charged but the wallet
 //    wasn't credited; "Chargeback" when the card owner's bank took it back.
 //  • Manual payout — record money you sent to their bank yourself.
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const COLOR = { PAID: 'var(--green-500)', PENDING: 'var(--gold)', FAILED: 'var(--slate-400)', CHARGEBACK: 'var(--red-500)' };
 const small = { width: 'auto', padding: '4px 10px', fontSize: 12 };
 

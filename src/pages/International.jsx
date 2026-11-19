@@ -7,7 +7,7 @@ import BottomNav from '../components/BottomNav';
 import { useAppInfo, pausedFor } from '../components/ServiceNotices';
 import { SvcHero, Step, Summary, Trust } from '../components/ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const POPULAR = ['GH', 'GB', 'US', 'CA', 'KE', 'ZA', 'CM', 'BJ', 'TG', 'AE', 'IE', 'DE'];
 
 // More → International airtime & data (VTpass foreign-airtime).

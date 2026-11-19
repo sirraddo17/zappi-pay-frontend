@@ -10,7 +10,7 @@ import { detectNetwork, networkOf, NETWORK_STYLE } from '../lib/network';
 
 const MAX = 50;
 const AMOUNTS = [100, 200, 500, 1000, 2000, 5000];
-const naira = (n) => `₦${Number(n || 0).toLocaleString()}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString()}`;
 
 // Same price formula as the Buy page (display only; the server
 // recomputes it for every number).

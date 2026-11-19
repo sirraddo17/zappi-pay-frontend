@@ -5,7 +5,7 @@ import { getFamily, inviteFamily, respondFamily, leaveFamily, updateFamily, fami
 import { SERVICE_LABEL } from '../lib/repeat';
 import { SvcHero } from '../components/ServiceKit';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG')}`;
 const date = (d) => new Date(d).toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short' });
 
 function Controls({ m, services, onSaved }) {

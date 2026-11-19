@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 // airtime to cash, deals, insurance, international) so they all look
 // like the main Buy screens.
 
-export const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+export const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 
 // Page top: back link, coloured icon tile, title, one line, and an
 // optional "how it works" strip of 2–3 short steps.

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAdminShops, saveAdminShops } from '../../api';
 
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 
 // Settings → Agent shops: commission for sales through agent links.
 export default function ShopsPanel() {

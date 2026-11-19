@@ -8,7 +8,7 @@ import { getUnmatchedPayments, assignUnmatchedPayment, closeUnmatchedPayment, ge
 // account number no customer owns any more (old test number, deleted
 // account, reset). Nothing was credited — credit the right customer, or
 // record that it was sent back to the payer.
-const naira = (n) => `₦${Number(n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const naira = (n) => `${Number(n || 0) < 0 ? '−' : ''}₦${Math.abs(Number(n || 0)).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const when = (d) => new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 const TABS = [['OPEN', 'Waiting'], ['ASSIGNED', 'Credited'], ['RETURNED', 'Sent back'], ['IGNORED', 'Ignored']];
 
