@@ -49,20 +49,21 @@ function FundsGuardCard() {
           On
         </label>
       </div>
-      <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 10px' }}>Your Monnify wallet alone must always hold at least everything customers are owed — fund VTpass from your own money (it isn’t counted). Only what’s above customer balances in Monnify is yours to move out (it includes what you’ve already spent on VTpass for customers’ purchases, plus profit). If Monnify ever falls short, bank transfers pause by themselves and you’re alerted. Sending money needs BVN/NIN, with daily limits by level.</p>
+      <p style={{ fontSize: 13, color: 'var(--slate-400)', margin: '4px 0 10px' }}>Customer money sits in Monnify and in VTpass (you top up VTpass from Monnify), so the two together must always hold at least everything customers are owed. Only what’s above that is yours to move out — and only from Monnify, since VTpass money can’t go to a bank. Topping up VTpass from Monnify is always fine. If they ever fall short, bank transfers pause by themselves and you’re alerted. Sending money needs BVN/NIN, with daily limits by level.</p>
       {!g.enabled ? <div style={{ fontSize: 14, color: 'var(--gold)' }}>⚠️ The guard is OFF — switch it back on as soon as possible.</div> : (
         <>
           <Row label="Customers are owed (real customers)" value={naira(g.owed)} hint={`Wallets, cashback, savings and transfers on their way.${g.testAccountsNotCounted > 0 ? ` ${naira(g.testAccountsNotCounted)} in accounts marked “Test account” isn’t counted (sandbox money).` : ''} Only LIVE partner wallets count as money held — sandbox balances never do.`} />
           {/* Demo / screenshot mode: sandbox balances and the "Short by" line are left out (they are test money, not real). */}
-          {!demo && <Row label="Monnify wallet" value={g.monnify === null ? '—' : naira(g.monnify)} hint="VTpass isn’t counted — it’s funded from your own money" />}
-          {!demo && <Row label="Customer money covered by Monnify" value={ok ? '✅ Yes' : g.status === 'SHORT' ? `❌ Short by ${naira(g.shortBy)}` : '⚠️ Couldn’t read Monnify'} />}
+          {!demo && <Row label="Monnify wallet" value={g.monnify === null ? '—' : naira(g.monnify)} />}
+          {!demo && <Row label="VTpass wallet" value={g.vtpassCounted ? (g.vtpass === null || g.vtpass === undefined ? '—' : naira(g.vtpass)) : 'Not counted (test keys)'} hint="Topped up from Monnify — counts as customer money" />}
+          {!demo && <Row label="Customer money covered by Monnify + VTpass" value={ok ? `✅ Yes (${naira(g.held)})` : g.status === 'SHORT' ? `❌ Short by ${naira(g.shortBy)}` : '⚠️ Couldn’t read a balance'} />}
           <Row
             label="Bank transfers (guard)"
             value={g.transfersPaused ? '⏸️ Paused to protect customers' : '▶️ Not paused'}
             hint={g.transfersPaused ? 'Payouts are held until customer money is covered again.' : sendToBankOn ? 'The guard is not blocking payouts.' : 'The guard is not blocking anything. Send to Bank is off for customers, so no payouts go out anyway.'}
           />
           {!demo && <Row label="Free in Monnify wallet" value={g.monnifyFree === null ? '—' : naira(g.monnifyFree)} hint="Monnify balance minus transfers on their way out" />}
-          {!demo && <Row label="Yours to move out of Monnify" value={<b style={{ color: 'var(--green-500)' }}>{naira(g.safeToWithdraw)}</b>} hint="To your bank or to top up VTpass — never move more than this" />}
+          {!demo && <Row label="Yours to move out of Monnify" value={<b style={{ color: 'var(--green-500)' }}>{naira(g.safeToWithdraw)}</b>} hint="To your own bank — never move more than this. Topping up VTpass from Monnify doesn’t count against it." />}
           {g.errors?.length > 0 && <div style={{ fontSize: 12, color: 'var(--gold)', marginTop: 6 }}>{g.errors.join(' · ')}</div>}
         </>
       )}
