@@ -27,6 +27,13 @@ export default function AiSettingsPanel() {
   const [gKey, setGKey] = useState('');
   const [showG, setShowG] = useState(false);
   const [showC, setShowC] = useState(false);
+  // OpenRouter: one key for many models — the last backup.
+  const [oKeySet, setOKeySet] = useState(false);
+  const [oKeyHint, setOKeyHint] = useState('');
+  const [oKey, setOKey] = useState('');
+  const [showO, setShowO] = useState(false);
+  const [oCustModel, setOCustModel] = useState('anthropic/claude-haiku-4.5');
+  const [oAdminModel, setOAdminModel] = useState('anthropic/claude-sonnet-4.5');
   const [gCustModel, setGCustModel] = useState('gemini-3.8-flash');
   const [gAdminModel, setGAdminModel] = useState('gemini-3.8-flash');
   const [custProvider, setCustProvider] = useState('gemini');
@@ -42,6 +49,10 @@ export default function AiSettingsPanel() {
     setTranslateOn(s.aiTranslateBroadcasts !== false);
     setCustomerModel(s.aiCustomerModel || 'claude-haiku-4-5');
     setAdminModel(s.aiAdminModel || 'claude-sonnet-5');
+    setOKeySet(Boolean(s.openrouterApiKeySet || s.openrouterFromEnv));
+    setOKeyHint(s.openrouterApiKeyHint || (s.openrouterFromEnv ? 'server settings' : ''));
+    setOCustModel(s.openrouterCustomerModel || 'anthropic/claude-haiku-4.5');
+    setOAdminModel(s.openrouterAdminModel || 'anthropic/claude-sonnet-4.5');
     setGKeySet(Boolean(s.geminiApiKeySet || s.geminiFromEnv));
     setGKeyHint(s.geminiApiKeyHint || (s.geminiFromEnv ? 'server settings' : ''));
     setGCustModel(s.geminiCustomerModel || 'gemini-3.8-flash');
@@ -65,6 +76,9 @@ export default function AiSettingsPanel() {
       const d = await updateSettings({
         ...(apiKey.trim() ? { aiApiKey: apiKey.trim() } : {}),
         ...(gKey.trim() ? { geminiApiKey: gKey.trim() } : {}),
+        ...(oKey.trim() ? { openrouterApiKey: oKey.trim() } : {}),
+        openrouterCustomerModel: oCustModel.trim(),
+        openrouterAdminModel: oAdminModel.trim(),
         geminiCustomerModel: gCustModel.trim(),
         geminiAdminModel: gAdminModel.trim(),
         aiCustomerProvider: custProvider,
@@ -95,7 +109,7 @@ export default function AiSettingsPanel() {
     setTest({ running: true });
     try {
       const r = await testAiConnection(model, provider);
-      setTest({ ok: true, text: `${r.provider === 'gemini' ? 'Gemini' : 'Claude'} connected ✓ (${r.model})${r.note ? ` — ${r.note}` : ''}` });
+      setTest({ ok: true, text: `${{ gemini: 'Gemini', openrouter: 'OpenRouter' }[r.provider] || 'Claude'} connected ✓ (${r.model})${r.note ? ` — ${r.note}` : ''}` });
       getAiUsage().then(setUsage).catch(() => {});
     } catch (err) {
       setTest({ ok: false, text: err.message });
@@ -108,7 +122,7 @@ export default function AiSettingsPanel() {
 
   return (
     <form className="card" style={{ margin: 0, maxWidth: 520 }} onSubmit={save}>
-      <h2 style={{ marginTop: 0, fontSize: 17 }}>AI Assistant (Gemini + Claude)</h2>
+      <h2 style={{ marginTop: 0, fontSize: 17 }}>AI Assistant (Gemini + Claude + OpenRouter)</h2>
       <p style={{ color: 'var(--slate-400)', fontSize: 13, marginTop: -4 }}>
         Answers customer questions in the Help chat (using their own orders and wallet) and your business questions under AI Assistant. It can only look things up; it can never move money or change anything.
       </p>
@@ -138,19 +152,44 @@ export default function AiSettingsPanel() {
           <div className="field" style={{ flex: '1 1 200px', margin: 0 }}>
             <label htmlFor="pCust">Customer chat answers with</label>
             <select id="pCust" value={custProvider} onChange={(e) => setCustProvider(e.target.value)}>
-              <option value="gemini">Gemini first, Claude if busy</option>
-              <option value="claude">Claude first, Gemini if busy</option>
+              <option value="gemini">Gemini first, then Claude, then OpenRouter</option>
+              <option value="claude">Claude first, then Gemini, then OpenRouter</option>
+              <option value="openrouter">OpenRouter first, then Gemini, then Claude</option>
             </select>
           </div>
           <div className="field" style={{ flex: '1 1 200px', margin: 0 }}>
             <label htmlFor="pAdmin">Admin &amp; support assistant answers with</label>
             <select id="pAdmin" value={adminProvider} onChange={(e) => setAdminProvider(e.target.value)}>
-              <option value="gemini">Gemini first, Claude if busy</option>
-              <option value="claude">Claude first, Gemini if busy</option>
+              <option value="gemini">Gemini first, then Claude, then OpenRouter</option>
+              <option value="claude">Claude first, then Gemini, then OpenRouter</option>
+              <option value="openrouter">OpenRouter first, then Gemini, then Claude</option>
             </select>
           </div>
         </div>
-        <small style={{ color: 'var(--slate-400)', display: 'block', marginTop: 6 }}>If the first one is busy, out of credit or failing, the other answers by itself (only providers with a saved key are used). The monthly budget below covers both.</small>
+        <small style={{ color: 'var(--slate-400)', display: 'block', marginTop: 6 }}>If the first one is busy, out of credit or failing, the next answers by itself (only providers with a saved key are used). The monthly budget below covers all three.</small>
+      </div>
+
+      <div className="card" style={{ margin: '0 0 12px', padding: 12, background: 'rgba(99,102,241,0.06)' }}>
+        <b style={{ fontSize: 14 }}>OpenRouter (backup)</b>
+        <div className="field" style={{ marginTop: 6 }}>
+          <label htmlFor="oKey">OpenRouter API key</label>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input id="oKey" type={showO ? 'text' : 'password'} autoComplete="off" spellCheck={false} value={oKey} onChange={(e) => setOKey(e.target.value.trim())} placeholder={oKeySet ? `Saved (${oKeyHint}) — paste a new one to replace` : 'sk-or-v1-…'} style={{ flex: 1 }} />
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 10px', fontSize: 12 }} onClick={() => setShowO((v) => !v)} aria-label={showO ? 'Hide key' : 'Show key'}>{showO ? '🙈 Hide' : '👁 Show'}</button>
+          </div>
+          <small style={{ color: 'var(--slate-400)' }}>
+            From openrouter.ai → Keys. Add credits there and set a credit limit on the key. One key reaches Claude, Gemini, GPT and more, so it answers when Gemini and Claude can’t — with the same tools.{' '}
+            {oKeySet && !oKeyHint.startsWith('server') && (
+              <button type="button" onClick={(e) => { if (window.confirm('Remove the OpenRouter key?')) save(e, { openrouterApiKeyClear: true }); }} style={{ background: 'none', border: 'none', color: 'var(--red-500)', cursor: 'pointer', padding: 0, fontSize: 12 }}>Remove key</button>
+            )}
+          </small>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="field" style={{ flex: '1 1 180px', margin: 0 }}><label htmlFor="oCm">OpenRouter model — customers</label><input id="oCm" value={oCustModel} onChange={(e) => setOCustModel(e.target.value)} /></div>
+          <div className="field" style={{ flex: '1 1 180px', margin: 0 }}><label htmlFor="oAm">OpenRouter model — admin</label><input id="oAm" value={oAdminModel} onChange={(e) => setOAdminModel(e.target.value)} /></div>
+        </div>
+        <small style={{ color: 'var(--slate-400)', display: 'block', marginTop: 4 }}>Copy the model name from openrouter.ai/models (e.g. anthropic/claude-haiku-4.5). Pick one that supports “tools”.</small>
+        <button type="button" className="btn btn-secondary" style={{ width: 'auto', marginTop: 8 }} disabled={!oKeySet || test?.running} onClick={() => runTest(oCustModel, 'openrouter')}>Test OpenRouter</button>
       </div>
 
       <div className="field">
