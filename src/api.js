@@ -846,3 +846,4 @@ export const markQuickVideoMade = (tag, script) => adminRequest(`/api/admin/vide
 export const getVideoResults = () => adminRequest('/api/admin/video-tags');
 export const recordVideoVisit = (tag) => request('/api/app/video-visit', { method: 'POST', body: JSON.stringify({ tag }) });
 export const createQuickVideo = (data) => adminRequest('/api/admin/video-tags', { method: 'POST', body: JSON.stringify(data) });
+export const chatQuickBuy = (text) => request('/api/chat/quick-buy', { method: 'POST', body: JSON.stringify({ text }) });

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { submitSupportTicket, getOrders, getAiStatus, aiChat } from '../api';
+import { submitSupportTicket, getOrders, getAiStatus, aiChat, chatQuickBuy } from '../api';
 import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL, availableTopic, TOPIC_FEATURE } from '../assistant/knowledge';
 import { useAppInfo, useFeatures } from './ServiceNotices';
 import ImageAttach from './ImageAttach';
@@ -166,6 +166,19 @@ export default function HelpAssistant() {
     if (!clean || thinking) return;
     setChatImages([]);
     setInput('');
+    // A plain airtime request ("₦500 MTN airtime to 0803…") gets the Pay
+    // card straight away — no AI needed, so it works even when the AI is off.
+    if (!pics.length && /airtime|recharge|credit|vtu|top ?up/i.test(clean) && /\d/.test(clean)) {
+      setMessages((prev) => [...prev, { from: 'user', text: clean }]);
+      setThinking(true);
+      const q = await chatQuickBuy(clean).catch(() => null);
+      setThinking(false);
+      if (q?.handled) {
+        setMessages((prev) => [...prev, botText(q.reply, { purchase: q.purchase || null })]);
+        return;
+      }
+      setMessages((prev) => prev.slice(0, -1));
+    }
     if (!ai?.enabled) {
       setMessages((prev) => [...prev, { from: 'user', text: clean }, ...respond(clean)]);
       return;
