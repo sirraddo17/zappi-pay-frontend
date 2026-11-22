@@ -24,6 +24,24 @@ function botText(text, extra = {}) {
   return { from: 'bot', text, ...extra };
 }
 
+// "Did my last airtime go through?" — answered from the customer's own
+// orders without the AI, so it works when the AI is off or busy.
+const LAST_ORDER_RE = /\b(last|latest|recent|previous)\b[^.?!]*\b(order|airtime|data|purchase|token|recharge|subscription|payment|buy|bought)\b|\b(go|went|gone) through\b|\bdid (it|my \w+) (work|go|deliver|arrive)/i;
+const SERVICE_WORD = { AIRTIME: 'airtime', DATA: 'data', ELECTRICITY: 'electricity', CABLE: 'TV', EDUCATION: 'exam PIN', INTERNET: 'internet' };
+const STATUS_TEXT = { SUCCESS: '✅ went through successfully', PENDING: '⏳ is still processing — you’ll get a notification when it’s done', FAILED: '❌ failed, and the money was refunded to your wallet', REFUNDED: '↩️ was refunded to your wallet' };
+async function lastOrderAnswer(text) {
+  if (!LAST_ORDER_RE.test(text)) return null;
+  const want = Object.entries(SERVICE_WORD).find(([, w]) => new RegExp(`\\b${w.split(' ')[0]}`, 'i').test(text))?.[0];
+  const data = await getOrders().catch(() => null);
+  const list = data?.orders || [];
+  const o = list.find((x) => !want || x.service === want) || null;
+  if (!o) return botText(want ? `I can’t see any ${SERVICE_WORD[want]} purchase on your account yet.` : 'I can’t see any purchase on your account yet.');
+  const amt = `₦${Number(o.amount || 0).toLocaleString('en-NG')}`;
+  const when = new Date(o.createdAt).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+  const who = o.billersCode || o.phone ? ` for ${o.billersCode || o.phone}` : '';
+  return botText(`Your last ${SERVICE_WORD[o.service] || 'purchase'} — ${amt} ${String(o.provider || '').toUpperCase()}${who} on ${when} — ${STATUS_TEXT[o.status] || `is ${String(o.status).toLowerCase()}`}.`, { actions: [{ label: 'View receipt', to: `/orders/${o.id}` }], offerHuman: o.status === 'PENDING' || o.status === 'FAILED' });
+}
+
 export const SUPPORT_TOPICS = [
   'Purchase problem',
   'Wallet funding',
@@ -180,7 +198,9 @@ export default function HelpAssistant() {
       setMessages((prev) => prev.slice(0, -1));
     }
     if (!ai?.enabled) {
-      setMessages((prev) => [...prev, { from: 'user', text: clean }, ...respond(clean)]);
+      setMessages((prev) => [...prev, { from: 'user', text: clean }]);
+      const last = await lastOrderAnswer(clean);
+      setMessages((prev) => [...prev, ...(last ? [last] : respond(clean))]);
       return;
     }
     const next = [...messages, { from: 'user', text: clean, pics }];
@@ -197,8 +217,10 @@ export default function HelpAssistant() {
     } catch (err) {
       // Fall back to the built-in answers so the customer still gets help.
       if (err.code === 'AI_LIMIT' || err.code === 'AI_OFF' || err.code === 'AI_NO_KEY' || err.code === 'AI_BUDGET') setAi({ enabled: false });
-      const note = err.code === 'AI_LIMIT' ? botText(err.message) : null;
-      setMessages((prev) => [...prev, ...(note ? [note] : []), ...respond(clean)]);
+      // Say so when the AI couldn't answer, instead of a confusing reply.
+      const note = err.code === 'AI_LIMIT' ? botText(err.message) : botText('The AI assistant is busy right now — here’s a quick answer instead. Try again in a minute for the full assistant.');
+      const last = await lastOrderAnswer(clean).catch(() => null);
+      setMessages((prev) => [...prev, note, ...(last ? [last] : respond(clean))]);
     } finally {
       setThinking(false);
     }
