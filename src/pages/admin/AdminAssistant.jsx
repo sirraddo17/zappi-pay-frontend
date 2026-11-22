@@ -7,6 +7,7 @@ import ImageAttach from '../../components/ImageAttach';
 import StatementAttach from '../../components/admin/StatementAttach';
 import AiActionCard from '../../components/admin/AiActionCard';
 import AiDesignCard from '../../components/admin/AiDesignCard';
+import ChatText from '../../components/ChatText';
 
 // "[[go:/admin/…|Label]]" in a reply becomes a button to that screen.
 function ReplyText({ text }) {
@@ -20,7 +21,7 @@ function ReplyText({ text }) {
   });
   return (
     <>
-      {body.join('').replace(/[ \t]+\n/g, '\n').trim()}
+      <ChatText text={body.join('').replace(/[ \t]+\n/g, '\n').trim()} />
       {links.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8, whiteSpace: 'normal' }}>
           {links.map((l) => <Link key={l.key} to={l.to} className="btn btn-secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: 13, textDecoration: 'none' }}>↗ {l.label}</Link>)}

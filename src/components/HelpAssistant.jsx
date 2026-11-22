@@ -6,6 +6,7 @@ import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL, 
 import { useAppInfo, useFeatures } from './ServiceNotices';
 import ImageAttach from './ImageAttach';
 import ChatPurchaseCard from './ChatPurchaseCard';
+import ChatText, { cleanMarkdown } from './ChatText';
 import ChatTransferCard from './ChatTransferCard';
 import ChatActionCard from './ChatActionCard';
 import VoiceButton from './VoiceButton';
@@ -362,13 +363,13 @@ export default function HelpAssistant() {
               }}
             >
               {m.pics?.length > 0 && <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>{m.pics.map((src, j) => <img key={j} src={src} alt="" style={{ width: 70, height: 70, objectFit: 'cover', borderRadius: 8 }} />)}</div>}
-              {m.text}
+              {m.from === 'bot' ? <ChatText text={m.text} /> : m.text}
             </div>
             {m.purchase && <ChatPurchaseCard draft={m.purchase} onClose={() => setOpen(false)} />}
             {m.transfer && <ChatTransferCard draft={m.transfer} onClose={() => setOpen(false)} />}
             {m.cards?.map((c) => <ChatActionCard key={c.id} card={c} />)}
             {m.ticketSent && <div style={{ marginTop: 6, fontSize: 12, color: 'var(--green-500)' }}>✓ Sent to our support team — the reply will come to your Notifications.</div>}
-            {m.from === 'bot' && m.text && <SpeakButton text={m.text} />}
+            {m.from === 'bot' && m.text && <SpeakButton text={cleanMarkdown(m.text)} />}
             {m.ai && <div style={{ fontSize: 10, color: 'var(--slate-500, #64748b)', marginTop: 2 }}>AI answer · check Orders for exact details</div>}
             {(m.actions?.length > 0 || m.offerHuman || m.quick) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
