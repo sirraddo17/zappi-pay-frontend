@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import TestModeBanner from '../components/TestModeBanner';
+import WaitlistForm from '../components/WaitlistForm';
+import { useAppInfo } from '../components/ServiceNotices';
 import SocialLinks from '../components/SocialLinks';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LogoIcon, Wordmark } from '../components/Logo';
@@ -89,6 +91,7 @@ const OWNERSHIP = 'ZAPPI PAY is owned and operated by SIRRADDO GLOBAL LIMITED (R
 export default function Landing() {
   const [searchParams] = useSearchParams();
   const [referral, setReferral] = useState(null);
+  const appInfo = useAppInfo();
   const ref = searchParams.get('ref');
   const signupTo = ref ? `/signup?ref=${encodeURIComponent(ref)}` : '/signup';
 
@@ -238,6 +241,9 @@ export default function Landing() {
           </div>
         </section>
       )}
+
+      {/* Before launch: collect people to tell when ZAPPI PAY is fully live. */}
+      {appInfo?.testMode && <WaitlistForm />}
 
       <section className="lp-section lp-faq" id="faq">
         <div className="lp-wrap" style={{ maxWidth: 760 }}>

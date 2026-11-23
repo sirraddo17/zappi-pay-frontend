@@ -40,6 +40,7 @@ const TABS = [
   { to: '/admin/features', label: '🧩 New features' },
   { to: '/admin/extra-services', label: '📩 SMS, Tickets & Bills' },
   { to: '/admin/feedback', label: '⭐ Feedback' },
+  { to: '/admin/waitlist', label: '📝 Launch waitlist' },
   { to: '/admin/radar', label: '🔭 Radar' },
   { to: '/admin/security', label: '🛡️ Security' },
   { to: '/admin/settings', label: 'Settings' },

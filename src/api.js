@@ -847,3 +847,21 @@ export const getVideoResults = () => adminRequest('/api/admin/video-tags');
 export const recordVideoVisit = (tag) => request('/api/app/video-visit', { method: 'POST', body: JSON.stringify({ tag }) });
 export const createQuickVideo = (data) => adminRequest('/api/admin/video-tags', { method: 'POST', body: JSON.stringify(data) });
 export const chatQuickBuy = (text) => request('/api/chat/quick-buy', { method: 'POST', body: JSON.stringify({ text }) });
+
+// Launch waitlist (welcome page) and its admin page.
+export const joinWaitlist = (body) => request('/api/waitlist', { method: 'POST', body: JSON.stringify(body) });
+export const getAdminWaitlist = () => adminRequest('/api/admin/waitlist');
+export const getWaitlistPhones = () => adminRequest('/api/admin/waitlist/phones');
+export const emailWaitlist = (body) => adminRequest('/api/admin/waitlist/notify', { method: 'POST', body: JSON.stringify(body) });
+export const removeWaitlistEntry = (id) => adminRequest(`/api/admin/waitlist/${encodeURIComponent(id)}`, { method: 'DELETE' });
+export function downloadWaitlistCsv() {
+  const token = localStorage.getItem('zappipay_admin_token');
+  return fetch(`${API_URL}/api/admin/waitlist/export`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }).then(async (res) => {
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Could not download');
+    const url = URL.createObjectURL(await res.blob());
+    const a = document.createElement('a');
+    a.href = url; a.download = `zappipay-waitlist-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  });
+}
