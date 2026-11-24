@@ -493,7 +493,13 @@ export const TOPIC_FEATURE = { 'card-checkout': 'cardCheckout', 'request-money':
 export function availableTopic(topic, isOn) {
   const key = topic && TOPIC_FEATURE[topic.id];
   if (!key || !isOn || isOn(key)) return topic;
-  return { ...topic, answer: `${topic.title.replace(/\s*\(.*\)$/, '')} isn’t available on ZAPPI PAY yet. We’ll announce it in the app when it’s ready. Meanwhile you can buy airtime, data, electricity, TV and more from your wallet.`, actions: [{ label: 'See what’s available', to: '/more' }] };
+  // One plain answer for a switched-off feature: no launch hint, no
+  // "coming soon" (same wording as the AI assistant, lib/features.js).
+  const name = topic.title.replace(/\s*\(.*\)$/, '');
+  const a2c = key === 'airtimeToCash'
+    ? ' We don’t work with outside vendors for this, so we can’t recommend one. Be careful with anyone who asks you to send airtime first or shows “payment successful” screenshots — that’s a common scam.'
+    : '';
+  return { ...topic, answer: `${name} isn’t available on ZAPPI PAY yet. You can buy airtime, data, electricity, cable TV and exam PINs from your wallet.${a2c}`, actions: [{ label: 'See what’s available', to: '/more' }] };
 }
 
 function normalize(text) {
