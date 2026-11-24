@@ -490,16 +490,20 @@ export const QUICK_TOPICS = ['services', 'fund', 'failed', 'a2c', 'transfer', 'e
 // Settings). When one is off, the help answers "not available yet"
 // instead of explaining how to use it.
 export const TOPIC_FEATURE = { 'card-checkout': 'cardCheckout', 'request-money': 'requests', 'bulk-sms': 'bulkSms', 'event-tickets': 'tickets', 'more-bills': 'moreBills', 'owambe-spray': 'spray', 'association-dues': 'dues', 'pay-for-me': 'payForMe', 'shared-light': 'sharedLight', safebuy: 'safeBuy', payroll: 'payroll', 'daily-rewards': 'dailyRewards', 'ajo-circle': 'circles', transfer: 'sendMoney', bank: 'bankTransfer', family: 'family', betting: 'betFunding', a2c: 'airtimeToCash', insurance: 'carInsurance' };
+// Only when the customer asks us to recommend someone else for a service
+// ZAPPI PAY doesn't offer (same wording as the AI, lib/features.js).
+export const VENDOR_REPLY = 'We don’t work with outside vendors for this, so we can’t recommend one. Be careful with anyone who asks you to send airtime first or shows ‘payment successful’ screenshots — that’s a common scam.';
+export function asksForVendor(text) {
+  return /\b(recommend|suggest|refer me|know any|any (good |trusted )?(vendor|person|place|app|site|website|platform))\b|\b(vendor|another app|other app|another site|another platform|where else|who else|who (sells|buys))\b/i.test(String(text || ''));
+}
+
 export function availableTopic(topic, isOn) {
   const key = topic && TOPIC_FEATURE[topic.id];
   if (!key || !isOn || isOn(key)) return topic;
   // One plain answer for a switched-off feature: no launch hint, no
   // "coming soon" (same wording as the AI assistant, lib/features.js).
   const name = topic.title.replace(/\s*\(.*\)$/, '');
-  const a2c = key === 'airtimeToCash'
-    ? ' We don’t work with outside vendors for this, so we can’t recommend one. Be careful with anyone who asks you to send airtime first or shows “payment successful” screenshots — that’s a common scam.'
-    : '';
-  return { ...topic, answer: `${name} isn’t available on ZAPPI PAY yet. You can buy airtime, data, electricity, cable TV and exam PINs from your wallet.${a2c}`, actions: [{ label: 'See what’s available', to: '/more' }] };
+  return { ...topic, answer: `${name} isn’t available on ZAPPI PAY yet. You can buy airtime, data, electricity, cable TV and exam PINs from your wallet.`, actions: [{ label: 'See what’s available', to: '/more' }] };
 }
 
 function normalize(text) {

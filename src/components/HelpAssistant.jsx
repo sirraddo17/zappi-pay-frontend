@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { submitSupportTicket, getOrders, getAiStatus, aiChat, chatQuickBuy } from '../api';
-import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL, availableTopic, TOPIC_FEATURE } from '../assistant/knowledge';
+import { matchMessage, topicById, QUICK_TOPICS, WHATSAPP_NUMBER, SUPPORT_EMAIL, availableTopic, TOPIC_FEATURE, VENDOR_REPLY, asksForVendor } from '../assistant/knowledge';
 import { useAppInfo, useFeatures } from './ServiceNotices';
 import ImageAttach from './ImageAttach';
 import ChatPurchaseCard from './ChatPurchaseCard';
@@ -157,6 +157,9 @@ export default function HelpAssistant() {
   }
 
   function respond(userText) {
+    // "Can you recommend a vendor / another app for …?" — the one case that
+    // gets the outside-vendor warning.
+    if (asksForVendor(userText)) return [botText(VENDOR_REPLY)];
     const result = matchMessage(userText, isOn);
     if (result.type === 'topic') {
       setMisses(0);
